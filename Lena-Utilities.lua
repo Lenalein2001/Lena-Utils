@@ -42,7 +42,7 @@ local shortcuts = menu.list(misc, "Shortcuts", {}, "")
 -- Auto Update
 -------------------------------------
 local response = false
-local script_version = 3.05
+local script_version = 3.06
 local rawGit = "https://raw.githubusercontent.com"
 async_http.init(rawGit,"/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion", function (output)
     local remoteVersion = tonumber(output)
