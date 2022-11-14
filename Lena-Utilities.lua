@@ -30,11 +30,13 @@ local tunables = menu.list(menu.my_root(), "Tunables", {"", ""})
 -- Sub Tabs
 -------------------------------------
 
+--local saim = menu.list(wep, "Ouchies", {""}, "")
 local lrf = menu.list(wep, "Legit rapid Fire", {""}, "")
 local better_heli = menu.list(vehicle, "Better Heli", {""}, "")
 local detections = menu.list(online, "Detections", {}, "")
 local protex = menu.list(online, "Protections", {}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {}, "")
+
 
 -------------------------------------
 -- Auto Update
@@ -385,8 +387,8 @@ function modern_toast(text)
                         util.stop_thread()
                     end
                 end
-                directx.draw_rect(0.5 - (scale_x / 2), y_pos, scale_x, scale_y, {r=0, g=0, b=0, a=0.7})
-                directx.draw_rect(0.5 - (scale_x / 2), y_pos - (scale_y/2), scale_x, 0.025, {r = 0, g = 0, b = 0, a = 1})
+                directx.draw_rect(0.5 - (scale_x / 2), y_pos, scale_x, scale_y, {r=0.81, g=0.10, b=0.50, a=0.88})
+                directx.draw_rect(0.5 - (scale_x / 2), y_pos - (scale_y/2), scale_x, 0.025, {r=0.51, g=0.06, b=0.32, a = 1})
                 directx.draw_text(0.5, y_pos + (scale_y / 2), text, 5, text_scale, {r=1, g=1, b=1, a=1}, false)
                 directx.draw_text(0.5, y_pos - (scale_y / 2), scriptname, 1, 0.6, {r=1, g=1, b=1, a=1}, false)
                 wait()
@@ -2295,6 +2297,10 @@ local function ClearLocalBits(script_str, script_local, ...)
     end
 end
 
+function SET_FLOAT_GLOBAL(Global, Value)
+    memory.write_float(memory.script_global(Global), Value)
+end
+
 local locals = {
 MCSellScriptString = "gb_biker_contraband_sell",
 MCEZMissionStarted = 696+122,
@@ -2306,6 +2312,18 @@ menu.toggle_loop(tunables, "Easy MC sell", {}, "", function()
     if value and value ~= 0 then
         SetLocalInt(locals.MCSellScriptString, locals.MCEZMission, 0)
     end
+end)
+
+-------------------------------------
+-- Remove Tony's Cut
+-------------------------------------
+
+ -- https://www.unknowncheats.me/forum/3347568-post13086.html
+
+menu.toggle_loop(tunables, "Tony's Cut of Nightclub", {""}, "", function()
+    SET_FLOAT_GLOBAL(262145 + 24524, 0) -- -1002770353
+end, function()
+    SET_FLOAT_GLOBAL(262145 + 24524, 0.1)
 end)
 
 -------------------------------------
