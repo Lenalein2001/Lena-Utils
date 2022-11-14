@@ -37,6 +37,42 @@ local detections = menu.list(online, "Detections", {}, "")
 local protex = menu.list(online, "Protections", {}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {}, "")
 
+
+-------------------------------------
+-- Auto Update
+-------------------------------------
+local response = false
+local script_version = 3.04
+local rawGit = "https://raw.githubusercontent.com"
+async_http.init(rawGit,"/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion", function (output)
+    local remoteVersion = tonumber(output)
+    response = true
+    if script_version ~= remoteVersion then
+        util.yield(1000)
+        thprnotify(scriptname .. " is outdated, and requires an update .. update will start itself in 3 seconds")
+        util.yield(3000)
+        async_http.init(rawGit, "/Lenalein2001/Lena-Utils/main/Lena%20Utilities.lua", function (a)
+            local catchError = select(2, load(a))
+            if catchError then
+                thprnotify("Download failed, restart the script, if that is not helping contact the owner of the script :)")
+                util.yield(3000)
+            return end
+            local file = io.open(filesystem.scripts_dir() .. SCRIPT_RELPATH, "w+b")
+            file:write(a)
+            file:close()
+            thprnotify(" " .. scriptname .. " has been updated successfully to version " .. remoteVersion .. 
+            "\n script will be restarted automatically ;)")
+            util.yield(3000)
+            util.restart_script()
+        end)
+        async_http.dispatch()
+    end
+end, function () response = true end)
+    async_http.dispatch()
+repeat
+    util.yield()
+until response
+
 -------------------------------------
 -- Wiri 
 -------------------------------------
@@ -674,6 +710,8 @@ end)
 -- Weapons
 -------------------------------------
 -------------------------------------
+
+
 
 -------------------------------------
 -- BULLET SPEED MULT
