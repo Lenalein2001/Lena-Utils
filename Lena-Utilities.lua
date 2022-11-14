@@ -30,19 +30,17 @@ local tunables = menu.list(menu.my_root(), "Tunables", {"", ""})
 -- Sub Tabs
 -------------------------------------
 
---local saim = menu.list(wep, "Ouchies", {""}, "")
 local lrf = menu.list(wep, "Legit rapid Fire", {""}, "")
 local better_heli = menu.list(vehicle, "Better Heli", {""}, "")
 local detections = menu.list(online, "Detections", {}, "")
 local protex = menu.list(online, "Protections", {}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {}, "")
 
-
 -------------------------------------
 -- Auto Update
 -------------------------------------
 local response = false
-local script_version = 3.06
+local script_version = 3.07
 local rawGit = "https://raw.githubusercontent.com"
 async_http.init(rawGit,"/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion", function (output)
     local remoteVersion = tonumber(output)
