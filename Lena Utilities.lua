@@ -42,7 +42,7 @@ local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 2.01
+local script_version = 2.02
 local rawGit = "https://raw.githubusercontent.com"
 async_http.init(rawGit,"/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion", function (output)
     local remoteVersion = tonumber(output)
