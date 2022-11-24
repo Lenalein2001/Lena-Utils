@@ -1,5 +1,6 @@
 local scriptname = "Lena Utilities"
 
+local log = util.log 
 local notify = util.toast
 local wait = util.yield
 local wait_once = util.yield_once
@@ -8,9 +9,6 @@ local wait_once = util.yield_once
 -- Natives
 -------------------------------------
 
---util.require_natives("1651208000")
---util.require_natives("1663599433")
---util.require_natives("1660775568-uno")
 util.require_natives("1663599444-uno")
 
 -------------------------------------
@@ -22,7 +20,7 @@ local wep = menu.list(menu.my_root(), "Weapons", {""}, "")
 local vehicle = menu.list(menu.my_root(), "Vehicle", {""}, "")
 local online = menu.list(menu.my_root(), "Online", {""}, "")
 local misc = menu.list(menu.my_root(), "Misc", {""}, "")
-local tunables = menu.list(menu.my_root(), "Tunables", {"", ""})
+local tunables = menu.list(menu.my_root(), "Tunables", {""}, "")
 --local wip = menu.list(menu.my_root(), "WIP", {""}, "")
 
 -------------------------------------
@@ -30,7 +28,7 @@ local tunables = menu.list(menu.my_root(), "Tunables", {"", ""})
 -------------------------------------
 
 local anims = menu.list(self, "Animations", {""}, "")
-local lrf = menu.list(wep, "Legit rapid Fire", {""}, "")
+local lrf = menu.list(wep, "Legit Rapid Fire", {""}, "")
 local better_heli = menu.list(vehicle, "Better Heli", {""}, "")
 local detections = menu.list(online, "Detections", {""}, "")
 local protex = menu.list(online, "Protections", {""}, "")
@@ -148,19 +146,6 @@ end
 
 if not filesystem.exists(lenaDir .. "bodyguards") then
 	filesystem.mkdir(lenaDir .. "bodyguards")
-end
-
----------------------------------
--- CONFIG/LANGUAGE
----------------------------------
-
-if filesystem.exists(lconfigFile) then
-	for s, tbl in pairs(Ini.load(lconfigFile)) do
-		for k, v in pairs(tbl) do
-			Config[s] = Config[s] or {}
-			Config[s][k] = v
-		end
-	end
 end
 
 ---------------------------------
@@ -311,6 +296,16 @@ function request_model_load(hash)
         end
         wait()
     end
+end
+
+function play_anim(dict, name, duration)
+    ped = PLAYER.PLAYER_PED_ID()
+    while not STREAMING.HAS_ANIM_DICT_LOADED(dict) do
+        STREAMING.REQUEST_ANIM_DICT(dict)
+        wait()
+    end
+    TASK.TASK_PLAY_ANIM(ped, dict, name, 1.0, 1.0, duration, 3, 0.5, false, false, false)
+    --TASK_PLAY_ANIM(Ped ped, char* animDictionary, char* animationName, float blendInSpeed, float blendOutSpeed, int duration, int flag, float playbackRate, BOOL lockX, BOOL lockY, BOOL lockZ)
 end
 
 -----------------------------------
@@ -797,10 +792,29 @@ menu.action(anims, "Chill", {""}, "", function()
     menu.trigger_commands("animchill")
 end)
 
-menu.divider(anims, "Custom Animations", {""}, "")
-menu.divider(anims, "Needs The Actions lua by Jackz", {""}, "")
+menu.action(anims, "Car blowjob", {""}, "", function(on_click)
+    play_anim("mini@prostitutes@sexlow_veh", "low_car_bj_loop_female", -1)
+end)
 
+menu.action(anims, "Execute", {""}, "", function(on_click)
+    play_anim("guard_reactions", "1hand_aiming_cycle", -1)
+end)
 
+menu.action(anims, "Sit Sad", {""}, "", function(on_click)
+    play_anim("anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_sleeping-noworkfemale", -1)
+end)
+
+menu.action(anims, "Wait", {""}, "", function(on_click)
+    play_anim("amb@world_human_hang_out_street@female_hold_arm@idle_a", "idle_a", -1)
+end)
+
+menu.action(anims, "Dance", {""}, "", function(on_click)
+    play_anim("anim@amb@casino@mini@dance@dance_solo@female@var_b@", "high_center", -1)
+end)
+
+menu.action(anims, "Hug", {""}, "", function(on_click)
+    play_anim("mp_ped_interaction", "kisses_guy_a", -1)
+end)
 
 -------------------------------------
 -- Auto CEO
@@ -885,10 +899,8 @@ end)
     local multiplier
     ---@type AmmoSpeed
     local modifiedSpeed
-    local helpText <const> =
-    translate("Weapon", "Allows you to change the speed of non-instant hit bullets (rockets, fireworks, etc.)")
 
-    menu.slider_float(wep, translate("Weapon", "Bullet Speed Mult"), {""}, helpText, 10, 100000, 100, 10, function(value)
+    menu.slider_float(wep, "Bullet Speed Mult", {""}, "Changes the speed of any non-instant hit projectile.", 10, 100000, 100, 10, function(value)
         multiplier = value / 100
     end)
 
@@ -924,7 +936,7 @@ end)
     LegitRapidFire = false
     LegitRapidMS = 100
 
-    menu.toggle(lrf, "Legit Rapid Fire", {"legitrapidfire"}, "Quickly switches to grenades and back to your weapon after you shot something. Useful with Sniper, RPG, Grenade Launcher.", function(on)
+    menu.toggle(lrf, "Legit Rapid Fire", {"legitrapidfire"}, "", function(on)
         local localped = GetLocalPed()
         if on then
             LegitRapidFire = true
@@ -1044,7 +1056,7 @@ end)
     -- TP into closest Vehicle
     -------------------------------------
 
-    menu.action(vehicle, "Dosen't work", {""}, "Should tp you into the nearest vehicle", function(on_click)
+    --[[menu.action(vehicle, "Dosen't work", {""}, "Should tp you into the nearest vehicle", function(on_click)
         local closestveh = VEHICLE.GET_CLOSEST_VEHICLE(players.user_ped())
         local driver = VEHICLE.GET_PED_IN_VEHICLE_SEAT(closestveh, -1)
         if VEHICLE.IS_VEHICLE_SEAT_FREE(closestveh, -1) then
@@ -1063,7 +1075,7 @@ end)
                 notify("Couldn't find a Vehicle")
             end
         end
-    end)
+    end)]]
 
     -------------------------------------
     -- Spinning Tank turret ig
@@ -1973,6 +1985,15 @@ end)
         end
     end)
 
+    menu.toggle_loop(detections, "Modded Animation", {""}, "", function()
+        for _, pid in ipairs(players.list(false, true, true)) do
+            local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            if PED.IS_PED_USING_ANY_SCENARIO(player) then
+                notify(PLAYER.GET_PLAYER_NAME(pid) .. " Is In A Modded Scenario")
+            end
+        end 
+    end)
+
     -------------------------------------
     -- Drones & Missiles
     -------------------------------------
@@ -2113,6 +2134,7 @@ end)
         notificationBits = 0
         nearbyNotificationBits = 0
     end)
+    
 
     -------------------------------------
     -- Anti Crash
@@ -2887,15 +2909,13 @@ local function player(pid)
     -- Block Join Kicks
     -------------------------------------
 
-    if menu.get_edition() >= 2 then 
-        menu.action(kicks, "Block Join Kick", {"EMP"}, "Discription.... yes", function()
-            menu.trigger_commands("historyblock " .. players.get_name(pid))
-            wait(500)
-            log("Player " .. players.get_name(pid) "has been Kicked and Blocked")
-            wait(500)
-            menu.trigger_commands("breakup" .. players.get_name(pid))
-        end, nil, nil, COMMANDPERM_RUDE)
-    end
+    menu.action(kicks, "Block Join Kick", {"EMP"}, "Discription.... yes", function()
+        menu.trigger_commands("historyblock" .. players.get_name(pid))
+        wait(500)
+        log("Player " .. players.get_name(pid) ..  " has been Kicked and Blocked")
+        wait(500)
+        menu.trigger_commands("breakup" .. players.get_name(pid))
+    end, nil, nil, COMMANDPERM_RUDE)
 
     -------------------------------------
     -- Simple Kicks
@@ -2911,7 +2931,7 @@ local function player(pid)
     -- Crashes
     -------------------------------------
 
-    menu.divider(crashes, "Why?", {""})
+    menu.readonly(crashes, "Why...?  Just why?", "Crash Addict")
     menu.action(crashes, "Block Join Crash", {""}, "", function()
         wait(500)
         menu.trigger_commands("choke " .. players.get_name(pid))

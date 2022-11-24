@@ -1,10 +1,3 @@
---[[
---------------------------------
-THIS FILE IS PART OF WIRISCRIPT
-         Nowiry#2663
---------------------------------
-]]
-
 json = require "pretty.json"
 local self = {}
 self.version = 27
@@ -79,7 +72,7 @@ notification =
 {
 	txdDict = "DIA_ZOMBIE1",
 	txdName = "DIA_ZOMBIE1",
-	title = "WiriScript",
+	title = "Lena Utils",
 	subtitle = "~c~" .. util.get_label_text("PM_PANE_FEE") .. "~s~",
 	defaultColour = HudColour.black
 }
@@ -88,7 +81,7 @@ notification =
 function notification.stand(msg)
 	assert(type(msg) == "string", "msg must be a string, got " .. type(msg))
 	msg = msg:gsub('~[%w_]-~', ""):gsub('<C>(.-)</C>', '%1')
-	util.toast("[WiriScript] " .. msg)
+	util.toast("[Lena Utils] " .. msg)
 end
 
 

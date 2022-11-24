@@ -1,10 +1,3 @@
---[[
---------------------------------
-THIS FILE IS PART OF WIRISCRIPT
-         Nowiry#2663
---------------------------------
-]]
-
 ---@diagnostic disable: exp-in-action, unknown-symbol, break-outside, undefined-global
 require "lena.functions"
 

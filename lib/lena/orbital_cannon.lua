@@ -1,10 +1,3 @@
---[[
---------------------------------
-THIS FILE IS PART OF WIRISCRIPT
-         Nowiry#2663
---------------------------------
-]]
-
 require "lena.functions"
 
 local self = {}
