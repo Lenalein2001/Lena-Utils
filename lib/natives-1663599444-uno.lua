@@ -4945,6 +4945,7 @@ STATS={
 	["STAT_SET_USER_ID"]=function(...)return native_invoker.uno_bool(0x8CDDF1E452BABE11,...)end,
 	["STAT_SET_CURRENT_POSIX_TIME"]=function(...)return native_invoker.uno_bool(0xC2F84B7F9C4D0C61,...)end,
 	["STAT_GET_INT"]=function(...)return native_invoker.uno_bool(0x767FBC2AC802EF3D,...)end,
+	["STAT_GET_INTW"]=function(...)return  native_invoker.get_return_value_bool(0x767FBC2AC802EF3D,...)end,
 	["STAT_GET_FLOAT"]=function(...)return native_invoker.uno_bool(0xD7AE6C9C9C6AC54C,...)end,
 	["STAT_GET_BOOL"]=function(...)return native_invoker.uno_bool(0x11B5E6D2AE73F48E,...)end,
 	["STAT_GET_DATE"]=function(...)return native_invoker.uno_bool(0x8B0FACEFC36C824B,...)end,
