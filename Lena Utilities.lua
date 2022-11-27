@@ -95,7 +95,7 @@ local OrbitalCannon = require "lena.orbital_cannon"
 local llang = require 'lena/llang'
 local lkey = require 'lena/lkey'
 local scaleForm = require("ScaleformLib")
-require("KeramiScriptLib")
+require("lenaslib")
 
 local scriptdir <const> = filesystem.scripts_dir()
 for _, file in ipairs(required) do
