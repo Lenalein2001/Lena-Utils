@@ -1,4 +1,4 @@
-local scriptname = "Lena Utilities"
+local scriptname = "Lena-Utilities"
 
 local log = util.log 
 local notify = util.toast
@@ -41,7 +41,7 @@ local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 2.1.4
+local script_version = 2.4
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion', function (output)
     local remoteVersion = tonumber(output)
     response = true
