@@ -41,15 +41,15 @@ local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 2.1.3
+local script_version = 2.1.4
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion', function (output)
     local remoteVersion = tonumber(output)
     response = true
     if script_version ~= remoteVersion then
         wait(1000)
         lenanotify(scriptname .. " is outdated, and requires an update ... update will start itself in 3 seconds")
-        wait(3000)
-        async_http.init('raw.githubusercontent.com', '/Lenalein2001/Lena-Utils/main/Lena Utilities.lua', function (a)
+        wait(1000)
+        async_http.init('raw.githubusercontent.com', '/Lenalein2001/Lena-Utils/main/Lena-Utilities.lua', function (a)
             local catchError = select(2, load(a))
             if catchError then
                 lenanotify("Download failed :/. Restart the script, if that does not work, contact the owner of the script")
