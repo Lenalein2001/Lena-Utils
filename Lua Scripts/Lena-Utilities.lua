@@ -41,7 +41,7 @@ local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 2.4
+local script_version = 2.5
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/LenaUtilitiesVersion', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -165,23 +165,6 @@ end
 if Config.general.language ~= "english" then
 	local ok, errmsg = load_translation(Config.general.language .. ".json")
 	if not ok then notification:help("Couldn't load tranlation: " .. errmsg, HudColour.red) end
-end
-
------------------------------------
--- LABELS
------------------------------------	
-
-local customLabels <const> =
-{
-	EnterFileName = translate("Labels", "Enter the file name"),
-	InvalidChar = translate("Labels", "Got an invalid character, try again"),
-	EnterValue = translate("Labels", "Enter the value"),
-	ValueMustBeNumber = translate("Labels", "The value must be a number, try again"),
-	Search = translate("Labels" ,"Type the word to search"),
-}
-
-for key, text in pairs(customLabels) do
-	customLabels[key] = util.register_label(text)
 end
 
 -----------------------------------
