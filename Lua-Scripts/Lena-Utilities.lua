@@ -46,7 +46,7 @@ local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 
 local response = false
 local script_version = 2.6
-async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion', function (output)
+async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
     if script_version ~= remoteVersion then
