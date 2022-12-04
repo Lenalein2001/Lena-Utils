@@ -5,6 +5,8 @@ local notify = util.toast
 local wait = util.yield
 local wait_once = util.yield_once
 
+
+
 -------------------------------------
 -- Natives
 -------------------------------------
@@ -33,15 +35,17 @@ local better_heli = menu.list(vehicle, "Better Heli", {""}, "")
 local lenasession = menu.list(online, "Session", {""}, "")
 local detections = menu.list(online, "Detections", {""}, "")
 local protex = menu.list(online, "Protections", {""}, "")
+local anti_orb = menu.list(online, "Anti Orb", {""}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
 local multipliers = menu.list(tunables, "Multipliers", {""}, "")
+
 
 -------------------------------------
 -- Auto Update
 -------------------------------------
 
 local response = false
-local script_version = 2.5
+local script_version = 2.6
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -70,6 +74,8 @@ end, function () response = true end)
 repeat
     wait()
 until response
+
+-- Imagine Stealing from my lua Tina. We both know who is stealing code from who. And did you know that ur Autoupdater doesn't work :). Enjoy.
 
 -------------------------------------
 -- Required Files
@@ -143,10 +149,6 @@ end
 
 if not filesystem.exists(lenaDir .. "handling") then
 	filesystem.mkdir(lenaDir .. "handling")
-end
-
-if not filesystem.exists(lenaDir .. "bodyguards") then
-	filesystem.mkdir(lenaDir .. "bodyguards")
 end
 
 ---------------------------------
@@ -614,9 +616,41 @@ local function SetLocalInt(script_str, script_local, value)
     return addr ~= 0
 end
 
+function SET_INT_GLOBAL(Global, Value)
+    memory.write_int(memory.script_global(Global), Value)
+end
+function SET_FLOAT_GLOBAL(Global, Value)
+    memory.write_float(memory.script_global(Global), Value)
+end
+
+function GET_INT_GLOBAL(Global)
+    return memory.read_int(memory.script_global(Global))
+end
+
+function SET_PACKED_INT_GLOBAL(StartGlobal, EndGlobal, Value)
+    for i = StartGlobal, EndGlobal do
+        SET_INT_GLOBAL(262145 + i, Value)
+    end
+end
+
 function SET_INT_LOCAL(Script, Local, Value)
     if memory.script_local(Script, Local) ~= 0 then
         memory.write_int(memory.script_local(Script, Local), Value)
+    end
+end
+
+function SET_FLOAT_LOCAL(Script, Local, Value)
+    if memory.script_local(Script, Local) ~= 0 then
+        memory.write_float(memory.script_local(Script, Local), Value)
+    end
+end
+
+function GET_INT_LOCAL(Script, Local)
+    if memory.script_local(Script, Local) ~= 0 then
+        local Value = memory.read_int(memory.script_local(Script, Local))
+        if Value ~= nil then
+            return Value
+        end
     end
 end
 
@@ -819,7 +853,8 @@ end
 -------------------------------------
 
 menu.action(anims, "Stop all Animations", {""}, "", function()
-    menu.trigger_commands("cancelanim")
+    local user_anim_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
+    TASK.CLEAR_PED_TASKS(user_anim_ped)
 end)
 
 menu.divider(anims, "Animations", {""}, "")
@@ -886,10 +921,6 @@ end)
 
 menu.action(anims, "Dance", {""}, "", function(on_click)
     play_anim("anim@amb@casino@mini@dance@dance_solo@female@var_b@", "high_center", -1)
-end)
-
-menu.action(anims, "Hug", {""}, "", function(on_click)
-    play_anim("mp_ped_interaction", "kisses_guy_a", -1)
 end)
 
 -------------------------------------
@@ -2268,6 +2299,28 @@ end)
     end)
 
     -------------------------------------
+    -- Ghost Orbital Players
+    -------------------------------------
+
+    local function IsPlayerUsingOrbitalCannon(player)
+        return BitTest(memory.read_int(memory.script_global((2689235 + (player * 453 + 1) + 416))), 0)
+    end
+
+    menu.toggle_loop(anti_orb, "Ghost", {"ghostorb"}, "Automatically ghost players that are using the orbital cannon.", function()
+        for _, pid in ipairs(players.list(false, true, true)) do
+           if IsPlayerUsingOrbitalCannon(pid) then
+                NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, true)
+            else
+                NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, false)
+            end
+        end
+    end, function()
+        for _, pid in ipairs(players.list(false, true, true)) do
+            NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, false)
+        end
+    end)
+
+    -------------------------------------
     -- Orb Detection
     -------------------------------------
 
@@ -2276,22 +2329,22 @@ end)
     local IsAtOrbTable = {}
     local IsNotAtOrbTable = {}
 
-    announce_it = false
+    announce_orb = false
 
     util.create_tick_handler(function()  
         for pid = 0,31 do
             if players.get_position(pid).x > 323 and players.get_position(pid).y < 4834 and players.get_position(pid).y > 4822 and players.get_position(pid).z <= -59.36 then
                 if IsOutOfOrbRoom[pid] and not IsInOrbRoom[pid] then
                     notify("" .. tostring(players.get_name(pid)) .. " has entered the orbital cannon room!")
-                    if announce_it == true then
+                    if announce_orb == true then
                         chat.send_message("> " .. players.get_name(pid) .. " entered the orbital cannon room", true, true, true)
                     end
                 end
                 if players.get_position(pid).x < 331 and players.get_position(pid).x > 330.40 and players.get_position(pid).y > 4830 and players.get_position(pid).y < 4830.40 and players.get_position(pid).z <= -59.36 then
                     if IsNotAtOrbTable[pid] and not IsAtOrbTable[pid] then
                         notify("" .. tostring(players.get_name(pid)) .. " might be about to call an orbital strike ;)")
-                        if announce_it == true then
-                            chat.send_message("> " .. tostring(players.get_name(pid)) .. " might be about to call an orbital strike ;)", true, true, true)
+                        if announce_orb == true then
+                            chat.send_message("> " .. tostring(players.get_name(pid)) .. " might be about to call an orbital strike.", true, true, true)
                         end
                     end
                     IsAtOrbTable[pid] = true
@@ -2302,7 +2355,7 @@ end)
             else
                 if IsInOrbRoom[pid] and not IsOutOfOrbRoom[pid] then
                     notify("" .. tostring(players.get_name(pid)) .. " has left the orbital cannon room!")
-                    if announce_it == true then
+                    if announce_orb == true then
                         chat.send_message("> " .. players.get_name(pid) .. " left the orbital cannon room", true, true, true)
                     end
                 end
@@ -2314,15 +2367,19 @@ end)
         end
     end)
 
-    menu.toggle_loop(detections, "Dispatch In Org Chat", {""}, "", function ()
-        announce_it = true
+    menu.toggle_loop(anti_orb, "Dispatch In Org Chat", {""}, "", function ()
+        announce_orb = true
         end, function ()
-        announce_it = false
+        announce_orb = false
     end)
+
+    -------------------------------------
+    -- Orb Postition
+    -------------------------------------
 
     local orbital_blips = {}
     local draw_orbital_blips = false
-    menu.toggle(detections, "Show orb", {""}, "", function(on)
+    menu.toggle(anti_orb, "Show orb", {""}, "", function(on)
         draw_orbital_blips = on
         while true do
             if not draw_orbital_blips then 
@@ -2662,6 +2719,34 @@ end)
     end)
 
     -------------------------------------
+    -- Remove Costs
+    -------------------------------------
+
+    menu.toggle_loop(tunables, "CEO Abilities", {}, "", function() -- Credit goes to Professor#4478's Kiddions Lua
+        SET_PACKED_INT_GLOBAL(12839, 12848, 0) -- 51567061, -1972817298
+        SET_PACKED_INT_GLOBAL(16023, 16028, 0) -- -1451871600, 1289619793
+        SET_INT_GLOBAL(262145 + 15945, 0) -- -939028485
+        SET_INT_GLOBAL(262145 + 19347, 0) -- 2052581897
+        SET_INT_GLOBAL(262145 + 19349, 0) -- -1333531254
+    end, function()
+        SET_PACKED_INT_GLOBAL(12840, 12842, 5000) -- 15263926, -400440420
+        SET_PACKED_INT_GLOBAL(16026, 16028, 5000) -- -679448434, 1289619793
+        SET_INT_GLOBAL(262145 + 12839, 20000) -- 51567061
+        SET_INT_GLOBAL(262145 + 12843, 25000) -- -1560965224
+        SET_INT_GLOBAL(262145 + 12844, 1000) -- 2096833423
+        SET_INT_GLOBAL(262145 + 12845, 1500) -- -688609610
+        SET_INT_GLOBAL(262145 + 12846, 1000) -- 153241568
+        SET_INT_GLOBAL(262145 + 12847, 12000) -- 813006152
+        SET_INT_GLOBAL(262145 + 12848, 15000) -- -1972817298
+        SET_INT_GLOBAL(262145 + 15945, 5000) -- -939028485
+        SET_INT_GLOBAL(262145 + 16023, 10000) -- -1451871600
+        SET_INT_GLOBAL(262145 + 16024, 7000) -- 650824488
+        SET_INT_GLOBAL(262145 + 16025, 9000) -- 253623806
+        SET_INT_GLOBAL(262145 + 19347, 5000) -- 2052581897
+        SET_INT_GLOBAL(262145 + 19349, 10000) -- -1333531254
+    end)
+
+    -------------------------------------
     -- Refill Snacks and Armor
     -------------------------------------
 
@@ -2701,10 +2786,19 @@ end)
 local function player(pid)
     
     if players.get_rockstar_id(pid) == 150742615 and players.get_rockstar_id_2(pid) == 150742615 then
-        menu.readonly(menu.my_root(), "I Love you", "")
-
         if players.get_rockstar_id(pid) == 216142317 and players.get_rockstar_id_2(pid) == 216142317 then
             notify("Ur babe is here, have fun :*")
+        end
+    end
+
+    -- Anti Griefer tool
+    local idiots = {208309465, 212858919, 132670200, 158212771, 178248141, 122719483, 157802946, 208036721, 214710914, 36784918, 81581713, 184694522, 22567607}
+
+    for _, rid in ipairs (idiots) do
+            if players.get_rockstar_id(pid) == rid and get_transition_state(pid) ~= 0 then 
+            menu.trigger_commands("icbm " .. players.get_name(pid))
+            wait("1000")
+            menu.trigger_commands("emp " .. players.get_name(pid))
         end
     end
 
@@ -2731,7 +2825,6 @@ local function player(pid)
 -- Friendly
 -------------------------------------
 -------------------------------------
-
 
     -------------------------------------
 	-- Check Stats
