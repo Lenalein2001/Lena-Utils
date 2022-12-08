@@ -4,7 +4,7 @@ local log = util.log
 local notify = util.toast
 local wait = util.yield
 local wait_once = util.yield_once
-
+local trigger_commands = menu.trigger_commands
 
 
 -------------------------------------
@@ -37,15 +37,16 @@ local detections = menu.list(online, "Detections", {""}, "")
 local protex = menu.list(online, "Protections", {""}, "")
 local anti_orb = menu.list(online, "Anti Orb", {""}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
+local clear_area_locally = menu.list(misc, "Clear Area", {""}, "")
 local multipliers = menu.list(tunables, "Multipliers", {""}, "")
-
+local sell_stuff = menu.list(tunables, "Selling", {""}, "")
 
 -------------------------------------
 -- Auto Update
 -------------------------------------
 
 local response = false
-local script_version = 2.6
+local script_version = 2.7
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -334,7 +335,7 @@ players_thread = util.create_thread(function (thr)
                                         if plyrpvp == players.user() then 
                                             notify("Pussy")
                                         else
-                                            menu.trigger_commands("kick" .. pvpername)
+                                            trigger_commands("kick" .. pvpername)
                                         end
                                         notify(pvpername .. 'd and was kicked from the session.')
                                         util.yield(100)
@@ -576,6 +577,11 @@ end
 
 local spawned_objects = {}
 local ladder_objects = {}
+
+local function BitTest(bits, place)
+    return (bits & (1 << place)) ~= 0
+end
+
 local function get_transition_state(pid)
     return memory.read_int(memory.script_global(((0x2908D3 + 1) + (pid * 0x1C5)) + 230))
 end
@@ -586,10 +592,6 @@ end
 
 local function is_player_in_interior(pid)
     return (memory.read_int(memory.script_global(0x2908D3 + 1 + (pid * 0x1C5) + 243)) ~= 0)
-end
-
-local function get_transition_state(pid)
-    return memory.read_int(memory.script_global(((0x2908D3 + 1) + (pid * 0x1C5)) + 230))
 end
 
 local function IsInSession()
@@ -860,47 +862,47 @@ end)
 menu.divider(anims, "Animations", {""}, "")
 
 menu.action(anims, "Sit on the Ground", {""}, "", function()
-    menu.trigger_commands("scensitonground")
+    trigger_commands("scensitonground")
 end)
 
 menu.action(anims, "Sunbathe Back", {""}, "", function()
-    menu.trigger_commands("scensunbatheback")
+    trigger_commands("scensunbatheback")
 end)
 
 menu.action(anims, "Sunbathe", {""}, "", function()
-    menu.trigger_commands("scensunbathe")
+    trigger_commands("scensunbathe")
 end)
 
 menu.action(anims, "Faint", {""}, "", function()
-    menu.trigger_commands("animfaint")
+    trigger_commands("animfaint")
 end)
 
 menu.action(anims, "Flirt", {""}, "", function()
-    menu.trigger_commands("animflirtylean")
+    trigger_commands("animflirtylean")
 end)
 
 menu.action(anims, "Twerk", {""}, "", function()
-    menu.trigger_commands("animtwerk")
+    trigger_commands("animtwerk")
 end)
 
 menu.action(anims, "Kisses", {""}, "", function()
-    menu.trigger_commands("animblowkiss")
+    trigger_commands("animblowkiss")
 end)
 
 menu.action(anims, "Wait", {""}, "", function()
-    menu.trigger_commands("animwait")
+    trigger_commands("animwait")
 end)
 
 menu.action(anims, "Prone", {""}, "", function()
-    menu.trigger_commands("animprone")
+    trigger_commands("animprone")
 end)
 
 menu.action(anims, "Look at the clouds", {""}, "", function()
-    menu.trigger_commands("animcloudgazer")
+    trigger_commands("animcloudgazer")
 end)
 
 menu.action(anims, "Chill", {""}, "", function()
-    menu.trigger_commands("animchill")
+    trigger_commands("animchill")
 end)
 
 menu.action(anims, "Car blowjob", {""}, "", function(on_click)
@@ -934,7 +936,7 @@ local blipcoords = HUD.GET_BLIP_COORDS
 
 menu.toggle(self, "Auto start CEO", {"autoorg"}, "", function(on)
     if players.get_boss(players.user()) == players.user() == false 
-    then notify('CEO autostart is activated') menu.trigger_commands('ceostart')  
+    then notify('CEO autostart is activated') trigger_commands('ceostart')  
         wait(2000) notify("Started, you are now your boss")
     elseif on and players.get_boss(players.user()) == players.user() == true 
     then wait(1000) notify("Not started, you are allready your CEO boss")
@@ -1093,7 +1095,7 @@ end)
     --[[
     menu.toggle(vehicle, "Auto Vehicle gm", {""}, "", function()
         if PED.GET_VEHICLE_PED_IS_IN(players.user()) then 
-            menu.trigger_commands("vehgodmode")
+            trigger_commands("vehgodmode")
         end
     end)
     ]]
@@ -1118,9 +1120,9 @@ end)
                 memory.write_float(CflyingHandling + offset, 0)
             end
             wait(500)
-            menu.trigger_commands("gravitymult 1")
+            trigger_commands("gravitymult 1")
             wait(500)
-            menu.trigger_commands("helithrust 2.3")
+            trigger_commands("helithrust 2.3")
             notify("Realistic Heli has been enabled")
         else
             notify("Failed\nget in a heli first")
@@ -1129,7 +1131,7 @@ end)
 
     menu.action(better_heli, "Reset Gravity", {""}, "", function ()
         wait(500)
-        menu.trigger_commands("gravitymult 2")
+        trigger_commands("gravitymult 2")
         wait(500)
         notify("Realistic Heli has been disabled")
     end)
@@ -1212,9 +1214,15 @@ end)
             for i = 0, 4, 1 do
                 memory.write_int(WeaponSeats + i * 4, seat + 1)
             end
-            menu.trigger_commands("repair")
+            trigger_commands("repair")
         end
     end)
+
+    -------------------------------------
+    -- Torque Multiplier
+    -------------------------------------
+
+    --
 
     -------------------------------------
     -- VEHICLE HANDLING EDITOR
@@ -2263,7 +2271,7 @@ end)
     end
 
 
-    menu.toggle_loop(protex, "Missile and Drone Detection", {""}, "Drone/Missile Detection", function()
+    menu.toggle_loop(detections, "Missile and Drone Detection", {""}, "Drone/Missile Detection", function()
         if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
             for player = 0, 32 do AddBlipForPlayerDrone(player) end
         end
@@ -2285,16 +2293,16 @@ end)
         local UnblockIncSyncs = menu.ref_by_path("Online>Protections>Syncs>Incoming>Any Incoming Sync>Block>Disabled")
         if on_toggle then
             notify("Anti Crash On")
-            menu.trigger_commands("desyncall on")
+            trigger_commands("desyncall on")
             menu.trigger_command(BlockIncSyncs)
             menu.trigger_command(BlockNetEvents)
-            menu.trigger_commands("anticrashcamera on")
+            trigger_commands("anticrashcamera on")
         else
             notify("Anti Crash Off")
-            menu.trigger_commands("desyncall off")
+            trigger_commands("desyncall off")
             menu.trigger_command(UnblockIncSyncs)
             menu.trigger_command(UnblockNetEvents)
-            menu.trigger_commands("anticrashcamera off")
+            trigger_commands("anticrashcamera off")
         end
     end)
 
@@ -2482,7 +2490,7 @@ end)
     local thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
     menu.toggle(misc, "Weather Toggle", {"thunder"}, "", function(on_toggle)
         if on_toggle then
-            menu.trigger_commands("weather normal")
+            trigger_commands("weather normal")
             wait(1000)
             menu.trigger_command(thunder_on)
             wait(10000)
@@ -2490,8 +2498,20 @@ end)
         else
             menu.trigger_command(thunder_off)
             wait(10000)
-            menu.trigger_commands("weather extrasunny")
+            trigger_commands("weather extrasunny")
             util.toast("Weather Set back to Normal") 
+        end
+    end)
+
+    -------------------------------------
+    -- Auto Join 
+    -------------------------------------
+
+    menu.toggle_loop(misc, "Auto Accept Joining Games", {""}, "Will auto accept join screens", function()
+        local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
+        if message_hash == 15890625 or message_hash == -398982408 or message_hash == -587688989 then
+            PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201, 1.0)
+            wait(200)
         end
     end)
 
@@ -2499,7 +2519,7 @@ end)
     -- Clear Area
     -------------------------------------
 
-    menu.list_action(misc, "Clear All...", {""}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
+    menu.list_action(clear_area_locally, "Clear All...", {""}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
         notify("Clearing "..name:lower().."...")
         local counter = 0
         pluto_switch index do
@@ -2561,7 +2581,7 @@ end)
         notify("Cleared "..tostring(counter).." "..name:lower()..".")
     end)
 
-    menu.action(misc, "Clear Area", {"ca"}, "", function()
+    menu.action(clear_area_locally, "Clear Area", {"ca"}, "", function()
         local cleanse_entitycount = 0
         for _, ped in pairs(entities.get_all_peds_as_handles()) do
             if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(ped) and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION() or NETWORK.NETWORK_IS_ACTIVITY_SESSION() and not ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) then
@@ -2616,7 +2636,7 @@ end)
     -------------------------------------
 
     menu.action(shortcuts, "Delete Vehicle", {"dv"}, "Deletes your current vehicle", function()
-        menu.trigger_commands("deletevehicle")
+        trigger_commands("deletevehicle")
     end)
 
     -------------------------------------
@@ -2653,24 +2673,12 @@ end)
     -------------------------------------
 
     menu.action(shortcuts, "Unload", {"bye"}, "", function()
-        menu.trigger_commands("bandaid off")
+        trigger_commands("bandaid off")
         wait(2000)
-        menu.trigger_commands("breakupbandaid")
+        trigger_commands("breakupbandaid off")
         util.toast("Lessen has been disabled. Unloading in 3 seconds.")
         wait(3000)
-        menu.trigger_commands("unload")
-    end)
-
-    -------------------------------------
-    -- Auto Join 
-    -------------------------------------
-
-    menu.toggle_loop(misc, "Auto Accept Joining Games", {""}, "Will auto accept join screens", function()
-        local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
-        if message_hash == 15890625 or message_hash == -398982408 or message_hash == -587688989 then
-            PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201, 1.0)
-            wait(200)
-        end
+        trigger_commands("unload")
     end)
 
 -------------------------------------
@@ -2689,7 +2697,7 @@ end)
     MCEZMission = 696+17,
     }
 
-    menu.toggle_loop(tunables, "Easy MC sell", {""}, "", function()
+    menu.toggle_loop(sell_stuff, "Easy MC sell", {""}, "", function()
         local value = GetLocalInt(locals.MCSellScriptString, locals.MCEZMission)
         if value and value ~= 0 then
             SetLocalInt(locals.MCSellScriptString, locals.MCEZMission, 0)
@@ -2702,7 +2710,7 @@ end)
 
     -- https://www.unknowncheats.me/forum/3347568-post13086.html
 
-    menu.toggle_loop(tunables, "Tony's Cut of Nightclub be gone", {""}, "", function()
+    menu.toggle_loop(sell_stuff, "Tony's Cut of Nightclub be gone", {""}, "", function()
         SET_FLOAT_GLOBAL(262145 + 24524, 0) -- -1002770353
     end, function()
         SET_FLOAT_GLOBAL(262145 + 24524, 0.1)
@@ -2714,7 +2722,7 @@ end)
 
     -- https://www.unknowncheats.me/forum/3521137-post39.html
 
-    menu.action(tunables, "Instant Bunker Sell", {""}, "Selling Only", function() 
+    menu.action(sell_stuff, "Instant Bunker Sell", {""}, "Selling Only", function() 
         SET_INT_LOCAL("gb_gunrunning", 1203 + 774, 0)
     end)
 
@@ -2766,6 +2774,14 @@ end)
     end)
 
     -------------------------------------
+    -- Max Club Popularity
+    -------------------------------------
+
+    menu.action(tunables, "Max NC Popularity", {"maxnc"}, "", function()
+        trigger_commands("clubpo 100")
+    end)
+
+    -------------------------------------
     -- Multipliers
     -------------------------------------
 
@@ -2777,6 +2793,20 @@ end)
         SET_FLOAT_GLOBAL(262145 + 1, MUT_Input) -- joaat("XP_MULTIPLIER")
     end, function()
         SET_FLOAT_GLOBAL(262145 + 1, 1)
+    end)
+
+    -------------------------------------
+    -- Start a BB
+    -------------------------------------
+
+    local start_a_bb = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Freemode Activities>Business Battle 1")
+
+    menu.action(tunables, "Start a BB", {"BB"}, "", function()
+        if menu.get_edition() >= 3 then 
+            menu.trigger_command(start_a_bb)
+        else
+            notify("You need Ultimate to Start a BB, request denied.")
+        end
     end)
 
 --------------------------------------------------------------------------------
@@ -2792,15 +2822,33 @@ local function player(pid)
     end
 
     -- Anti Griefer tool
+    -- local friendly_players = {0x0EA9662D, 0x25299A1D}
+
     local idiots = {208309465, 212858919, 132670200, 158212771, 178248141, 122719483, 157802946, 208036721, 214710914, 36784918, 81581713, 184694522, 22567607}
+    
+    local read_warnings_off = menu.ref_by_path("Stand>Settings>Warnings>Force Me To Read Warnings")
 
     for _, rid in ipairs (idiots) do
-            if players.get_rockstar_id(pid) == rid and get_transition_state(pid) ~= 0 then 
-            menu.trigger_commands("icbm " .. players.get_name(pid))
-            wait("1000")
-            menu.trigger_commands("emp " .. players.get_name(pid))
+        if players.get_rockstar_id(pid) == rid and get_transition_state(pid) ~= 0 then
+            wait("2000") 
+            trigger_commands("commandsskipwarnings on")
+            trigger_commands("skiprepeatwarnings on")
+            menu.trigger_command(read_warnings_off, "off")
+            wait("4000")
+            trigger_commands("crash " .. players.get_name(pid))
+            wait("2000")
+            notify("Crash failed, kicking the griefer.")
+            trigger_commands("historyblock " .. players.get_name(pid) .. "on")
+            wait("500")
+            trigger_commands("kick " .. players.get_name(pid))
         end
     end
+
+    --[[for _, rid in ipairs (friendly_players) do
+        if players.get_rockstar_id(pid) == rid and get_transition_state(pid) ~= 0 then 
+            --do stuff
+        end
+    end]]
 
     menu.divider(menu.player_root(pid), "Lena Utilities")
     local lena = menu.list(menu.player_root(pid), "Lena Utilities", {"lenau"}, "")
@@ -2844,7 +2892,20 @@ local function player(pid)
 -- Friendly
 -------------------------------------
 -------------------------------------
-
+    menu.action(friendly, "invite to CEO/MC", {""}, "", function ()
+        util.trigger_script_event(1 << pid, {
+            -1129846248,
+            players.user(),
+            4,
+            10000, -- wage?
+            0,
+            0,
+            0,
+            0,
+            memory.read_int(memory.script_global(1920255 + 9)), -- f_8
+            memory.read_int(memory.script_global(1920255 + 10)), -- f_9
+        })
+    end)
     -------------------------------------
 	-- GOD MODE
 	-------------------------------------
@@ -3116,9 +3177,9 @@ local function player(pid)
     -------------------------------------
 
     menu.action(trolling, "Disable Passive Mode", {"pussive"}, "", function()
-        menu.trigger_commands("givesh" .. players.get_name(pid))
+        trigger_commands("givesh" .. players.get_name(pid))
         wait(1000)
-        menu.trigger_commands("mission" .. players.get_name(pid))
+        trigger_commands("mission" .. players.get_name(pid))
     end)
 
     -------------------------------------
@@ -3180,10 +3241,10 @@ local function player(pid)
 
     menu.action(kicks, "Block Join Kick", {"EMP"}, "Discription.... yes", function()
         wait(500)
-        menu.trigger_commands("historyblock" .. players.get_name(pid))
+        trigger_commands("historyblock" .. players.get_name(pid))
         log("Player " .. players.get_name(pid) ..  " has been Kicked and Blocked")
         wait(500)
-        menu.trigger_commands("kick" .. players.get_name(pid))
+        trigger_commands("kick" .. players.get_name(pid))
     end, nil, nil, COMMANDPERM_RUDE)
 
     -------------------------------------
@@ -3192,7 +3253,7 @@ local function player(pid)
 
     if menu.get_edition() >= 2 then 
         menu.action(kicks, "Rape", {"rape"}, "A Unblockable kick that won't tell the target or non-hosts who did it.", function()
-            menu.trigger_commands("breakup" .. players.get_name(pid))
+            trigger_commands("breakup" .. players.get_name(pid))
         end, nil, nil, COMMANDPERM_RUDE)
     end
 
@@ -3200,14 +3261,14 @@ local function player(pid)
     -- Crashes
     -------------------------------------
 
-    menu.action(crashes, "Block Join Crash", {""}, "", function()
+    menu.action(crashes, "Block Join Crash", {"gtfo"}, "", function()
         wait(500)
-        menu.trigger_commands("choke " .. players.get_name(pid))
+        trigger_commands("choke " .. players.get_name(pid))
         wait(500)
-        menu.trigger_commands("crash " .. players.get_name(pid))
+        trigger_commands("crash " .. players.get_name(pid))
         wait(500)
         log("Player " .. players.get_name(pid) ..  " has been Crashed and Blocked")
-        menu.trigger_commands("historyblock" .. players.get_name(pid))
+        trigger_commands("historyblock" .. players.get_name(pid))
     end)
 
     local nature = menu.list(crashes, "Para", {}, "")
@@ -3217,7 +3278,7 @@ local function player(pid)
         local pos = players.get_position(user)
         BlockSyncs(pid, function() 
             wait(100)
-            menu.trigger_commands("invisibility on")
+            trigger_commands("invisibility on")
             for i = 0, 110 do
                 PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user, 0xFBF7D21F)
                 PED.SET_PED_COMPONENT_VARIATION(user_ped, 5, i, 0, 0)
@@ -3231,7 +3292,7 @@ local function player(pid)
             ENTITY.SET_ENTITY_HEALTH(user_ped, 0) 
             NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(pos, 0, false, false, 0)
             PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
-            menu.trigger_commands("invisibility off")
+            trigger_commands("invisibility off")
         end)
     end)
     
@@ -3304,7 +3365,7 @@ local function player(pid)
         for i = 1, 15 do
             util.trigger_script_event(1 << pid, {1348481963, pid, math.random(int_min, int_max)})
         end
-        menu.trigger_commands("givesh " .. players.get_name(pid))
+        trigger_commands("givesh " .. players.get_name(pid))
         wait(100)
         util.trigger_script_event(1 << pid, {495813132, pid, 0, 0, -12988, -99097, 0})
         util.trigger_script_event(1 << pid, {495813132, pid, -4640169, 0, 0, 0, -36565476, -53105203})
