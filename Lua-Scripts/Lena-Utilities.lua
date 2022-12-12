@@ -5,7 +5,7 @@ local notify = util.toast
 local wait = util.yield
 local wait_once = util.yield_once
 local trigger_commands = menu.trigger_commands
-
+local trigger_command = menu.trigger_command
 
 -------------------------------------
 -- Natives
@@ -23,7 +23,11 @@ local vehicle = menu.list(menu.my_root(), "Vehicle", {""}, "")
 local online = menu.list(menu.my_root(), "Online", {""}, "")
 local misc = menu.list(menu.my_root(), "Misc", {""}, "")
 local tunables = menu.list(menu.my_root(), "Tunables", {""}, "")
---local wip = menu.list(menu.my_root(), "WIP", {""}, "")
+local script_settings = menu.list(menu.my_root(), "Settings", {""}, "")
+
+menu.action(script_settings, "Restart Script", {"restartl"}, "", function()
+    util.restart_script()
+end)
 
 -------------------------------------
 -- Sub Tabs
@@ -46,7 +50,7 @@ local sell_stuff = menu.list(tunables, "Selling", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 2.7
+local script_version = 2.8
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -103,7 +107,7 @@ local OrbitalCannon = require "lena.orbital_cannon"
 local llang = require 'lena/llang'
 local lkey = require 'lena/lkey'
 local scaleForm = require("ScaleformLib")
-require('lena/lenaslib')
+util.ensure_package_is_installed("")
 
 local scriptdir <const> = filesystem.scripts_dir()
 for _, file in ipairs(required) do
@@ -121,8 +125,6 @@ end
 -----------------------------------
 -- FILE SYSTEM
 -----------------------------------
-
-util.ensure_package_is_installed("lua/lena/ScaleformLib")
 
 local SF = scaleForm("instructional_buttons")
 local _LR = {}
@@ -557,6 +559,10 @@ local numpadControls = {
 -- Different Checks 
 -------------------------------------
 
+function GetLocalPed()
+    return PLAYER.PLAYER_PED_ID()
+end
+
 function BitTest(bits, place)
 	return (bits & (1 << place)) ~= 0
 end
@@ -831,7 +837,7 @@ local function BlockSyncs(pid, callback)
     for _, i in ipairs(players.list(false, true, true)) do
         if i ~= pid then
             local outSync = menu.ref_by_rel_path(menu.player_root(i), "Outgoing Syncs>Block")
-            menu.trigger_command(outSync, "on")
+            trigger_command(outSync, "on")
         end
     end
     wait(10)
@@ -839,7 +845,7 @@ local function BlockSyncs(pid, callback)
     for _, i in ipairs(players.list(false, true, true)) do
         if i ~= pid then
             local outSync = menu.ref_by_rel_path(menu.player_root(i), "Outgoing Syncs>Block")
-            menu.trigger_command(outSync, "off")
+            trigger_command(outSync, "off")
         end
     end
 end
@@ -970,75 +976,6 @@ end)
 -------------------------------------
 
     -------------------------------------
-    -- BULLET SPEED MULT
-    -------------------------------------
-
-    ---@class AmmoSpeed
-    local AmmoSpeed = {address = 0, defaultValue = 0}
-    AmmoSpeed.__index = AmmoSpeed
-
-    ---@param address integer
-    ---@return AmmoSpeed
-    function AmmoSpeed.new(address)
-        assert(address ~= 0, "got a nullpointer")
-        local instance = setmetatable({}, AmmoSpeed)
-        instance.address = address
-        instance.defaultValue = memory.read_float(address)
-        return instance
-    end
-
-    AmmoSpeed.__eq = function (a, b)
-        return a.address == b.address
-    end
-
-    ---@return number
-    function AmmoSpeed:getValue()
-        return memory.read_float(self.address)
-    end
-
-    ---@param value number
-    function AmmoSpeed:setValue(value)
-        memory.write_float(self.address, value)
-    end
-
-    function AmmoSpeed:reset()
-        memory.write_float(self.address, self.defaultValue)
-    end
-
-    local multiplier
-    ---@type AmmoSpeed
-    local modifiedSpeed
-
-    menu.slider_float(wep, "Bullet Speed Mult", {""}, "Changes the speed of any non-instant hit projectile.", 10, 100000, 100, 10, function(value)
-        multiplier = value / 100
-    end)
-
-    util.create_tick_handler(function()
-        local CPed = entities.handle_to_pointer(players.user_ped())
-        if CPed == 0 or not multiplier then return end
-        local ammoSpeedAddress = addr_from_pointer_chain(CPed, {0x10B8, 0x20, 0x60, 0x58})
-        if ammoSpeedAddress == 0 then
-            if entities.get_user_vehicle_as_pointer() == 0 then return end
-            ammoSpeedAddress = addr_from_pointer_chain(CPed, {0x10B8, 0x70, 0x60, 0x58})
-            if ammoSpeedAddress == 0 then return end
-        end
-        local ammoSpeed = AmmoSpeed.new(ammoSpeedAddress)
-        modifiedSpeed = modifiedSpeed or ammoSpeed
-        if ammoSpeed ~= modifiedSpeed then
-            modifiedSpeed:reset()
-            modifiedSpeed = ammoSpeed
-        end
-        local newValue = modifiedSpeed.defaultValue * multiplier
-        if modifiedSpeed:getValue() ~= newValue then
-            modifiedSpeed:setValue(newValue)
-        end
-    end)
-
-    util.on_stop(function ()
-        if modifiedSpeed then modifiedSpeed:reset() end
-    end)
-
-    -------------------------------------
     -- Legit rapid Fire
     -------------------------------------
 
@@ -1129,7 +1066,7 @@ end)
         end
     end)
 
-    menu.action(better_heli, "Reset Gravity", {""}, "", function ()
+    menu.action(better_heli, "Reset Gravity", {"resetbetterheli"}, "", function ()
         wait(500)
         trigger_commands("gravitymult 2")
         wait(500)
@@ -1140,13 +1077,7 @@ end)
     -- Vehicle Strafe
     -------------------------------------
 
-    menu.toggle_loop(vehicle, "Vehicle Strafe", {""}, "Let your vehicle strafe left or right using either arrow left or arror right", function ()
-        local last_car
-        if last_car == NULL and player_cur_car ~= NULL then
-            last_car = player_cur_car
-        elseif last_car ~= player_cur_car then
-            last_car = player_cur_car
-        end
+    menu.toggle_loop(vehicle, "Vehicle Strafe", {""}, "", function(toggle)
         if player_cur_car ~= 0 then
             local rot = ENTITY.GET_ENTITY_ROTATION(player_cur_car, 0)
             if PAD.IS_CONTROL_PRESSED(175, 175) then
@@ -1208,9 +1139,9 @@ end)
         if CVehicleWeaponHandlingDataAddress == 0 then util.toast("oopsie","this vehicle does not seem to have any weapons.") return end
     
         local WeaponSeats = CVehicleWeaponHandlingDataAddress + 0x0020
-        local succes, seat = get_seat_ped_is_in(PLAYER.PLAYER_PED_ID())
+        local success, seat = get_seat_ped_is_in(PLAYER.PLAYER_PED_ID())
     
-        if succes then
+        if success then
             for i = 0, 4, 1 do
                 memory.write_int(WeaponSeats + i * 4, seat + 1)
             end
@@ -2070,6 +2001,20 @@ end)
     end)
 
     -------------------------------------
+    -- SUID
+    -------------------------------------
+
+    local stand_UID = menu.ref_by_path("Online>Protections>Detections>Stand User Identification")
+
+    menu.toggle(detections, "Stand User ID", {"suid"}, "", function(on)
+        if on then
+            trigger_command(stand_UID, "on")
+        else
+            trigger_command(stand_UID, "off")
+        end
+    end, true)
+
+    -------------------------------------
     -- Super Drive
     -------------------------------------
 
@@ -2249,7 +2194,6 @@ end)
                     local msg = GetNotificationMsg(GetPlayerDroneType(player), true)
                     notification:normal(msg, HudColour.purpleDark, get_condensed_player_name(player))
                     nearbyNotificationBits = SetBit(nearbyNotificationBits, player)
-                    chat.send_message("" .. players.get_name(pid) .. "Is near you", true, true, false )
                 end
 
             else
@@ -2294,14 +2238,14 @@ end)
         if on_toggle then
             notify("Anti Crash On")
             trigger_commands("desyncall on")
-            menu.trigger_command(BlockIncSyncs)
-            menu.trigger_command(BlockNetEvents)
+            trigger_command(BlockIncSyncs)
+            trigger_command(BlockNetEvents)
             trigger_commands("anticrashcamera on")
         else
             notify("Anti Crash Off")
             trigger_commands("desyncall off")
-            menu.trigger_command(UnblockIncSyncs)
-            menu.trigger_command(UnblockNetEvents)
+            trigger_command(UnblockIncSyncs)
+            trigger_command(UnblockNetEvents)
             trigger_commands("anticrashcamera off")
         end
     end)
@@ -2401,7 +2345,7 @@ end)
                 local cam_rot = players.get_cam_rot(pid)
                 local cam_pos = players.get_cam_pos(pid)
                 if cam_pos.z >= 390.0 and cam_pos.z <= 850.0 and cam_rot.x == 270.0 and cam_rot.y == 0.0 and cam_rot.z == 0.0 and players.is_in_interior(pid) then 
-                    util.draw_debug_text(players.get_name(pid) .. translations.orbital_cannon_warn)
+                    util.draw_debug_text(players.get_name(pid) .. "is about to orb someone")
                     if orbital_blips[pid] == nil then 
                         local blip = HUD.ADD_BLIP_FOR_COORD(cam_pos.x, cam_pos.y, cam_pos.z)
                         HUD.SET_BLIP_SPRITE(blip, 588)
@@ -2473,9 +2417,9 @@ end)
         local lessen = menu.ref_by_path("Online>Protections>Lessen Breakup Kicks As Host")
         if not util.is_session_transition_active() then
             if players.get_host() == players.user() then
-                menu.trigger_command(lessen, "on")
+                trigger_command(lessen, "on")
             elseif players.get_host() ~= players.user() then
-                menu.trigger_command(lessen, "off")
+                trigger_command(lessen, "off")
             end
         else
             -- nothing
@@ -2492,11 +2436,11 @@ end)
         if on_toggle then
             trigger_commands("weather normal")
             wait(1000)
-            menu.trigger_command(thunder_on)
+            trigger_command(thunder_on)
             wait(10000)
             util.toast("Weather Set to Thunder") 
         else
-            menu.trigger_command(thunder_off)
+            trigger_command(thunder_off)
             wait(10000)
             trigger_commands("weather extrasunny")
             util.toast("Weather Set back to Normal") 
@@ -2644,7 +2588,7 @@ end)
     -------------------------------------
 
     menu.action(shortcuts, "Grab SH", {"sh"}, "", function()
-        menu.trigger_command(menu.ref_by_path("Players>"..players.get_name_with_tags(players.user())..">Friendly>Give Script Host"))
+        trigger_command(menu.ref_by_path("Players>"..players.get_name_with_tags(players.user())..">Friendly>Give Script Host"))
     end)
 
     -------------------------------------
@@ -2697,7 +2641,7 @@ end)
     MCEZMission = 696+17,
     }
 
-    menu.toggle_loop(sell_stuff, "Easy MC sell", {""}, "", function()
+    menu.toggle_loop(sell_stuff, "Easy MC sell", {"easymc"}, "", function()
         local value = GetLocalInt(locals.MCSellScriptString, locals.MCEZMission)
         if value and value ~= 0 then
             SetLocalInt(locals.MCSellScriptString, locals.MCEZMission, 0)
@@ -2722,7 +2666,7 @@ end)
 
     -- https://www.unknowncheats.me/forum/3521137-post39.html
 
-    menu.action(sell_stuff, "Instant Bunker Sell", {""}, "Selling Only", function() 
+    menu.action(sell_stuff, "Instant Bunker Sell", {"bunker"}, "Selling Only", function() 
         SET_INT_LOCAL("gb_gunrunning", 1203 + 774, 0)
     end)
 
@@ -2799,11 +2743,24 @@ end)
     -- Start a BB
     -------------------------------------
 
-    local start_a_bb = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Freemode Activities>Business Battle 1")
+    local start_a_bb1 = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Freemode Activities>Business Battle 1")
+    local start_a_bb2 = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Uncategorised>Business Battle 2")
 
     menu.action(tunables, "Start a BB", {"BB"}, "", function()
         if menu.get_edition() >= 3 then 
-            menu.trigger_command(start_a_bb)
+            trigger_command(start_a_bb1)
+        else
+            notify("You need Ultimate to Start a BB, request denied.")
+        end
+    end)
+ 
+    -------------------------------------
+    -- Start a BB 2
+    -------------------------------------    
+
+    menu.action(tunables, "Start a BB 2", {"BB2"}, "", function()
+        if menu.get_edition() >= 3 then 
+            trigger_command(start_a_bb2)
         else
             notify("You need Ultimate to Start a BB, request denied.")
         end
@@ -2833,7 +2790,7 @@ local function player(pid)
             wait("2000") 
             trigger_commands("commandsskipwarnings on")
             trigger_commands("skiprepeatwarnings on")
-            menu.trigger_command(read_warnings_off, "off")
+            trigger_command(read_warnings_off, "off")
             wait("4000")
             trigger_commands("crash " .. players.get_name(pid))
             wait("2000")
@@ -2892,7 +2849,7 @@ local function player(pid)
 -- Friendly
 -------------------------------------
 -------------------------------------
-    menu.action(friendly, "invite to CEO/MC", {""}, "", function ()
+    menu.action(friendly, "Invite to CEO/MC", {"ceoinv"}, "", function ()
         util.trigger_script_event(1 << pid, {
             -1129846248,
             players.user(),
@@ -3196,11 +3153,11 @@ local function player(pid)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(objHash)
     end
 
-	local notifmsg = translate("Trolling - Cage", "%s was out of the cage")
+	local notifmsg = translate("Trolling - Cage", "%s escaped the cage, caging him again... :)")
 
 	local cagePos
 	local timer <const> = newTimer()
-	menu.toggle_loop(trolling, "Automatic", {"autocage"}, "", function()
+	menu.toggle_loop(trolling, "Automatic", {"pet"}, "", function()
 		if not is_player_active(pid, false, true) then
 			util.stop_thread()
 
@@ -3241,7 +3198,7 @@ local function player(pid)
 
     menu.action(kicks, "Block Join Kick", {"EMP"}, "Discription.... yes", function()
         wait(500)
-        trigger_commands("historyblock" .. players.get_name(pid))
+        trigger_commands("historyblock" .. players.get_name(pid) .. " on")
         log("Player " .. players.get_name(pid) ..  " has been Kicked and Blocked")
         wait(500)
         trigger_commands("kick" .. players.get_name(pid))
@@ -3268,7 +3225,7 @@ local function player(pid)
         trigger_commands("crash " .. players.get_name(pid))
         wait(500)
         log("Player " .. players.get_name(pid) ..  " has been Crashed and Blocked")
-        trigger_commands("historyblock" .. players.get_name(pid))
+        trigger_commands("historyblock" .. players.get_name(pid) .. " on")
     end)
 
     local nature = menu.list(crashes, "Para", {}, "")

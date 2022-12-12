@@ -1,5 +1,5 @@
 -- Made by Lena
-json = require "pretty.json"
+json = require "/lena/pretty.json"
 local self = {}
 self.version = 27
 
