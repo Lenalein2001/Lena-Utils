@@ -751,6 +751,7 @@ DLC={
 	["ON_ENTER_MP"]=function(...)return native_invoker.uno_void(0x0888C3502DBBEEF5,...)end,
 }
 ENTITY={
+	["GET_ENTITY_BONE_POSITION_2"]=function(...)return native_invoker.uno_void(0x46F8696933A63C9B,...)end,
 	["DOES_ENTITY_EXIST"]=function(...)return native_invoker.uno_bool(0x7239B21A38F536BA,...)end,
 	["DOES_ENTITY_BELONG_TO_THIS_SCRIPT"]=function(...)return native_invoker.uno_bool(0xDDE6DF5AE89981D2,...)end,
 	["DOES_ENTITY_HAVE_DRAWABLE"]=function(...)return native_invoker.uno_bool(0x060D6E96F8B8E48D,...)end,
