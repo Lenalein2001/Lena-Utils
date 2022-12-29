@@ -1,8 +1,8 @@
 -- Copyright (c) 2018, Souche Inc.
 
-local Constant = require "lena.pretty.json.constant"
-local Serializer = require "lena.pretty.json.serializer"
-local Parser = require "lena.pretty.json.parser"
+local Constant = require "pretty.json.constant"
+local Serializer = require "pretty.json.serializer"
+local Parser = require "pretty.json.parser"
 
 local json = {
     _VERSION = "0.1",

@@ -3725,7 +3725,6 @@ PAD={
 	["IS_CONTROL_JUST_PRESSED"]=function(...)return native_invoker.uno_bool(0x580417101DDB492F,...)end,
 	["IS_CONTROL_JUST_RELEASED"]=function(...)return native_invoker.uno_bool(0x50F940259D3841E6,...)end,
 	["GET_CONTROL_VALUE"]=function(...)return native_invoker.uno_int(0xD95E79E8686D2C27,...)end,
-	["GET_CONTROL_NORMAL"]=function(...)return native_invoker.uno_float(0xEC3C9B8D5327B563,...)end,
 	["SET_USE_ADJUSTED_MOUSE_COORDS"]=function(...)return native_invoker.uno_void(0x5B73C77D9EB66E24,...)end,
 	["GET_CONTROL_UNBOUND_NORMAL"]=function(...)return native_invoker.uno_float(0x5B84D09CEC5209C5,...)end,
 	["SET_CONTROL_VALUE_NEXT_FRAME"]=function(...)return native_invoker.uno_bool(0xE8A25867FBA3B05E,...)end,

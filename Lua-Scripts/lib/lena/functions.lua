@@ -1,5 +1,4 @@
--- Made by Lena
-json = require "/lena/pretty.json"
+json = require "pretty.json"
 local self = {}
 self.version = 27
 
@@ -82,7 +81,7 @@ notification =
 function notification.stand(msg)
 	assert(type(msg) == "string", "msg must be a string, got " .. type(msg))
 	msg = msg:gsub('~[%w_]-~', ""):gsub('<C>(.-)</C>', '%1')
-	util.toast("[Lena Utils] " .. msg)
+	util.toast("[Lena] " .. msg)
 end
 
 
@@ -977,7 +976,7 @@ end
 ---@return boolean
 function is_player_passive(player)
 	if player ~= players.user() then
-		local address = memory.script_global(1892703 + (player * 599 + 1) + 8)
+		local address = memory.script_global(1894573 + (player * 608 + 1) + 8)
 		if address ~= NULL then return memory.read_byte(address) == 1 end
 	else
 		local address = memory.script_global(1574582)
@@ -990,7 +989,7 @@ end
 ---@param player Player
 ---@return boolean
 function is_player_in_any_interior(player)
-	local address = memory.script_global(2689235 + (player * 453 + 1) + 243)
+	local address = memory.script_global(2657589 + (player * 466 + 1) + 245)
 	return address ~= NULL and memory.read_int(address) ~= 0
 end
 
@@ -1001,12 +1000,12 @@ function is_player_in_interior(player)
 	if player == -1 then
 		return false
 	end
-	local bits = read_global.int(1853348 + (player * 834 + 1) + 267 + 30)
+	local bits = read_global.int(1853910 + (player * 862 + 1) + 267 + 31)
 	if (bits & (1 << 0)) ~= 0 then
 		return true
 	elseif (bits & (1 << 1)) ~= 0 then
 		return true
-	elseif read_global.int(2689235 + (player * 453 + 1) + 318 + 6) ~= -1 then
+	elseif read_global.int(2657589 + (player * 466 + 1) + 321 + 7) ~= -1 then
 		return true
 	end
 	return false
@@ -1017,7 +1016,7 @@ end
 ---@return boolean
 function is_player_in_rc_bandito(player)
 	if player ~= -1 then
-		local address = memory.script_global(1853348 + (player * 834 + 1) + 267 + 348)
+		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 365)
 		return BitTest(memory.read_int(address), 29)
 	end
 	return false
@@ -1028,7 +1027,7 @@ end
 ---@return boolean
 function is_player_in_rc_tank(player)
 	if player ~= -1 then
-		local address = memory.script_global(1853348 + (player * 834 + 1) + 267 + 408 + 2)
+		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 2)
 		return BitTest(memory.read_int(address), 16)
 	end
 	return false
@@ -1039,7 +1038,7 @@ end
 ---@return boolean
 function is_player_in_rc_personal_vehicle(player)
 	if player ~= -1 then
-		local address = memory.script_global(1853348 + (player * 834 + 1) + 267 + 408 + 3)
+		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 3)
 		return BitTest(memory.read_int(address), 6)
 	end
 	return false
@@ -1146,7 +1145,7 @@ function is_player_active(player, isPlaying, inTransition)
 		return false
 	end
 	if inTransition and
-	read_global.int(2689235 + (player * 453 + 1)) ~= 4 then
+	read_global.int(2657589 + (player * 466 + 1)) ~= 4 then
 		return false
 	end
 	return true
@@ -1339,36 +1338,33 @@ read_global = {
 HudTimer = {}
 
 HudTimer.SetHeightMultThisFrame = function (mult)
-	write_global.int(1649593 + 1163, mult)
+	write_global.int(1655472 + 1163, mult)
 end
 
 HudTimer.DisableThisFrame = function()
-	write_global.int(2727091, 1)
+	write_global.int(2696211, 1)
 end
 
 
 function EnableOTR()
-	local toggle_addr = 2689235 + ((PLAYER.PLAYER_ID() * 453) + 1) + 208
+	local toggle_addr = 2657589 + ((PLAYER.PLAYER_ID() * 466) + 1) + 210
 	if read_global.int(toggle_addr) == 1 then
 		return
 	end
 	write_global.int(toggle_addr, 1)
-	write_global.int(2703735 + 56, NETWORK.GET_NETWORK_TIME() + 1)
+	write_global.int(2672505 + 56, NETWORK.GET_NETWORK_TIME() + 1)
 end
 
 function DisableOTR()
-	write_global.int(2689235 + ((PLAYER.PLAYER_ID() * 453) + 1) + 208, 0)
+	write_global.int(2657589 + ((PLAYER.PLAYER_ID() * 466) + 1) + 210, 0)
 end
 
 function DisablePhone()
-    write_global.int(20249, 1)
+    write_global.int(20366, 1)
 end
 
 
 function is_phone_open()
-	if read_global.int(20266 + 1) > 3 then
-		return true
-	end
 	if SCRIPT.GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(util.joaat("cellphone_flashhand")) > 0 then
 		return true
 	end
@@ -1597,7 +1593,7 @@ local orgLog = util.log
 ---@param ... any
 util.log = function (format, ...)
 	local strg = type(format) ~= "string" and tostring(format) or format:format(...)
-	orgLog("" .. strg)
+	orgLog("[Lena] " .. strg)
 end
 
 function draw_debug_text(...)
