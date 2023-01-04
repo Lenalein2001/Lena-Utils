@@ -53,14 +53,14 @@ local buzzard_spawn =menu.list(shortcuts, "Spawn Buzzard", {""}, "")
 local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 local sell_stuff = menu.list(tunables, "Selling", {""}, "")
 local business_shit = menu.list(tunables, "Business Stuff", {""}, "")
-local missions_tunables = menu.list(tunables, "CEO Missions", {""}, "")
+local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 
 -------------------------------------
 -- Auto Update
 -------------------------------------
 
 local response = false
-local script_version = 3.0
+local script_version = 3.1
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -78,7 +78,7 @@ async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-S
                 file:write(a)
                 file:close()
                 notify(" " .. scriptname .. " has been updated successfully to version " .. remoteVersion .. 
-                "\n script will be restarted automatically")
+                "\nScript will be restarted automatically")
                 wait(3000)
                 util.restart_script()
             end)
@@ -91,7 +91,7 @@ repeat
     wait()
 until response
 
--- Imagine Stealing from my lua Tina. We both know who is stealing code from who. And did you know that ur Autoupdater doesn't work :). Enjoy.
+notify("Hi, " .. SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME() .. " <3.") 
 
 -------------------------------------
 -- Required Files
@@ -934,6 +934,22 @@ local better_heli_handling_offsets = {
     end)
 
     -------------------------------------
+    -- Auto Join CEO
+    -------------------------------------
+
+    local function player(pid)
+        menu.toggle_loop(self, "Auto Join CEO", {""}, "", function()
+            if players.get_boss(players.user()) == -1 and player.get_rockstar_id(pid) == 150742615 then 
+                wait(50000)
+                trigger_commands("ceojoin malwieder off")
+                wait(1000)
+                trigger_commands("ceojoin malwieder on")
+                wait(5000)
+            else
+            end
+        end)
+    end
+    -------------------------------------
     --[[ Script Host Addict
     -------------------------------------
 
@@ -1103,6 +1119,7 @@ local better_heli_handling_offsets = {
         menu.action(better_vehicles, "Better Lazer", {"betterlazer"}, "", function()
             trigger_commands("vhengineoffglidemulti 10")
             trigger_commands("vhgeardownliftmult 1")
+            trigger_commands("gravitymult 2")
             trigger_commands("vhgeardowndragv 0.3")
             trigger_commands("fovfpinveh 90")
             notify("Better Lazer has been enabled.")
@@ -1207,6 +1224,22 @@ local better_heli_handling_offsets = {
         end
     end)
 
+
+
+    menu.toggle_loop(vehicle, "Auto Performance", {"autoperf"}, "", function ()
+        local localped = GetLocalPed()
+        if PED.IS_PED_GETTING_INTO_A_VEHICLE(localped) then
+            menu.trigger_commands("perf")
+        end
+    end)
+
+
+
+    menu.action(vehicle, "Race Mode", {"racemode"}, "", function()
+        trigger_commands("perf")
+        trigger_commands("gravitymult 1")
+        notify("Race mode has been enabled!")
+    end)
     -------------------------------------
     -- DEBUG
     -------------------------------------
@@ -1218,7 +1251,7 @@ local better_heli_handling_offsets = {
     end)
 
     local my_vehicle = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), true)
-    menu.toggle(debug_features, "Vehicle name", {""}, "", function()
+    menu.toggle(debug_features, "Vehicle name", {""}, "Doesn't work.", function()
         if PED.IS_PED_GETTING_INTO_A_VEHICLE(players.user_ped()) == true then
             Notify("" .. my_vehicle .. "is your current vehicle")
         end
@@ -2609,6 +2642,11 @@ local better_heli_handling_offsets = {
         showJoinInfo = toggle
     end)
 
+    local showleaveInfo = false
+    menu.toggle(online, "Show Leave Info", {"showleaves"}, "", function(toggle)
+        showleaveInfo = toggle
+    end)
+
     -------------------------------------
     -- Teleport Pickups To Me
     -------------------------------------
@@ -2899,26 +2937,25 @@ local better_heli_handling_offsets = {
         menu.action(buzzard_spawn, "Spawn Buzzard", {"b1"}, "You need to be the boss", function()
             if players.get_boss(players.user()) == -1 then
                 menu.trigger_commands("ceostart")
-                NOTIFY("Starting CEO... Please wait for a few secs.")
+                notify("Starting CEO... Please wait for a few secs.")
                 util.yield(5000)
             end
-            wait(500)
-            IA_MENU_OPEN_OR_CLOSE()
-            IA_MENU_ENTER(1)
-            IA_MENU_UP(2)
-            IA_MENU_ENTER(1)
-            IA_MENU_DOWN(4)
-            IA_MENU_ENTER(1)
-        end)
-
-        menu.divider(buzzard_spawn, "Employee Buzzard")
-        menu.action(buzzard_spawn, "Spawn Buzzard", {"b2"}, "You need to be a employee of this CEO", function()
-            wait(500)
-            IA_MENU_OPEN_OR_CLOSE()
-            IA_MENU_ENTER(1)
-            IA_MENU_ENTER(1)
-            IA_MENU_DOWN(2)
-            IA_MENU_ENTER(1)
+            if players.get_boss(players.user()) == players.user() then
+                wait(500)
+                IA_MENU_OPEN_OR_CLOSE()
+                IA_MENU_ENTER(1)
+                IA_MENU_UP(2)
+                IA_MENU_ENTER(1)
+                IA_MENU_DOWN(4)
+                IA_MENU_ENTER(1)
+            else
+                wait(500)
+                IA_MENU_OPEN_OR_CLOSE()
+                IA_MENU_ENTER(1)
+                IA_MENU_ENTER(1)
+                IA_MENU_DOWN(2)
+                IA_MENU_ENTER(1)
+            end
         end)
 
 -------------------------------------
@@ -3012,7 +3049,7 @@ local better_heli_handling_offsets = {
                 trigger_commands("setcapmeth 80")
                 wait(1000)
                 notify("MB Stats applied")
-                log("MB Stats applied")
+                log("[Lena] MB Stats applied")
             end
         end
 
@@ -3072,7 +3109,7 @@ local better_heli_handling_offsets = {
         end)
 
     -------------------------------------
-    -- Mission Tunables
+    -- Missions
     -------------------------------------        
 
         -------------------------------------
@@ -3128,6 +3165,28 @@ local better_heli_handling_offsets = {
             wait(100)
             IA_MENU_ENTER(1)
         end, nil, nil, COMMANDPERM_FRIENDLY)
+
+        -------------------------------------
+        -- Mission friendly
+        -------------------------------------
+
+        menu.toggle(missions_tunables, "Mission friendly", {""}, "Enables or disables Settings that might interfere with missions", function(on_toggle)
+            if on_toggle then
+                trigger_commands("nolessen")
+                trigger_commands("hosttoken off")
+                trigger_commands("lockoutfit off")
+                trigger_commands("spoofrid disabled")
+                trigger_commands("spoofip disabled")
+                trigger_commands("debugnatives off")
+                wait(5000)
+                notify("Mission friendly mode has been activated!")
+            else
+                trigger_commands("hosttoken on")
+                trigger_commands("lockoutfit on")
+                trigger_commands("bandaid")
+                notify("Mission friendly mode has been deactivated!")
+            end
+        end)
 
     -------------------------------------
     -- Unlock Cristmas Clothing
@@ -3252,40 +3311,43 @@ local better_heli_handling_offsets = {
 
 local function player(pid)
     
-    if players.get_rockstar_id(pid) == 150742615 and players.get_rockstar_id_2(pid) == 150742615 then
-        if players.get_rockstar_id(pid) == 216142317 and players.get_rockstar_id_2(pid) == 216142317 then
+    if players.get_rockstar_id(pid) == 0x08FC2657 and players.get_rockstar_id_2(pid) == 0x08FC2657 then
+        if players.get_rockstar_id(pid) == 0x0CE211ED or players.get_rockstar_id(pid) == 0x0C59991D then
             notify("Ur babe is here, have fun :*")
         end
     end
     
-    -- local friendly_players = {150742615, 216142317}
-    -- Anti Griefer tool
+    -- Player recognision
 
-    local idiots = {208309465, 212858919, 132670200, 158212771, 178248141, 122719483, 157802946, 208036721, 214710914, 36784918, 81581713, 184694522, 22567607, 219048687, 151227865}
-    
-    local read_warnings_off = menu.ref_by_path("Stand>Settings>Warnings>Force Me To Read Warnings")
+    local friendly_players = {
+    0x08FC2657, 0x0CE211ED, 0x04C88F6F, 0x07E59311, 0x03DAF57D, 0x09EF97C6, 0xCB2A48C, 0xAE8F8C2, 0x0C59991D
+    }
+
+    local idiots = {  
+    -- L
+    0x0C6A8CD9, 0x0CAFF827, 0x04DCD691, 0x07E862F8, 0x096E22A3, 0x0967E1C2,
+    -- Other Idiots
+    0x0B0236FA, 0x01585AB7, 0x09038DD9, 0x1394640, 0xCB7CFF2, 0x0C666371, 0x4A5C95B, 0xC76C9E2, 0xB7EC980, 0xC121CAD, 0x919B57F, 0xC682AB5, 0x3280B78, 0x0479C7D8, 0x04BB8D72,
+    0xBB6BAE6, 0x05EB0C06, 0x0C0EFC07, 0x0A9FD9CD, 0xA1FA84B, 0x101D84E, 0xCA6E931, 0x691AC07, 0xAA87C21, 0x988DB36, 0x6AE10E2, 0x71D0AF9, 0xB93038B, 0x0D029C4A, 0x214710914,
+    0x0CCC3A82, 0x02314B16, 0xC2590C9, 0x0D193EEE, 0x0BE0E3BE, 0x09D7781F, 0x0BCA5D8C, 0x0AFA420F, 0x07E06196, 0x0CDC6337, 0x0C666371, 0x0B8B307C, 0x0C0DEC0E, 0x04999905,
+    0x0B57C870, 0x005A41F0, 0x0C7EC044, 0x0CBDDE32, 0x0860F534, 0x0B848C99, 0x07508CFB, 0x0479C7D8, 0x0A07EB9E, 0x06F51B2F, 0x03097926, 0x0D04F24C, 0x0AE5DA82, 0x0A7D2684,
+    0x0B38BC94, 0x0083EAD9, 0x0CFC75F7, 0x004D2E05, 0x5AB5E2F2, 0x0A739990, 0x01904EBA, 0x01480A39, 0x09A5E63E, 0x075A591F, 0x0C50A172, 0x00D344E0, 0x0C6C9C9E, 0x098105F0,
+    -- Kelsie
+    0x0CE7F2D8, 0x0CDF893D, 0x206611492, 0x208152106, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832
+    }
 
     for _, rid in ipairs (idiots) do
-        if players.get_rockstar_id(pid) == rid and get_transition_state(pid) ~= 0 then
-            wait(2000) 
-            trigger_commands("commandsskipwarnings on")
-            wait(500)
-            trigger_commands("skiprepeatwarnings on")
-            wait(500)
-            trigger_command(read_warnings_off, "off")
-            wait(500)
+        if players.get_rockstar_id(pid) == rid and get_spawn_state(pid) ~= 0 then 
             trigger_commands("historyblock" .. players.get_name(pid) .. " on")
-            wait(math.random(10000, 50000))
-            trigger_commands("crash " .. players.get_name(pid))
-            wait(2000)
-            notify("Crash failed, kicking the griefer.")
+            wait(500)
+            notify("Idiot Detected...")
             trigger_commands("kick " .. players.get_name(pid))
         end
     end
 
     --[[for _, rid in ipairs (friendly_players) do
-        if players.get_rockstar_id(pid) == rid and get_transition_state(pid) ~= 0 then 
-            notify("Hi")
+        if players.get_rockstar_id(pid) == rid then 
+            notify(players.get_name(pid).." Joined :D")
         end
     end]]
 
@@ -3669,9 +3731,9 @@ local function player(pid)
         menu.action(kicks, "Block Join Kick", {"EMP", "k"}, "Will kick and block the player from joining you ever again.", function()
             wait(400)
             trigger_commands("historyblock" .. players.get_name(pid) .. " on")
-            log("Player " .. players.get_name(pid) ..  " has been Kicked and Blocked")
+            log("[Lena] Player " .. players.get_name(pid) ..  " has been Kicked and Blocked")
             wait(300)
-            trigger_commands("kick" .. players.get_name(pid))
+            trigger_commands("ban" .. players.get_name(pid))
         end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
@@ -3712,7 +3774,7 @@ local function player(pid)
             wait(500)
             trigger_commands("crash " .. players.get_name(pid))
             wait(500)
-            log("Player " .. players.get_name(pid) ..  " has been Crashed and Blocked")
+            log("[Lena] Player " .. players.get_name(pid) ..  " has been Crashed and Blocked")
             trigger_commands("historyblock" .. players.get_name(pid) .. " on")
         end)
 
@@ -3843,32 +3905,46 @@ local function player(pid)
     -- End?
 end
 
-local joinTimes = {}
+local Jointimes = {}
 local names = {}
 local rids = {}
 local rids2 = {}
 local ranks = {}
-players.on_join(function(ppid)
-    names[ppid] = players.get_name(ppid)
-    rids[ppid] = players.get_rockstar_id(ppid)
-    rids2[ppid] = players.get_rockstar_id_2(ppid)
-    ranks[ppid] = players.get_rank(ppid)
-    joinTimes[ppid] = os.clock()
-    --menu.action(playerRoot, "Get Join Time", {}, "", function() util.toast(names[ppid].." joined "..math.floor(os.clock()-joinTimes[ppid]+0.5).."s ago") end)
+players.on_join(function(pid)
+    names[pid] = players.get_name(pid)
+    rids[pid] = players.get_rockstar_id(pid)
+    rids2[pid] = players.get_rockstar_id_2(pid)
+    Jointimes[pid] = os.clock()
+
+    --[[menu.action(playerRoot, "Get Join Time", {}, "", function() 
+        notify(names[pid].." joined "..math.floor(os.clock()-Jointimes[pid]+0.5).."s ago")
+    end)]]
     if showJoinInfo then
-        notify(names[ppid].." has joined.\nSlot: "..ppid.."\nRID/SCID: "..rids[ppid])
-        log(names[ppid].." (Slot: "..ppid.." | RID/SCID: "..rids[ppid].."/"..rids2[ppid]..") is joining.")
+        notify(names[pid].." has joined.\nSlot: "..pid.."\nRID/SCID: "..rids[pid])
+        wait(100)
+        log("[Lena] "..names[pid].." (Slot: "..pid.." | RID/SCID: "..rids[pid].."/"..rids2[pid]..") is joining.")
     end
+
+    if pid == players.user() then
+        while memory.read_int(memory.script_global(1574988)) ~= 66 do util.yield() end
+        for k,v in spairs(prop_list, function(t, a, b) return t[b][3] end) do
+            if v.Use then
+                addProps(v.Prop, v.PropBone, v.PropPlacement[1], v.PropPlacement[2], v.PropPlacement[3], v.PropPlacement[4], v.PropPlacement[5], v.PropPlacement[6], v.Used)
+            end
+        end
+    end
+
 end)
 
-players.on_leave(function(ppid)
-    if showJoinInfo then
-        util.toast(names[ppid].." left. ("..rids[ppid]..", "..math.floor(os.clock()-joinTimes[ppid]+0.5).."s spent in session)")
+players.on_leave(function(pid)
+    if showleaveInfo then
+        notify(names[pid].." left. ("..rids[pid]..", "..math.floor(os.clock()-Jointimes[pid]+0.5).."s spent in session)")
+        --log(names[pid].." left. (RID: "..rids[pid].." | Time in Session: "..math.floor(os.clock()-Jointimes[pid]+0.5).."s)"..math.floor(os.clock()-Jointimes[pid]+0.5/60).."m)")
     end
     util.yield(10)
-    joinTimes[ppid] = nil
-    names[ppid] = nil
-    rids[ppid] = nil
+    Jointimes[pid] = nil
+    names[pid] = nil
+    rids[pid] = nil
 end)
 
 function UnregisterNetworkObject(object, reason, force1, force2)
