@@ -1,7 +1,7 @@
 # Lena-Utils
 A utility script for Stand and the Stand API. Made by Lena.
 
-# Instalation
+# Installation
 To install, simply click "Download ZIP" and extract the .zip. Copy&Paste the "Lua Scripts" folder in "C:\Users\user\AppData\Roaming\Stand".
 
 # Features
