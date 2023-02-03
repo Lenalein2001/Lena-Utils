@@ -1591,10 +1591,10 @@ local orgLog = util.log
 
 ---@param format string
 ---@param ... any
-util.log = function (format, ...)
+--[[util.log = function (format, ...)
 	local strg = type(format) ~= "string" and tostring(format) or format:format(...)
---	orgLog("[Lena] " .. strg)
-end
+	orgLog("[Lena] " .. strg)
+end]]
 
 function draw_debug_text(...)
 	local arg = {...}
