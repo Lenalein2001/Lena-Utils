@@ -37,6 +37,7 @@ local online = menu.list(menu.my_root(), "Online", {"lenaonline"}, "")
 local tunables = menu.list(menu.my_root(), "Tunables", {"lenatun"}, "")
 local misc = menu.list(menu.my_root(), "Misc", {"lenamisc"}, "")
 local sdebug = menu.list(menu.my_root(), "[Debug]", {"lenadebug"}, "")
+local ai_made = menu.list(menu.my_root(), "AI Made", {"ai_made"}, "The following actions and toggles have been generated using ChatGPT, a cutting-edge AI language model. These options have been carefully crafted to provide players with an immersive and personalized gaming experience. Whether you're a seasoned veteran or a newcomer, these options will help you customize your gameplay and take your skills to the next level.\n-ChatGPT")
 
 -------------------------------------
 -- Sub Tabs
@@ -64,6 +65,7 @@ local friend_lists = menu.list(online, "Friend List", {""}, "")
 local reactions = menu.list(online, "Reactions", {""}, "")
 local join_reactions = menu.list(reactions, "Join Reactions", {""}, "")
 local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
+local chatpresets = menu.list(online, "Chat Presets", {""}, "")
 -- Tunables
 local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 local sell_stuff = menu.list(tunables, "Selling", {""}, "")
@@ -72,6 +74,7 @@ local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 -- Misc
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
 local clear_area_locally = menu.list(misc, "Clear Area", {""}, "")
+local teleport = menu.list(misc, "Teleport", {""}, "")
 
 
 -------------------------------------
@@ -79,7 +82,7 @@ local clear_area_locally = menu.list(misc, "Clear Area", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 3.2
+local script_version = 3.3
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -266,6 +269,61 @@ local large_warehouses = {
     [19] = "Cypress Warehouses", 
     [20] = "West Vinewood Backlot", 
     [22] = "Walker & Sons Warehouse"
+}
+
+local interiors = {
+    {"Safe Space", {x=-158.71494, y=-982.75885, z=149.13135}},
+    {"Torture Room", {x=147.170, y=-2201.804, z=4.688}},
+    {"Mining Tunnels", {x=-595.48505, y=2086.4502, z=131.38136}},
+    {"Omegas Garage", {x=2330.2573, y=2572.3005, z=46.679367}},
+    {"50 Car Garage", {x=520.0, y=-2625.0, z=-50.0}},
+    {"Server Farm", {x=2474.0847, y=-332.58887, z=92.9927}},
+    {"Character Creation", {x=402.91586, y=-998.5701, z=-99.004074}},
+    {"Life Invader Building", {x=-1082.8595, y=-254.774, z=37.763317}},
+    {"Mission End Garage", {x=405.9228, y=-954.1149, z=-99.6627}},
+    {"Destroyed Hospital", {x=304.03894, y=-590.3037, z=43.291893}},
+    {"Stadium", {x=-256.92334, y=-2024.9717, z=30.145584}},
+    {"Comedy Club", {x=-430.00974, y=261.3437, z=83.00648}},
+    {"Record A Studios", {x=-1010.6883, y=-49.127754, z=-99.40313}},
+    {"Bahama Mamas Nightclub", {x=-1394.8816, y=-599.7526, z=30.319544}},
+    {"Janitors House", {x=-110.20285, y=-8.6156025, z=70.51957}},
+    {"Therapists House", {x=-1913.8342, y=-574.5799, z=11.435149}},
+    {"Martin Madrazos House", {x=1395.2512, y=1141.6833, z=114.63437}},
+    {"Floyds Apartment", {x=-1156.5099, y=-1519.0894, z=10.632717}},
+    {"Michaels House", {x=-813.8814, y=179.07889, z=72.15914}},
+    {"Franklins House (Strawberry)", {x=-14.239959, y=-1439.6913, z=31.101551}},
+    {"Franklins House (Vinewood Hills)", {x=7.3125067, y=537.3615, z=176.02803}},
+    {"Trevors House", {x=1974.1617, y=3819.032, z=33.436287}},
+    {"Lesters House", {x=1273.898, y=-1719.304, z=54.771}},
+    {"Lesters Warehouse", {x=713.5684, y=-963.64795, z=30.39534}},
+    {"Lesters Office", {x=707.2138, y=-965.5549, z=30.412853}},
+    {"Meth Lab", {x=1391.773, y=3608.716, z=38.942}},
+    {"Acid Lab", {x=484.69, y=-2625.36, z=-49.0}},
+    {"Morgue Lab", {x=495.0, y=-2560.0, z=-50.0}},
+    {"Humane Labs", {x=3625.743, y=3743.653, z=28.69009}},
+    {"Motel Room", {x=152.2605, y=-1004.471, z=-99.024}},
+    {"Police Station", {x=443.4068, y=-983.256, z=30.689589}},
+    {"Bank Vault", {x=263.39627, y=214.39891, z=101.68336}},
+    {"Blaine County Bank", {x=-109.77874, y=6464.8945, z=31.626724}}, -- credit to fluidware for telling me about this one
+    {"Tequi-La-La Bar", {x=-564.4645, y=275.5777, z=83.074585}},
+    {"Scrapyard Body Shop", {x=485.46396, y=-1315.0614, z=29.2141}},
+    {"The Lost MC Clubhouse", {x=980.8098, y=-101.96038, z=74.84504}},
+    {"Vangelico Jewlery Store", {x=-629.9367, y=-236.41296, z=38.057056}},
+    {"Airport Lounge", {x=-913.8656, y=-2527.106, z=36.331566}},
+    {"Morgue", {x=240.94368, y=-1379.0645, z=33.74177}},
+    {"Union Depository", {x=1.298771, y=-700.96967, z=16.131021}},
+    {"Fort Zancudo Tower", {x=-2357.9187, y=3249.689, z=101.45073}},
+    {"Agency Interior", {x=-1118.0181, y=-77.93254, z=-98.99977}},
+    {"Agency Garage", {x=-1071.0494, y=-71.898506, z=-94.59982}},
+    {"Terrobyte Interior", {x=-1421.015, y=-3012.587, z=-80.000}},
+    {"Bunker Interior", {x=899.5518,y=-3246.038, z=-98.04907}},
+    {"IAA Office", {x=128.20, y=-617.39, z=206.04}},
+    {"FIB Top Floor", {x=135.94359, y=-749.4102, z=258.152}},
+    {"FIB Floor 47", {x=134.5835, y=-766.486, z=234.152}},
+    {"FIB Floor 49", {x=134.635, y=-765.831, z=242.152}},
+    {"Big Fat White Cock", {x=-31.007448, y=6317.047, z=40.04039}},
+    {"Strip Club DJ Booth", {x=121.398254, y=-1281.0024, z=29.480522}},
+    {"Single Garage", {x=-144.11609, y=-576.5855, z=31.845743}}
 }
 
 -----------------------------------
@@ -837,7 +895,7 @@ local better_heli_handling_offsets = {
         -- Fast Vehicle Enter/Exit
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.", function()
+        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.\n'Lock Outfit' seems to break it.", function()
             if (TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 160) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 167) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 165)) and not TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 195) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -890,7 +948,7 @@ local better_heli_handling_offsets = {
     menu.toggle_loop(self, "Auto Heal", {""}, "Heals you on low health", function()
         local pped = players.user_ped()
         local phealth = ENTITY.GET_ENTITY_HEALTH(pped)
-        if phealth <= 120 then
+        if phealth <= 140 then
             trigger_commands("refillhealth; refillarmour")
         else
         end
@@ -930,17 +988,17 @@ local better_heli_handling_offsets = {
     end)
 
     -------------------------------------
-    -- Friendly AI
+    -- No Bounties
     -------------------------------------
 
-    menu.toggle_loop(self, "No Bounties", {"avoidbounties"}, "", function()
+    --[[menu.toggle_loop(self, "No Bounties", {"avoidbounties"}, "", function()
         if players.get_bounty(players.user()) then
             notify("A Bounty is placed on you. Removing it...")
             wait(3000)
             trigger_commands("removebounty")
         end
         wait(10000)
-    end)
+    end)]]
 
     -------------------------------------
     --[[ Script Host Addict
@@ -1059,7 +1117,7 @@ local better_heli_handling_offsets = {
     -- Max Lockon Range
     -------------------------------------    
 
-    menu.toggle_loop(weap, "Max Lockon Range", {}, "Sets your players lockon range with homing missles and auto aim to the max.", function()
+    menu.toggle_loop(weap, "Max Lockon Range", {""}, "Sets your players lockon range with homing missles and auto aim to the max.", function()
         PLAYER.SET_PLAYER_LOCKON_RANGE_OVERRIDE(players.user(), 99999999.0)
     end)
 
@@ -1067,7 +1125,7 @@ local better_heli_handling_offsets = {
     -- Unfair Triggerbot
     -------------------------------------  
 
-    menu.toggle_loop(weap, "Unfair Triggerbot", {"triggerbotall"}, "", function()
+    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "A Challenge for myself", function()
         local wpn = WEAPON.GET_SELECTED_PED_WEAPON(players.user_ped())
         local dmg = SYSTEM.ROUND(WEAPON.GET_WEAPON_DAMAGE(wpn, 0))
         local delay = WEAPON.GET_WEAPON_TIME_BETWEEN_SHOTS(wpn)
@@ -1082,6 +1140,24 @@ local better_heli_handling_offsets = {
                 MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(wpnCoords, pos, dmg, true, wpn, players.user_ped(), true, false)
                 PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 24, 1.0) -- shooting manually after so it has the effect of you shooting to seem more legit despite there being nothing legit about this
                 util.yield(delay * 1000)
+            end
+        end
+    end)
+
+
+    menu.toggle_loop(weap, "Thermal Scope", {""}, "Press E while aiming to activate.", function()
+        local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
+        local aiming = PLAYER.IS_PLAYER_FREE_AIMING(players.user())
+        if GRAPHICS.GET_USINGSEETHROUGH() and not aiming then
+            menu.trigger_command(thermal_command, "off")
+            GRAPHICS.SEETHROUGH_SET_MAX_THICKNESS(1)
+        elseif PAD.IS_CONTROL_JUST_PRESSED(38,38) then
+            if menu.get_value(thermal_command) or not aiming then
+                menu.trigger_command(thermal_command, "off")
+                GRAPHICS.SEETHROUGH_SET_MAX_THICKNESS(1)
+            else
+                menu.trigger_command(thermal_command, "on")
+                GRAPHICS.SEETHROUGH_SET_MAX_THICKNESS(100)
             end
         end
     end)
@@ -1290,7 +1366,7 @@ local better_heli_handling_offsets = {
     -- Race Mode
     -------------------------------------
 
-    menu.action(vehicle, "Race Mode", {"racemode"}, "", function()
+    menu.action(vehicle, "Race Mode", {"racemode"}, "Changes some settings that makes races more fair", function()
         trigger_commands("perf")
         trigger_commands("gravitymult 1")
         notify("Race mode has been enabled!")
@@ -1300,7 +1376,7 @@ local better_heli_handling_offsets = {
     -- Bypass Anti-Lockon
     -------------------------------------
 
-    menu.toggle_loop(vehicle, "Bypass Anti-Lockon", {}, "", function()
+    menu.toggle_loop(vehicle, "Bypass Anti-Lockon", {""}, "", function()
         for _, pid in ipairs(players.list(false, true, true)) do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local veh = PED.GET_VEHICLE_PED_IS_USING(ped)
@@ -2304,29 +2380,21 @@ local better_heli_handling_offsets = {
         local nearbyNotificationBits = 0
         local blips = {}
 
-        ---@param player Player
-        ---@return boolean
         local function isPlayerFlyingAnyDrone(player)
             local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 365)
             return BitTest(memory.read_int(address), 26)
         end
 
-        ---@param player Player
-        ---@return integer
         local function getDroneType(player)
             local p_type = memory.script_global(1914091 + (player * 297 + 1) + 97)
             return memory.read_int(p_type)
         end
 
-        ---@param player Player
-        ---@return Object
         local function getPlayerDroneObject(player)
             local p_object = memory.script_global(1914091 + (players.user() * 297 + 1) + 64 + (player + 1))
             return memory.read_int(p_object)
         end
 
-        ---@param heading number
-        ---@return number
         local function invertHeading(heading)
             if heading > 180.0 then
                 return heading - 180.0
@@ -2334,14 +2402,10 @@ local better_heli_handling_offsets = {
             return heading + 180.0
         end
 
-        ---@param droneType integer
-        ---@return integer
         local function getDroneBlipSprite(droneType)
             return (droneType == 8 or droneType == 4) and 548 or 627
         end
 
-        ---@param droneType integer
-        ---@return string
         local function getNotificationMsg(droneType, nearby)
             if droneType == 8 or droneType == 4 then
                 return nearby and trans.NearMissile or trans.LaunchedMissile
@@ -2349,14 +2413,12 @@ local better_heli_handling_offsets = {
             return nearby and trans.NearDrone or trans.FlyingDrone
         end
 
-        ---@param index integer
         local function removeBlipIndex(index)
             if HUD.DOES_BLIP_EXIST(blips[index]) then
                 util.remove_blip(blips[index]); blips[index] = 0
             end
         end
 
-        ---@param player Player
         function addBlipForPlayerDrone(player)
             if not blips[player] then
                 blips[player] = 0
@@ -2809,306 +2871,17 @@ local better_heli_handling_offsets = {
         showleaveInfoteam = toggle
     end)
 
--------------------------------------
--------------------------------------
--- Misc
--------------------------------------
--------------------------------------
-
-    -------------------------------------
-    -- Disable Numpad
-    -------------------------------------
-
-    menu.toggle_loop(misc, "Disable Numpad", {"dn"}, "Disables the Numpad while Stand is open", function()
-        if not menu.is_open() or lkey.is_key_down('VK_LBUTTON') or lkey.is_key_down('VK_RBUTTON') then return end
-        for _, control in pairs(numpadControls) do
-            PAD.DISABLE_CONTROL_ACTION(2, control, true)
-        end
+    menu.action(chatpresets, "Race Countdown", {"Start"}, "Start a race countdown", function()
+    for i = 3, 1, -1 do
+        chat.send_message(i, false, true, true)
+        util.yield(1000)
+    end
+    chat.send_message("GO!!!", false, true, true)
     end)
 
-    -------------------------------------
-    -- Toggle Thunder
-    -------------------------------------
-
-    local thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
-    local thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
-    menu.toggle(misc, "Weather Toggle", {"thunder"}, "Requests Thunder Session-wide", function(on_toggle)
-        if on_toggle then
-            trigger_commands("weather normal")
-            wait(1000)
-            trigger_command(thunder_on)
-            wait(10000)
-            notify("Weather Set to Thunder") 
-        else
-            trigger_command(thunder_off)
-            wait(10000)
-            trigger_commands("weather extrasunny")
-            notify("Weather Set back to Normal") 
-        end
+    menu.action(chatpresets, "Money Drops", {"Info"}, "Info on money drops", function()
+    chat.send_message("Money drops have no impact on gameplay and only serve as a distraction. Focus on objectives!", false, true, true)
     end)
-
-    -------------------------------------
-    -- Auto Join 
-    -------------------------------------
-
-    menu.toggle_loop(misc, "Auto Accept Joining Games", {""}, "Will auto accept join screens", function()
-        local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
-        if message_hash == 15890625 or message_hash == -398982408 or message_hash == -587688989 then
-            PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201, 1.0)
-            wait(50)
-        end
-    end)
-
-    -------------------------------------
-    -- No Traffic
-    -------------------------------------    
-
-    local config = {
-        disable_traffic = true,
-        disable_peds = true,
-    }
-    local pop_multiplier_id
-    
-    menu.toggle(misc, "No Traffic", {}, "", function(on)
-        if on then
-            local ped_sphere, traffic_sphere
-            if config.disable_peds then ped_sphere = 0.0 else ped_sphere = 1.0 end
-            if config.disable_traffic then traffic_sphere = 0.0 else traffic_sphere = 1.0 end
-            pop_multiplier_id = MISC.ADD_POP_MULTIPLIER_SPHERE(1.1, 1.1, 1.1, 15000.0, ped_sphere, traffic_sphere, false, true)
-            MISC.CLEAR_AREA(1.1, 1.1, 1.1, 19999.9, true, false, false, true)
-        else
-            MISC.REMOVE_POP_MULTIPLIER_SPHERE(pop_multiplier_id, false);
-        end
-    end)
-
-    -------------------------------------
-    -- Clear Area
-    -------------------------------------
-
-        -------------------------------------
-        -- Clear Area All
-        -------------------------------------
-
-        menu.action(clear_area_locally, "Clear Area", {"ca"}, "", function()
-            local cleanse_entitycount = 0
-            for _, ped in pairs(entities.get_all_peds_as_handles()) do
-                if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(ped) and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION() or NETWORK.NETWORK_IS_ACTIVITY_SESSION() and not ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) then
-                    entities.delete_by_handle(ped)
-                    cleanse_entitycount += 1
-                    wait()
-                end
-            end
-
-            notify("Cleared " .. cleanse_entitycount .. " Peds")
-            cleanse_entitycount = 0
-            for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
-                if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
-                    entities.delete_by_handle(vehicle)
-                    cleanse_entitycount += 1
-                    wait()
-                end
-            end
-
-            notify("Cleared ".. cleanse_entitycount .." Vehicles")
-            cleanse_entitycount = 0
-            for _, object in pairs(entities.get_all_objects_as_handles()) do
-                entities.delete_by_handle(object)
-                cleanse_entitycount += 1
-                wait()
-            end
-
-            notify("Cleared " .. cleanse_entitycount .. " Objects")
-            cleanse_entitycount = 0
-            for _, pickup in pairs(entities.get_all_pickups_as_handles()) do
-                entities.delete_by_handle(pickup)
-                cleanse_entitycount += 1
-                wait()
-            end
-
-            notify("Cleared " .. cleanse_entitycount .. " Pickups")
-            local temp = memory.alloc(4)
-            for i = 0, 100 do
-                memory.write_int(temp, i)
-                PHYSICS.DELETE_ROPE(temp)
-            end
-        end)
-
-    -------------------------------------
-    -- Shortcuts
-    -------------------------------------
-
-        -------------------------------------
-        -- Delete Vehicle
-        -------------------------------------
-
-        menu.action(shortcuts, "Delete Vehicle", {"dv"}, "Deletes your current vehicle", function()
-            trigger_commands("deletevehicle")
-        end)
-
-        -------------------------------------
-        -- Grab Scrip Host
-        -------------------------------------
-
-        menu.action(shortcuts, "Grab SH", {"sh"}, "", function()
-            trigger_command(menu.ref_by_path("Players>"..players.get_name_with_tags(players.user())..">Friendly>Give Script Host"))
-        end)
-
-        -------------------------------------
-        -- Easy Way Out
-        -------------------------------------
-
-        menu.action(shortcuts, "Really easy Way out", {"ewo"}, "Kill urself", function()
-            local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped(), false)
-            pos.z = pos.z - 1.0
-            FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), pos.x, pos.y, pos.z, 5, 1.0, false, false, 1.0)
-        end)
-
-        -------------------------------------
-        -- Stop all Sounds
-        -------------------------------------
-
-        menu.action(shortcuts, "Force Stop all sound events", {"stopsounds"}, "", function()
-            for i=-1,100 do
-                AUDIO.STOP_SOUND(i)
-                AUDIO.RELEASE_SOUND_ID(i)
-            end
-        end)
-
-        -------------------------------------
-        -- Yeet
-        -------------------------------------
-
-        menu.action(shortcuts, "Unload", {"bye", "ul"}, "", function()
-            trigger_commands("bandaid off")
-            wait(2000)
-            trigger_commands("breakupbandaid off")
-            wait(2000)
-            notify("Lessen has been disabled. Unloading in 3 seconds.")
-            wait(3000)
-            trigger_commands("unload")
-        end)
-
-        -------------------------------------
-        -- No lessen
-        -------------------------------------
-
-        menu.action(shortcuts, "No lessen", {"nolessen", "nl"}, "", function()
-            trigger_commands("bandaid off")
-            wait(2000)
-            trigger_commands("breakupbandaid off")
-            wait(2000)
-            notify("Lessen has been disabled.")
-        end)
-
-        -------------------------------------
-        -- Buy Ammo
-        -------------------------------------    
-
-        menu.action(shortcuts, "Buy Ammo", {""}, "Buys ammo the legit way.", function()
-            wait(500)
-            if players.get_boss(players.user()) == -1 then
-                notify("Not in a CEO... changing config")
-                IA_MENU_OPEN_OR_CLOSE()
-                IA_MENU_DOWN(2)
-                IA_MENU_ENTER(1)
-                IA_MENU_DOWN(6)
-                IA_MENU_ENTER(1)
-                IA_MENU_LEFT(1)
-                IA_MENU_DOWN(1)
-                IA_MENU_ENTER(1)
-                IA_MENU_OPEN_OR_CLOSE()
-            else
-                notify("In a CEO... changing config")
-                IA_MENU_OPEN_OR_CLOSE()
-                IA_MENU_DOWN(3)
-                IA_MENU_ENTER(1)
-                IA_MENU_DOWN(6)
-                IA_MENU_ENTER(1)
-                IA_MENU_LEFT(1)
-                IA_MENU_DOWN(1)
-                IA_MENU_ENTER(1)
-                IA_MENU_OPEN_OR_CLOSE()
-            end
-        end)
-
-        -------------------------------------
-        -- Spawn Buzzard
-        -------------------------------------
-
-        menu.action(shortcuts, "Spawn Buzzard", {"b1"}, "You need to be in a CEO", function()
-            if players.get_boss(players.user()) == -1 then
-                trigger_commands("ceostart")
-                notify("Starting CEO... Please wait for a few secs.")
-                wait(5000)
-            end
-            if players.get_boss(players.user()) == players.user() then
-                wait(500)
-                IA_MENU_OPEN_OR_CLOSE()
-                IA_MENU_ENTER(1)
-                IA_MENU_UP(2)
-                IA_MENU_ENTER(1)
-                IA_MENU_DOWN(4)
-                IA_MENU_ENTER(1)
-            else
-                wait(500)
-                IA_MENU_OPEN_OR_CLOSE()
-                IA_MENU_ENTER(1)
-                IA_MENU_ENTER(1)
-                IA_MENU_DOWN(2)
-                IA_MENU_ENTER(1)
-            end
-        end)
-
-        -------------------------------------
-        -- Auto-Performance Tuning
-        -------------------------------------
-
-        menu.toggle_loop(shortcuts, "Auto-Perf", {""}, "Will Check every 10 seconds if your vehicle could use a upgrade :)", function()
-            local turbo = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Turbo")
-            local armour = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Armour")
-            local engine = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Engine")
-            if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped())then
-                trigger_commands("turbo on; armour 4; brakes 2; engine 3; bulletprooftyres on")
-                --notify("Upgraded your Vehicle :)")
-            else
-                --
-            end
-            --notify(menu.get_value(turbo).." | ".. menu.get_value(armour).." | ".. menu.get_value(engine).." | "..PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()))
-            wait(10000)
-        end)
-
-        -------------------------------------
-        -- INSTANT RC TANK
-        -------------------------------------
-
-        function DoesPlayerOwnMinitank(player)
-            if player ~= -1 then
-                local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 2)
-                return BitTest(memory.read_int(address), 15)
-            end
-            return false
-        end
-
-        menu.action(shortcuts, "Instant RC Tank", {""}, "", function ()
-            write_global.int(2793044 + 6875, 1)
-            if not DoesPlayerOwnMinitank(players.user()) then
-                local address = memory.script_global(1853910 + (players.user() * 862 + 1) + 267 + 428 + 2)
-                memory.write_int(address, SetBit(memory.read_int(address), 15))
-            end
-        end)
-
-        -------------------------------------
-        -- Rockstar Verified All
-        -------------------------------------     
-
-        menu.toggle_loop(shortcuts, "Rockstar Verified All", {""}, "", function()
-            if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
-                local icon = "¦"
-                chat.ensure_open_with_empty_draft(false)
-                chat.add_to_draft(icon .. " ")
-            else
-            end
-	    end)
 
 -------------------------------------
 -------------------------------------
@@ -3273,9 +3046,6 @@ local better_heli_handling_offsets = {
                 trigger_commands("nolessen")
                 trigger_commands("hosttoken off")
                 trigger_commands("lockoutfit off")
-                trigger_commands("spoofrid disabled")
-                trigger_commands("spoofip disabled")
-                trigger_commands("debugnatives off")
                 trigger_commands("svmreimpl off")
                 wait(5000)
                 notify("Mission friendly mode has been activated!")
@@ -3321,7 +3091,7 @@ local better_heli_handling_offsets = {
         menu.action(missions_tunables, "Take over LSIA", {"lsia"}, "", function()
             if players.get_boss(players.user()) == -1 then
                 trigger_commands("ceostart")
-                NOTIFY("Starting CEO... Please wait for a few secs.")
+                notify("Starting CEO... Please wait for a few secs.")
                 wait(5000)
             end
 
@@ -3436,31 +3206,31 @@ local better_heli_handling_offsets = {
     menu.toggle_loop(multipliers, "RP", {""}, "", function()
         SET_FLOAT_GLOBAL(262145 + 1, menu.get_value(MUT_INPUT) / 100) -- XP_MULTIPLIER
     end, function()
-        SET_FLOAT_GLOBAL(262145 + 1, menu.get_default_state(MUT_INPUT) / 100)
+        SET_FLOAT_GLOBAL(262145 + 1, menu.get_default_state(MUT_INPUT))
     end)
 
     menu.toggle_loop(multipliers, "Street Race", {""}, "", function()
         SET_FLOAT_GLOBAL(262145 + 31648, menu.get_value(MUT_INPUT) / 100) -- TUNER_STREET_RACE_PLACE_XP_MULTIPLIER
     end, function()
-        SET_FLOAT_GLOBAL(262145 + 31648, menu.get_default_state(MUT_INPUT) / 100)
+        SET_FLOAT_GLOBAL(262145 + 31648, menu.get_default_state(MUT_INPUT))
     end)
     
     menu.toggle_loop(multipliers, "Pursuit Race", {""}, "", function()
-        SET_FLOAT_GLOBAL(262145 + 31649, menu.get_value(MUT_INPUT) / 100) -- TUNER_CHECKPOINT_RACE_PLACE_XP_MULTIPLIER
+        SET_FLOAT_GLOBAL(262145 + 31649, menu.get_value(MUT_INPUT) / 100) -- TUNER_PURSUIT_RACE_PLACE_XP_MULTIPLIER
     end, function()
-        SET_FLOAT_GLOBAL(262145 + 31649, menu.get_default_state(MUT_INPUT) / 100)
+        SET_FLOAT_GLOBAL(262145 + 31649, menu.get_default_state(MUT_INPUT))
     end)
 
     menu.toggle_loop(multipliers, "LS Car Meet", {""}, "", function()
         SET_FLOAT_GLOBAL(262145 + 31652, menu.get_value(MUT_INPUT) / 100) -- TUNER_CARCLUB_VISITS_STREAK_XP_MULTIPLIER
     end, function()
-        SET_FLOAT_GLOBAL(262145 + 31652, menu.get_default_state(MUT_INPUT) / 100)
+        SET_FLOAT_GLOBAL(262145 + 31652, menu.get_default_state(MUT_INPUT))
     end)
 
     menu.toggle_loop(multipliers, "LS Car Meet Track", {""}, "", function()
         SET_FLOAT_GLOBAL(262145 + 31653, menu.get_value(MUT_INPUT) / 100) -- TUNER_CARCLUB_TIME_XP_MULTIPLIER
     end, function()
-        SET_FLOAT_GLOBAL(262145 + 31653, menu.get_default_state(MUT_INPUT) / 100)
+        SET_FLOAT_GLOBAL(262145 + 31653, menu.get_default_state(MUT_INPUT))
     end)
 
     -------------------------------------
@@ -3499,6 +3269,353 @@ local better_heli_handling_offsets = {
             notify("You need Ultimate to Start a BB, request denied.")
         end
     end)
+
+
+-------------------------------------
+-------------------------------------
+-- Misc
+-------------------------------------
+-------------------------------------
+
+    -------------------------------------
+    -- Teleports
+    -------------------------------------  
+    
+        -------------------------------------
+        -- Interiors TP's
+        -------------------------------------
+
+        for index, data in pairs(interiors) do
+            local location_name = data[1]
+            local location_coords = data[2]
+            menu.action(teleport, location_name, {""}, "", function()
+                menu.trigger_commands("doors on")
+                menu.trigger_commands("nodeathbarriers on")
+                ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), location_coords.x, location_coords.y, location_coords.z, false, false, false)
+            end)
+        end
+
+    -------------------------------------
+    -- Clear Area
+    -------------------------------------
+
+        -------------------------------------
+        -- Clear Area All
+        -------------------------------------
+
+        menu.action(clear_area_locally, "Clear Area", {"ca"}, "", function()
+            local cleanse_entitycount = 0
+            for _, ped in pairs(entities.get_all_peds_as_handles()) do
+                if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(ped) and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION() or NETWORK.NETWORK_IS_ACTIVITY_SESSION() and not ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) then
+                    entities.delete_by_handle(ped)
+                    cleanse_entitycount += 1
+                    wait()
+                end
+            end
+            notify("Cleared " .. cleanse_entitycount .. " Peds")
+
+            cleanse_entitycount = 0
+            for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
+                if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+                    entities.delete_by_handle(vehicle)
+                    cleanse_entitycount += 1
+                    wait()
+                end
+            end
+            notify("Cleared ".. cleanse_entitycount .." Vehicles")
+
+            cleanse_entitycount = 0
+            for _, object in pairs(entities.get_all_objects_as_handles()) do
+                entities.delete_by_handle(object)
+                cleanse_entitycount += 1
+                wait()
+            end
+            notify("Cleared " .. cleanse_entitycount .. " Objects")
+
+            cleanse_entitycount = 0
+            for _, pickup in pairs(entities.get_all_pickups_as_handles()) do
+                entities.delete_by_handle(pickup)
+                cleanse_entitycount += 1
+                wait()
+            end
+            notify("Cleared " .. cleanse_entitycount .. " Pickups")
+
+            local temp = memory.alloc(4)
+            for i = 0, 100 do
+                memory.write_int(temp, i)
+                PHYSICS.DELETE_ROPE(temp)
+            end
+        end)
+
+    -------------------------------------
+    -- Shortcuts
+    -------------------------------------
+
+        -------------------------------------
+        -- Delete Vehicle
+        -------------------------------------
+
+        menu.action(shortcuts, "Delete Vehicle", {"dv"}, "Deletes your current vehicle", function()
+            trigger_commands("deletevehicle")
+        end)
+
+        -------------------------------------
+        -- Grab Scrip Host
+        -------------------------------------
+
+        menu.action(shortcuts, "Grab SH", {"sh"}, "", function()
+            trigger_command(menu.ref_by_path("Players>"..players.get_name_with_tags(players.user())..">Friendly>Give Script Host"))
+        end)
+
+        -------------------------------------
+        -- Easy Way Out
+        -------------------------------------
+
+        menu.action(shortcuts, "Really easy Way out", {"kys"}, "Kill urself", function()
+            local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped(), false)
+            pos.z = pos.z - 1.0
+            FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), pos.x, pos.y, pos.z, 5, 1.0, false, false, 1.0)
+        end)
+
+        -------------------------------------
+        -- Stop all Sounds
+        -------------------------------------
+
+        menu.action(shortcuts, "Force Stop all sound events", {"stopsounds"}, "", function()
+            for i=-1,100 do
+                AUDIO.STOP_SOUND(i)
+                AUDIO.RELEASE_SOUND_ID(i)
+            end
+        end)
+
+        -------------------------------------
+        -- Start a CEO
+        -------------------------------------        
+
+        menu.action(shortcuts, "Start a CEO", {"ceo"}, "", function()
+            if players.get_boss(players.user()) == -1 then
+                trigger_commands("ceostart")
+                notify("Starting CEO... Please wait for a few secs.")
+            elseif players.get_boss(players.user()) == players.user() then
+                notify("You are already your own Boss!")
+            else
+                notify("You are already working for someone else!")
+            end
+        end)
+
+        -------------------------------------
+        -- Yeet
+        -------------------------------------
+
+        menu.action(shortcuts, "Unload", {"bye", "ul"}, "", function()
+            trigger_commands("bandaid off")
+            wait(2000)
+            trigger_commands("breakupbandaid off")
+            wait(2000)
+            notify("Lessen has been disabled. Unloading in 3 seconds.")
+            wait(3000)
+            trigger_commands("unload")
+        end)
+
+        -------------------------------------
+        -- No lessen
+        -------------------------------------
+
+        menu.action(shortcuts, "No lessen", {"nolessen", "nl"}, "", function()
+            trigger_commands("bandaid off")
+            wait(2000)
+            trigger_commands("breakupbandaid off")
+            wait(2000)
+            notify("Lessen has been disabled.")
+        end)
+
+        -------------------------------------
+        -- Buy Ammo
+        -------------------------------------    
+
+        menu.action(shortcuts, "Buy Ammo", {""}, "Buys ammo the legit way.", function()
+            wait(500)
+            if players.get_boss(players.user()) == -1 then
+                notify("Not in a CEO... changing config")
+                IA_MENU_OPEN_OR_CLOSE()
+                IA_MENU_DOWN(2)
+                IA_MENU_ENTER(1)
+                IA_MENU_DOWN(6)
+                IA_MENU_ENTER(1)
+                IA_MENU_LEFT(1)
+                IA_MENU_DOWN(1)
+                IA_MENU_ENTER(1)
+                IA_MENU_OPEN_OR_CLOSE()
+            else
+                notify("In a CEO... changing config")
+                IA_MENU_OPEN_OR_CLOSE()
+                IA_MENU_DOWN(3)
+                IA_MENU_ENTER(1)
+                IA_MENU_DOWN(6)
+                IA_MENU_ENTER(1)
+                IA_MENU_LEFT(1)
+                IA_MENU_DOWN(1)
+                IA_MENU_ENTER(1)
+                IA_MENU_OPEN_OR_CLOSE()
+            end
+        end)
+
+        -------------------------------------
+        -- Spawn Buzzard
+        -------------------------------------
+
+        menu.action(shortcuts, "Spawn Buzzard", {"b1"}, "You need to be in a CEO", function()
+            if players.get_boss(players.user()) == -1 then
+                trigger_commands("ceostart")
+                notify("Starting CEO... Please wait for a few secs.")
+                wait(5000)
+            end
+            if players.get_boss(players.user()) == players.user() then
+                wait(500)
+                IA_MENU_OPEN_OR_CLOSE()
+                IA_MENU_ENTER(1)
+                IA_MENU_UP(2)
+                IA_MENU_ENTER(1)
+                IA_MENU_DOWN(4)
+                IA_MENU_ENTER(1)
+            else
+                wait(500)
+                IA_MENU_OPEN_OR_CLOSE()
+                IA_MENU_ENTER(1)
+                IA_MENU_ENTER(1)
+                IA_MENU_DOWN(2)
+                IA_MENU_ENTER(1)
+            end
+        end)
+
+        -------------------------------------
+        -- Auto-Performance Tuning
+        -------------------------------------
+
+        menu.toggle_loop(shortcuts, "Auto-Perf", {""}, "Will Check every 10 seconds if your vehicle could use a upgrade :)", function()
+            local turbo = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Turbo")
+            local armour = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Armour")
+            local engine = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Engine")
+            if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped())then
+                trigger_commands("turbo on; armour 4; brakes 2; engine 3; bulletprooftyres on")
+                --notify("Upgraded your Vehicle :)")
+            else
+            end
+            --notify(menu.get_value(turbo).." | ".. menu.get_value(armour).." | ".. menu.get_value(engine).." | "..PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()))
+            wait(10000)
+        end)
+
+        -------------------------------------
+        -- INSTANT RC TANK
+        -------------------------------------
+
+        function DoesPlayerOwnMinitank(player)
+            if player ~= -1 then
+                local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 2)
+                return BitTest(memory.read_int(address), 15)
+            end
+            return false
+        end
+
+        menu.action(shortcuts, "Instant RC Tank", {""}, "", function ()
+            write_global.int(2793044 + 6875, 1)
+            if not DoesPlayerOwnMinitank(players.user()) then
+                local address = memory.script_global(1853910 + (players.user() * 862 + 1) + 267 + 428 + 2)
+                memory.write_int(address, SetBit(memory.read_int(address), 15))
+            end
+        end)
+
+        -------------------------------------
+        -- Rockstar Verified All
+        -------------------------------------     
+
+        menu.toggle_loop(shortcuts, "Rockstar Verified All", {""}, "", function()
+            if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
+                local icon = "¦"
+                chat.ensure_open_with_empty_draft(false)
+                chat.add_to_draft(icon .. " ")
+            else
+            end
+	    end)
+
+    -------------------------------------
+    -- Disable Numpad
+    -------------------------------------
+
+    menu.toggle_loop(misc, "Disable Numpad", {"dn"}, "Disables the Numpad while Stand is open", function()
+        if not menu.is_open() or lkey.is_key_down('VK_LBUTTON') or lkey.is_key_down('VK_RBUTTON') then return end
+        for _, control in pairs(numpadControls) do
+            PAD.DISABLE_CONTROL_ACTION(2, control, true)
+        end
+    end)
+
+    -------------------------------------
+    -- Toggle Thunder
+    -------------------------------------
+
+    menu.toggle(misc, "Weather Toggle", {"thunder"}, "Requests Thunder Session-wide", function(on_toggle) 
+        local thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
+        local thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
+        if on_toggle then
+            trigger_commands("weather normal")
+            wait(1000)
+            trigger_command(thunder_on)
+            wait(10000)
+            notify("Weather Set to Thunder") 
+        else
+            trigger_command(thunder_off)
+            wait(10000)
+            trigger_commands("weather extrasunny")
+            notify("Weather Set back to Normal") 
+        end
+    end)
+
+    -------------------------------------
+    -- Auto Join 
+    -------------------------------------
+
+    menu.toggle_loop(misc, "Auto Accept Joining Games", {""}, "Will auto accept join screens", function()
+        local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
+        if message_hash == 15890625 or message_hash == -398982408 or message_hash == -587688989 then
+            PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201, 1.0)
+            wait(50)
+        end
+    end)
+
+    -------------------------------------
+    -- No Traffic
+    -------------------------------------    
+
+    local config = {
+        disable_traffic = true,
+        disable_peds = true,
+    }
+    local pop_multiplier_id
+    
+    menu.toggle(misc, "No Traffic", {""}, "", function(on)
+        if on then
+            local ped_sphere, traffic_sphere
+            if config.disable_peds then ped_sphere = 0.0 else ped_sphere = 1.0 end
+            if config.disable_traffic then traffic_sphere = 0.0 else traffic_sphere = 1.0 end
+            pop_multiplier_id = MISC.ADD_POP_MULTIPLIER_SPHERE(1.1, 1.1, 1.1, 15000.0, ped_sphere, traffic_sphere, false, true)
+            MISC.CLEAR_AREA(1.1, 1.1, 1.1, 19999.9, true, false, false, true)
+        else
+            MISC.REMOVE_POP_MULTIPLIER_SPHERE(pop_multiplier_id, false);
+        end
+    end)
+
+    -------------------------------------
+    -- Skip Cutscenes
+    -------------------------------------  
+    
+    menu.toggle_loop(misc, "Skip Cutscenes", {""}, "", function()
+        if CUTSCENE.IS_CUTSCENE_PLAYING(true) then
+            wait(3000)
+            STOP_CUTSCENE_IMMEDIATELY()
+            notify("Skipping Cutscene...")
+        else
+        end
+    end)
     
     -------------------------------------
     -------------------------------------
@@ -3524,39 +3641,6 @@ local better_heli_handling_offsets = {
         local vmodel = players.get_vehicle_model(pped)
         notify("Vehicle Model: "..vmodel.."\nName: ".. vname)
         log("Vehicle Model: "..vmodel.." | Name: ".. vname)
-    end)
-
-    menu.action(sdebug, "Check for updates", {""}, "", function()
-        async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
-            local remoteVersion = tonumber(output)
-            response = true
-            if script_version ~= remoteVersion then
-                wait(5000)
-                notify(scriptname .. " is outdated, and requires an update.")
-                menu.action(menu.my_root(), "Update Lua", {}, "", function()
-                    async_http.init('raw.githubusercontent.com', '/Lenalein2001/Lena-Utils/main/Lua-Scripts/Lena-Utilities.lua', function (a)
-                        local catchError = select(2, load(a))
-                        if catchError then
-                            notify("Download failed :/. Restart the script, if that does not work, contact the owner of the script")
-                            wait(3000)
-                        return end
-                        local file = io.open(filesystem.scripts_dir() .. SCRIPT_RELPATH, "w+b")
-                        file:write(a)
-                        file:close()
-                        notify(" " .. scriptname .. " has been updated successfully to version " .. remoteVersion .. "\nScript will be restarted automatically")
-                        wait(3000)
-                        util.restart_script()
-                    end)
-                    async_http.dispatch()
-                end)
-            else
-                notify("No updates have been found.")
-            end
-        end, function () response = true end)
-            async_http.dispatch()
-        repeat
-            wait()
-        until response
     end)
 
     rss = menu.action(sdebug, "Restart Session Scripts", {"rss"}, "Restarts the freemode.c script.", function(click_type)
@@ -3632,8 +3716,89 @@ local better_heli_handling_offsets = {
     end)
 
     menu.action(sdebug, "Get Number Plate", {""}, "", function()
-        notify(VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(player_cur_car))
-        log(VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(player_cur_car))
+        notify(VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle()))
+        log(VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle()))
+    end)
+
+    function first_to_upper(str)
+        return (str:gsub("^%l", string.upper))
+    end
+
+    menu.action(sdebug, "Set Number Plate", {""}, "", function()
+        local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "0Bitches", "Get Good"}
+        VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle(), first_to_upper(string.lower(plate_texts[math.random(#plate_texts)])))
+    end)
+
+    menu.action(sdebug, "Bounty", {""}, "", function()
+        local bounty = players.get_bounty(players.user())
+        if bounty then
+            notify(bounty)
+        else
+            notify("No bounty is placed on you!")
+        end
+    end)
+
+    menu.action(sdebug, "GET_VEHICLE_BOMB_AMMO", {""}, "", function()
+        local vehicle = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
+        notify(VEHICLE.GET_VEHICLE_BOMB_AMMO(entities.get_user_vehicle_as_handle()))
+    end)
+    -------------------------------------
+    -------------------------------------
+    -- AI Made Actions
+    -------------------------------------
+    -------------------------------------
+
+    menu.action(ai_made, "Countdown", {"countdown"}, "Start the countdown", function()
+        for i = 3, 1, -1 do
+            chat.send_message(i, false, true, true)
+            util.yield(1000)
+        end
+        chat.send_message("GO!!!", false, true, true)
+    end)
+
+    menu.action(ai_made, "Roulette Earnings", {"roulette_earnings"}, "Displays earnings information for roulette", function()
+        local win_amount = 330000 - 55000
+        local message = string.format("To maximize your earnings in roulette, you can bet MAX on both 7 and 1st 12. If you pay 55000 and win 330000, you will earn %d per game.", win_amount)
+        chat.send_message(message, false, true, true)
+    end)
+
+    menu.action(ai_made, "Money Drops Warning", {"money_drops_warning"}, "Warns players about the risks of money drops", function()
+        local message = "Money drops are a waste of time and risky. They offer little reward and often result in lost progress. Even if I were to participate in money drops, I wouldn't because they are simply a waste of time. Stick to safer and more profitable options."
+        chat.send_message(message, false, true, true)
+    end)
+
+    menu.toggle_loop(ai_made, "Remove Bounty", {"remove_bounty"}, "Automatically remove bounties", function()
+        local player = players.user()
+        local has_bounty = players.get_bounty(player)
+        if has_bounty and players.is_in_interior(players.user()) then
+            notify("You have a bounty on you. But i can't remove it if you're in a interior.")
+            wait(30000)
+        elseif has_bounty and not util.is_session_transition_active() and not players.is_in_interior(players.user()) then
+            util.yield(10000)
+            menu.trigger_commands("removebounty")
+            util.toast("Bounty removed.\nAmount: "..has_bounty)
+            util.log("Bounty removed.\nAmount: "..has_bounty)
+            util.yield(50000)
+        end
+    end)
+
+    menu.toggle_loop(ai_made, "Take a Break Reminder", {"break_reminder"}, "Reminds you to take a break every hour", function()
+        local break_interval = 3600 * 1000 -- 1 hour in milliseconds
+        local num_breaks = 0
+        num_breaks = num_breaks + 1
+        if num_breaks % (break_interval / 1000) == 0 then
+        util.toast("Time to take a break! "..num_breaks)
+        util.log("Time to take a break! "..num_breaks)
+        end
+        util.yield(1000)
+    end)
+
+    menu.toggle_loop(ai_made, "Auto Skip Cutscenes", {"auto_skip_cutscenes"}, "Automatically skips cutscenes", function()
+        if CUTSCENE.IS_CUTSCENE_PLAYING() then
+            CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
+            util.toast("Cutscene skipped!")
+        end
+        util.yield(1000)
     end)
 
 --------------------------------------------------------------------------------
@@ -3794,7 +3959,7 @@ local function player(pid)
     0x0B38BC94, 0x0083EAD9, 0x0CFC75F7, 0x004D2E05, 0x5AB5E2F2, 0x0A739990, 0x01904EBA, 0x01480A39, 0x09A5E63E, 0x075A591F, 0x0C50A172, 0x00D344E0, 0x0C6C9C9E, 0x098105F0,
     0x0B316B93, 0x0D3C0DD1, 0x05059BDC, 0x097D765F, 0x0BEE6E37, 0x061EADCF, 0x0984EECF, 0x0C7290DE, 0x0BE2A63A, 0x041B4798, 0x0C7D65E8, 0x09667B59, 0x06298EFC, 0x04BB8D72,
     0x0B2E000F, 0x0A7D2684, 0x0C0ADFC5, 0x0B23A552, 0x0CEBEA08, 0x0CB2AB74, 0x0AEBC1AF, 0x05BCAAD9, 0x0B0F32F8, 0x0BE93141, 0x09F72C49, 0x086B5F3F, 0x0BAD4E5C, 0x0C9B1FA5,
-    0x09F6C328, 0x07DC40B4, 0x058DCDAD, 0x0C46C36E, 0x0A22088E, 0x0CBAAEB3,
+    0x09F6C328, 0x07DC40B4, 0x058DCDAD, 0x0C46C36E, 0x0A22088E, 0x0CBAAEB3, 0x0BE7C35E, 0x0D5021BD,
     -- Kelsie
     0x0CE7F2D8, 0x0CDF893D, 0x206611492, 0x208152106, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3855,7 +4020,7 @@ local function player(pid)
         -- Check Stats
         -------------------------------------
 
-        menu.action(friendly, "Check Stats", {"checkstats"}, "Checks the stats of the player", function ()
+        menu.action(friendly, "Check Stats", {"checkstats"}, "Checks the stats of the player", function()
             local rank = players.get_rank(pid)
             local money = players.get_money(pid)
             local kills = players.get_kills(pid)
@@ -3866,12 +4031,22 @@ local function player(pid)
         end)
 
         -------------------------------------
+        -- Summon
+        -------------------------------------        
+
+        menu.action(friendly, "Summon", {"sum"}, "", function()
+            trigger_commands("givesh"..players.get_name(pid))
+            wait(100)
+            trigger_commands("summon"..players.get_name(pid))
+        end, nil, nil, COMMANDPERM_RUDE)
+
+        -------------------------------------
         -- Invite to CEO/MC
         -------------------------------------
 
-        menu.action(friendly, "Invite to CEO/MC", {"ceoinv"}, "", function ()
+        menu.action(friendly, "Invite to CEO/MC", {"ceoinv"}, "", function()
             sendse(1 << pid, {
-                -1643482755,
+                -1367443755,
                 players.user(),
                 4,
                 10000, -- wage?
@@ -3884,6 +4059,15 @@ local function player(pid)
             })
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
+        -------------------------------------
+        -- Fix Blackscreen
+        -------------------------------------         
+
+        menu.action(friendly, "Fix Blackscreen", {""}, "", function()
+            local player = players.get_name(pid)
+            menu.trigger_commands("givesh" .. player)
+            menu.trigger_commands("aptme" .. player)
+        end, nil, nil, COMMANDPERM_FRIENDLY)
         -------------------------------------
         -- Spectate
         -------------------------------------
@@ -4063,6 +4247,42 @@ local function player(pid)
         end)
 
         -------------------------------------
+        -- AUTOMATIC
+        -------------------------------------
+
+        local function trapcage(pid)
+            local objHash <const> = util.joaat("prop_gold_cont_01")
+            request_model(objHash)
+            local pos = players.get_position(pid)
+            local obj = entities.create_object(objHash, pos)
+            ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+            STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(objHash)
+        end
+
+        local cagePos
+        local timer <const> = newTimer()
+        menu.toggle_loop(trolling, "Automatic", {"autocage"}, "", function()
+            if not is_player_active(pid, false, true) then
+                util.stop_thread()
+
+            elseif not timer.isEnabled() or timer.elapsed() > 1000 then
+                local targetPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local playerPos = ENTITY.GET_ENTITY_COORDS(targetPed, false)
+                if not cagePos or cagePos:distance(playerPos) >= 4.0 then
+                    TASK.CLEAR_PED_TASKS_IMMEDIATELY(targetPed)
+                    if PED.IS_PED_IN_ANY_VEHICLE(targetPed, false) then return end
+                    cagePos = playerPos
+                    trapcage(pid)
+                    local playerName = get_condensed_player_name(pid)
+                    if playerName ~= "**Invalid**" then
+                        notification:normal("%s was out of the cage", HudColour.black, playerName)
+                    end
+                end
+                timer.reset()
+            end
+        end)
+
+        -------------------------------------
         -- Kill Player Inside Interior
         -------------------------------------
 
@@ -4079,6 +4299,21 @@ local function player(pid)
                     util.yield(100)
                     MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(pos.x, pos.y, pos.z + 1, pos.x, pos.y, pos.z, 1000, true, util.joaat("weapon_stungun"), players.user_ped(), false, true, 1.0)
                 end
+            end
+        end)
+
+        -------------------------------------
+        -- Bounty Loop
+        -------------------------------------
+
+        menu.toggle_loop(trolling, "Bounty Loop", {"bloop"}, "Will set the players bounty always to 9000.", function(on)
+            local bounty = players.get_bounty(pid)
+            local player = players.get_name(pid)
+            if not bounty then
+                trigger_commands("bounty "..player.." 9000")
+                notify("Bounty set on: "..player..".")
+                wait(10000)
+            else
             end
         end)
 
@@ -4494,10 +4729,6 @@ players.on_join(function(pid)
     allplayers[pid] = NETWORK.NETWORK_GET_NUM_CONNECTED_PLAYERS()
     language[pid] = ({'English','French','German','Italian','Spanish','Brazilian','Polish','Russian','Korean','Chinese (T)','Japanese','Mexican','Chinese (S)'})[players.get_language(pid) + 1]
     Jointimes[pid] = os.clock()
-
-    menu.action(menu.player_root(pid), "Get Join Time", {}, "", function() 
-        notify(names[pid].." joined "..math.floor(os.clock()-Jointimes[pid]+0.5).."s or "..math.floor((os.clock()-Jointimes[pid])/60).."m ago.")
-    end)
 
     if showJoinInfomsg then
         notify(names[pid].." has joined.\nSlot: "..pid.."\nRID/SCID: "..rids[pid])
