@@ -68,7 +68,6 @@ local friend_lists = menu.list(online, "Friend List", {""}, "")
 local reactions = menu.list(online, "Reactions", {""}, "")
 local join_reactions = menu.list(reactions, "Join Reactions", {""}, "")
 local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
-local chatpresets = menu.list(online, "Chat Presets", {""}, "")
 -- Tunables
 local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 local sell_stuff = menu.list(tunables, "Selling", {""}, "")
@@ -84,7 +83,7 @@ local teleport = menu.list(misc, "Teleport", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 3.4
+local script_version = 3.5
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -101,7 +100,7 @@ async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-S
                 local file = io.open(filesystem.scripts_dir() .. SCRIPT_RELPATH, "w+b")
                 file:write(a)
                 file:close()
-                notify(" " .. scriptname .. " has been updated successfully to version " .. remoteVersion .. "\nScript will be restarted automatically")
+                notify(scriptname.." has been updated successfully to version "..remoteVersion.."\nScript will be restarted automatically")
                 wait(3000)
                 util.restart_script()
             end)
@@ -165,56 +164,20 @@ else
 end
 
 local lenaDir <const> = scriptdir .. "Lena\\"
-local languageDir <const> = lenaDir .. "language\\"
-local lconfigFile <const> = lenaDir .. "lconfig.ini"
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
-end
-
-if not filesystem.exists(languageDir) then
-	filesystem.mkdir(languageDir)
 end
 
 if not filesystem.exists(lenaDir .. "Players") then
 	filesystem.mkdir(lenaDir .. "Players")
 end
 
-if not filesystem.exists(lenaDir .. "handling") then
-	filesystem.mkdir(lenaDir .. "handling")
-end
-
-if filesystem.exists(lconfigFile) then
-	for s, tbl in pairs(Ini.load(lconfigFile)) do
-		for k, v in pairs(tbl) do
-			Config[s] = Config[s] or {}
-			Config[s][k] = v
-		end
-	end
-end
-
 -----------------------------------
 -- Keybinds
 -----------------------------------
 
--- name = {"keybind; controller", index}
-local Imputs <const> =
-{
-	INPUT_JUMP = {"Spacebar; X", 22},
-	INPUT_VEH_ATTACK = {"Mouse L; RB", 69},
-	INPUT_VEH_AIM = {"Mouse R; LB", 68},
-	INPUT_VEH_DUCK = {"X; A", 73},
-	INPUT_VEH_HORN = {"E; L3", 86},
-	INPUT_VEH_CINEMATIC_UP_ONLY = {"Numpad +; none", 96},
-	INPUT_VEH_CINEMATIC_DOWN_ONLY = {"Numpad -; none", 97}
-}
-
 local NULL <const> = 0
-DecorFlag_isTrollyVehicle = 1 << 0
-DecorFlag_isEnemyVehicle = 1 << 1
-DecorFlag_isAttacker = 1 << 2
-DecorFlag_isAngryPlane = 1 << 3
-
 local numpadControls = {
     -- Plane
         107,
@@ -368,10 +331,8 @@ function IA_MENU_LEFT(Num)
     end
 end
 function IA_MENU_ENTER(Num)
-    for i = 1, Num do
-        PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1.0)
-        wait(100)
-    end
+    PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1.0)
+    wait(100)
 end
 
 function play_anim(dict, name, duration)
@@ -431,41 +392,45 @@ local function get_interior_player_is_in(pid)
     return memory.read_int(memory.script_global(((2657589 + 1) + (pid * 466)) + 245)) -- Global_2657589[bVar0 /*466*/].f_245
 end
 
+local function mod_uses(type, incr)
+    -- this func is a patch. every time the script loads, all the toggles load and set their state. in some cases this makes the _uses optimization negative and breaks things. this prevents that.
+    if incr < 0 and is_loading then
+        return
+    end
+    if type == "vehicle" then
+        if vehicle_uses <= 0 and incr < 0 then
+            return
+        end
+        vehicle_uses = vehicle_uses + incr
+    elseif type == "pickup" then
+        if pickup_uses <= 0 and incr < 0 then
+            return
+        end
+        pickup_uses = pickup_uses + incr
+    elseif type == "ped" then
+        if ped_uses <= 0 and incr < 0 then
+            return
+        end
+        ped_uses = ped_uses + incr
+    elseif type == "player" then
+        if player_uses <= 0 and incr < 0 then
+            return
+        end
+        player_uses = player_uses + incr
+    elseif type == "object" then
+        if object_uses <= 0 and incr < 0 then
+            return
+        end
+        object_uses = object_uses + incr
+    end
+end
+
 local function SetLocalInt(script_str, script_local, value)
     local addr = memory.script_local(script_str, script_local)
     if addr ~= 0 then
         memory.write_int(addr, value)
     end
     return addr ~= 0
-end
-
-function SET_INT_GLOBAL(Global, Value)
-    memory.write_int(memory.script_global(Global), Value)
-end
-function SET_FLOAT_GLOBAL(Global, Value)
-    memory.write_float(memory.script_global(Global), Value)
-end
-
-function GET_INT_GLOBAL(Global)
-    return memory.read_int(memory.script_global(Global))
-end
-
-function SET_PACKED_INT_GLOBAL(StartGlobal, EndGlobal, Value)
-    for i = StartGlobal, EndGlobal do
-        SET_INT_GLOBAL(262145 + i, Value)
-    end
-end
-
-function SET_INT_LOCAL(Script, Local, Value)
-    if memory.script_local(Script, Local) ~= 0 then
-        memory.write_int(memory.script_local(Script, Local), Value)
-    end
-end
-
-function SET_FLOAT_LOCAL(Script, Local, Value)
-    if memory.script_local(Script, Local) ~= 0 then
-        memory.write_float(memory.script_local(Script, Local), Value)
-    end
 end
 
 function GET_INT_LOCAL(Script, Local)
@@ -531,41 +496,33 @@ function ADD_MP_INDEX(Stat)
     return Stat
 end
 
-local function mod_uses(type, incr)
-    -- this func is a patch. every time the script loads, all the toggles load and set their state. in some cases this makes the _uses optimization negative and breaks things. this prevents that.
-    if incr < 0 and is_loading then
-        return
-    end
-    if type == "vehicle" then
-        if vehicle_uses <= 0 and incr < 0 then
-            return
-        end
-        vehicle_uses = vehicle_uses + incr
-    elseif type == "pickup" then
-        if pickup_uses <= 0 and incr < 0 then
-            return
-        end
-        pickup_uses = pickup_uses + incr
-    elseif type == "ped" then
-        if ped_uses <= 0 and incr < 0 then
-            return
-        end
-        ped_uses = ped_uses + incr
-    elseif type == "player" then
-        if player_uses <= 0 and incr < 0 then
-            return
-        end
-        player_uses = player_uses + incr
-    elseif type == "object" then
-        if object_uses <= 0 and incr < 0 then
-            return
-        end
-        object_uses = object_uses + incr
+function SET_INT_GLOBAL(Global, Value)
+    memory.write_int(memory.script_global(Global), Value)
+end
+function SET_FLOAT_GLOBAL(Global, Value)
+    memory.write_float(memory.script_global(Global), Value)
+end
+
+function GET_INT_GLOBAL(Global)
+    return memory.read_int(memory.script_global(Global))
+end
+
+function SET_PACKED_INT_GLOBAL(StartGlobal, EndGlobal, Value)
+    for i = StartGlobal, EndGlobal do
+        SET_INT_GLOBAL(262145 + i, Value)
     end
 end
 
-function STAT_SET_INT(Stat, Value)
-    STATS.STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
+function SET_INT_LOCAL(Script, Local, Value)
+    if memory.script_local(Script, Local) ~= 0 then
+        memory.write_int(memory.script_local(Script, Local), Value)
+    end
+end
+
+function SET_FLOAT_LOCAL(Script, Local, Value)
+    if memory.script_local(Script, Local) ~= 0 then
+        memory.write_float(memory.script_local(Script, Local), Value)
+    end
 end
 
 function STAT_SET_INT(Stat, Value)
@@ -632,24 +589,6 @@ function get_sub_handling_types(vehicle, type)
     end
     if type then return nil end
     return types
-end
-
-function BitTest(bits, place)
-	return (bits & (1 << place)) ~= 0
-end
-
-function request_model_load(hash)
-    request_time = os.time()
-    if not STREAMING.IS_MODEL_VALID(hash) then
-        return
-    end
-    STREAMING.REQUEST_MODEL(hash)
-    while not STREAMING.HAS_MODEL_LOADED(hash) do
-        if os.time() - request_time >= 10 then
-            break
-        end
-        wait()
-    end
 end
 
 local function BlockSyncs(pid, callback)
@@ -888,7 +827,7 @@ local better_heli_handling_offsets = {
         -- Fast Vehicle Enter/Exit
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.\n'Lock Outfit' seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.\n'Lock Outfit' seems to break it", function()
             if (TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 160) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 167) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 165)) and not TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 195) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -898,7 +837,7 @@ local better_heli_handling_offsets = {
         -- Fast Weapon swap
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Hands", {""}, "Swaps your weapons faster.", function()
+        menu.toggle_loop(fast_stuff, "Fast Hands", {""}, "Swaps your weapons faster", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 56) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -908,7 +847,7 @@ local better_heli_handling_offsets = {
         -- Fast Mount
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.", function()
+        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 50) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 51) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -976,22 +915,9 @@ local better_heli_handling_offsets = {
     -- Friendly AI
     -------------------------------------
 
-    menu.toggle_loop(self, "Friendly AI", {""}, "The AI will ignore you.", function()
+    menu.toggle_loop(self, "Friendly AI", {""}, "The AI will ignore you", function()
         PED.SET_PED_RESET_FLAG(players.user_ped(), 124, true)
     end)
-
-    -------------------------------------
-    -- No Bounties
-    -------------------------------------
-
-    --[[menu.toggle_loop(self, "No Bounties", {"avoidbounties"}, "", function()
-        if players.get_bounty(players.user()) then
-            notify("A Bounty is placed on you. Removing it...")
-            wait(3000)
-            trigger_commands("removebounty")
-        end
-        wait(10000)
-    end)]]
 
     -------------------------------------
     --[[ Script Host Addict
@@ -1138,7 +1064,7 @@ local better_heli_handling_offsets = {
     end)
 
 
-    menu.toggle_loop(weap, "Thermal Scope", {""}, "Press E while aiming to activate.", function()
+    menu.toggle_loop(weap, "Thermal Scope", {""}, "Press E while aiming to activate", function()
         local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
         local aiming = PLAYER.IS_PLAYER_FREE_AIMING(players.user())
         if GRAPHICS.GET_USINGSEETHROUGH() and not aiming then
@@ -1280,7 +1206,7 @@ local better_heli_handling_offsets = {
     -------------------------------------
 
     local seat_id = -1
-    local moved_seat = menu.click_slider(vehicle, "Move To Seat", {}, "", 1, 1, 1, 1, function(seat_id)
+    local moved_seat = menu.click_slider(vehicle, "Move To Seat", {""}, "", 1, 1, 1, 1, function(seat_id)
         TASK.TASK_WARP_PED_INTO_VEHICLE(players.user_ped(), entities.get_user_vehicle_as_handle(), seat_id - 2)
     end)
 
@@ -1379,771 +1305,6 @@ local better_heli_handling_offsets = {
         end
     end)
 
-        -------------------------------------
-        -- VEHICLE HANDLING EDITOR
-        -------------------------------------
-
-        CHandlingData =
-        {
-            --{"m_model_hash", 0x0008},
-            {"fMass", 0x000C},
-            {"fInitialDragCoeff", 0x0010},
-            {"fDownforceModifier", 0x0014},
-            {"fPopUpLightRotation", 0x0018},
-            {"vecCentreOfMassOffsetX", 0x0020},
-            {"vecCentreOfMassOffsetY", 0x0024},
-            {"vecCentreOfMassOffsetZ", 0x0028},
-            {"vecInertiaMultiplierX", 0x0030},
-            {"vecInertiaMultiplierY", 0x0034},
-            {"vecInertiaMultiplierZ", 0x0038},
-            {"fPercentSubmerged", 0x0040},
-            {"fSubmergedRatio", 0x0044},
-            {"fDriveBiasFront", 0x0048},
-            {"fDriveBiasRear", 0x004C},
-            {"fDriveInertia", 0x0054},
-            {"fClutchChangeRateScaleUpShift", 0x0058},
-            {"fClutchChangeRateScaleDownShift", 0x005C},
-            {"fInitialDriveForce", 0x0060},
-            {"fDriveMaxFlatVel", 0x0064},
-            {"fInitialDriveMaxFlatVel", 0x0068},
-            {"fBrakeForce", 0x006C},
-            {"fBrakeBiasFront", 0x0074},
-            {"fBrakeBiasRear", 0x0078},
-            {"fHandBrakeForce", 0x007C},
-            {"fSteeringLock", 0x0080},
-            {"fSteeringLockRatio", 0x0084},
-            {"fTractionCurveMax", 0x0088},
-            {"fTractionCurveMaxRatio", 0x008C},
-            {"fTractionCurveMin", 0x0090},
-            {"fTractionCurveRatio", 0x0094},
-            {"fTractionCurveLateral", 0x0098},
-            {"fTractionCurveLateralRatio", 0x009C},
-            {"fTractionSpringDeltaMax", 0x00A0},
-            {"fTractionSpringDeltaMaxRatio", 0x00A4},
-            {"fLowSpeedTractionLossMult", 0x00A8},
-            {"fCamberStiffnesss", 0x00AC},
-            {"fTractionBiasFront", 0x00B0},
-            {"fTractionBiasRear", 0x00B4},
-            {"fTractionLossMult", 0x00B8},
-            {"fSuspensionForce", 0x00BC},
-            {"fSuspensionCompDamp", 0x00C0},
-            {"fSuspensionReboundDamp", 0x00C4},
-            {"fSuspensionUpperLimit", 0x00C8},
-            {"fSuspensionLowerLimit", 0x00CC},
-            {"fSuspensionRaise", 0x00D0},
-            {"fSuspensionBiasFront", 0x00D4},
-            {"fSuspensionBiasRear", 0x00D8},
-            {"fAntiRollBarForce", 0x00DC},
-            {"fAntiRollBarBiasFront", 0x00E0},
-            {"fAntiRollBarBiasRear", 0x00E4},
-            {"fRollCentreHeightFront", 0x00E8},
-            {"fRollCentreHeightRear", 0x00EC},
-            {"fCollisionDamageMult", 0x00F0},
-            {"fWeaponDamageMult", 0x00F4},
-            {"fDeformationDamageMult", 0x00F8},
-            {"fEngineDamageMult", 0x00FC},
-            {"fPetrolTankVolume", 0x0100},
-            {"fOilVolume", 0x0104},
-            {"fSeatOffsetDistX", 0x010C},
-            {"fSeatOffsetDistY", 0x0110},
-            {"fSeatOffsetDistZ", 0x0114},
-        }
-
-        CFlyingHandlingData =
-        {
-            {"fThrust", 0x0008},
-            {"fThrustFallOff", 0x000C},
-            {"fThrustVectoring", 0x0010},
-            {"fYawMult", 0x001C},
-            {"fYawStabilise", 0x0020},
-            {"fSideSlipMult", 0x0024},
-            {"fRollMult", 0x002C},
-            {"fRollStabilise", 0x0030},
-            {"fPitchMult", 0x0038},
-            {"fPitchStabilise", 0x003C},
-            {"fFormLiftMult", 0x0044},
-            {"fAttackLiftMult", 0x0048},
-            {"fAttackDiveMult", 0x004C},
-            {"fGearDownDragV", 0x0050},
-            {"fGearDownLiftMult", 0x0054},
-            {"fWindMult", 0x0058},
-            {"fMoveRes", 0x005C},
-            {"vecTurnResX", 0x0060},
-            {"vecTurnResY", 0x0064},
-            {"vecTurnResZ", 0x0068},
-            {"vecSpeedResX", 0x0070},
-            {"vecSpeedResY", 0x0074},
-            {"vecSpeedResZ", 0x0078},
-            {"fGearDoorFrontOpen", 0x0080},
-            {"fGearDoorRearOpen", 0x0084},
-            {"fGearDoorRearOpen2", 0x0088},
-            {"fGearDoorRearMOpen", 0x008C},
-            {"fTurbulanceMagnitudMax", 0x0090},
-            {"fTurbulanceForceMulti", 0x0094},
-            {"fTurbulanceRollTorqueMulti", 0x0098},
-            {"fTurbulancePitchTorqueMulti", 0x009C},
-            {"fBodyDamageControlEffectMult", 0x00A0},
-            {"fInputSensitivityForDifficulty", 0x00A4},
-            {"fOnGroundYawBoostSpeedPeak", 0x00A8},
-            {"fOnGroundYawBoostSpeedCap", 0x00AC},
-            {"fEngineOffGlideMult", 0x00B0},
-            {"fAfterburnerEffectRadius", 0x00B4},
-            {"fAfterburnerEffectDistance", 0x00B8},
-            {"fAfterburnerEffectForceMulti", 0x00BC},
-            {"fSubmergeLevelToPullHeliUnderWater", 0x00C0},
-            {"fExtraLiftWithRoll", 0x00C4},
-        }
-
-        SubHandlingData =
-        {
-            CBikeHandlingData =
-            {
-                {"fLeanFwdCOMMult", 0x0008},
-                {"fLeanFwdForceMult", 0x000C},
-                {"fLeanBakCOMMult", 0x0010},
-                {"fLeanBakForceMult", 0x0014},
-                {"fMaxBankAngle", 0x0018},
-                {"fFullAnimAngle", 0x001C},
-                {"fDesLeanReturnFrac", 0x0024},
-                {"fStickLeanMult", 0x0028},
-                {"fBrakingStabilityMult", 0x002C},
-                {"fInAirSteerMult", 0x0030},
-                {"fWheelieBalancePoint", 0x0034},
-                {"fStoppieBalancePoint", 0x0038},
-                {"fWheelieSteerMult", 0x003C},
-                {"fRearBalanceMult", 0x0040},
-                {"fFrontBalanceMult", 0x0044},
-                {"fBikeGroundSideFrictionMult", 0x0048},
-                {"fBikeWheelGroundSideFrictionMult", 0x004C},
-                {"fBikeOnStandLeanAngle", 0x0050},
-                {"fBikeOnStandSteerAngle", 0x0054},
-                {"fJumpForce", 0x0058},
-            },
-            CFlyingHandlingData = CFlyingHandlingData,
-            CFlyingHandlingData2 = CFlyingHandlingData,
-            CBoatHandlingData =
-            {
-                {"fBoxFrontMult", 0x0008},
-                {"fBoxRearMult", 0x000C},
-                {"fBoxSideMult", 0x0010},
-                {"fSampleTop", 0x0014},
-                {"fSampleBottom", 0x0018},
-                {"fSampleBottomTestCorrection", 0x001C},
-                {"fAquaplaneForce", 0x0020},
-                {"fAquaplanePushWaterMult", 0x0024},
-                {"fAquaplanePushWaterCap", 0x0028},
-                {"fAquaplanePushWaterApply", 0x002C},
-                {"fRudderForce", 0x0030},
-                {"fRudderOffsetSubmerge", 0x0034},
-                {"fRudderOffsetForce", 0x0038},
-                {"fRudderOffsetForceZMult", 0x003C},
-                {"fWaveAudioMult", 0x0040},
-                {"vecMoveResistanceX", 0x0050},
-                {"vecMoveResistanceY", 0x0054},
-                {"vecMoveResistanceZ", 0x0058},
-                {"vecTurnResistanceX", 0x0060},
-                {"vecTurnResistanceY", 0x0064},
-                {"vecTurnResistanceZ", 0x0068},
-                {"fLook_L_R_CamHeight", 0x0070},
-                {"fDragCoefficient", 0x0074},
-                {"fKeelSphereSize", 0x0078},
-                {"fPropRadius", 0x007C},
-                {"fLowLodAngOffset", 0x0080},
-                {"fLowLodDraughtOffset", 0x0084},
-                {"fImpellerOffset", 0x0088},
-                {"fImpellerForceMult", 0x008C},
-                {"fDinghySphereBuoyConst", 0x0090},
-                {"fProwRaiseMult", 0x0094},
-                {"fDeepWaterSampleBuoyancyMult", 0x0098},
-                {"fTransmissionMultiplier", 0x009C},
-                {"fTractionMultiplier", 0x00A0},
-            },
-            CSeaPlaneHandlingData =
-            {
-                {"fPontoonBuoyConst", 0x0010},
-                {"fPontoonSampleSizeFront", 0x0014},
-                {"fPontoonSampleSizeMiddle", 0x0018},
-                {"fPontoonSampleSizeRear", 0x001C},
-                {"fPontoonLengthFractionForSamples", 0x0020},
-                {"fPontoonDragCoefficient", 0x0024},
-                {"fPontoonVerticalDampingCoefficientUp", 0x0028},
-                {"fPontoonVerticalDampingCoefficientDown", 0x002C},
-                {"fKeelSphereSize", 0x0030},
-            },
-            CSubmarineHandlingData =
-            {
-                {"vTurnResX", 0x0010},
-                {"vTurnResY", 0x0014},
-                {"vTurnResZ", 0x0018},
-                {"fMoveResXY", 0x0020},
-                {"fMoveResZ", 0x0024},
-                {"fPitchMult", 0x0028},
-                {"fPitchAngle", 0x002C},
-                {"fYawMult", 0x0030},
-                {"fDiveSpeed", 0x0034},
-                {"fRollMult", 0x0038},
-                {"fRollStab", 0x003C}
-            },
-            CTrainHandlingData =
-            {
-            },
-            CTrailerHandlingData =
-            {
-            },
-            CCarHandlingData =
-            {
-                {"fBackEndPopUpCarImpulseMult", 0x0008},
-                {"fBackEndPopUpBuildingImpulseMult", 0x000C},
-                {"fBackEndPopUpMaxDeltaSpeed", 0x0010},
-                {"fToeFront", 0x0014},
-                {"fToeRear", 0x0018},
-                {"fCamberFront", 0x001C},
-                {"fCamberRear", 0x0020},
-                {"fCastor", 0x0024},
-                {"fEngineResistance", 0x0028},
-                {"fMaxDriveBiasTransfer", 0x002C},
-                {"fJumpForceScale", 0x0030},
-            },
-            CVehicleWeaponHandlingData =
-            {
-                {"fUvAnimatiomMult", 0x0320},
-                {"fMiscGadgetVar", 0x0324},
-                {"fWheelImpactOffset", 0x0328}
-            },
-            CSpecialFlightHandlingData =
-            {
-                {"vecAngularDampingX", 0x0010},
-                {"vecAngularDampingY", 0x0014},
-                {"vecAngularDampingZ", 0x0018},
-                {"vecAngularDampingMinX", 0x0020},
-                {"vecAngularDampingMinY", 0x0024},
-                {"vecAngularDampingMinZ", 0x0028},
-                {"vecLinearDampingX", 0x0030},
-                {"vecLinearDampingY", 0x0034},
-                {"vecLinearDampingZ", 0x0038},
-                {"vecLinearDampingMinX", 0x0040},
-                {"vecLinearDampingMinY", 0x0044},
-                {"vecLinearDampingMinZ", 0x0048},
-                {"fLiftCoefficient", 0x0050},
-                {"fMinLiftVelocity", 0x0060},
-                {"fDragCoefficient", 0x006C},
-                {"fRollTorqueScale", 0x0070},
-                {"fYawTorqueScale", 0x007C},
-                {"fMaxPitchTorque", 0x0088},
-                {"fMaxSteeringRollTorque", 0x008C},
-                {"fPitchTorqueScale", 0x0090},
-                {"fMaxThrust", 0x0098},
-                {"fTransitionDuration", 0x009C},
-                {"fHoverVelocityScale", 0x00A0},
-                {"fMinSpeedForThrustFalloff", 0x00A8},
-                {"fBrakingThrustScale", 0x00AC},
-            },
-        }
-
-        -------------------------------------
-        -- HANDLING SECTION
-        -------------------------------------
-
-        local subHandlingClasses =
-        {
-            [0]  = "CBikeHandlingData",
-            [1]  = "CFlyingHandlingData",
-            [2]  = "CFlyingHandlingData2",
-            [3]  = "CBoatHandlingData",
-            [4]  = "CSeaPlaneHandlingData",
-            [5]  = "CSubmarineHandlingData",
-            [6]  = "CTrainHandlingData",
-            [7]  = "CTrailerHandlingData",
-            [8]  = "CCarHandlingData",
-            [9]  = "CVehicleWeaponHandlingData",
-            [10] = "CSpecialFlightHandlingData",
-        }
-
-        local function get_sub_handling_type(subHandling)
-            local funAddress = memory.read_long(memory.read_long(subHandling) + 16)
-            return util.call_foreign_function(funAddress, subHandling)
-        end
-
-        local function get_sub_handling_array(handlingData)
-            local subHandlingArray = memory.read_long(handlingData + 0x158)
-            local numSubHandling = memory.read_ushort(handlingData + 0x160)
-            local arr = {}
-            local index = 0
-            local t = -1
-
-            while true do
-                local subHandling = memory.read_long(subHandlingArray + index * 8)
-                if subHandling == NULL then
-                    goto NotFound
-                end
-
-                t = get_sub_handling_type(subHandling)
-                if t >= 0 and t <= 10 then
-                    table.insert(arr, {type = t, address = subHandling})
-                end
-
-            ::NotFound::
-                index = index + 1
-                if index >= numSubHandling then break end
-            end
-
-            return arr
-        end
-
-        local GetVehicleModelInfo = 0
-        memory_scan("GVMI", "48 89 5C 24 ? 57 48 83 EC 20 8B 8A ? ? ? ? 48 8B DA", function (address)
-            GetVehicleModelInfo = memory.rip(address + 0x2A)
-        end)
-
-
-        local GetHandlingDataFromIndex = 0
-        memory_scan("GHDFI", "40 53 48 83 EC 30 48 8D 54 24 ? 0F 29 74 24 ?", function (address)
-            GetHandlingDataFromIndex = memory.rip(address + 0x37)
-        end)
-
-        local function get_vehicle_model_info(modelHash)
-            return util.call_foreign_function(GetVehicleModelInfo, modelHash, NULL)
-        end
-
-        local function get_vehicle_model_handling_data(modelInfo)
-            return util.call_foreign_function(GetHandlingDataFromIndex, memory.read_uint(modelInfo + 0x4B8))
-        end
-
-        -------------------------------------
-        -- HANDLING DATA
-        -------------------------------------
-
-        HandlingData =
-        {
-            reference = 0,
-            name = "",
-            address = NULL,
-            visible = true,
-            offsets = {},
-            open = false,
-        }
-        HandlingData.__index = HandlingData
-
-        HandlingData.new = function (parent, name, address, offsets)
-            local self = setmetatable({address = address, name = name, offsets = offsets}, HandlingData)
-            self.reference = menu.list(parent, name, {}, "", function()
-                self.open = true
-            end, function()
-                self.open = false
-            end)
-
-            menu.divider(self.reference, name)
-            for _, tbl in ipairs(offsets) do self:addOption(self.reference, tbl[1], tbl[2]) end
-            return self
-        end
-
-        HandlingData.addOption = function(self, parent, name, offset)
-            local value = memory.read_float(self.address + offset) * 100
-
-            menu.slider_float(parent, name, {name}, "", -1e6, 1e6, math.floor(value), 10, function(new)
-                memory.write_float(self.address + offset, new / 100)
-            end)
-        end
-
-        HandlingData.Remove = function(self)
-            menu.delete(self.reference)
-        end
-
-        function HandlingData:get()
-            local r = {}
-
-            for _, tbl in ipairs(self.offsets) do
-                local value = memory.read_float(self.address + tbl[2])
-                r[tbl[1]] = round(value, 3)
-            end
-
-            return r
-        end
-
-        function HandlingData:set(values)
-            local count = 0
-
-            for _, tbl in ipairs(self.offsets) do
-                local value = values[tbl[1]]
-
-                if not value then
-                    goto label_continue
-                end
-
-                memory.write_float(self.address + tbl[2], value)
-                count = count + 1
-
-            ::label_continue::
-            end
-        end
-
-        -------------------------------------
-        -- HANDLING EDITOR
-        -------------------------------------
-
-        VehicleList = {selected = 0, root = 0, name = "", onClick = nil}
-        VehicleList.__index = VehicleList
-
-        function VehicleList.new(parent, name, onClick)
-            local self = setmetatable({name = name, onClick = onClick}, VehicleList)
-            self.root = menu.list(parent, name, {}, "")
-
-            local classLists = {}
-            for _, vehicle in ipairs(util.get_vehicles()) do
-                local nameHash = joaat(vehicle.name)
-                local class = VEHICLE.GET_VEHICLE_CLASS_FROM_NAME(nameHash)
-
-                if not classLists[class] then
-                    classLists[class] = menu.list(self.root, util.get_label_text("VEH_CLASS_" .. class), {}, "")
-                end
-
-                local menuName = util.get_label_text(vehicle.name)
-                if menuName == "NULL" then
-                    goto label_coninue
-                end
-
-                menu.action(classLists[class], util.get_label_text(vehicle.name), {}, "", function()
-                    self:setSelected(nameHash, vehicle.name)
-                    menu.focus(self.root)
-                end)
-            ::label_coninue::
-            end
-
-            return self
-        end
-
-        function VehicleList:setSelected(nameHash, vehicleName)
-            if not vehicleName then
-                vehicleName = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(nameHash)
-            end
-            menu.set_menu_name(self.root, self.name .. ": " .. util.get_label_text(vehicleName))
-            self.selected = nameHash
-            if self.onClick then self.onClick(nameHash) end
-        end
-
-        -------------------------------------
-        -- FILE LIST
-        -------------------------------------
-
-        FileList = {
-            dir = "",
-            ext = "json",
-            open = false,
-            reference = 0,
-            options = {},
-            fileOpts = {},
-            onClick = nil
-        }
-        FileList.__index = FileList
-
-        function FileList.new(parent, name, options, dir, ext, onClick)
-            local self = setmetatable({dir = dir, ext = ext, options = options}, FileList)
-            self.fileOpts = {}
-            self.onClick = onClick
-
-            self.reference = menu.list(parent, name, {}, "", function()
-                self.open = true
-                self:load()
-            end, function()
-                self.open = false
-                self:clear()
-            end)
-
-            return self
-        end
-
-        function FileList:load()
-            if not self.dir or not filesystem.exists(self.dir) then
-                return
-            end
-
-            for _, path in ipairs(filesystem.list_files(self.dir)) do
-                local name, ext = string.match(path, '^.+\\(.+)%.(.+)$')
-                if not self.ext or self.ext == ext then self:createOpt(name, path) end
-            end
-        end
-
-        function FileList:createOpt(fileName, path)
-            local list = menu.list(self.reference, fileName, {}, "")
-
-            for i, opt in ipairs(self.options) do
-                menu.action(list, opt, {}, "", function() self.onClick(i, fileName, path) end)
-            end
-
-            self.fileOpts[#self.fileOpts+1] = list
-        end
-
-        function FileList:clear()
-            if #self.fileOpts == 0 then
-                return
-            end
-
-            for i, ref in ipairs(self.fileOpts) do
-                menu.delete(ref); self.fileOpts[i] = nil
-            end
-        end
-
-        function FileList:add(file, content)
-            assert(self.dir ~= "", "tried to add a file to a null directory")
-            if not filesystem.exists(self.dir) then
-                filesystem.mkdir(self.dir)
-            end
-
-            local name, ext = string.match(file, '^(.+)%.(.+)$')
-            local count = 1
-
-            while filesystem.exists(self.dir .. file) do
-                count = count + 1
-                file = string.format("%s (%s).%s", name, count, ext)
-            end
-
-            local file <close> = assert(io.open(self.dir .. file, "w"))
-            file:write(content)
-        end
-
-        function FileList:reload()
-            self:clear()
-            self:load()
-        end
-
-        -------------------------------------
-        -- AUTOLOAD LIST
-        -------------------------------------
-
-        local handlingTrans <const> =
-        {
-            SetVehicle = translate("Handling Editor", "Set Vehicle"),
-            CurrentVehicle = translate("Handling Editor", "Current Vehicle"),
-            SaveHandling = translate("Handling Editor", "Save Handling Data"),
-            SavedFiles = translate("Handling Editor", "Saved Files"),
-            Load = translate("Handling Editor", "Load"),
-            Delete = translate("Handling Editor", "Delete"),
-            Autoload = translate("Handling Editor", "Autoload"),
-            Saved = translate("Handling Editor", "Handling file saved"),
-            Loaded = translate("Handling Editor", "Handling file successfully loaded"),
-            WillAutoload = translate("Handling Editor", "File '%s' will be autoloaded"),
-            HandlingEditor = translate("Handling Editor", "Handling Editor"),
-            AutoloadedFiles = translate("Handling Editor", "Autoloaded Files"),
-            ClickToDelete = translate("Handling Editor", "Click to delete"),
-            SavedHelp = translate("Handling Editor", "Saved handling files for the selected vehicle model")
-        }
-
-        AutoloadList = {reference = 0, options = {}}
-        AutoloadList.__index = AutoloadList
-
-        function AutoloadList.new(parent, name)
-            local self = setmetatable({options = {}}, AutoloadList)
-
-            self.reference = menu.list(parent, name, {}, "")
-            return self
-        end
-
-        function AutoloadList:push(vehLabel, file)
-            local vehName = util.get_label_text(vehLabel)
-
-            if self.options[vehName] then
-                menu.delete(self.options[vehName])
-            end
-
-            self.options[vehName] = menu.action(self.reference, string.format("%s: %s", vehName, file), {}, handlingTrans.ClickToDelete, function()
-                Config.handlingAutoload[vehLabel] = nil
-                menu.delete(self.options[vehName])
-            end)
-        end
-
-        -------------------------------------
-        -- HANDLING EDITOR
-        -------------------------------------
-
-        HandlingEditor =
-        {
-            references = {root = 0, meta = 0},
-            handlingData = nil,
-            subHandlings = {},
-            currentVehicle = 0,
-            open = false,
-            ---@type FileList
-            filesList = nil,
-            ---@type AutoloadList
-            autoloads = nil
-        }
-        HandlingEditor.__index = HandlingEditor
-
-        function HandlingEditor.new(parent, name)
-            local self = setmetatable({subHandlings = {}, references = {}}, HandlingEditor)
-            self.references.root = menu.list(parent, name, {}, "", function()
-                self.open = true
-            end, function() self.open = false end)
-
-            local vehList = VehicleList.new(self.references.root, handlingTrans.SetVehicle, function (vehicle)
-                self:SetCurrentVehicle(vehicle)
-            end)
-
-            menu.action(self.references.root, handlingTrans.CurrentVehicle, {}, "", function ()
-                local vehicle = entities.get_user_vehicle_as_handle()
-                if vehicle ~= 0 then vehList:setSelected(ENTITY.GET_ENTITY_MODEL(vehicle)) end
-            end)
-
-            self.references.meta = menu.list(self.references.root, "Meta", {}, "")
-
-            menu.action(self.references.meta, handlingTrans.SaveHandling, {}, "", function()
-                local ok, msg = self:save()
-                if not ok then
-                    return notification:help(capitalize(msg), HudColour.red)
-                end
-                notification:normal(handlingTrans.Saved, HudColour.purpleDark)
-            end)
-
-            local fileOpts <const> =
-            {
-                handlingTrans.Load,
-                handlingTrans.Autoload,
-                handlingTrans.Delete,
-            }
-
-            self.filesList = FileList.new(self.references.meta, handlingTrans.SavedFiles, fileOpts, "", "json", function (opt, fileName, path)
-                if  opt == 1 then
-                    local ok, msg = self:load(path)
-                    if not ok then
-                        return notification:help(capitalize(msg), HudColour.red)
-                    end
-                    self:SetCurrentVehicle(self.currentVehicle) -- reloading
-                    notification:normal(handlingTrans.Loaded, HudColour.purpleDark)
-
-                elseif opt == 3 then
-                    os.remove(path)
-                    self.filesList:reload()
-
-                elseif opt == 2 then
-                    local name = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(self.currentVehicle)
-                    if name == "CARNOTFOUND" then
-                        return
-                    end
-                    Config.handlingAutoload[name] = fileName
-                    self.autoloads:push(name, fileName)
-                    notification:normal(string.format(handlingTrans.WillAutoload, fileName), HudColour.purpleDark)
-                end
-            end)
-
-            menu.set_help_text(self.filesList.reference, handlingTrans.SavedHelp)
-            self.autoloads = AutoloadList.new(self.references.meta, handlingTrans.AutoloadedFiles)
-            return self
-        end
-
-        function HandlingEditor:SetCurrentVehicle(hash)
-            if self.handlingData then self:clear() end
-            self.currentVehicle = hash
-            local root = self.references.root
-            local modelInfo = get_vehicle_model_info(hash)
-            if modelInfo == NULL then
-                return
-            end
-
-            local handlingAddress = get_vehicle_model_handling_data(modelInfo)
-            if handlingAddress == NULL then
-                return
-            end
-
-            self.handlingData = HandlingData.new(root, "CHandlingData", handlingAddress, CHandlingData)
-            local subHandlings = get_sub_handling_array(handlingAddress)
-
-            for _, subHandling in ipairs(subHandlings) do
-                if subHandling.address == NULL then
-                    continue
-                end
-                local name = subHandlingClasses[subHandling.type]
-                local offsets = SubHandlingData[name]
-                if not self.subHandlings[name] then self.subHandlings[name] = HandlingData.new(root, name, subHandling.address, offsets) end
-            end
-
-            local vehicleName = memory.read_string(modelInfo + 0x298)
-            self.filesList.dir = lenaDir .. "handling\\" .. string.lower(vehicleName) .. "\\"
-        end
-
-        function HandlingEditor:clear()
-            self.handlingData:Remove()
-            for _, h in pairs(self.subHandlings) do h:Remove() end
-
-            self.handlingData = nil
-            self.subHandlings = {}
-            self.currentVehicle = 0
-            self.filesList.dir = ""
-        end
-
-        function HandlingEditor:save()
-            if not self.handlingData then
-                return false, "handling data not found"
-            end
-
-            local input = ""
-            local label = "Enter the file name"
-
-            while true do
-                input = get_input_from_screen_keyboard(label, 31, "")
-                if input == "" then
-                    return false, "save canceled"
-                end
-                if not input:find '[^%w_%.%-]' then break end
-                label = "Got an invalid character, try again"
-                wait(200)
-            end
-
-            local data = {}
-            data[self.handlingData.name] = self.handlingData:get()
-
-            for _, subHandling in pairs(self.subHandlings) do
-                data[subHandling.name] = subHandling:get()
-            end
-
-            self.filesList:add(input .. ".json", json.stringify(data, nil, 4))
-            return true, nil
-        end
-
-        function HandlingEditor:load(path)
-            if not self.handlingData then
-                return false, "handling data not found"
-            end
-
-            if not filesystem.exists(path) then
-                return false, "file does not exist"
-            end
-
-            local ok, result = json.parse(path, false)
-            if not ok then
-                return false, result
-            end
-
-            self.handlingData:set(result.CHandlingData)
-
-            for name, subHandling in pairs(self.subHandlings) do
-                if result[name] then subHandling:set(result[name]) end
-            end
-
-            return true, nil
-        end
-
-        function HandlingEditor:autoload()
-            local count = 0
-
-            for vehicle, file in pairs(Config.handlingAutoload) do
-                local path =  lenaDir .. "handling\\" .. string.lower(vehicle) .. "\\" .. file .. ".json"
-                local modelHash = joaat(vehicle)
-
-                self:SetCurrentVehicle(modelHash)
-                if  self:load(path) then
-                    self.autoloads:push(vehicle, file)
-                    count = count + 1
-                end
-            end
-
-            if self.handlingData then self:clear() end
-            return count
-        end
-
-        g_handlingEditor = HandlingEditor.new(vehicle, handlingTrans.HandlingEditor)
-
-        local numFilesLoaded = g_handlingEditor:autoload()
-
 -------------------------------------
 -------------------------------------
 -- Online
@@ -2163,7 +1324,7 @@ local better_heli_handling_offsets = {
             NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(0, value)
             notify("Free Slots: ".. NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(0))
         end)
-        menu.click_slider(hosttools, "max spectators", {"maxSpectators"}, "Set the max Spectators for the lobby\nOnly works as the Host", 0, 2, 2, 1, function (value)
+        menu.click_slider(hosttools, "max spectators", {"maxspectators"}, "Set the max Spectators for the lobby\nOnly works as the Host", 0, 2, 2, 1, function (value)
             NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(4, value)
             notify("Free Slots: ".. NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(4))
         end)
@@ -2295,7 +1456,7 @@ local better_heli_handling_offsets = {
         -- No-clip
         -------------------------------------
 
-        menu.toggle_loop(detections, "Noclip", {}, "Detects if the player is using noclip aka levitation", function()
+        menu.toggle_loop(detections, "Noclip", {""}, "Detects if the player is using noclip aka levitation", function()
             for _, pid in ipairs(players.list(false, true, true)) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local ped_ptr = entities.handle_to_pointer(ped)
@@ -2584,8 +1745,6 @@ local better_heli_handling_offsets = {
             end
         end)
 
-
-
         menu.toggle_loop(anti_orb,  "Block Orbital Cannon", {"blockorb"}, "Spawns a prop that blocks the orbital cannon room.", function()
             local mdl = util.joaat("xm_prop_cannon_room_door")
             request_model(mdl)
@@ -2857,18 +2016,6 @@ local better_heli_handling_offsets = {
         showleaveInfoteam = toggle
     end)
 
-    menu.action(chatpresets, "Race Countdown", {"Start"}, "Start a race countdown", function()
-    for i = 3, 1, -1 do
-        chat.send_message(i, false, true, true)
-        util.yield(1000)
-    end
-    chat.send_message("GO!!!", false, true, true)
-    end)
-
-    menu.action(chatpresets, "Money Drops", {"Info"}, "Info on money drops", function()
-    chat.send_message("Money drops have no impact on gameplay and only serve as a distraction. Focus on objectives!", false, true, true)
-    end)
-
 -------------------------------------
 -------------------------------------
 -- Tuneables
@@ -3027,7 +2174,7 @@ local better_heli_handling_offsets = {
         -- Mission friendly
         -------------------------------------
 
-        menu.toggle(missions_tunables, "Mission friendly", {""}, "Enables or disables Settings that might interfere with missions", function(on_toggle)
+        menu.toggle(missions_tunables, "Mission friendly", {"missionfriendly", "mfr"}, "Enables or disables Settings that might interfere with missions", function(on_toggle)
             if on_toggle then
                 trigger_commands("nolessen")
                 trigger_commands("hosttoken off")
@@ -3054,19 +2201,13 @@ local better_heli_handling_offsets = {
                 notify("Starting CEO... Please wait for a few secs.")
                 wait(6000)
             end
-
-            if util.is_interaction_menu_open() then
-                IA_MENU_OPEN_OR_CLOSE()
-            end
-            wait(200)
-            SET_INT_GLOBAL(2766485, 29) -- Renders VIP Work screen of the Interaction Menu
-            wait(100)
+            wait(500)
             IA_MENU_OPEN_OR_CLOSE()
-            wait(100)
-            IA_MENU_DOWN(8)
-            wait(100)
             IA_MENU_ENTER(1)
-            wait(100)
+            IA_MENU_DOWN(2)
+            IA_MENU_ENTER(1)
+            IA_MENU_DOWN(8)
+            IA_MENU_ENTER(1)
             IA_MENU_ENTER(1)
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
@@ -3080,24 +2221,20 @@ local better_heli_handling_offsets = {
                 notify("Starting CEO... Please wait for a few secs.")
                 wait(5000)
             end
-
-            if util.is_interaction_menu_open() then
-                IA_MENU_OPEN_OR_CLOSE()
-            end
-            wait(200)
-            SET_INT_GLOBAL(2766485, 29) -- Renders VIP Work screen of the Interaction Menu
-            wait(100)
+            wait(500)
             IA_MENU_OPEN_OR_CLOSE()
-            wait(100)
+            IA_MENU_ENTER(1)
+            IA_MENU_DOWN(2)
+            IA_MENU_ENTER(1)
             IA_MENU_UP(6)
             wait(100)
-            IA_MENU_ENTER(1)
+            IA_MENU_ENTER()
             wait(100)
             IA_MENU_LEFT(2)
             wait(100)
             IA_MENU_DOWN(1)
             wait(100)
-            IA_MENU_ENTER(1)
+            IA_MENU_ENTER()
         end, nil, nil, COMMANDPERM_FRIENDLY)
         
         -------------------------------------
@@ -3120,40 +2257,31 @@ local better_heli_handling_offsets = {
         end)
 
     -------------------------------------
-    -- Unlock Cristmas Clothing
-    -------------------------------------
-
-    menu.toggle_loop(tunables, "Bypass Christmas Clothing", {""}, "", function()
-        SET_PACKED_INT_GLOBAL(9393, 9400, 0) -- joaat("disable_snowballs"), -1810184402
-        SET_PACKED_INT_GLOBAL(9401, 9402, 7) -- joaat("max_number_of_snowballs"), joaat("pick_up_number_of_snowballs")
-    end)
-
-    -------------------------------------
     -- Remove Costs
     -------------------------------------
 
     menu.toggle_loop(tunables, "CEO Abilities", {""}, "", function()
-        SET_PACKED_INT_GLOBAL(12842, 12851, 0) -- 51567061, -1972817298
-        SET_PACKED_INT_GLOBAL(15968, 15973, 0) -- -1451871600, 1289619793
-        SET_INT_GLOBAL(262145 + 15890, 0) -- -939028485
-        SET_INT_GLOBAL(262145 + 19302, 0) -- 2052581897
-        SET_INT_GLOBAL(262145 + 19304, 0) -- -1333531254
+        SET_PACKED_INT_GLOBAL(12842, 12851, 0) -- GB_CALL_LIMO_COST, GB_BRIBE_AUTHORITIES_COST
+        SET_PACKED_INT_GLOBAL(15968, 15973, 0) -- EXEC_VIP2_VOLATUS_RENTAL, EXEC_VIP2_HAVOK_RENTAL
+        SET_INT_GLOBAL(262145 + 15890, 0) -- EXEC1_REQUEST_HELICOPTER
+        SET_INT_GLOBAL(262145 + 19302, 0) -- IMPEXP_VIP_SUPERDIAMOND_COST
+        SET_INT_GLOBAL(262145 + 19304, 0) -- IMPEXP_VIP_SUPERVOLITO_COST
     end, function()
-        SET_PACKED_INT_GLOBAL(12842, 12851, 5000) -- 15263926, -400440420
-        SET_PACKED_INT_GLOBAL(15968, 15973, 5000) -- -679448434, 1289619793
-        SET_INT_GLOBAL(262145 + 12842, 20000) -- 51567061
-        SET_INT_GLOBAL(262145 + 12846, 25000) -- -1560965224
-        SET_INT_GLOBAL(262145 + 12847, 1000) -- 2096833423
-        SET_INT_GLOBAL(262145 + 12848, 1500) -- -688609610
-        SET_INT_GLOBAL(262145 + 12849, 1000) -- 153241568
-        SET_INT_GLOBAL(262145 + 12850, 12000) -- 813006152
-        SET_INT_GLOBAL(262145 + 12851, 15000) -- -1972817298
-        SET_INT_GLOBAL(262145 + 15890, 5000) -- -939028485
-        SET_INT_GLOBAL(262145 + 15968, 10000) -- -1451871600
-        SET_INT_GLOBAL(262145 + 15969, 7000) -- 650824488
-        SET_INT_GLOBAL(262145 + 15970, 9000) -- 253623806
-        SET_INT_GLOBAL(262145 + 19302, 5000) -- 2052581897
-        SET_INT_GLOBAL(262145 + 19304, 10000) -- -1333531254
+        SET_PACKED_INT_GLOBAL(12843, 12845, 5000) -- GB_CALL_ARMORED_COGNOSCENTI_COST, GB_CALL_ARMORED_BALLER_COST
+        SET_PACKED_INT_GLOBAL(15971, 15973, 5000) -- EXEC_VIP2_DINGHY_RENTAL, EXEC_VIP2_HAVOK_RENTAL
+        SET_INT_GLOBAL(262145 + 12842, 20000) -- GB_CALL_LIMO_COST
+        SET_INT_GLOBAL(262145 + 12846, 25000) -- GB_CALL_BUZZARD_COST
+        SET_INT_GLOBAL(262145 + 12847, 1000) -- GB_DROP_AMMO_COST
+        SET_INT_GLOBAL(262145 + 12848, 1500) -- GB_DROP_ARMOR_COST
+        SET_INT_GLOBAL(262145 + 12849, 1000) -- GB_DROP_BULLSHARK_COST
+        SET_INT_GLOBAL(262145 + 12850, 12000) -- GB_GHOST_ORG_COST
+        SET_INT_GLOBAL(262145 + 12851, 15000) -- GB_BRIBE_AUTHORITIES_COST
+        SET_INT_GLOBAL(262145 + 15890, 5000) -- EXEC1_REQUEST_HELICOPTER
+        SET_INT_GLOBAL(262145 + 15968, 10000) -- EXEC_VIP2_VOLATUS_RENTAL
+        SET_INT_GLOBAL(262145 + 15969, 7000) -- EXEC_VIP2_RUMPO_RENTAL
+        SET_INT_GLOBAL(262145 + 15970, 9000) -- EXEC_VIP2_BRICKADE_RENTAL
+        SET_INT_GLOBAL(262145 + 19302, 5000) -- IMPEXP_VIP_SUPERDIAMOND_COST
+        SET_INT_GLOBAL(262145 + 19304, 10000) -- IMPEXP_VIP_SUPERVOLITO_COST
     end)
 
     -------------------------------------
@@ -3234,28 +2362,14 @@ local better_heli_handling_offsets = {
     -- Start a BB
     -------------------------------------
 
-    local start_a_bb1 = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Freemode Activities>Business Battle 1")
-    menu.action(tunables, "Start a BB", {"BB"}, "", function()
+    local start_a_bb = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Freemode Activities>Business Battle 1")
+    menu.action(tunables, "Start a BB", {"bb"}, "", function()
         if menu.get_edition() >= 3 then 
-            trigger_command(start_a_bb1)
+            trigger_command(start_a_bb)
         else
             notify("You need Ultimate to Start a BB, request denied.")
         end
     end, nil, nil, COMMANDPERM_FRIENDLY)
-
-    -------------------------------------
-    -- Start a BB 2
-    -------------------------------------
-
-    local start_a_bb2 = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Uncategorised>Business Battle 2")
-    menu.action(tunables, "Start a BB 2", {"BB2"}, "[Doesn't Work]", function()
-        if menu.get_edition() >= 3 then 
-            trigger_command(start_a_bb2)
-        else
-            notify("You need Ultimate to Start a BB, request denied.")
-        end
-    end)
-
 
 -------------------------------------
 -------------------------------------
@@ -3357,7 +2471,7 @@ local better_heli_handling_offsets = {
         -- Easy Way Out
         -------------------------------------
 
-        menu.action(shortcuts, "Really easy Way out", {"kys"}, "Kill urself", function()
+        menu.action(shortcuts, "Really easy Way out", {"kys"}, "Kill yourself", function()
             local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped(), false)
             pos.z = pos.z - 1.0
             FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), pos.x, pos.y, pos.z, 5, 1.0, false, false, 1.0)
@@ -3423,7 +2537,7 @@ local better_heli_handling_offsets = {
         -- Buy Ammo
         -------------------------------------    
 
-        menu.action(shortcuts, "Buy Ammo", {""}, "Buys ammo the legit way.", function()
+        menu.action(shortcuts, "Buy Ammo", {"buyammo"}, "Buys ammo the legit way.", function()
             wait(500)
             if players.get_boss(players.user()) == -1 then
                 notify("Not in a CEO... changing config")
@@ -3628,7 +2742,7 @@ local better_heli_handling_offsets = {
             notify("Vehicle Health: "..vhealth)
         end)
 
-        menu.action(sdebug, "Get Vehicle", {"getveh"}, "", function()
+        menu.action(sdebug, "Get Vehicle", {""}, "", function()
             local pped = players.user()
             local vname = check(util.get_label_text(players.get_vehicle_model(pped)))
             local vmodel = players.get_vehicle_model(pped)
@@ -3636,7 +2750,7 @@ local better_heli_handling_offsets = {
             log("Vehicle Model: "..vmodel.." | Name: ".. vname)
         end)
 
-        rss = menu.action(sdebug, "Restart Session Scripts", {"rss"}, "Restarts the freemode.c script.", function(click_type)
+        rss = menu.action(sdebug, "Restart Session Scripts", {"rss"}, "Restarts the freemode.c script. This will remove your weapons for some reason.\nKill youself and you will have them again", function(click_type)
             trigger_commands("skiprepeatwar off; commandsskip off")
             wait(1000)
             if not util.is_session_transition_active() then
@@ -3731,9 +2845,11 @@ local better_heli_handling_offsets = {
             end
         end)
 
-        menu.action(sdebug, "GET_VEHICLE_BOMB_AMMO", {""}, "", function()
-            local vehicle = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-            notify(VEHICLE.GET_VEHICLE_BOMB_AMMO(entities.get_user_vehicle_as_handle()))
+        menu.slider(sdebug, "Rank", {"reqrank"}, "", 1,8000,1,1, function(on_change)
+            required_rank = on_change
+        end)
+        menu.action(sdebug, "Get RP for Rank", {""}, "", function()
+            notify("RP required for Rank: "..util.get_rp_required_for_rank(required_rank))
         end)
     end
 
@@ -4063,6 +3179,7 @@ local function player(pid)
             menu.trigger_commands("givesh" .. player)
             menu.trigger_commands("aptme" .. player)
         end, nil, nil, COMMANDPERM_FRIENDLY)
+
         -------------------------------------
         -- Spectate
         -------------------------------------
@@ -4218,11 +3335,35 @@ local function player(pid)
                 end
         end)
 
+        menu.action(trolling, "Send To Online Intro", {"intro"}, "Sends player to the GTA Online intro", function()
+            local int = memory.read_int(memory.script_global(1894573 + 1 + (pid * 608) + 510))
+            sendse(1 << pid, {-95341040, players.user(), 20, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
+            sendse(1 << pid, {1742713914, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+        end)
+    
+        menu.action(trolling, "Send To Golf", {"golf"}, "Sends player to go play golf", function()
+            local int = memory.read_int(memory.script_global(1894573 + 1 + (pid * 608) + 510))
+            sendse(1 << pid, {-95341040, players.user(), 116, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
+            sendse(1 << pid, {1742713914, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+        end)
+    
+        menu.action(trolling, "Break Freemode", {"breakfreemode"}, "Breaks their freemode to where they can't use see the player list, use their interaction menu, or see most blips", function()
+            local int = memory.read_int(memory.script_global(1894573 + 1 + (pid * 608) + 510))
+            sendse(1 << pid, {-95341040, players.user(), 194, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
+            sendse(1 << pid, {1742713914, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+        end)
+        
+        menu.action(trolling, "Force 1v1", {"1v1"}, "Forces them into a 1v1", function()
+            local int = memory.read_int(memory.script_global(1894573 + 1 + (pid * 608) + 510))
+            sendse(1 << pid, {-95341040, players.user(), 197, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
+            sendse(1 << pid, {1742713914, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+        end)
+
         -------------------------------------
         -- HOSTILE TRAFFIC
         -------------------------------------
 
-        menu.toggle_loop(trolling, "Hostile Traffic", {}, "", function()
+        menu.toggle_loop(trolling, "Hostile Traffic", {""}, "", function()
             if not is_player_active(pid, false, true) then
                 return util.stop_thread()
             end
@@ -4281,7 +3422,7 @@ local function player(pid)
         -- Kill Player Inside Interior
         -------------------------------------
 
-        menu.action(trolling, "Kill Player Inside Interior", {}, "Works in casino and nightclubs.", function()
+        menu.action(trolling, "Kill Player Inside Interior", {""}, "Works in casino and nightclubs", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = ENTITY.GET_ENTITY_COORDS(ped)
     
@@ -4290,7 +3431,7 @@ local function player(pid)
                     util.toast("Player is not in any interior. :/")
                 return end
                 if get_interior_player_is_in(pid) ~= id then
-                    util.trigger_script_event(1 << pid, {113023613, pid, 1771544554, math.random(0, 9999)})
+                    sendse(1 << pid, {113023613, pid, 1771544554, math.random(0, 9999)})
                     util.yield(100)
                     MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(pos.x, pos.y, pos.z + 1, pos.x, pos.y, pos.z, 1000, true, util.joaat("weapon_stungun"), players.user_ped(), false, true, 1.0)
                 end
@@ -4301,7 +3442,7 @@ local function player(pid)
         -- Bounty Loop
         -------------------------------------
 
-        menu.toggle_loop(trolling, "Bounty Loop", {"bloop"}, "Will set the players bounty always to 9000.", function(on)
+        menu.toggle_loop(trolling, "Bounty Loop", {"bloop"}, "Will set the players bounty always to 9000", function(on)
             local bounty = players.get_bounty(pid)
             local player = players.get_name(pid)
             if not bounty then
@@ -4318,27 +3459,27 @@ local function player(pid)
 
         for id, name in pairs(All_business_properties) do
             if id <= 12 then
-                menu.action(clubhouse, name, {}, "", function()
+                menu.action(clubhouse, name, {""}, "", function()
                     sendse(1 << pid, {0xDEE5ED91, pid, id, 0x20, NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, math.random(1, 10)})
                 end)
             elseif id > 12 and id <= 21 then
-                menu.action(facility, name, {}, "", function()
+                menu.action(facility, name, {""}, "", function()
                     sendse(1 << pid, {0xDEE5ED91, pid, id, 0x20, NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
                 end)
             elseif id > 21 then
-                menu.action(arcade, name, {}, "", function() 
+                menu.action(arcade, name, {""}, "", function() 
                     sendse(1 << pid, {0xDEE5ED91, pid, id, 0x20, NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1})
                 end)
             end
         end
 
         for id, name in pairs(large_warehouses) do
-            menu.action(large, name, {}, "", function()
+            menu.action(large, name, {""}, "", function()
                 sendse(1 << pid, {0x7EFC3716, pid, 0, 1, id})
             end)
         end
 
-        menu.action(tp_player, "Heist Passed Apartment Teleport", {}, "", function()
+        menu.action(tp_player, "Heist Passed Apartment Teleport", {""}, "", function()
             sendse(1 << pid, {0xAD1762A7, players.user(), pid, -1, 1, 1, 0, 1, 0}) 
         end) 
 
@@ -4366,11 +3507,11 @@ local function player(pid)
             Explosion.type = value 
         end)]]
 
-        menu.action(customExplosion, "Stealth Explode", {}, "", function()
+        menu.action(customExplosion, "Stealth Explode", {""}, "", function()
             FIRE.ADD_EXPLOSION(players.get_position(pid), 1, 1.0, true, false, 0.0, false)
         end)
 
-        menu.action(customExplosion, "Stealth Owned Explode", {}, "", function()
+        menu.action(customExplosion, "Stealth Owned Explode", {""}, "", function()
             FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 1, 1.0, false, true, 0.0)
         end)
   
@@ -4379,14 +3520,14 @@ local function player(pid)
         end)
 
         local usingExplosionLoop = false
-        menu.toggle(customExplosion, "Stealth Explosion Loop", {}, "", function(on)
+        menu.toggle(customExplosion, "Stealth Explosion Loop", {""}, "", function(on)
             usingExplosionLoop = on
             while usingExplosionLoop and is_player_active(pid, false, true) and not util.is_session_transition_active() do
                 FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 1, 1.0, false, true, 0.0)
                 wait(delay)
             end
         end)
-        menu.toggle(customExplosion, "Explosion Loop", {}, "", function(on)
+        menu.toggle(customExplosion, "Explosion Loop", {""}, "", function(on)
             usingExplosionLoop = on
             while usingExplosionLoop and is_player_active(pid, false, true) and not util.is_session_transition_active() do
                 FIRE.ADD_EXPLOSION(players.get_position(pid), 1, 1.0, true, false, 0.0, false)
@@ -4427,7 +3568,11 @@ local function player(pid)
         -------------------------------------
 
         menu.toggle(trolling, "Ghost Player", {"ghost", "g"}, "", function(on)
-            NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, on)
+            if on then
+                NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, on)
+            else
+                NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, off)
+            end
         end)
 
     -------------------------------------
@@ -4693,18 +3838,6 @@ local function player(pid)
                 ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, my_pos, false, false, false)
             end
         end)
-
-        menu.action(crashes, "Host Crash v2", {"hostcrash"}, "", function()
-            menu.trigger_commands("pipebomb" .. players.get_name(pid))
-        end)
-            
-        menu.action(crashes, "Host Pedswap Crash", {""}, "", function()
-            menu.trigger_commands("pipebomb" .. players.get_name(pid))
-        end)
-                
-        menu.toggle_loop(crashes, "Break Lag Compensation", {""}, "Remotely Make The Player Break Lag Compensation", function()
-            menu.trigger_commands("pipebomb" .. players.get_name(pid))
-        end)
 --  end
 end
 
@@ -4798,7 +3931,6 @@ end)
 
 util.on_stop(function()
 	set_streamed_texture_dict_as_no_longer_needed("lena")
-	Ini.save(lconfigFile, Config)
 end)
 
 -------------------------------------
