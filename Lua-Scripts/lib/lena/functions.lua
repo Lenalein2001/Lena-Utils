@@ -28,8 +28,6 @@ Config = {
 	handlingAutoload = {}
 }
 
----@alias HudColour integer
-
 HudColour =
 {
 	pureWhite = 0,
@@ -67,7 +65,6 @@ local NULL <const> = 0
 -- NOTIFICATION
 --------------------------
 
----@class Notification
 notification =
 {
 	txdDict = "DIA_ZOMBIE1",
@@ -77,15 +74,12 @@ notification =
 	defaultColour = HudColour.black
 }
 
----@param msg string
 function notification.stand(msg)
 	assert(type(msg) == "string", "msg must be a string, got " .. type(msg))
 	msg = msg:gsub('~[%w_]-~', ""):gsub('<C>(.-)</C>', '%1')
 	util.toast("[Lena] " .. msg)
 end
 
-
----@param format string
 ---@param colour? HudColour
 function notification:help(format, colour, ...)
 	assert(type(format) == "string", "msg must be a string, got " .. type(format))
@@ -100,9 +94,6 @@ function notification:help(format, colour, ...)
 	HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER_WITH_TOKENS(true, true)
 end
 
-
----@param format string
----@param colour? HudColour
 function notification:normal(format, colour, ...)
 	assert(type(format) == "string", "msg must be a string, got " .. type(format))
 
@@ -123,10 +114,6 @@ end
 
 Features = {}
 Translation = {}
-
----@param section string
----@param name string
----@return string
 function translate(section, name)
 	Features[section] = Features[section] or {}
 	Features[section][name] = Features[section][name] or ""
@@ -144,9 +131,6 @@ function translate(section, name)
 	return Translation[section][name]
 end
 
-
----@param value any
----@param e string
 function type_match (value, e)
 	local t = type(value)
 	for w in e:gmatch('[^|]+') do
@@ -156,11 +140,6 @@ function type_match (value, e)
 	return false, msg:format(e:gsub('|', " or "), t)
 end
 
-
----@param tbl table
----@param types {[1]: string, [2]:string}
----@return boolean
----@return string? errmsg
 local check_table_types = function (tbl, types)
 	if type(tbl) ~= "table" then
 		return false, "tbl must be a tble"
@@ -175,10 +154,6 @@ local check_table_types = function (tbl, types)
 	return true
 end
 
-
----@param obj table
----@return boolean
----@return string? errmsg
 function is_translation_valid (obj)
 	for sect_name, section in pairs(obj) do
 		if type(sect_name) ~= "string" then
@@ -195,10 +170,6 @@ function is_translation_valid (obj)
 	return true
 end
 
-
----@param language string
----@return boolean
----@return string? errmsg
 function load_translation(language)
 	local path = filesystem.scripts_dir() .. "WiriScript\\language\\" .. language
 	if not filesystem.exists(path) then
@@ -225,10 +196,6 @@ end
 --------------------------
 
 Ini = {}
-
----Saves a table with key-value pairs in an ini format file.
----@param fileName string
----@param obj table
 function Ini.save(fileName, obj)
 	local file <close> = assert(io.open(fileName, "w"), "error loading file")
 	local s = {}
@@ -242,10 +209,6 @@ function Ini.save(fileName, obj)
 	file:write(table.concat(s, '\n'))
 end
 
-
----Parses a table from an ini format file.
----@param fileName any
----@return table
 function Ini.load(fileName)
 	assert(type(fileName) == "string", "fileName must be a string")
 	local file <close> = assert(io.open(fileName, "r"), "error loading file: " .. fileName)
@@ -274,13 +237,8 @@ function Ini.load(fileName)
 	return data
 end
 
-
 local parseJson = json.parse
 
----@param filePath string
----@param withoutNull? boolean
----@return boolean
----@return string|table
 json.parse = function (filePath, withoutNull)
 	local file <close> = assert(io.open(filePath, "r"), filePath .. " does not exist")
 	local content = file:read("a")
@@ -295,14 +253,9 @@ end
 -- EFFECT
 --------------------------
 
----@class Effect
 Effect = {asset = "", name = "", scale = 1.0}
 Effect.__index = Effect
 
----@param asset string
----@param name string
----@param scale? number
----@return Effect
 function Effect.new(asset, name, scale)
 	local inst = setmetatable({}, Effect)
 	inst.name = name
@@ -315,15 +268,9 @@ end
 -- SOUND
 --------------------------
 
----@class Sound
 Sound = {Id = -1, name = "", reference = ""}
 Sound.__index = Sound
 
----@alias nullptr 0
-
----@param name string|nullptr
----@param reference string|nullptr
----@return Sound
 function Sound.new(name, reference)
 	local inst = setmetatable({}, Sound)
 	inst.name = name
@@ -361,18 +308,10 @@ end
 -- COLOUR
 --------------------------
 
----@class Colour
----@field r number | integer
----@field g number | integer
----@field b number | integer
----@field a number | integer
-
 function new_colour(r, g, b, a)
 	return {r = r, g = g, b = b, a = a}
 end
 
-
----@return Colour
 function get_random_colour()
 	local colour = {a = 255}
 	colour.r = math.random(0,255)
@@ -381,9 +320,6 @@ function get_random_colour()
 	return colour
 end
 
-
----@param hudColour HudColour
----@return {r: integer, g: integer, b: integer, a: integer}
 function get_hud_colour(hudColour)
 	local r = memory.alloc(1)
 	local g = memory.alloc(1)
@@ -393,8 +329,6 @@ function get_hud_colour(hudColour)
 	return {r = memory.read_int(r), g = memory.read_int(g), b = memory.read_int(b), a = memory.read_int(a)}
 end
 
-
----@param colour Colour
 function rainbow_colour(colour)
 	if colour.r > 0 and colour.b == 0 then
 		colour.r = colour.r - 1
@@ -412,9 +346,6 @@ function rainbow_colour(colour)
 	end
 end
 
-
----@param perc number
----@return Colour
 function get_blended_colour(perc)
 	local colour = {a = 255}
 	local r, g, b
@@ -441,7 +372,6 @@ end
 
 Instructional = {scaleform = 0}
 
----@return boolean
 function Instructional:begin ()
 	if GRAPHICS.HAS_SCALEFORM_MOVIE_LOADED(self.scaleform) then
 		GRAPHICS.BEGIN_SCALEFORM_MOVIE_METHOD(self.scaleform, "CLEAR_ALL")
@@ -459,10 +389,6 @@ function Instructional:begin ()
     end
 end
 
-
----@param index integer
----@param name string
----@param button string
 function Instructional:add_data_slot(index, name, button)
 	GRAPHICS.BEGIN_SCALEFORM_MOVIE_METHOD(self.scaleform, "SET_DATA_SLOT")
 	GRAPHICS.SCALEFORM_MOVIE_METHOD_ADD_PARAM_INT(self.position)
@@ -480,27 +406,16 @@ function Instructional:add_data_slot(index, name, button)
 	self.position = self.position + 1
 end
 
-
----@param index integer
----@param name string
 function Instructional.add_control(index, name)
 	local button = PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(2, index, true)
     Instructional:add_data_slot(index, name, button)
 end
 
-
----@param index integer
----@param name string
 function Instructional.add_control_group (index, name)
 	local button = PAD.GET_CONTROL_GROUP_INSTRUCTIONAL_BUTTONS_STRING(2, index, true)
     Instructional:add_data_slot(index, name, button)
 end
 
-
----@param r integer
----@param g integer
----@param b integer
----@param a integer
 function Instructional:set_background_colour(r, g, b, a)
 	GRAPHICS.BEGIN_SCALEFORM_MOVIE_METHOD(self.scaleform, "SET_BACKGROUND_COLOUR")
 	GRAPHICS.SCALEFORM_MOVIE_METHOD_ADD_PARAM_INT(r)
@@ -509,7 +424,6 @@ function Instructional:set_background_colour(r, g, b, a)
 	GRAPHICS.SCALEFORM_MOVIE_METHOD_ADD_PARAM_INT(a)
 	GRAPHICS.END_SCALEFORM_MOVIE_METHOD()
 end
-
 
 function Instructional:draw ()
 	GRAPHICS.BEGIN_SCALEFORM_MOVIE_METHOD(self.scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
@@ -523,13 +437,6 @@ end
 -- TIMER
 --------------------------
 
----@class Timer
----@field elapsed fun(): integer
----@field reset fun()
----@field isEnabled fun(): boolean
----@field disable fun()
-
----@return Timer
 function newTimer()
 	local self = {
 		start = util.current_time_millis(),
@@ -573,9 +480,6 @@ function BitTest(bits, place)
 	return (bits & (1 << place)) ~= 0
 end
 
-
----@param entity Entity
----@param value boolean
 function set_explosion_proof(entity, value)
 	local pEntity = entities.handle_to_pointer(entity)
 	if pEntity == 0 then return end
@@ -584,10 +488,6 @@ function set_explosion_proof(entity, value)
 	memory.write_uint(pEntity + 0x188, damageBits)
 end
 
-
----@param entity Entity
----@param target Entity
----@param usePitch? boolean
 function set_entity_face_entity(entity, target, usePitch)
 	local pos1 = ENTITY.GET_ENTITY_COORDS(entity, false)
 	local pos2 = ENTITY.GET_ENTITY_COORDS(target, false)
@@ -601,11 +501,6 @@ function set_entity_face_entity(entity, target, usePitch)
 	end
 end
 
-
----@param entity Entity
----@param blipSprite integer
----@param colour integer
----@return Blip
 function add_blip_for_entity(entity, blipSprite, colour)
 	local blip = HUD.ADD_BLIP_FOR_ENTITY(entity)
 	HUD.SET_BLIP_SPRITE(blip, blipSprite)
@@ -627,10 +522,6 @@ function add_blip_for_entity(entity, blipSprite, colour)
 	return blip
 end
 
-
----@param blip Blip
----@param name string
----@param isLabel? boolean
 function set_blip_name(blip, name, isLabel)
 	HUD.BEGIN_TEXT_COMMAND_SET_BLIP_NAME("STRING")
 	if not isLabel then
@@ -641,9 +532,6 @@ function set_blip_name(blip, name, isLabel)
 	HUD.END_TEXT_COMMAND_SET_BLIP_NAME(blip)
 end
 
-
----@param entity Entity
----@return boolean
 function request_control_once(entity)
 	if not NETWORK.NETWORK_IS_IN_SESSION() then
 		return true
@@ -653,10 +541,6 @@ function request_control_once(entity)
 	return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
 end
 
-
----@param entity Entity
----@param timeOut? integer #time in `ms` trying to get control
----@return boolean
 function request_control(entity, timeOut)
 	if not ENTITY.DOES_ENTITY_EXIST(entity) then
 		return false
@@ -669,11 +553,6 @@ function request_control(entity, timeOut)
 	return start.elapsed() < timeOut
 end
 
-
----@param ped Ped
----@param maxPeds? integer
----@param ignore? integer
----@return Entity[]
 function get_ped_nearby_peds(ped, maxPeds, ignore)
 	maxPeds = maxPeds or 16
 	local pEntityList = memory.alloc((maxPeds + 1) * 8)
@@ -685,10 +564,6 @@ function get_ped_nearby_peds(ped, maxPeds, ignore)
 	return pedsList
 end
 
-
----@param ped Ped
----@param maxVehicles? integer
----@return Entity[]
 function get_ped_nearby_vehicles(ped, maxVehicles)
 	maxVehicles = maxVehicles or 16
 	local pVehicleList = memory.alloc((maxVehicles + 1) * 8)
@@ -700,9 +575,6 @@ function get_ped_nearby_vehicles(ped, maxVehicles)
 	return vehiclesList
 end
 
-
----@param ped Ped
----@return Entity[]
 function get_ped_nearby_entities(ped)
 	local peds = get_ped_nearby_peds(ped)
 	local vehicles = get_ped_nearby_vehicles(ped)
@@ -711,10 +583,6 @@ function get_ped_nearby_entities(ped)
 	return entities
 end
 
-
----@param player Player
----@param radius number
----@return Entity[]
 function get_peds_in_player_range(player, radius)
 	local peds = {}
 	local playerPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(player)
@@ -728,10 +596,6 @@ function get_peds_in_player_range(player, radius)
 	return peds
 end
 
-
----@param player Player
----@param radius number
----@return Entity[]
 function get_vehicles_in_player_range(player, radius)
 	local vehicles = {}
 	local pos = players.get_position(player)
@@ -742,10 +606,6 @@ function get_vehicles_in_player_range(player, radius)
 	return vehicles
 end
 
-
----@param pId Player
----@param radius number
----@return Entity[]
 function get_entities_in_player_range(pId, radius)
 	local peds = get_peds_in_player_range(pId, radius)
 	local vehicles = get_vehicles_in_player_range(pId, radius)
@@ -754,29 +614,15 @@ function get_entities_in_player_range(pId, radius)
 	return entities
 end
 
-
----@param start v3
----@param to v3
----@param colour Colour
 local draw_line = function (start, to, colour)
 	GRAPHICS.DRAW_LINE(start.x, start.y, start.z, to.x, to.y, to.z, colour.r, colour.g, colour.b, colour.a)
 end
 
-
----@param pos0 v3
----@param pos1 v3
----@param pos2 v3
----@param pos3 v3
----@param colour Colour
 local draw_rect = function (pos0, pos1, pos2, pos3, colour)
 	GRAPHICS.DRAW_POLY(pos0.x, pos0.y, pos0.z, pos1.x, pos1.y, pos1.z, pos3.x, pos3.y, pos3.z, colour.r, colour.g, colour.b, colour.a)
 	GRAPHICS.DRAW_POLY(pos3.x, pos3.y, pos3.z, pos2.x, pos2.y, pos2.z, pos0.x, pos0.y, pos0.z, colour.r, colour.g, colour.b, colour.a)
 end
-
-
----@param entity Entity
----@param showPoly? boolean
----@param colour? Colour	
+	
 function draw_bounding_box(entity, showPoly, colour)
 	if not ENTITY.DOES_ENTITY_EXIST(entity) then
 		return
@@ -824,17 +670,10 @@ function draw_bounding_box(entity, showPoly, colour)
 	end
 end
 
-
----@param entity Entity
----@param flag integer
 function set_decor_flag(entity, flag)
 	DECORATOR.DECOR_SET_INT(entity, "Casino_Game_Info_Decorator", flag)
 end
 
-
----@param entity Entity
----@param flag integer
----@return boolean
 function is_decor_flag_set(entity, flag)
 	if ENTITY.DOES_ENTITY_EXIST(entity) and
 	DECORATOR.DECOR_EXIST_ON(entity, "Casino_Game_Info_Decorator") then
@@ -844,19 +683,10 @@ function is_decor_flag_set(entity, flag)
 	return false
 end
 
-
----@param entity Entity
 function remove_decor(entity)
 	DECORATOR.DECOR_REMOVE(entity, "Casino_Game_Info_Decorator")
 end
 
-
----@param ped Ped
----@param forcedOn boolean
----@param hasCone boolean
----@param noticeRange number
----@param colour integer
----@param sprite integer
 function add_ai_blip_for_ped(ped, forcedOn, hasCone, noticeRange, colour, sprite)
 	if colour == -1 then
 		HUD.SET_PED_HAS_AI_BLIP(ped, true)
@@ -869,21 +699,11 @@ function add_ai_blip_for_ped(ped, forcedOn, hasCone, noticeRange, colour, sprite
 	HUD.SET_PED_AI_BLIP_FORCED_ON(ped, forcedOn)
 end
 
-
----@param entity Entity
----@param minDistance number
----@param maxDistance number
----@return v3
 function get_random_offset_from_entity(entity, minDistance, maxDistance)
 	local pos = ENTITY.GET_ENTITY_COORDS(entity, false)
 	return get_random_offset_in_range(pos, minDistance, maxDistance)
 end
 
-
----@param coords v3
----@param minDistance number
----@param maxDistance number
----@return v3
 function get_random_offset_in_range(coords, minDistance, maxDistance)
 	local radius = random_float(minDistance, maxDistance)
 	local angle = random_float(0, 2 * math.pi)
@@ -893,8 +713,6 @@ function get_random_offset_in_range(coords, minDistance, maxDistance)
 	return coords
 end
 
-
----@param entity Entity
 function set_entity_as_no_longer_needed(entity)
 	if not ENTITY.DOES_ENTITY_EXIST(entity) then return end
 	local pHandle = memory.alloc_int()
@@ -902,10 +720,6 @@ function set_entity_as_no_longer_needed(entity)
 	ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(pHandle)
 end
 
-
----@param entity Entity
----@param target Entity
----@return number
 function get_distance_between_entities(entity, target)
 	if not ENTITY.DOES_ENTITY_EXIST(entity) or not ENTITY.DOES_ENTITY_EXIST(target) then
 		return 0.0
@@ -918,8 +732,6 @@ end
 -- PLAYER
 --------------------------
 
----@param player Player
----@return boolean
 function is_player_friend(player)
 	local pHandle = memory.alloc(104)
 	NETWORK.NETWORK_HANDLE_FROM_PLAYER(player, pHandle, 13)
@@ -927,9 +739,6 @@ function is_player_friend(player)
 	return isFriend
 end
 
-
----@param player Player
----@return Vehicle
 function get_vehicle_player_is_in(player)
 	local targetPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(player)
 	if PED.IS_PED_IN_ANY_VEHICLE(targetPed, false) then
@@ -938,9 +747,6 @@ function get_vehicle_player_is_in(player)
 	return 0
 end
 
-
----@param player Player
----@return Entity
 function get_entity_player_is_aiming_at(player)
 	if not PLAYER.IS_PLAYER_FREE_AIMING(player) then
 		return NULL
@@ -955,25 +761,16 @@ function get_entity_player_is_aiming_at(player)
 	return entity
 end
 
-
----@param entity Entity
----@return integer address
 function get_net_obj(entity)
 	local pEntity = entities.handle_to_pointer(entity)
 	return pEntity ~= NULL and memory.read_long(pEntity + 0xD0) or NULL
 end
 
-
----@param entity Entity
----@return Player owner
 function get_entity_owner(entity)
 	local net_obj = get_net_obj(entity)
 	return net_obj ~= NULL and memory.read_byte(net_obj + 0x49) or -1
 end
 
-
----@param player Player
----@return boolean
 function is_player_passive(player)
 	if player ~= players.user() then
 		local address = memory.script_global(1894573 + (player * 608 + 1) + 8)
@@ -985,17 +782,11 @@ function is_player_passive(player)
 	return false
 end
 
-
----@param player Player
----@return boolean
 function is_player_in_any_interior(player)
 	local address = memory.script_global(2657589 + (player * 466 + 1) + 245)
 	return address ~= NULL and memory.read_int(address) ~= 0
 end
 
-
----@param player Player
----@return boolean
 function is_player_in_interior(player)
 	if player == -1 then
 		return false
@@ -1011,9 +802,6 @@ function is_player_in_interior(player)
 	return false
 end
 
-
----@param player Player
----@return boolean
 function is_player_in_rc_bandito(player)
 	if player ~= -1 then
 		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 365)
@@ -1022,9 +810,6 @@ function is_player_in_rc_bandito(player)
 	return false
 end
 
-
----@param player Player
----@return boolean
 function is_player_in_rc_tank(player)
 	if player ~= -1 then
 		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 2)
@@ -1033,9 +818,6 @@ function is_player_in_rc_tank(player)
 	return false
 end
 
-
----@param player Player
----@return boolean
 function is_player_in_rc_personal_vehicle(player)
 	if player ~= -1 then
 		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 3)
@@ -1044,9 +826,6 @@ function is_player_in_rc_personal_vehicle(player)
 	return false
 end
 
-
----@param player Player
----@return boolean
 function is_player_in_any_rc_vehicle(player)
 	if is_player_in_rc_bandito(player) then
 		return true
@@ -1063,10 +842,6 @@ function is_player_in_any_rc_vehicle(player)
 	return false
 end
 
-
----@diagnostic disable: exp-in-action, unknown-symbol, action-after-return, undefined-global
----@param colour integer
----@return integer
 function get_hud_colour_from_org_colour(colour)
 	switch colour do
 		case 0:
@@ -1103,10 +878,6 @@ function get_hud_colour_from_org_colour(colour)
 	return 1
 end
 
-
----@diagnostic enable: exp-in-action, unknown-symbol, action-after-return, undefined-global
----@param player Player
----@return integer
 function get_player_org_blip_colour(player)
 	if players.get_boss(player) ~= -1 then
 		local hudColour = get_hud_colour_from_org_colour(players.get_org_colour(player))
@@ -1116,9 +887,6 @@ function get_player_org_blip_colour(player)
 	return 0
 end
 
-
----@param player Player
----@return string
 function get_condensed_player_name(player)
 	local condensed = "<C>" .. PLAYER.GET_PLAYER_NAME(player) .. "</C>"
 
@@ -1131,11 +899,6 @@ function get_condensed_player_name(player)
 	return condensed
 end
 
-
----@param player Player
----@param isPlaying boolean
----@param inTransition boolean
----@return boolean
 function is_player_active(player, isPlaying, inTransition)
 	if player == -1 or
 	not NETWORK.NETWORK_IS_PLAYER_ACTIVE(player) then
@@ -1151,13 +914,10 @@ function is_player_active(player, isPlaying, inTransition)
 	return true
 end
 
-
 --------------------------
 -- CAM
 --------------------------
 
----@param dist number
----@return v3
 function get_offset_from_cam(dist)
 	local rot = CAM.GET_FINAL_RENDERED_CAM_ROT(2)
 	local pos = CAM.GET_FINAL_RENDERED_CAM_COORD()
@@ -1185,15 +945,6 @@ TraceFlag =
 	foliage = 256,
 }
 
----@class RaycastResult
----@field didHit boolean
----@field endCoords v3
----@field surfaceNormal v3
----@field hitEntity Entity
-
----@param dist number
----@param flag? integer
----@return RaycastResult
 function get_raycast_result(dist, flag)
 	local result = {}
 	flag = flag or TraceFlag.everything
@@ -1223,46 +974,33 @@ end
 -- STREAMING
 --------------------------
 
----@param model integer
 function request_model(model)
 	STREAMING.REQUEST_MODEL(model)
 	while not STREAMING.HAS_MODEL_LOADED(model) do util.yield_once() end
 end
 
-
----@param asset string
 function request_fx_asset(asset)
 	STREAMING.REQUEST_NAMED_PTFX_ASSET(asset)
 	while not STREAMING.HAS_NAMED_PTFX_ASSET_LOADED(asset) do util.yield_once() end
 end
 
-
----@param hash integer
 function request_weapon_asset(hash)
 	WEAPON.REQUEST_WEAPON_ASSET(hash, 31, 0)
 	while not WEAPON.HAS_WEAPON_ASSET_LOADED(hash) do util.yield_once() end
 end
 
-
----Credits to aaron
----@param textureDict string
 function request_streamed_texture_dict(textureDict)
 	util.spoof_script("main_persistent", function()
 		GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(textureDict, false)
 	end)
 end
 
-
----@param textureDict string
 function set_streamed_texture_dict_as_no_longer_needed(textureDict)
 	util.spoof_script("main_persistent", function()
 		GRAPHICS.SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED(textureDict)
 	end)
 end
 
-
----@param name string
----@return integer
 function request_scaleform_movie(name)
 	local handle
 	util.spoof_script("main_persistent", function ()
@@ -1271,8 +1009,6 @@ function request_scaleform_movie(name)
 	return handle
 end
 
-
----@param handle integer
 function set_scaleform_movie_as_no_longer_needed(handle)
 	util.spoof_script("main_persistent", function ()
 		local ptr = memory.alloc_int()
@@ -1285,9 +1021,6 @@ end
 -- MEMORY
 --------------------------
 
----@param addr integer
----@param offsets integer[]
----@return integer
 function addr_from_pointer_chain(addr, offsets)
 	if addr == 0 then return 0 end
 	for k = 1, (#offsets - 1) do
@@ -1297,7 +1030,6 @@ function addr_from_pointer_chain(addr, offsets)
 	addr = addr + offsets[#offsets]
 	return addr
 end
-
 
 write_global = {
 	byte = function(global, value)
@@ -1313,7 +1045,6 @@ write_global = {
 		memory.write_float(address, value)
 	end
 }
-
 
 read_global = {
 	byte = function(global)
@@ -1334,7 +1065,6 @@ read_global = {
 	end
 }
 
-
 HudTimer = {}
 
 HudTimer.SetHeightMultThisFrame = function (mult)
@@ -1344,7 +1074,6 @@ end
 HudTimer.DisableThisFrame = function()
 	write_global.int(2696211, 1)
 end
-
 
 function EnableOTR()
 	local toggle_addr = 2657589 + ((PLAYER.PLAYER_ID() * 466) + 1) + 210
@@ -1371,10 +1100,6 @@ function is_phone_open()
 	return false
 end
 
-
----@param name string
----@param pattern string
----@param callback fun(address: integer)
 function memory_scan(name, pattern, callback)
 	local address = memory.scan(pattern)
 
@@ -1387,9 +1112,6 @@ end
 -- TABLE
 --------------------------
 
----Returns a random value from the given table.
----@param t table
----@return any
 function table.random(t)
 	if rawget(t, 1) ~= nil then
 		return t[ math.random(#t) ]
@@ -1417,20 +1139,10 @@ function pairs_by_keys(t, f)
 	return iter
 end
 
-
----Inserts `value` if `t` does not already includes it.
----@param t table
----@param value any
 function table.insert_once(t, value)
 	if not table.find(t, value) then table.insert(t, value) end
 end
 
-
----@generic T: table, K, V
----@param t T
----@param f fun(key: K, value: V): boolean
----@return V
----@nodiscard
 function table.find_if(t, f)
 	for k, v in pairs(t) do
 		if f(k, v) then return k end
@@ -1438,12 +1150,6 @@ function table.find_if(t, f)
 	return nil
 end
 
-
----@generic T: table, K, V
----@param t T
----@param value any
----@return K?
----@nodiscard
 function table.find(t, value)
 	for k, v in pairs(t) do
 		if value == v then return k end
@@ -1451,11 +1157,6 @@ function table.find(t, value)
 	return nil
 end
 
-
----@generic T: table, K, V
----@param t T
----@param f fun(key: K, value: V):boolean
----@return integer
 function table.count_if(t, f)
 	local count = 0
 	for k, v in pairs(t) do
@@ -1468,29 +1169,20 @@ end
 -- MISC
 --------------------------
 
----Credits to Sainan
 function int_to_uint(int)
     if int >= 0 then return int end
     return (1 << 32) + int
 end
-
 
 function interpolate(y0, y1, perc)
 	perc = perc > 1.0 and 1.0 or perc
 	return (1 - perc) * y0 + perc * y1
 end
 
-
----@param num number
----@param places? integer
----@return number?
 function round(num, places)
 	return tonumber(string.format('%.' .. (places or 0) .. 'f', num))
 end
 
-
----@param blip integer
----@return v3?
 function get_blip_coords(blip)
 	if blip == 0 then
 		return nil
@@ -1507,9 +1199,6 @@ function get_blip_coords(blip)
 	return pos
 end
 
-
----@param pos v3
----@return number?
 function get_ground_z(pos)
 	local pGroundZ = memory.alloc(4)
 	MISC.GET_GROUND_Z_FOR_3D_COORD(pos.x, pos.y, pos.z, pGroundZ, false, true)
@@ -1517,11 +1206,6 @@ function get_ground_z(pos)
 	return groundz
 end
 
-
----@param windowName string #Must be a label
----@param maxInput integer
----@param defaultText string
----@return string
 function get_input_from_screen_keyboard(windowName, maxInput, defaultText)
 	MISC.DISPLAY_ONSCREEN_KEYBOARD(0, windowName, "", defaultText, "", "", "", maxInput);
 	while MISC.UPDATE_ONSCREEN_KEYBOARD() == 0 do
@@ -1533,12 +1217,6 @@ function get_input_from_screen_keyboard(windowName, maxInput, defaultText)
 	return ""
 end
 
-
----@param s string
----@param x number
----@param y number
----@param scale number
----@param font integer
 function draw_string(s, x, y, scale, font)
 	HUD.BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING")
 	HUD.SET_TEXT_FONT(font or 0)
@@ -1557,21 +1235,10 @@ function capitalize(txt)
 	return tostring(txt):gsub('^%l', string.upper)
 end
 
-
----@param min number
----@param max number
----@return number
 function random_float(min, max)
 	return min + math.random() * (max - min)
 end
 
-
----@param type integer
----@param pos v3
----@param scale number
----@param colour Colour
----@param textureDict string?
----@param textureName string?
 function draw_marker(type, pos, scale, colour, textureDict, textureName)
 	textureDict = textureDict or 0
 	textureName = textureName or 0

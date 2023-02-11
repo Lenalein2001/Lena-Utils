@@ -83,7 +83,7 @@ local teleport = menu.list(misc, "Teleport", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 3.5
+local script_version = 3.6
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -144,8 +144,6 @@ local required <const> = {
 local Functions = require "lena.functions"
 local GuidedMissile = require "lena.guided_missile"
 local OrbitalCannon = require "lena.orbital_cannon"
-local llang = require 'lena/llang'
-local lkey = require 'lena/lkey'
 local scaleForm = require("ScaleformLib")
 util.ensure_package_is_installed("ScaleformLib")
 util.ensure_package_is_installed("pretty.json")
@@ -1842,7 +1840,7 @@ local better_heli_handling_offsets = {
                     end
                     break 
                 end
-                for _, pid in players.list(true, true, true) do
+                for _, pid in players.list(false, true, true) do
                     local cam_rot = players.get_cam_rot(pid)
                     local cam_pos = players.get_cam_pos(pid)
                     if cam_pos.z >= 390.0 and cam_pos.z <= 850.0 and cam_rot.x == 270.0 and cam_rot.y == 0.0 and cam_rot.z == 0.0 and players.is_in_interior(pid) then 
@@ -2014,6 +2012,33 @@ local better_heli_handling_offsets = {
     end)
     menu.toggle(leave_reactions, "Announce In Team Chat", {""}, "", function(toggle)
         showleaveInfoteam = toggle
+    end)
+
+    menu.toggle(online, "Spoof Session", {""}, "", function(toggle)
+        local spoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Story Mode")
+        local unspoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Disabled")
+        if menu.get_edition == 3 then
+            if toggle then
+                trigger_command(spoof_ses)
+                notify("Spoofing Enabled")
+            else
+                trigger_command(unspoof_ses)
+                notify("Spoofing disabled")
+            end
+        else
+            notify("You need Ultimate in order to do that")
+        end
+    end)
+
+    menu.toggle(online, "Whitelist Session", {"whitelist", "wl"}, "Blocks Joins from non-Whitelisted players", function(toggle)
+        local whitelist = menu.ref_by_path("Online>Session>Block Joins>From Non-Whitelisted")
+        if toggle then
+            trigger_command(whitelist, "on")
+            notify("Session is now whitelisted")
+        else
+            trigger_command(whitelist, "off")
+            notify("Session is not whitelisted anymore")
+        end
     end)
 
 -------------------------------------
@@ -2601,7 +2626,7 @@ local better_heli_handling_offsets = {
             local armour = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Armour")
             local engine = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Engine")
             if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped())then
-                trigger_commands("turbo on; armour 4; brakes 2; engine 3; bulletprooftyres on")
+                trigger_commands("turbo on; armour 4; brakes 2; engine 3; transmission 3; bulletprooftyres on")
                 --notify("Upgraded your Vehicle :)")
             else
             end
@@ -2647,7 +2672,7 @@ local better_heli_handling_offsets = {
     -------------------------------------
 
     menu.toggle_loop(misc, "Disable Numpad", {"dn"}, "Disables the Numpad while Stand is open", function()
-        if not menu.is_open() or lkey.is_key_down('VK_LBUTTON') or lkey.is_key_down('VK_RBUTTON') then return end
+        if not menu.is_open()--[[or lkey.is_key_down('VK_LBUTTON') or lkey.is_key_down('VK_RBUTTON')]] then return end
         for _, control in pairs(numpadControls) do
             PAD.DISABLE_CONTROL_ACTION(2, control, true)
         end
@@ -2850,6 +2875,10 @@ local better_heli_handling_offsets = {
         end)
         menu.action(sdebug, "Get RP for Rank", {""}, "", function()
             notify("RP required for Rank: "..util.get_rp_required_for_rank(required_rank))
+        end)
+
+        menu.action(sdebug, "Get follow Cam", {""}, "", function()
+            notify(CAM.IS_CINEMATIC_CAM_RENDERING())
         end)
     end
 
@@ -3331,6 +3360,8 @@ local function player(pid)
                     notify("The message is to long.")
                 else
                     chat.send_targeted_message(pid, players.user(), on_command, false)
+                    chat.send_message(on_command, false, true, false)
+                    --log(players.get_name(players.user()).." [All] ".. on_command)
                     notify("Message has been send.")
                 end
         end)
@@ -3754,7 +3785,7 @@ local function player(pid)
             end
         end)
 
-        menu.action(crashes, "Fragment Crash", {""}, "", function()
+        menu.action(crashes, "Fragment Crash", {""}, "2Shit1 Crash. Doesn't really work.", function()
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
@@ -3767,7 +3798,7 @@ local function player(pid)
             end
         end)
 
-        menu.action(crashes, "Lena's Crash", {"ICBM"}, "", function()
+        menu.action(crashes, "math.random", {"ICBM"}, "Simply a SE Crash", function()
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
@@ -3818,7 +3849,7 @@ local function player(pid)
             end
         end)
 
-        menu.action(crashes, "Thigh Highs Crash", {"squish"}, "Blocked by some popular menus.", function()
+        menu.action(crashes, "Invalid Animation", {"squish"}, "Blocked by some popular menus.", function()
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
@@ -3848,7 +3879,6 @@ local rids2 = {}
 local hostq = {}
 local language = {}
 local allplayers = {}
-
 players.on_join(function(pid)
     names[pid] = players.get_name(pid)
     rids[pid] = players.get_rockstar_id(pid)
@@ -3917,8 +3947,6 @@ end
 util.create_tick_handler(function()
     if was_in_transition and not util.is_session_transition_active() then
         on_transition_exit()
-        wait("20000")
-        --trigger_commands("removegunshazard")
     end
     was_in_transition = util.is_session_transition_active()
 end)
@@ -3943,11 +3971,11 @@ function memoryScan(name, pattern, callback)
 	callback(address)
 end
 
-memory_scan("GNGP", "48 83 EC ? 33 C0 38 05 ? ? ? ? 74 ? 83 F9", function (address)
+memory_scan("GNGP", "48 83 EC ? 33 C0 38 05 ? ? ? ? 74 ? 83 F9", function(address)
 	GetNetGamePlayer_addr = address
 end)
 
-memory_scan("NOM", "48 8B 0D ? ? ? ? 45 33 C0 E8 ? ? ? ? 33 FF 4C 8B F0", function (address)
+memory_scan("NOM", "48 8B 0D ? ? ? ? 45 33 C0 E8 ? ? ? ? 33 FF 4C 8B F0", function(address)
 	CNetworkObjectMgr = memory.rip(address + 3)
 end)
 
