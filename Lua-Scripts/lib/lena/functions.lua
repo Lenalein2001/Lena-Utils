@@ -1253,7 +1253,6 @@ function draw_marker(type, pos, scale, colour, textureDict, textureName)
 	)
 end
 
-
 local orgLog = util.log
 
 ---@param format string
