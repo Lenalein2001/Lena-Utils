@@ -81,7 +81,7 @@ local teleport = menu.list(misc, "Teleport", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 3.8
+local script_version = 3.9
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -294,7 +294,7 @@ local interiors = {
     {"Strip Club DJ Booth", {x=121.398254, y=-1281.0024, z=29.480522}},
     {"Single Garage", {x=-144.11609, y=-576.5855, z=31.845743}},
     {"FIB Destroyed Floor", {x=158.44386, y=-738.07367, z=246.15218}},
-    {"Pharma Lab", {x=496.86224, y=-2560.0608, z=-58.921993}}
+    {"Pharma Lab", {x=496.86224, y=-2560.0608, z=-58.921993}},
     {"Nightclub Safe", {x=-1615.6887, y=-3015.7354, z=-75.205086}}
 }
 
@@ -1349,9 +1349,6 @@ local better_heli_handling_offsets = {
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 10 seconds if your vehicle could use a upgrade.", function()
-        local turbo = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Turbo")
-        local armour = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Armour")
-        local engine = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Engine")
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped())then
             trigger_commands("turbo on; armour 4; brakes 2; engine 3; transmission 3; bulletprooftyres on")
         end
@@ -1367,6 +1364,7 @@ local better_heli_handling_offsets = {
     menu.toggle(online, "Spoof Assets", {"spoofassets", "spoofass"}, "Spoof Session Assets.", function(toggled)
         if toggled then 
             trigger_commands("extratoggle on")
+            notify("Spoofing Session Assets.")
         else
             trigger_commands("extratoggle off")
         end
@@ -1427,7 +1425,7 @@ local better_heli_handling_offsets = {
             NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(0, value)
             notify("Free Slots: ".. NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(0))
         end)
-        menu.click_slider(hosttools, "max spectators", {"maxspectators"}, "Set the max Spectators for the lobby\nOnly works as the Host.", 0, 2, 0, 1, function (value)
+        menu.click_slider(hosttools, "Max Spectators", {"maxspectators"}, "Set the max Spectators for the lobby\nOnly works as the Host.", 0, 2, 0, 1, function (value)
             NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(4, value)
             notify("Free Slots: ".. NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(4))
         end)
@@ -1454,7 +1452,7 @@ local better_heli_handling_offsets = {
             local hostQueue = players.get_host_queue(false, false, true)
             for idx, pid in hostQueue do
                 if idx <= curPos then
-                    trigger_commands("kick " .. players.get_name(pid))
+                    trigger_commands("kick" .. players.get_name(pid))
                     wait(100)
                 end
             end
