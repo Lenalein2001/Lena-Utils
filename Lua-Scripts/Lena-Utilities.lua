@@ -81,7 +81,7 @@ local teleport = menu.list(misc, "Teleport", {""}, "")
 -------------------------------------
 
 local response = false
-local script_version = 3.7
+local script_version = 3.8
 async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
     local remoteVersion = tonumber(output)
     response = true
@@ -110,32 +110,6 @@ end, function () response = true end)
 repeat
     wait()
 until response
-
-async_http.init('raw.githubusercontent.com','/Lenalein2001/Lena-Utils/main/Lua-Scripts/LenaUtilitiesVersion.txt', function (output)
-    local lib_path = filesystem.scripts_dir() .. "lib/lena"
-    local remoteVersion = tonumber(output)
-    response = true
-    if script_version ~= remoteVersion then
-        wait(1000)
-        async_http.init('raw.githubusercontent.com', '/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/lena/funcs.lua', function (a)
-            local catchError = select(2, load(a))
-            if catchError then
-                notify("Download failed :/. Restart the script, if that does not work, contact the owner of the script")
-            return end
-            local file = io.open(lib_path .. SCRIPT_RELPATH, "w+b")
-            file:write(a)
-            file:close()
-            wait(1000)
-            util.restart_script()
-        end)
-        async_http.dispatch()
-    end
-end, function () response = true end)
-    async_http.dispatch()
-repeat
-    wait()
-until response
-
 
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
@@ -321,6 +295,7 @@ local interiors = {
     {"Single Garage", {x=-144.11609, y=-576.5855, z=31.845743}},
     {"FIB Destroyed Floor", {x=158.44386, y=-738.07367, z=246.15218}},
     {"Pharma Lab", {x=496.86224, y=-2560.0608, z=-58.921993}}
+    {"Nightclub Safe", {x=-1615.6887, y=-3015.7354, z=-75.205086}}
 }
 
 -------------------------------------
