@@ -191,7 +191,7 @@ local auto_update_config = {
         },
     }
 }
---auto_updater.run_auto_update(auto_update_config)
+auto_updater.run_auto_update(auto_update_config)
 
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
