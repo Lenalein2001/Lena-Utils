@@ -449,27 +449,6 @@ function set_blip_name(blip, name, isLabel)
 	HUD.END_TEXT_COMMAND_SET_BLIP_NAME(blip)
 end
 
-function request_control_once(entity)
-	if not NETWORK.NETWORK_IS_IN_SESSION() then
-		return true
-	end
-	local netId = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(entity)
-	NETWORK.SET_NETWORK_ID_CAN_MIGRATE(netId, true)
-	return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
-end
-
-function request_control(entity, timeOut)
-	if not ENTITY.DOES_ENTITY_EXIST(entity) then
-		return false
-	end
-	timeOut = timeOut or 500
-	local start = newTimer()
-	while not request_control_once(entity) and start.elapsed() < timeOut do
-		util.yield_once()
-	end
-	return start.elapsed() < timeOut
-end
-
 function get_ped_nearby_peds(ped, maxPeds, ignore)
 	maxPeds = maxPeds or 16
 	local pEntityList = memory.alloc((maxPeds + 1) * 8)
@@ -511,16 +490,6 @@ function get_peds_in_player_range(player, radius)
 		end
 	end
 	return peds
-end
-
-function get_vehicles_in_player_range(player, radius)
-	local vehicles = {}
-	local pos = players.get_position(player)
-	for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
-		local vehPos = ENTITY.GET_ENTITY_COORDS(vehicle, true)
-		if pos:distance(vehPos) <= radius then table.insert(vehicles, vehicle) end
-	end
-	return vehicles
 end
 
 function get_entities_in_player_range(pId, radius)
@@ -688,22 +657,6 @@ function get_entity_owner(entity)
 	return net_obj ~= NULL and memory.read_byte(net_obj + 0x49) or -1
 end
 
-function is_player_passive(player)
-	if player ~= players.user() then
-		local address = memory.script_global(1894573 + (player * 608 + 1) + 8)
-		if address ~= NULL then return memory.read_byte(address) == 1 end
-	else
-		local address = memory.script_global(1574582)
-		if address ~= NULL then return memory.read_int(address) == 1 end
-	end
-	return false
-end
-
-function is_player_in_any_interior(player)
-	local address = memory.script_global(2657589 + (player * 466 + 1) + 245)
-	return address ~= NULL and memory.read_int(address) ~= 0
-end
-
 function is_player_in_interior(player)
 	if player == -1 then
 		return false
@@ -802,18 +755,6 @@ function get_player_org_blip_colour(player)
 		return (rgba.r << 24) + (rgba.g << 16) + (rgba.b << 8) + rgba.a
 	end
 	return 0
-end
-
-function get_condensed_player_name(player)
-	local condensed = "<C>" .. PLAYER.GET_PLAYER_NAME(player) .. "</C>"
-
-	if players.get_boss(player) ~= -1  then
-		local colour = players.get_org_colour(player)
-		local hudColour = get_hud_colour_from_org_colour(colour)
-		return string.format("~HC_%d~%s~s~", hudColour, condensed)
-	end
-
-	return condensed
 end
 
 function is_player_active(player, isPlaying, inTransition)
