@@ -1,5 +1,5 @@
 # Lena-Utils
-The Lua Script using the Stand Lua API "Lena-Utilities" is a powerful tool designed to enhance the user's gameplay experience. This script was created with the user in mind, offering a range of features that make it easier to enjoy your favorite games. The Self Options feature allows users to customize their own gameplay options and settings, making it easy to get the experience you want. The Protections and Detections feature helps keep your gameplay secure, protecting you from any potential threats or issues. The Vehicle Handling Editor makes it easy to customize your vehicles and get the most out of your gameplay. The Tunables feature allows you to fine-tune your settings, so you can get the exact experience you're looking for. The Shortcuts feature makes it easier to access the features you use most, so you can get straight to the action. Finally, the AI-made actions and toggles using ChatGPT allow for an even more intuitive experience, making it easier than ever to get the most out of your gameplay. With all these features combined, the Lua Script using the Stand Lua API "Lena-Utilities" is the perfect tool for anyone looking to enhance their gaming experience.
+A Lua Script to enhace the User's Gameplay.
 
 # Installation
-To install, simply click "Download ZIP" and extract the .zip. Copy&Paste the "Lua Scripts" folder in "C:\Users\user\AppData\Roaming\Stand".
+To install, simply click "Download ZIP" and extract the .zip. Copy and Paste everything into "%AppData%\Roaming\Stand\Lua Scripts" folder.
