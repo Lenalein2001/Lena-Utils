@@ -155,19 +155,19 @@ local auto_update_config = {
         },
         {
             name="constant",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json/constant.lua",
             script_relpath="/lib/pretty/json/constant.lua",
             check_interval=default_check_interval,
         },
         {
             name="parser",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json/parser.lua",
             script_relpath="/lib/pretty/json/parser.lua",
             check_interval=default_check_interval,
         },
         {
             name="serializer",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json/serializer.lua",
             script_relpath="/lib/pretty/json/serializer.lua",
             check_interval=default_check_interval,
         },
