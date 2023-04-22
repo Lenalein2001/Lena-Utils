@@ -37,7 +37,7 @@ all_objects = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
 natives_version = "1663599444-uno"
-dev_vers = true
+dev_vers = false
 
 
 -------------------------------------
@@ -155,19 +155,19 @@ local auto_update_config = {
         },
         {
             name="Constant",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/constant.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/Lua-Scripts/lib/pretty/json/constant.lua",
             script_relpath="/lib/pretty/json/constant.lua",
             check_interval=default_check_interval,
         },
         {
             name="Parser",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/parser.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/Lua-Scripts/lib/pretty/json/parser.lua",
             script_relpath="/lib/pretty/json/parser.lua",
             check_interval=default_check_interval,
         },
         {
             name="Serializer",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/serializer.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/Lua-Scripts/lib/pretty/json/serializer.lua",
             script_relpath="/lib/pretty/json/serializer.lua",
             check_interval=default_check_interval,
         },
