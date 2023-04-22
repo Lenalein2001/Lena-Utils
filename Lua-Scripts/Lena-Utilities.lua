@@ -4089,7 +4089,7 @@ util.create_tick_handler(function()
     if player_cur_car != carCheck then
         player_cur_car = carCheck
     end
-    while true do
+    if dev_vers then
         update_all_lyric_files()
         menu.set_list_action_options(lyric_select_actions, all_lyric_files)
         util.yield(5000)
