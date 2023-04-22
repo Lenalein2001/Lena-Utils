@@ -1,5 +1,6 @@
 --[[
           Lua made by Lena. Have fun <3
+          
     ⠄⠄⠄⣰⣿⠄⠄⠄⠄⠄⢠⠄⠄⢀⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄
     ⠄⠄⢰⣿⠿⠄⡀⠄⠄⠄⠘⣷⡀⠄⠢⣄⠄⠄⠄⠄⠄⠄⠄⣠⠖⠁⠄⠄⠄⠄
     ⠄⣤⢸⣿⣿⣆⠣⠄⠄⠄⠄⠸⣿⣦⡀⠙⢶⣦⣄⡀⠄⡠⠞⠁⢀⡴⠄⠄⠄⠄
@@ -36,8 +37,7 @@ all_objects = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
 natives_version = "1663599444-uno"
-
-dev_vers = true -- Lena, for the love of god, change this before release.
+dev_vers = true
 
 
 -------------------------------------
@@ -142,32 +142,32 @@ local auto_update_config = {
             check_interval=default_check_interval,
         },
         {
-            name="natives",
+            name="Natives",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/natives-1663599444-uno.lua",
             script_relpath="/lib/natives-1663599444-uno.lua",
             check_interval=default_check_interval,
         },
         {
-            name="json",
+            name="Json",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json.lua",
             script_relpath="/lib/pretty/json.lua",
             check_interval=default_check_interval,
         },
         {
-            name="constant",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json/constant.lua",
+            name="Constant",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/constant.lua",
             script_relpath="/lib/pretty/json/constant.lua",
             check_interval=default_check_interval,
         },
         {
-            name="parser",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json/parser.lua",
+            name="Parser",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/parser.lua",
             script_relpath="/lib/pretty/json/parser.lua",
             check_interval=default_check_interval,
         },
         {
-            name="serializer",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json/serializer.lua",
+            name="Serializer",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/serializer.lua",
             script_relpath="/lib/pretty/json/serializer.lua",
             check_interval=default_check_interval,
         },
@@ -178,13 +178,13 @@ local auto_update_config = {
             check_interval=default_check_interval,
         },
         {
-            name="texture",
+            name="Texture",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/resources/lena.ytd",
             script_relpath="/resources/lena.ytd",
             check_interval=default_check_interval,
         },
         {
-            name="all_labels",
+            name="Labels",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/all_labels.lua",
             script_relpath="/lib/all_labels.lua",
             check_interval=default_check_interval,
@@ -205,7 +205,7 @@ if lang.get_current() ~= "en" then
 end
 if not SCRIPT_SILENT_START then
     notify("Hi, " .. SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME() .. " <3.")
-end
+end 
 
 -------------------------------------
 -- Required Files
@@ -218,19 +218,22 @@ local scaleForm = require("ScaleformLib")
 local funcs = require("lena.funcs")
 
 local scriptdir = filesystem.scripts_dir()
+local lenaDir = scriptdir .. "Lena\\"
+local lyrics_dir = lenaDir .. "lyrics\\"
 
 if filesystem.exists(filesystem.resources_dir() .. "lena.ytd") then
 	util.register_file(filesystem.resources_dir() .. "lena.ytd")
 	notification.txdDict = "lena"
 	notification.txdName = "logo"
 	request_streamed_texture_dict("lena")
-else
 end
-
-local lenaDir = scriptdir .. "Lena\\"
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
+end
+
+if not filesystem.exists(lenaDir .. "lyrics") then
+	filesystem.mkdir(lenaDir .. "lyrics")
 end
 
 if not filesystem.exists(lenaDir .. "Session") then
@@ -398,13 +401,6 @@ objects_thread = util.create_thread(function (thr)
                             HUD.SET_BLIP_COLOUR(proj_blip, 75)
                             projectile_blips[#projectile_blips + 1] = proj_blip 
                         end
-                    end
-                end
-                --------------
-                if l_e_o_on then
-                    local size = get_model_size(obj_model)
-                    if size.x > l_e_max_x or size.y > l_e_max_y or size.z > l_e_max_y then
-                        entities.delete_by_pointer(obj_ptr)
                     end
                 end
             end    
@@ -884,7 +880,6 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
         -------------------------------------
 
         menu.toggle(doorcontrol, "Lock doors", {"lock"}, "Locks your current Vehicle so randoms can't enter it.", function(toggled)
-            local player_cur_car = entities.get_user_vehicle_as_handle()
             if toggled then 
                 VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, true)
             else
@@ -893,7 +888,6 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
         end)
 
         menu.toggle(doorcontrol, "Lock Doors for Randoms", {"lock"}, "Locks your current Vehicle so only friends can enter it.", function(toggled)
-            local player_cur_car = entities.get_user_vehicle_as_handle()
             for _, players in players.list(false, false, true) do
                 if toggled then 
                     VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(player_cur_car, players, true)
@@ -908,7 +902,6 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
         -------------------------------------
 
         menu.toggle(doorcontrol, "Unbreakable Doors", {""}, "", function(toggled)
-            local player_cur_car = entities.get_user_vehicle_as_handle()
             local vehicleDoorCount = VEHICLE.GET_NUMBER_OF_VEHICLE_DOORS(player_cur_car)
             if toggled then
                 for i = -1, vehicleDoorCount do
@@ -930,22 +923,19 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
         -------------------------------------
 
         menu.toggle(engine_control, "Start/Stop Engine", {""},"Disables and enables the engine on toggle.", function(toggled)
-            local vehicle = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), true)
             if toggled then
-                VEHICLE.SET_VEHICLE_ENGINE_ON(vehicle, false, true, true)
+                VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, false, true, true)
             else
-                VEHICLE.SET_VEHICLE_ENGINE_ON(vehicle, true, true, false)
+                VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, true, true, false)
             end
         end)
 
         menu.action(engine_control, "Toggle Engine On", {""}, "Starts the Engine of the current Vehicle.", function()
-            local vehicle = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), true)
-            VEHICLE.SET_VEHICLE_ENGINE_ON(vehicle, true, true, true)
+            VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, true, true, true)
         end)
 
         menu.action(engine_control, "Toggle Engine Off", {""}, "Stops The Engine of the current Vehicle.", function()
-            local vehicle = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), true)
-            VEHICLE.SET_VEHICLE_ENGINE_ON(vehicle, false, true, true)
+            VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, false, true, true)
         end)
 
     -------------------------------------
@@ -970,8 +960,7 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
     -------------------------------------
 
     menu.action(vehicle, "Clean Vehicle", {"clv"}, "Cleans the current Vehicle.", function()
-    local vehicle = entities.get_user_vehicle_as_handle(players.user())  
-        VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
+        VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0.0)
     end)
 
     -------------------------------------
@@ -1000,7 +989,6 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Drift Mode", {"driftmode"}, "Hold shift to drift.", function(on)
-        local player_cur_car = entities.get_user_vehicle_as_handle()
         if util.is_key_down("VK_SHIFT") then
             VEHICLE.SET_VEHICLE_REDUCE_GRIP(player_cur_car, true)
             -- VEHICLE.SET_VEHICLE_REDUCE_GRIP_LEVEL(player_cur_car, 0.0) Causes a Crash. I have no idea why. Maybe because it's looped?
@@ -1014,7 +1002,6 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
     -------------------------------------   
 
     menu.toggle(vehicle, "Unbreakable Lights", {""}, "Makes the Lights unbreakable on your current Vehicle.", function(on_toggle)
-        local player_cur_car = entities.get_user_vehicle_as_handle()
         if on_toggle then
             VEHICLE.SET_VEHICLE_HAS_UNBREAKABLE_LIGHTS(player_cur_car, true)
         else
@@ -1078,14 +1065,19 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped())then
-            local user = players.user()
-            local vmodel = players.get_vehicle_model(user)
-            if VEHICLE.IS_THIS_MODEL_A_CAR(vmodel) then
-                trigger_commands("turbo on; armour 4; brakes 2; engine 3; transmission 3; bulletprooftyres on")
+        local Turbo = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Turbo")
+        local Transmission = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Transmission")
+        local Armour = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Armour")
+        local Brakes = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Brakes")
+        local Engine = menu.ref_by_path("Vehicle>Los Santos Customs>Performance>Engine")
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) then
+            if VEHICLE.IS_THIS_MODEL_A_CAR(players.get_vehicle_model(players.user())) then
+                if Turbo.value == false or Transmission.value == false or Armour.value == false or Brakes.value == false or Engine.value == false then
+                    trigger_commands("turbo on; armour 4; brakes 2; engine 3; transmission 3; bulletprooftyres on")
+                    notify("Your Vehicle has been upgraded.")
+                end
             end
         end
-        wait(5000)
     end)
 
     -------------------------------------
@@ -1254,6 +1246,18 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
                     if modders_in_this_session[pid] == nil then
                         modders_in_this_session[pid] = players.get_name(pid) .. ' [' .. players.get_tags_string(pid) .. ']'
                         menu.set_list_action_options(modders_in_session_list, modders_in_this_session)
+                    end
+                end
+            end
+        end)
+
+        menu.toggle_loop(mpsession, "Show Talking Players", {""}, "Draws a debug text of players current talking.", function()
+            if util.is_session_started() and not util.is_session_transition_active() then
+                local talking = 0
+                for _, pid in players.list(false, true, true) do
+                    if NETWORK.NETWORK_IS_PLAYER_TALKING(pid) then
+                        util.draw_debug_text(players.get_name(pid).." is talking", ALIGN_TOP_CENTRE)
+                        talking = talking + 0.03
                     end
                 end
             end
@@ -1464,7 +1468,7 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
                             notify("Kicked Explo Sniper User\n" .. players.get_name(pid) .. " / " .. players.get_rockstar_id(pid))
                             wait(50)
                             trigger_commands("kick"..players.get_name(pid))
-                            wait(4000)
+                            wait(5000)
                         end
                     end
                 end
@@ -1480,12 +1484,12 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
         -- Anti Crash
         -------------------------------------
 
-        menu.toggle(protex, "Render GTA uncrashable", {"panic"}, "Will render GTA:O uncrashable, but the Gameplay will become unplayable.", function(on_toggle)
+        menu.toggle(protex, "Render GTA uncrashable", {"panic"}, "Will render GTA:O uncrashable, but the Gameplay will become unplayable.", function(toggled)
             local BlockNetEvents = menu.ref_by_path("Online>Protections>Events>Raw Network Events>Any Event>Block>Enabled")
             local UnblockNetEvents = menu.ref_by_path("Online>Protections>Events>Raw Network Events>Any Event>Block>Disabled")
             local BlockIncSyncs = menu.ref_by_path("Online>Protections>Syncs>Incoming>Any Incoming Sync>Block>Enabled")
             local UnblockIncSyncs = menu.ref_by_path("Online>Protections>Syncs>Incoming>Any Incoming Sync>Block>Disabled")
-            if on_toggle then
+            if toggled then
                 notify("Rendering GTA Uncrashable...")
                 trigger_commands("desyncall on")
                 trigger_command(BlockIncSyncs)
@@ -1519,20 +1523,22 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
         -------------------------------------
 
         -- Doesn't work.
-        --[[local crash_events = { "S0", "S1", "S2", "S3", "S4", "TB", "T1", "T2", "T3", "T7", "T8"}
+        local crash_events = { "S0", "S1", "S2", "S3", "S4", "TB", "T1", "T2", "T3", "T7", "T8"}
         local cwash = menu.list(protex, "Auto Kick Specific Crash Events")
         for _, event in crash_events do
             menu.toggle_loop(cwash, event, {""}, "Needs Testing", function()
                 for _, pid in players.list(false, true, true) do
-                    for _, cmd in menu.player_root(pid):getChildren() do
-                        if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and (cmd:refByRelPath("Crash Event (" .. event .. ")"):isValid()) then
-                            trigger_commands("kick" .. players.get_name(pid))
-                            log("[Lena] Crash event "..event.." recieved from: "..players.get_name(pid))
+                    if players.get_name(pid) ~= nil then
+                        for _, cmd in menu.player_root(pid):getChildren() do
+                            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and (cmd:refByRelPath("Crash Event (" .. event .. ")"):isValid()) then
+                                trigger_commands("kick" .. players.get_name(pid))
+                                log("[Lena] Crash event "..event.." recieved from: "..players.get_name(pid))
+                            end
                         end
                     end
                 end
             end)
-        end]]
+        end
 
     -------------------------------------
     -- Orb Detections
@@ -2668,7 +2674,7 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
             notify("You have lost the Game.")
             log(os.date("On %A the %x at %X your game suffered a critical error and died. It will be remembered."))
             wait(1000)
-            trigger_commands("yeet")
+            PED.GET_CLOSEST_PED(players.user_ped(), false, false)
         else
             notify("You have won the Game.")
         end
@@ -2777,7 +2783,7 @@ local bones = {12844, 24816, 24817, 24818, 35731, 31086}
 
 local s_developer = {3+0x10C69C46/2, 3+0x19C423D4/2, 3+0x18B33334/2, 3+0x1AB46072/2, (3+0x18B33334/2)-128}
 
-if true then
+if not dev_vers then
     send_discord_webhook()
 end
 
@@ -2959,6 +2965,85 @@ for _, developer in s_developer do
             end
         end)
 
+        menu.toggle_loop(sdebug, 'Enable nitro', {"nitro"}, "Enable nitro boost on any vehicle, use it by pressing \"X\".", function()
+            if not STREAMING.HAS_NAMED_PTFX_ASSET_LOADED('veh_xs_vehicle_mods') then
+                STREAMING.REQUEST_NAMED_PTFX_ASSET('veh_xs_vehicle_mods')
+                while not STREAMING.HAS_NAMED_PTFX_ASSET_LOADED('veh_xs_vehicle_mods') do
+                    util.yield()
+                end
+            end
+            if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), true) and player_cur_car ~= 0 then
+                if PAD.IS_CONTROL_JUST_PRESSED(357, 357) then 
+                    VEHICLE.SET_OVERRIDE_NITROUS_LEVEL(player_cur_car, true, 3000, 10, 99999999999, false)
+                    util.yield(3000)
+                    VEHICLE.SET_OVERRIDE_NITROUS_LEVEL(player_cur_car, false, 0, 0, 0, false)
+                end
+            end
+        end)
+
+        menu.toggle(sdebug, "Disbale Spectator Chat", {""}, "", function()
+            NETWORK.NETWORK_SET_SPECTATOR_TO_NON_SPECTATOR_TEXT_CHAT(true)
+        end)
+        
+        local detachable_wheels = {"Front L", "Front R", "Back L", "Back R", "Random", "All"}
+        menu.textslider_stateful(sdebug, "Get Value", {""}, "", detachable_wheels, function(value)
+            detachable_wheels = value
+            local vehicle = entities.get_user_vehicle_as_pointer(players.user_ped(), false)
+            switch detachable_wheels do
+                case 1:
+                    entities.detach_wheel(vehicle, 0)
+                    break
+                case 2:
+                    entities.detach_wheel(vehicle, 1)
+                    break
+                case 3:
+                    entities.detach_wheel(vehicle, 2)
+                    break
+                case 4:
+                    entities.detach_wheel(vehicle, 3)
+                    break
+                case 5:
+                    entities.detach_wheel(vehicle, math.random(0,7))
+                    break
+                case 6:
+                    entities.detach_wheel(vehicle, 1, 7)
+                    break
+            end
+        end)
+
+        local function ends_with(str, ending)
+            return ending == "" or str:sub(-#ending) == ending
+        end
+        all_lyric_files = {}
+        function update_all_lyric_files()
+            temp_lyrics = {}
+            for i, path in filesystem.list_files(lyrics_dir) do
+                local file_str = path:gsub(lyrics_dir, '')
+                if ends_with(file_str, '.lrc') then
+                    temp_lyrics[#temp_lyrics+1] = file_str
+                end
+            end
+            all_lyric_files = temp_lyrics
+        end
+        update_all_lyric_files()
+
+        lyric_select_actions = menu.list_action(sdebug, "Lyrics", {""}, "", all_lyric_files, function(index, value, click_type)
+            menu.show_warning(lyric_select_actions, click_type, "This will delete the current Song.lrc file.", function()
+                local first_file = io.open(lyrics_dir .. '\\' .. value,  'r')
+                local deez_lyrics = first_file:read('*all')
+                first_file:close()
+                local second_file = io.open(filesystem.stand_dir() .. '\\' .. 'Song.lrc', 'w')
+                second_file:write(deez_lyrics)
+                second_file:close()
+                notify(value .. " successfully loaded")
+            end, function()
+                notify("Aborted.")
+            end)
+        end)
+
+        menu.toggle_loop(sdebug, "Transition State", {""}, "", function()
+        end)
+
         -------------------------------------
         -- Natives
         -------------------------------------
@@ -3057,7 +3142,7 @@ local function player(pid)
     0x04504CCB, 0x0C15670E, 0x09DC648E, 0x0046658F, 0x00456136, 0x05D5715F, 0x0D1E3C6E, 0x07B6FB71, 0x0C98B465, 0x0C4EC8C9, 0x071A5EE2, 0x0AC7DADC, 0x0270B92D, 0x0BD93DCF,
     0x0CFF2596, 0x0C9CE642, 0x0C4FBEC1, 0x0BB7CBB2, 0x0AD078FA, 0x0ACD50CE, 0x0BEBF7A0, 0x080A4E57, 0x04CB6ACE, 0x093EA186, 0x0BF770F5, 0x0C732D5C, 0x0C732D5C, 0x0CC8C37C,
     0x0A507921, 0x04BE7D5E, 0x0C42877C, 0x09025232, 0x0962404A, 0x07B42014, 0x0B1800ED, 0x0D2D6965, 0x06B87017, 0x0D67118D, 0x0AE5341D, 0x05207167, 0x0CC31372, 0x0D66E920,
-    0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007,
+    0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0,
     -- Retard
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3116,7 +3201,7 @@ local function player(pid)
             local kills = players.get_kills(pid)
             local deaths = players.get_deaths(pid)
             local kdratio = players.get_kd(pid)
-            local language = ({'English','French','German','Italian','Spanish','Brazilian','Polish','Russian','Korean','Chinese (T)','Japanese','Mexican','Chinese (S)'})[players.get_language(pid) + 1]
+            local language = language_string(players.get_language(pid))
             notify("Name : " .. players.get_name(pid).."\nLanguage: "..language.. "\nRank: " .. rank .. "\nMoney: " .. string.format("%.2f", money/1000000) .. "M$" .. "\nKills/Deaths: " .. kills .. "/" .. deaths .. "\nRatio: " .. string.format("%.2f", kdratio))
         end)
 
@@ -3529,14 +3614,21 @@ local function player(pid)
 
         menu.action(customExplosion, "Orbital Cannon Explode", {"nuke"}, "Spawns the explosion on the selected Player.", function()
             local becomeorb = menu.ref_by_path("Online>Become The Orbital Cannon")
-            trigger_command(becomeorb, "on")
-            wait(100)
-            GRAPHICS.USE_PARTICLE_FX_ASSET("scr_xm_orbital")
-            FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 59, 1.0, true, false, 0.0)
-            GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD("scr_xm_orbital_blast", players.get_position(pid), 0, 180, 0, 1.0, true, true, true)
-            AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "DLC_XM_Explosions_Orbital_Cannon", players.user_ped(), 0, true, false)
-            wait(100)
-            trigger_command(becomeorb, "off")
+            becomeorb.value = true
+                wait(200)
+                local player_ped = players.user_ped()
+                while not STREAMING.HAS_NAMED_PTFX_ASSET_LOADED("scr_xm_orbital") do
+                    STREAMING.REQUEST_NAMED_PTFX_ASSET("scr_xm_orbital")
+                    util.yield(0)
+                end
+                GRAPHICS.USE_PARTICLE_FX_ASSET("scr_xm_orbital")
+                GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD("scr_xm_orbital_blast", players.get_position(pid), 0, 180, 0, 1.0, true, true, true)
+                for i = 1, 4 do
+                    AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "DLC_XM_Explosions_Orbital_Cannon", player_ped, 0, true, false)
+                end
+                FIRE.ADD_OWNED_EXPLOSION(player_ped, players.get_position(pid), 59, 1.0, true, false, 0.0)
+                wait(200)
+            becomeorb.value = false
         end)
 
         -------------------------------------
@@ -3733,16 +3825,17 @@ local function player(pid)
                     trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
+                local player = players.get_name(pid)
                 wait(500)
-                trigger_commands("flashcrash " .. players.get_name(pid))
+                trigger_commands("ngcrash"..players.get_name(pid))
                 wait(500)
-                trigger_commands("crash " .. players.get_name(pid))
+                trigger_commands("crash"..players.get_name(pid))
                 wait(500)
-                log("[Lena | Crash] Player ".. players.get_name(pid) .." ("..rids..") has been Crashed and Blocked.")
-                trigger_commands("historyblock" .. players.get_name(pid) .. " on")
+                log("[Lena | Crash] Player "..players.get_name(pid).." ("..rids..") has been Crashed and Blocked.")
+                trigger_commands("historyblock" ..players.get_name(pid).." on")
                 wait(10000)
-                if players.get_name(pid) ~= nil then
-                    log("[Lena | Crash Backup] Player ".. players.get_name(pid) .." ("..rids..") has not crashed, kicking the player instead.")
+                if players.get_name(pid) == player then
+                    log("[Lena | Crash Backup] Player "..players.get_name(pid) .." ("..rids..") has not crashed, kicking the player instead.")
                     wait(50)
                     trigger_commands("kick"..players.get_name(pid))
                 end
@@ -3832,13 +3925,21 @@ local function player(pid)
 
 
         menu.action(crashes, "Object Crash", {"objcrash"}, "", function()
-            BlockSyncs(pid, function()
-                local coords = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                local object = entities.create_object(joaat("h4_prop_tree_palm_trvlr_03"), coords)
-                OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
-                wait(5000)
-                --entities.delete_by_handle(object)
-            end)
+            if players.get_name(pid) == players.get_name(players.user()) then
+                notify(lang.get_localised(-1974706693))
+            else
+                if savekicked then
+                    trigger_commands("savep" .. players.get_name(pid))
+                    wait(50)
+                end
+                BlockSyncs(pid, function()
+                    local coords = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
+                    local object = entities.create_object(joaat("h4_prop_tree_palm_trvlr_03"), coords)
+                    OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
+                    wait(5000)
+                    --entities.delete_by_handle(object)
+                end)
+            end
         end)
 
         menu.action(crashes, "MK2 Griefer", {"grief"}, "Should work one some menus, idk. Don't crash players.", function()
@@ -3925,29 +4026,28 @@ end
 local Jointimes = {}
 local names = {}
 local rids = {}
-local rids2 = {}
 local hostq = {}
-local language = {}
 local allplayers = {}
+local ips = {}
 players.on_join(function(pid)
     names[pid] = players.get_name(pid)
     rids[pid] = players.get_rockstar_id(pid)
     hostq[pid] = players.get_host_queue_position(pid)
     allplayers[pid] = NETWORK.NETWORK_GET_NUM_CONNECTED_PLAYERS()
-    language[pid] = ({'English','French','German','Italian','Spanish','Brazilian','Polish','Russian','Korean','Chinese (T)','Japanese','Mexican','Chinese (S)'})[players.get_language(pid) + 1]
+    ips[pid] = player_ip(pid)
     Jointimes[pid] = os.clock()
 
     if showJoinInfomsg then
-        notify(names[pid].." has joined.\nSlot: "..pid.."\nRID/SCID: "..rids[pid])
+        notify(names[pid].." has joined.\nSlot: "..pid.."\nRID/SCID: "..rids[pid].."\nIPv4: "..ips[pid])
     end
     if showJoinInfolog then
-        log("[Lena | Join Reactions] "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid]..") is joining.")
+        log("[Lena | Join Reactions] "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.")
     end
     if showJoinInfoteam then
-        chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid]..") is joining.", true, true, true)
+        chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", true, true, true)
     end
     if showJoinInfoall then
-        chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid]..") is joining.", false, true, true)
+        chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", false, true, true)
     end
 end)
 
@@ -3983,6 +4083,18 @@ end)
 -- On-Stop
 -------------------------------------
 -------------------------------------
+
+util.create_tick_handler(function()
+    local carCheck = entities.get_user_vehicle_as_handle()
+    if player_cur_car != carCheck then
+        player_cur_car = carCheck
+    end
+    while true do
+        update_all_lyric_files()
+        menu.set_list_action_options(lyric_select_actions, all_lyric_files)
+        util.yield(5000)
+    end
+end)
 
 util.on_stop(function()
 	set_streamed_texture_dict_as_no_longer_needed("lena")
