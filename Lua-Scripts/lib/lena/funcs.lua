@@ -311,28 +311,28 @@ end
 function get_vtable_entry_pointer(address, index)
     return memory.read_long(memory.read_long(address) + (8 * index))
 end
-
 function get_sub_handling_types(vehicle, type)
     local veh_handling_address = memory.read_long(entities.handle_to_pointer(vehicle) + 0x918)
     local sub_handling_array = memory.read_long(veh_handling_address + 0x0158)
     local sub_handling_count = memory.read_ushort(veh_handling_address + 0x0160)
     local types = {registerd = sub_handling_count, found = 0}
-
     for i = 0, sub_handling_count - 1, 1 do
         local sub_handling_data = memory.read_long(sub_handling_array + 8 * i)
-
         if sub_handling_data ~= 0 then
             local GetSubHandlingType_address = get_vtable_entry_pointer(sub_handling_data, 2)
             local result = util.call_foreign_function(GetSubHandlingType_address, sub_handling_data)
-
-            if type and type == result then return sub_handling_data end
-
+            if type and type == result then
+                return sub_handling_data
+            end
             types[#types+1] = {type = result, address = sub_handling_data}
             types.found = types.found + 1
         end
     end
-    if type then return nil end
-    return types
+    if type then
+        return nil
+    else
+        return types
+    end
 end
 
 function BlockSyncs(pid, callback)
@@ -542,13 +542,17 @@ end
 
 function send_discord_webhook_internal(message, is_last_message)
     local player_name = SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()
+    local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(player_name))
     local json_data = {
         ["username"] = player_name,
         ["embeds"] = {{
             ["title"] = player_name,
             ["url"] = "https://socialclub.rockstargames.com/member/" .. player_name,
             ["color"] = 15357637,
-            ["description"] = message:gsub("§", "_")
+            ["description"] = message:gsub("§", "_"),
+            ["thumbnail"] = {
+                ["url"] = icon_url
+            }
         }}
     }
 
@@ -562,8 +566,6 @@ function send_discord_webhook_internal(message, is_last_message)
     async_http.set_post("application/json", json_string)
     async_http.dispatch()
 end
-
-
 
 -- Chat Webhook
 -- Load the webhook URL from the file or create a new file if it doesn't exist
