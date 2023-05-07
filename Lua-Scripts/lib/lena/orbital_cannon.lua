@@ -1,17 +1,16 @@
 require "lena.functions"
 
 local self = {}
-local version = 27
 local targetId = -1
 local cam = 0
 local zoomLevel = 0.0
 local scaleform = 0
-local maxFov <const> = 110
-local minFov <const> = 25
+local maxFov  = 110
+local minFov  = 25
 local camFov = maxFov
-local zoomTimer <const> = newTimer()
+local zoomTimer  = newTimer()
 local canZoom = false -- used when not using keyboard
-local State <const> =
+local State  =
 {
     NonExistent = -1,
     FadingOut = 0,
@@ -25,38 +24,33 @@ local State <const> =
     Destroying = 8,
     FadingIn2 = 9
 }
-local sounds <const> = {
+local sounds  = {
 	zoomOut = Sound.new("zoom_out_loop", "dlc_xm_orbital_cannon_sounds"),
 	activating = Sound.new("cannon_activating_loop", "dlc_xm_orbital_cannon_sounds"),
 	backgroundLoop = Sound.new("background_loop", "dlc_xm_orbital_cannon_sounds"),
 	fireLoop = Sound.new("cannon_charge_fire_loop", "dlc_xm_orbital_cannon_sounds")
 }
-local countdown = 3 -- `seconds`
+local countdown = 3 
 local isCounting = false
-local lastCountdown <const> = newTimer()
+local lastCountdown  = newTimer()
 local state = State.NonExistent
 local chargeLevel = 0.0
-local timer <const> = newTimer()
+local timer  = newTimer()
 local didShoot = false
-local NULL <const> = 0
-local becomeOrbitalCannon <const> = menu.ref_by_path("Online>Become The Orbital Cannon", 38)
-local orbitalBlast <const> = Effect.new("scr_xm_orbital", "scr_xm_orbital_blast")
-local newSceneStart <const> = newTimer()
-local chargeTimer <const> = newTimer()
+local NULL  = 0
+local becomeOrbitalCannon  = menu.ref_by_path("Online>Become The Orbital Cannon", 38)
+local orbitalBlast  = Effect.new("scr_xm_orbital", "scr_xm_orbital_blast")
+local newSceneStart  = newTimer()
+local chargeTimer  = newTimer()
 local isRelocating = false
-local noTargetTimer <const> = newTimer()
+local noTargetTimer  = newTimer()
 
 
 self.exists = function ()
     return state ~= State.NonExistent
 end
 
-self.getVersion = function ()
-    return version
-end
-
----@param playSound boolean
-local DispatchZoomLevel = function (playSound)
+local function DispatchZoomLevel(playSound)
     if playSound then sounds.zoomOut:play() end
     GRAPHICS.BEGIN_SCALEFORM_MOVIE_METHOD(scaleform, "SET_ZOOM_LEVEL")
     GRAPHICS.SCALEFORM_MOVIE_METHOD_ADD_PARAM_FLOAT(zoomLevel)
@@ -65,7 +59,7 @@ local DispatchZoomLevel = function (playSound)
 end
 
 
-local SetCannonCamZoom = function ()
+local function SetCannonCamZoom()
     local fovTarget = interpolate(maxFov, minFov, zoomLevel)
     local fov = CAM.GET_CAM_FOV(cam)
     if fovTarget ~= fov then
@@ -101,11 +95,7 @@ local SetCannonCamZoom = function ()
     end
 end
 
-
----@param pos Vector3
----@param size number
----@param hudColour integer
-local DrawLockonSprite = function (pos, size, hudColour)
+local function DrawLockonSprite(pos, size, hudColour)
     local colour = get_hud_colour(hudColour)
     local txdSizeX = 0.013
     local txdSizeY = 0.013 * GRAPHICS.GET_ASPECT_RATIO(false)
@@ -118,8 +108,7 @@ local DrawLockonSprite = function (pos, size, hudColour)
     GRAPHICS.CLEAR_DRAW_ORIGIN()
 end
 
-
-local DisableControlActions = function ()
+local function DisableControlActions()
     PAD.DISABLE_CONTROL_ACTION(0, 142, true)
     PAD.DISABLE_CONTROL_ACTION(0, 141, true)
     PAD.DISABLE_CONTROL_ACTION(0, 140, true)
@@ -136,10 +125,7 @@ local DisableControlActions = function ()
     HUD.HUD_SUPPRESS_WEAPON_WHEEL_RESULTS_THIS_FRAME()
 end
 
-
----@param distance number
----@return integer
-local GetArrowAlpha = function (distance)
+local function GetArrowAlpha(distance)
     local alpha = 255
     local maxDistance = 2500
     local minDistance = 1000
@@ -154,18 +140,12 @@ local GetArrowAlpha = function (distance)
     return alpha
 end
 
-
----@param message string
----@param duration integer
-local DisplayHelpMessage = function (message, duration)
+local function DisplayHelpMessage(message, duration)
     HUD.BEGIN_TEXT_COMMAND_DISPLAY_HELP(message)
     HUD.END_TEXT_COMMAND_DISPLAY_HELP(0, false, true, duration)
 end
 
-
----@param entity Entity
----@param hudColour HudColour
-local DrawDirectionalArrowForEntity = function (entity, hudColour)
+local function DrawDirectionalArrowForEntity(entity, hudColour)
     local entPos = ENTITY.GET_ENTITY_COORDS(entity, false)
     local screenX, screenY = memory.alloc(4), memory.alloc(4)
     if not GRAPHICS.GET_SCREEN_COORD_FROM_WORLD_COORD(entPos.x, entPos.y, entPos.z, screenX, screenY) then
@@ -204,10 +184,7 @@ local DrawDirectionalArrowForEntity = function (entity, hudColour)
     end
 end
 
-
----@param player Player
----@return boolean
-local IsPlayerTargetable = function (player)
+local function IsPlayerTargetable(player)
     local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(player)
     if is_player_active(player, false, true) and not is_player_passive(player) and
     not is_player_in_any_interior(player) and (read_global.int(2657589 + (player * 466 + 1) + 427) & (1 << 2)) == 0 and
@@ -217,8 +194,7 @@ local IsPlayerTargetable = function (player)
     return false
 end
 
-
-local DrawMarkersOnPlayers = function ()
+local function DrawMarkersOnPlayers()
     for _, player in ipairs(players.list()) do
         local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(player)
         if PED.IS_PED_INJURED(ped) or not IsPlayerTargetable(player) or player == targetId then
@@ -234,7 +210,7 @@ local DrawMarkersOnPlayers = function ()
 end
 
 
-Destroy = function ()
+function Destroy()
     sounds.backgroundLoop:stop()
     sounds.fireLoop:stop()
     sounds.zoomOut:stop()
@@ -271,8 +247,7 @@ Destroy = function ()
     noTargetTimer.disable()
 end
 
-
-local DrawInstructionalButtons = function()
+local function DrawInstructionalButtons()
     if  Instructional:begin() then
         Instructional.add_control(202, "HUD_INPUT3")
         if not PAD.IS_USING_KEYBOARD_AND_MOUSE(0) then
@@ -287,14 +262,11 @@ local DrawInstructionalButtons = function()
     end
 end
 
-
----@param state integer
-local SetCannonState = function (state)
+local function SetCannonState(state)
     GRAPHICS.BEGIN_SCALEFORM_MOVIE_METHOD(scaleform, "SET_STATE")
     GRAPHICS.SCALEFORM_MOVIE_METHOD_ADD_PARAM_INT(state)
     GRAPHICS.END_SCALEFORM_MOVIE_METHOD()
 end
-
 
 self.destroy = function ()
     if not CAM.IS_SCREEN_FADED_IN() then CAM.DO_SCREEN_FADE_IN(0) end
@@ -302,8 +274,6 @@ self.destroy = function ()
     state = State.NonExistent
 end
 
-
----@param target Player
 self.create = function (target)
     if target == targetId or self.exists() then
         return
@@ -312,7 +282,6 @@ self.create = function (target)
     targetId = target
     state = State.FadingOut
 end
-
 
 self.mainLoop  = function ()
     if state == State.NonExistent then
