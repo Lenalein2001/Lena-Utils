@@ -647,7 +647,7 @@ local launch_vehicle = {"Launch Up", "Launch Forward", "Launch Backwards", "Laun
     LegitRapidFire = false
     LegitRapidMS = 100
     menu.toggle(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main Weapon.", function(toggled)
-        local ped = player.user_ped()
+        local ped = players.user_ped()
         if toggled then
             LegitRapidFire = true
             util.create_thread(function ()
