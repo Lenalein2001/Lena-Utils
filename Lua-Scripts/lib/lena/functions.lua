@@ -80,7 +80,6 @@ function notification.stand(msg)
 	util.toast("[Lena] " .. msg)
 end
 
----@param colour? HudColour
 function notification:help(format, colour, ...)
 	assert(type(format) == "string", "msg must be a string, got " .. type(format))
 

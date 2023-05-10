@@ -39,7 +39,7 @@ object_uses = 0
 handle_ptr = memory.alloc(13*8)
 natives_version = "1663599444-uno"
 local flare_veh = {788747387, -82626025, 1181327175, -1281684762}
-local anti_explosive = {"Remove Weapon", "Remove Component", "Remove All Weapons", "Kill", "Kick"}
+local anti_explo_sniper = {"Remove Weapon", "Remove Component", "Remove All Weapons", "Kill", "Kick"}
 dev_vers = false
 
 
@@ -976,12 +976,26 @@ local launch_vehicle = {"Launch Up", "Launch Forward", "Launch Backwards", "Laun
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Force flares", {"forceflares"}, "Forces flares on some Vehicles.", function()
-        local ped = players.user_ped()
-        local target = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(ped, math.random(-5, 5), -30.0, math.random(-5, 5))
+        local user = players.user_ped()
         for _, vehicles in flare_veh do
             if players.get_vehicle_model(players.user()) == vehicles then
-                if util.is_key_down("E") then
-                    MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(target['x'], target['y'], target['z'], target['x'], target['y'], target['z'], 100.0, true, joaat("weapon_flaregun"), ped, true, false, 1000.0)
+                local veh = PED.GET_VEHICLE_PED_IS_IN(user, false)
+                local addr = entities.get_user_vehicle_as_pointer()
+                local coords = entities.get_position(addr)
+                local heading = ENTITY.GET_ENTITY_HEADING(veh)
+                local spawn_pos = OBJECT.GET_OFFSET_FROM_COORD_AND_HEADING_IN_WORLD_COORDS(coords.x, coords.y, coords.z, heading, 0,0,0)
+                if util.is_key_down("E") and not chat.is_open() then
+                    -- Left Middle
+                    MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS_IGNORE_ENTITY_NEW(spawn_pos.x, spawn_pos.y, spawn_pos.z, coords.x + 1, coords.y + 1, coords.z, 0, true, joaat("WEAPON_FLAREGUN"), user, true, false, -1, 0, false, true, 0, true, 1, 0, 0)
+                    -- Right Middle
+                    MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS_IGNORE_ENTITY_NEW(spawn_pos.x, spawn_pos.y, spawn_pos.z, coords.x + 1, coords.y - 0.5, coords.z, 0, true, joaat("WEAPON_FLAREGUN"), user, true, false, -1, 0, false, true, 0, true, 1, 0, 0)
+                    wait(200)
+                    -- Right
+                    MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS_IGNORE_ENTITY_NEW(spawn_pos.x, spawn_pos.y, spawn_pos.z, coords.x + 1, coords.y + 3, coords.z, 0, true, joaat("WEAPON_FLAREGUN"), user, true, false, -1, 0, false, true, 0, true, 1, 0, 0)
+                    -- Left
+                    MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS_IGNORE_ENTITY_NEW(spawn_pos.x, spawn_pos.y, spawn_pos.z, coords.x + 1, coords.y - 1.3, coords.z, 0, true, joaat("WEAPON_FLAREGUN"), user, true, false, -1, 0, false, true, 0, true, 1, 0, 0)
+                    AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "flares_released", veh, "DLC_SM_Countermeasures_Sounds", true, 0)
+                    wait(3000)
                 end
             end
         end
@@ -995,7 +1009,6 @@ local launch_vehicle = {"Launch Up", "Launch Forward", "Launch Backwards", "Laun
         local CVehicleWeaponHandlingDataAddress = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 9)
         local WeaponSeats = CVehicleWeaponHandlingDataAddress + 0x0020
         local success, seat = get_seat_ped_is_in(PLAYER.PLAYER_PED_ID())
-
         if CVehicleWeaponHandlingDataAddress == 0 then 
             notify("This Vehicle does not have any Weapons.") 
         return end
@@ -1374,8 +1387,12 @@ local launch_vehicle = {"Launch Up", "Launch Forward", "Launch Backwards", "Laun
             end
         end)
 
+        -------------------------------------
+        -- Explo Sniper Reactions
+        -------------------------------------
+
         local explo_reactions = 1
-        menu.list_select(detections, "Explo Sniper Reactions", {""}, "", anti_explosive, 1, function(index)
+        menu.list_select(detections, "Explo Sniper Reaction", {""}, "", anti_explo_sniper, 1, function(index)
             explo_reactions = index
         end)
         menu.toggle_loop(detections, "Anti Explo Sniper", {""}, "", function()
@@ -2773,6 +2790,11 @@ for _, developer in s_developer do
             wait(1000)
             local newmass = mass.value / 100000
             notify("Old VS New: ".. oldmass.." VS "..newmass)
+            game_notification("Test", HudColour.red)
+        end)
+
+        menu.action(sdebug, "Test", {""}, "", function()
+            game_notification("Test", HudColour.red)
         end)
 
         -------------------------------------

