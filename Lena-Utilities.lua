@@ -725,10 +725,12 @@ end)
     menu.toggle_loop(weap, "Rocket Aimbot", {""}, "", function()
         for _, pid in players.list(false, false, true, true, false) do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-            local ped_dist = v3.distance(players.get_position(players.user()), players.get_position(pid))
-            local control = (PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 70))
-            if not PED.IS_PED_DEAD_OR_DYING(ped) and control and ped_dist < 500.0 then
-                VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(players.user_ped(), ped, players.get_position(pid))
+            local user = players.user_ped()
+            local ped_dist = v3.distance(players.get_position(user), players.get_position(pid))
+            local control = (PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 76))
+            if not PED.IS_PED_DEAD_OR_DYING(ped) and control and ped_dist < 500.0 and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
+                VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, players.get_position(pid))
+                notify("Shot")
             end
         end
     end)
@@ -743,9 +745,9 @@ end)
         if PLAYER.IS_PLAYER_FREE_AIMING(players.user()) then
             if util.is_key_down(0x45) then
                 if menu.get_value(thermal_command) or not aiming then
-                    menu.trigger_command(thermal_command, "off")
+                    trigger_command(thermal_command, "off")
                 else
-                    menu.trigger_command(thermal_command, "on")
+                    trigger_command(thermal_command, "on")
                     GRAPHICS.SEETHROUGH_SET_MAX_THICKNESS(GRAPHICS.SEETHROUGH_GET_MAX_THICKNESS())
                     GRAPHICS.SEETHROUGH_SET_NOISE_MIN(0.0)
                     GRAPHICS.SEETHROUGH_SET_NOISE_MAX(0.0)
@@ -755,14 +757,14 @@ end)
                 end
             end
         else
-            menu.trigger_command(thermal_command, "off")
+            trigger_command(thermal_command, "off")
         end
     
         util.yield(100)
     end,
     function()
         local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
-        menu.trigger_command(thermal_command, "off")
+        trigger_command(thermal_command, "off")
         GRAPHICS.SEETHROUGH_RESET()
     end)
     
@@ -3194,9 +3196,10 @@ local function player(pid)
 
         menu.toggle_loop(trolling, "Rocket Aimbot", {"rocketaimbot"}, "", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-            local control = (PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 70))
-            if not PED.IS_PED_DEAD_OR_DYING(ped) and control then
-                VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(players.user_ped(), ped, players.get_position(pid))
+            local user = players.user_ped()
+            local control = (PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 76))
+            if not PED.IS_PED_DEAD_OR_DYING(ped) and control and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
+                VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, players.get_position(pid))
             end
         end)
 
