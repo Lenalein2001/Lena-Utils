@@ -53,7 +53,7 @@ local better_heli_handling_offsets = {
     ["fWindMult"] = 0x58,
     ["fPitchStabilise"] = 0x3C
 }
-dev_vers = false
+dev_vers = true
 
 -------------------------------------
 -- Natives
@@ -112,21 +112,21 @@ local teleport = menu.list(misc, "Teleport", {""}, "")
 
 local status, auto_updater = pcall(require, "auto-updater")
 if not status then
-    local auto_update_complete = nil util.toast("Installing auto-updater...", TOAST_ALL)
+    local auto_update_complete = nil notify("Installing auto-updater...", TOAST_ALL)
     async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/main/auto-updater.lua",
         function(result, headers, status_code)
             local function parse_auto_update_result(result, headers, status_code)
                 local error_prefix = "Error downloading auto-updater: "
-                if status_code ~= 200 then util.toast(error_prefix..status_code, TOAST_ALL) return false end
-                if not result or result == "" then util.toast(error_prefix.."Found empty file.", TOAST_ALL) return false end
+                if status_code ~= 200 then notify(error_prefix..status_code, TOAST_ALL) return false end
+                if not result or result == "" then notify(error_prefix.."Found empty file.", TOAST_ALL) return false end
                 filesystem.mkdir(filesystem.scripts_dir() .. "lib")
                 local file = io.open(filesystem.scripts_dir() .. "lib\\auto-updater.lua", "wb")
-                if file == nil then util.toast(error_prefix.."Could not open file for writing.", TOAST_ALL) return false end
-                file:write(result) file:close() util.toast("Successfully installed auto-updater lib", TOAST_ALL) return true
+                if file == nil then notify(error_prefix.."Could not open file for writing.", TOAST_ALL) return false end
+                file:write(result) file:close() notify("Successfully installed auto-updater lib", TOAST_ALL) return true
             end
             auto_update_complete = parse_auto_update_result(result, headers, status_code)
-        end, function() util.toast("Error downloading auto-updater lib. Update failed to download.", TOAST_ALL) end)
-    async_http.dispatch() local i = 1 while (auto_update_complete == nil and i < 40) do util.yield(250) i = i + 1 end
+        end, function() notify("Error downloading auto-updater lib. Update failed to download.", TOAST_ALL) end)
+    async_http.dispatch() local i = 1 while (auto_update_complete == nil and i < 40) do wait(250) i = i + 1 end
     if auto_update_complete == nil then error("Error downloading auto-updater lib. HTTP Request timeout") end
     auto_updater = require("auto-updater")
 end
@@ -532,7 +532,7 @@ end)
         -- Fast Vehicle Enter/Exit
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.\n'Lock Outfit' seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.\n'Lock Outfit seems to break it.", function()
             if (TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 160) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 167) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 165)) and not TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 195) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -542,7 +542,7 @@ end)
         -- Fast Weapon swap
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Hands", {""}, "Swaps your weapons faster.", function()
+        menu.toggle_loop(fast_stuff, "Fast Hands", {""}, "Swaps your weapons faster.\n'Lock Outfit seems to break it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 56) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -552,7 +552,7 @@ end)
         -- Fast Reload
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.", function()
+        menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.\n'Lock Outfit seems to break it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 298) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -562,7 +562,7 @@ end)
         -- Fast Mount
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.", function()
+        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.\n'Lock Outfit seems to break it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 50) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 51) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -604,7 +604,7 @@ end)
     menu.toggle_loop(self, "Auto Heal", {""}, "Heals you on low health.", function()
         local ped = players.user_ped()
         local health = ENTITY.GET_ENTITY_HEALTH(ped)
-        if health <= 140 then
+        if health <= 140 and not PED.IS_PED_DEAD_OR_DYING(ped) then
             trigger_commands("refillhealth; refillarmour")
             notify("Health set to max!")
         end
@@ -694,14 +694,14 @@ end)
     -------------------------------------    
 
     menu.toggle_loop(weap, "Max Lockon Range", {""}, "Sets your players lockon range with homing missles and auto aim to the max.", function()
-        PLAYER.SET_PLAYER_LOCKON_RANGE_OVERRIDE(players.user(), 99999999.0)
+        PLAYER.SET_PLAYER_LOCKON_RANGE_OVERRIDE(players.user(), 99999999)
     end)
 
     -------------------------------------
     -- Unfair Triggerbot
     -------------------------------------  
 
-    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "A Challenge for myself.", function()
+    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "", function()
         local wpn = WEAPON.GET_SELECTED_PED_WEAPON(players.user_ped())
         local dmg = SYSTEM.ROUND(WEAPON.GET_WEAPON_DAMAGE(wpn, 0))
         local delay = WEAPON.GET_WEAPON_TIME_BETWEEN_SHOTS(wpn)
@@ -760,7 +760,7 @@ end)
             trigger_command(thermal_command, "off")
         end
     
-        util.yield(100)
+        wait(100)
     end,
     function()
         local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
@@ -1032,7 +1032,7 @@ end)
     menu.toggle_loop(vehicle, "Shot Flames", {""}, "", function()
         if players.get_vehicle_model(players.user()) ~= 0 then
             entities.set_rpm(entities.get_user_vehicle_as_pointer(), 1.2)
-            util.yield(100)
+            wait(100)
         end
     end)
 
@@ -1352,53 +1352,36 @@ end)
         -- Full credits to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for _, pid in players.list(false, true, true, true, true) do
+            for _, pid in players.list(true, true, true, true, true) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
                 local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
                 local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
+                local plyveh = DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle")
+                local pegasusveh = DECORATOR.DECOR_GET_BOOL(vehicle, "CreatedByPegasus")
                 for _, veh in veh_things do
                     if hash == joaat(veh) and DECORATOR.DECOR_GET_INT(vehicle, "MPBitset") == 8 then
                         return 
                     end
                 end
-                local detections = {
-                    [1] = bitset == 8 or plate_text == "46EEK572",
-                    [2] = plate_text == "X FORCE ",
-                    [3] = plate_text == " TERROR ",
-                    [4] = plate_text == " MXMENU ",
-                    [5] = plate_text == "  FATE  ",
-                    [6] = bitset == 1024,
-                }
-                local detection_index = 0
-                for i, detection in detections do
-                    if detection then
-                        detection_index = i
-                        break
-                    end
-                end
                 if players.get_vehicle_model(pid) ~= 0 and not TASK.GET_IS_TASK_ACTIVE(ped, 160) and get_spawn_state(players.user()) ~= 0 then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
-                    if players.get_name(driver) ~= "InvalidPlayer" and pid == driver then
-                        switch detection_index do
-                        case 1:
-                            util.draw_debug_text(players.get_name(driver) .. " is using a spawned vehicle " .. "(" .. lang.get_localised(util.get_label_text(players.get_vehicle_model(pid))) .. ")")
+                    if players.get_name(driver) ~= "InvalidPlayer" and not pegasusveh and pid == driver then
+                        if bitset == 1024 then
+                            util.draw_debug_text(players.get_name(driver) .. " Is likely a 2Take1 User")
                             break
-                        case 2:
-                            util.draw_debug_text(players.get_name(driver) .. " Is a XForce User")
-                            break
-                        case 3:
+                        elseif plate_text == " TERROR " then
                             util.draw_debug_text(players.get_name(driver) .. " Is a Terror User")
                             break
-                        case 4:
+                        elseif plate_text == " MXMENU " then
                             util.draw_debug_text(players.get_name(driver) .. " Is a MXMenu User")
                             break
-                        case 5:
+                        elseif plate_text == "  FATE  " then
                             util.draw_debug_text(players.get_name(driver) .. " Is a Fate User")
                             break
-                        case 6:
-                            util.draw_debug_text(players.get_name(driver) .. " Is likely a 2Take1 User")
+                        elseif bitset == 8 or plate_text == "46EEK572" then
+                            util.draw_debug_text(players.get_name(driver) .. " is using a spawned vehicle " .. "(" .. lang.get_localised(util.get_label_text(players.get_vehicle_model(pid))) .. ")")
                             break
                         end
                     end
@@ -1481,7 +1464,7 @@ end)
                     if IsPlayerUsingOrbitalCannon(pid) and TASK.GET_IS_TASK_ACTIVE(ped, 135)
                     and v3.distance(ENTITY.GET_ENTITY_COORDS(players.user_ped(), false), cam_pos) < 400
                     and v3.distance(ENTITY.GET_ENTITY_COORDS(players.user_ped(), false), cam_pos) > 340 then
-                        util.toast(players.get_name(pid) .. " Is targeting you with the Orbital Cannon.")
+                        notify(players.get_name(pid) .. " Is targeting you with the Orbital Cannon.")
                     end
                     if players.is_in_interior(pid) then
                         if IsPlayerUsingOrbitalCannon(pid) then
@@ -1500,8 +1483,8 @@ end)
         -------------------------------------
 
         menu.toggle_loop(anti_orb, "Block Orbital Cannon", {"blockorb"}, "Spawns a prop that blocks the Orbital Cannon Room.", function()
-            local md1 = util.joaat("xm_prop_cannon_room_door")
-            local md2 = util.joaat("xm_prop_cannon_room_door")
+            local md1 = joaat("xm_prop_cannon_room_door")
+            local md2 = joaat("xm_prop_cannon_room_door")
             request_model(md1)
             if orb_obj == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj) then
                 orb_obj = entities.create_object(md1, v3(336.56, 4833.00, -60.0))
@@ -2526,6 +2509,21 @@ end)
     end)
 
     -------------------------------------
+    -- Enable/Disable ESP
+    -------------------------------------
+
+    menu.toggle_loop(misc, "Disable Phone", {""}, "Disables the Phone when certain conditions are met.", function()
+        local phone = menu.ref_by_path("Game>Disables>Straight To Voicemail")
+        if chat.is_open() or PLAYER.IS_PLAYER_FREE_AIMING(players.user()) or util.is_interaction_menu_open() or menu.is_open() then
+            if phone.value == false then
+                phone.value = true
+            end
+        elseif phone.value == true then
+            phone.value = false
+        end
+    end)
+
+    -------------------------------------
     -- Russian Roulette
     -------------------------------------
 
@@ -2554,7 +2552,7 @@ end)
     menu.action(ai_made, "Countdown", {"countdown"}, "Start the countdown.", function()
         for i = 3, 1, -1 do
             chat.send_message(i.."...", false, true, true)
-            util.yield(1000)
+            wait(1000)
         end
         chat.send_message("GO!!!", false, true, true)
     end, nil, nil, COMMANDPERM_FRIENDLY)
@@ -2590,12 +2588,12 @@ end)
             notify("You have a bounty on you. But i can't remove it if you're in a interior.")
             wait(30000)
         elseif has_bounty and not util.is_session_transition_active() and not players.is_in_interior(user) then
-            util.yield(10000)
-            menu.trigger_commands("removebounty")
-            util.toast("Bounty removed.\nAmount: "..has_bounty..".")
-            util.log("[Lena | Auto-remove Bounty] Bounty removed. Amount: "..has_bounty..".")
+            wait(10000)
+            trigger_commands("removebounty")
+            notify("Bounty removed.\nAmount: "..has_bounty..".")
+            log("[Lena | Auto-remove Bounty] Bounty removed. Amount: "..has_bounty..".")
         end
-        util.yield(20000)
+        wait(20000)
     end)
 
     -------------------------------------
@@ -2607,10 +2605,10 @@ end)
         local num_breaks = 0
         num_breaks = num_breaks + 1
         if num_breaks % (break_interval / 1000) == 0 then
-        util.toast("Time to take a break! "..num_breaks)
-        util.log("[Lena | Break reminder] Time to take a break! Number of breaks: "..num_breaks)
+        notify("Time to take a break! "..num_breaks)
+        log("[Lena | Break reminder] Time to take a break! Number of breaks: "..num_breaks)
         end
-        util.yield(1000)
+        wait(1000)
     end)
 
     -------------------------------------
@@ -2619,9 +2617,9 @@ end)
 
     menu.toggle_loop(ai_made, "Auto Skip Cutscenes", {"auto_skip_cutscenes"}, "Automatically skips cutscenes.", function()
         if CUTSCENE.IS_CUTSCENE_PLAYING() then
-            util.yield(3000)
+            wait(3000)
             CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
-            util.toast("Cutscene skipped!")
+            notify("Cutscene skipped!")
         end
     end)
     
@@ -2631,9 +2629,9 @@ end)
 
     menu.toggle_loop(ai_made, "Auto Skip Conversations", {"auto_skip_conversations"}, "Automatically skips conversations.", function()
         if AUDIO.IS_SCRIPTED_CONVERSATION_ONGOING() then
-            util.yield(3000)
+            wait(3000)
             AUDIO.STOP_SCRIPTED_CONVERSATION(false)
-            util.toast("Conversation skipped!")
+            notify("Conversation skipped!")
         end
     end)
     
@@ -3170,7 +3168,7 @@ local function player(pid)
 
         menu.toggle_loop(trolling, "Unfair Triggerbot", {"triggerbot"}, "It tries to Aim for the head, but chances are low if they are moving.", function()
             if pid == players.user() then 
-                util.toast(lang.get_localised(-1974706693)) 
+                notify(lang.get_localised(-1974706693)) 
                 trigger_commands("triggerbot "..players.get_name(players.user()).." off")
                 util.stop_thread()
             end
@@ -3340,7 +3338,7 @@ local function player(pid)
         menu.action(trolling, "Kill Player Inside Interior", {""}, "Works in Casino and Nightclubs.", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = ENTITY.GET_ENTITY_COORDS(ped)
-            local stun = util.joaat("weapon_stungun")
+            local stun = joaat("weapon_stungun")
             for _, id in interior_stuff do
                 if get_interior_player_is_in(pid) == id then
                     notify("Player is not in any interior. :/")
@@ -3437,7 +3435,7 @@ local function player(pid)
                 local player_ped = players.user_ped()
                 while not STREAMING.HAS_NAMED_PTFX_ASSET_LOADED("scr_xm_orbital") do
                     STREAMING.REQUEST_NAMED_PTFX_ASSET("scr_xm_orbital")
-                    util.yield(0)
+                    wait(0)
                 end
                 GRAPHICS.USE_PARTICLE_FX_ASSET("scr_xm_orbital")
                 GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD("scr_xm_orbital_blast", players.get_position(pid), 0, 180, 0, 1.0, true, true, true)
