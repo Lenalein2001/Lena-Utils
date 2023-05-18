@@ -252,19 +252,19 @@ function STAT_GET_INT(Stat)
     local Int_PTR = memory.alloc_int()
     STATS.STAT_GET_INT(joaat(getMPX() .. Stat), Int_PTR, -1)
     return memory.read_int(Int_PTR)
-end
-
-function IS_MPPLY(Stat)
-    local Stats = {
-        "MP_PLAYING_TIME",
-    }
-    for i = 1, #Stats do
-        if Stat == Stats[i] then
-            return true
-        end
-    end
-    if string.find(Stat, "MPPLY_") then
-        return true
+end 
+ 
+function IS_MPPLY(Stat) 
+    local Stats = { 
+        "MP_PLAYING_TIME", 
+    } 
+    for i = 1, #Stats do 
+        if Stat == Stats[i] then 
+            return true 
+        end 
+    end 
+    if string.find(Stat, "MPPLY_") then 
+        return true 
     else
         return false
     end
