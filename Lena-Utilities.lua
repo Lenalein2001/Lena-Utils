@@ -134,7 +134,7 @@ if auto_updater == true then error("Invalid auto-updater lib. Please delete your
 
 local default_check_interval = 604800
 local auto_update_config = {
-    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/Lena-Utilities.lua",
+    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lena-Utilities.lua",
     script_relpath=SCRIPT_RELPATH,
     switch_to_branch=selected_branch,
     verify_file_begins_with="--",
@@ -143,67 +143,67 @@ local auto_update_config = {
     dependencies={
         {
             name="Funcs",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/lena/funcs.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/lena/funcs.lua",
             script_relpath="/lib/lena/funcs.lua",
             check_interval=default_check_interval,
         },
         {
             name="Functions",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/lena/functions.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/lena/functions.lua",
             script_relpath="/lib/lena/functions.lua",
             check_interval=default_check_interval,
         },
         {
             name="Orbital Cannon",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/lena/orbital_cannon.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/lena/orbital_cannon.lua",
             script_relpath="/lib/lena/orbital_cannon.lua",
             check_interval=default_check_interval,
         },
         {
             name="Natives",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/natives-1663599444-uno.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/natives-1663599444-uno.lua",
             script_relpath="/lib/natives-1663599444-uno.lua",
             check_interval=default_check_interval,
         },
         {
             name="Json",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/pretty/json.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/pretty/json.lua",
             script_relpath="/lib/pretty/json.lua",
             check_interval=default_check_interval,
         },
         {
             name="Constant",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/Lua-Scripts/lib/pretty/json/constant.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/lib/pretty/json/constant.lua",
             script_relpath="/lib/pretty/json/constant.lua",
             check_interval=default_check_interval,
         },
         {
             name="Parser",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/Lua-Scripts/lib/pretty/json/parser.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/lib/pretty/json/parser.lua",
             script_relpath="/lib/pretty/json/parser.lua",
             check_interval=default_check_interval,
         },
         {
             name="Serializer",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/Lua-Scripts/lib/pretty/json/serializer.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/lib/pretty/json/serializer.lua",
             script_relpath="/lib/pretty/json/serializer.lua",
             check_interval=default_check_interval,
         },
         {
             name="ScaleformLib",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/ScaleformLib.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/ScaleformLib.lua",
             script_relpath="/lib/ScaleformLib.lua",
             check_interval=default_check_interval,
         },
         {
             name="Texture",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/resources/lena.ytd",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/resources/lena.ytd",
             script_relpath="/resources/lena.ytd",
             check_interval=default_check_interval,
         },
         {
             name="Labels",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lua-Scripts/lib/all_labels.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/all_labels.lua",
             script_relpath="/lib/all_labels.lua",
             check_interval=default_check_interval,
         },
