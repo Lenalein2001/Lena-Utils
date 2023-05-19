@@ -1658,7 +1658,7 @@ end)
             explo_reactions = index
         end)
         menu.toggle_loop(weapon_reactions, "Anti Explo Sniper", {""}, "", function()
-            for _, pid in players.list(true, true, true, true, false) do
+            for _, pid in players.list(true, true, true, true, true) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if WEAPON.IS_PED_ARMED(ped, 4) then
                     if WEAPON.HAS_PED_GOT_WEAPON(ped, 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(PLAYER.GET_PLAYER_PED(pid), 177293209, 2313935527) then
@@ -1678,12 +1678,12 @@ end)
                             notify("Kicked Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
                             wait(50)
                             trigger_commands("kick"..players.get_name(pid))
-                            wait(5000)
                         end
+                        wait(5000)
                     end
+                    util.draw_debug_text(players.get_name(pid).." Is using the Explo Sniper.")
                 end
             end
-            wait(5000)
         end)
 
     -------------------------------------
@@ -2202,7 +2202,7 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Grab Script Host", {"sh"}, "Grabs Script Host in a less destructive way.", function()
-            trigger_command(menu.ref_by_path("Players>"..players.get_name(players.user())..">Friendly>Give Script Host"))
+            trigger_commands("givesh".. players.get_name(players.user()))
         end)
 
         -------------------------------------
