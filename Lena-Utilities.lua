@@ -2812,7 +2812,7 @@ for _, developer in s_developer do
 
             local nativehud = menu.list(nativec, "HUD", {""}, "")
             local nativevehicle = menu.list(nativec, "VEHICLE", {""}, "")
-            local nativeENTITY = menu.list(nativec, "ENTITY", {""}, "")
+            local nativeentity = menu.list(nativec, "ENTITY", {""}, "")
 
             -------------------------------------
             -- HUD
@@ -2847,7 +2847,7 @@ for _, developer in s_developer do
             -- ENTITY
             -------------------------------------
 
-            menu.action(nativeENTITY, "Clone Player", {""}, "Clones the Player Ped.", function()
+            menu.action(nativeentity, "Clone Player", {""}, "Clones the Player Ped.", function()
                 local whore = PED.CLONE_PED(players.user_ped(), true, true, true)
                 local cords = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), -5.0, 0.0, 0.0)
                 ENTITY.SET_ENTITY_COORDS(whore, cords.x, cords.y, cords.z)
@@ -3244,11 +3244,11 @@ local function player(pid)
                         TASK.CLEAR_PED_TASKS_IMMEDIATELY(targetPed)
                         if PED.IS_PED_IN_ANY_VEHICLE(targetPed, false) then return end
                         cagePos = playerPos
-                        trapcage(pid)
+                        trapcage(pid, "prop_gold_cont_01", true)
                         local playername = players.get_name(pid)
                         if playername ~= "**Invalid**" then
                             notify(playername.." was out of the cage!")
-                            spawned_objects[#spawned_objects + 1] = trapcage(pid)
+                            trapcage(pid, "prop_gold_cont_01", true)
                         end
                     end
                     timer.reset()
@@ -3262,8 +3262,7 @@ local function player(pid)
             menu.action(mpcage, "Small Cage", {""}, "", function()
                 TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                 wait(250)
-                local smallcage = entities.create_object(959275690, players.get_position(pid))
-                spawned_objects[#spawned_objects + 1] = smallcage
+                trapcage(pid, "prop_gold_cont_01", true)
             end)
 
             -------------------------------------
@@ -3273,45 +3272,50 @@ local function player(pid)
             menu.action(mpcage, "Small Invisible Cage", {""}, "", function()
                 TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                 wait(250)
-                local smallcage1 = entities.create_object(959275690, players.get_position(pid))
-                entities.set_can_migrate(entities.handle_to_pointer(smallcage1), false)
-                ENTITY.SET_ENTITY_VISIBLE(smallcage1, false)
-                spawned_objects[#spawned_objects + 1] = smallcage1
+                trapcage(pid, "prop_gold_cont_01", false)
             end)
 
             -------------------------------------
             -- Invisible Cage
             -------------------------------------
 
-            menu.action(mpcage, "Invisible Cage", {""}, "", function()
-                TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                wait(250)
-                local spawnped = joaat("u_m_m_jesus_01")
-                local spawn1 = joaat("prop_test_elevator")
-                local spawn2 = joaat("prop_test_elevator")
+            local elevatorPOS
+            menu.toggle_loop(mpcage, "Invisible Cage", {""}, "", function()
+                if not elevatorPOS or elevatorPOS:distance(players.get_position(pid)) >= 6.0 then
+                    TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
+                    wait(250)
+                    local spawnped = joaat("u_m_m_jesus_01")
+                    local spawn1 = joaat("prop_test_elevator")
+                    local spawn2 = joaat("prop_test_elevator")
+                    elevatorPOS = players.get_position(pid)
+                    util.request_model(spawnped)
+                    local temp_ped = entities.create_ped(2, spawnped, players.get_position(pid), 0)
 
-                util.request_model(spawnped)
-                local temp_ped = entities.create_ped(2, spawnped, players.get_position(pid), 0)
-
-                if ENTITY.IS_ENTITY_A_PED(temp_ped) then
-                    ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
-                    PED.SET_PED_CONFIG_FLAG(temp_ped, 62, 1)
-                    ENTITY.FREEZE_ENTITY_POSITION(temp_ped, true)
-                    util.request_model(spawn1)
-                    util.request_model(spawn2)
-                    local cage1 = entities.create_object(spawn1, players.get_position(pid))
-                    local cage2 = entities.create_object(spawn2, players.get_position(pid))
-                    ENTITY.SET_ENTITY_VISIBLE(temp_ped, true)
-                    ENTITY.ATTACH_ENTITY_TO_ENTITY(cage1, temp_ped, 0, 0,0,0, 0,0,0, false, true, true, 0, true)
-                    ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
-                    ENTITY.ATTACH_ENTITY_TO_ENTITY(cage2, temp_ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -90.0, 0,  false, true, true, 0, true)
-                    ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
-                    ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
-                    spawned_objects[#spawned_objects + 1] = cage1
-                    spawned_objects[#spawned_objects + 1] = cage2
-                else
-                    entities.delete_by_handle(temp_ped)
+                    if ENTITY.IS_ENTITY_A_PED(temp_ped) then
+                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
+                        PED.SET_PED_CONFIG_FLAG(temp_ped, 62, 1)
+                        ENTITY.FREEZE_ENTITY_POSITION(temp_ped, true)
+                        util.request_model(spawn1)
+                        util.request_model(spawn2)
+                        local cage1 = entities.create_object(spawn1, players.get_position(pid))
+                        local cage2 = entities.create_object(spawn2, players.get_position(pid))
+                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, true)
+                        ENTITY.ATTACH_ENTITY_TO_ENTITY(cage1, temp_ped, 0, 0,0,0, 0,0,0, false, true, true, 0, true)
+                        ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
+                        ENTITY.ATTACH_ENTITY_TO_ENTITY(cage2, temp_ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -90.0, 0,  false, true, true, 0, true)
+                        ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
+                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
+                        spawned_objects[#spawned_objects + 1] = cage1
+                        spawned_objects[#spawned_objects + 1] = cage2
+                    else
+                        entities.delete_by_handle(temp_ped)
+                    end
+                    local name = players.get_name(pid)
+                    if name ~= "**Invalid**" then
+                        notify(name.." was out of the cage!")
+                    end
                 end
+                wait(1000)
             end)
 
             -------------------------------------

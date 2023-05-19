@@ -181,11 +181,14 @@ function get_interior_player_is_in(pid)
     return memory.read_int(memory.script_global(((2657589 + 1) + (pid * 466)) + 245)) -- Global_2657589[bVar0 /*466*/].f_245
 end
 
-function trapcage(pid)
-    local objHash <const> = util.joaat("prop_gold_cont_01")
+function trapcage(pid, object, visible)
+    local objHash = util.joaat(object)
     request_model(objHash)
     local pos = players.get_position(pid)
     local obj = entities.create_object(objHash, pos)
+    entities.set_can_migrate(entities.handle_to_pointer(obj), false)
+    spawned_objects[#spawned_objects + 1] = obj
+    ENTITY.SET_ENTITY_VISIBLE(obj, visible)
     ENTITY.FREEZE_ENTITY_POSITION(obj, true)
     STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(objHash)
 end
