@@ -156,6 +156,37 @@ function request_model_load(hash)
     end
 end
 
+function spawn_ped(ped_name, pos, godmode)
+    local hash = util.joaat(ped_name)
+    if STREAMING.IS_MODEL_A_PED(hash) then
+        util.request_model(hash)
+        local ped = entities.create_ped(2, hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
+        ENTITY.SET_ENTITY_INVINCIBLE(ped, godmode)
+        local ptr = entities.handle_to_pointer(ped)
+        entities.set_can_migrate(ptr, false)
+        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+        return ped
+    else
+        util.toast(ped_name .. " is not a valid ped model name :/")
+    end
+end
+
+function spawn_vehicle(model_name, pos, godmode)
+    local hash = util.joaat(model_name)
+    if STREAMING.IS_MODEL_A_VEHICLE(hash) then
+        util.request_model(hash)
+        local veh = entities.create_vehicle(hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
+        ENTITY.SET_ENTITY_INVINCIBLE(veh, godmode)
+        local ptr = entities.handle_to_pointer(veh)
+        entities.set_can_migrate(ptr, false)
+        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+        return veh
+    else
+        util.toast(model_name .. " is not a valid vehicle model name :/")
+        return nil
+    end
+end
+
 function pid_to_handle(pid)
     NETWORK.NETWORK_HANDLE_FROM_PLAYER(pid, handle_ptr, 13)
     return handle_ptr

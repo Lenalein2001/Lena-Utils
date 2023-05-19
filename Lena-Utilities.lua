@@ -37,7 +37,7 @@ all_objects = {}
 spawned_objects = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
-natives_version = "1663599444-uno"
+natives_version = 1681379138, "uno"
 local flare_veh = {788747387, -82626025, 1181327175, -1281684762}
 local anti_explo_sniper = {"Remove Weapon", "Remove Component", "Remove All Weapons", "Kill", "Kick"}
 local interior_stuff = {0, 233985, 169473, 169729, 169985, 170241, 177665, 177409, 185089, 184833, 184577, 163585, 167425, 167169}
@@ -119,8 +119,8 @@ if not status then
                 local error_prefix = "Error downloading auto-updater: "
                 if status_code ~= 200 then notify(error_prefix..status_code, TOAST_ALL) return false end
                 if not result or result == "" then notify(error_prefix.."Found empty file.", TOAST_ALL) return false end
-                filesystem.mkdir(filesystem.scripts_dir() .. "lib")
-                local file = io.open(filesystem.scripts_dir() .. "lib\\auto-updater.lua", "wb")
+                filesystem.mkdir(filesystem.scripts_dir().."lib")
+                local file = io.open(filesystem.scripts_dir().."lib\\auto-updater.lua", "wb")
                 if file == nil then notify(error_prefix.."Could not open file for writing.", TOAST_ALL) return false end
                 file:write(result) file:close() notify("Successfully installed auto-updater lib", TOAST_ALL) return true
             end
@@ -222,14 +222,14 @@ end
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
     local msg2 = "Please download the file and everything else again from my Github."
-    util.show_corner_help(msg1.."natives-"..natives_version .. ".lua\n"..msg2)
+    util.show_corner_help(msg1.."natives-"..natives_version..".lua\n"..msg2)
     util.stop_script()
 end
 if lang.get_current() ~= "en" then
     notify("This Lua is made using the english translation of Stand. If things break it's most likely because you are using a different language.\nTry to use: Stand>Settings>Language>English (UK).")
 end
 if not SCRIPT_SILENT_START then
-    notify("Hi, " .. SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME() .. " <3.")
+    notify("Hi, "..SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME().." <3.")
 end 
 
 -------------------------------------
@@ -242,11 +242,11 @@ local scaleForm = require("ScaleformLib")
 local funcs = require("lena.funcs")
 
 local scriptdir = filesystem.scripts_dir()
-local lenaDir = scriptdir .. "Lena\\"
-local lyrics_dir = lenaDir .. "lyrics\\"
+local lenaDir = scriptdir.."Lena\\"
+local lyrics_dir = lenaDir.."lyrics\\"
 
-if filesystem.exists(filesystem.resources_dir() .. "lena.ytd") then
-	util.register_file(filesystem.resources_dir() .. "lena.ytd")
+if filesystem.exists(filesystem.resources_dir().."lena.ytd") then
+	util.register_file(filesystem.resources_dir().."lena.ytd")
 	notification.txdDict = "lena"
 	notification.txdName = "logo"
 	request_streamed_texture_dict("lena")
@@ -256,16 +256,16 @@ if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
 end
 
-if not filesystem.exists(lenaDir .. "lyrics") then
-	filesystem.mkdir(lenaDir .. "lyrics")
+if not filesystem.exists(lenaDir.."lyrics") then
+	filesystem.mkdir(lenaDir.."lyrics")
 end
 
-if not filesystem.exists(lenaDir .. "Session") then
-	filesystem.mkdir(lenaDir .. "Session")
+if not filesystem.exists(lenaDir.."Session") then
+	filesystem.mkdir(lenaDir.."Session")
 end
 
-if not filesystem.exists(lenaDir .. "Players") then
-	filesystem.mkdir(lenaDir .. "Players")
+if not filesystem.exists(lenaDir.."Players") then
+	filesystem.mkdir(lenaDir.."Players")
 end
 
 -----------------------------------
@@ -1062,8 +1062,8 @@ end)
                         local new_sh = players.get_host()
                         if sh ~= new_sh and new_sh ~= -1 and new_sh ~= nil then
                             if players.exists(new_sh) then
-                                notify("Session Host migrated from " .. sh_name .. " to " .. players.get_name(new_sh))
-                                log("[Lena | Host Migration] Session Host migrated from " .. sh_name .. " to " .. players.get_name(new_sh))
+                                notify("Session Host migrated from "..sh_name.." to "..players.get_name(new_sh))
+                                log("[Lena | Host Migration] Session Host migrated from "..sh_name.." to "..players.get_name(new_sh))
                             end
                         end
                     end
@@ -1087,8 +1087,8 @@ end)
                         local new_sh = players.get_script_host()
                         if sh ~= new_sh and new_sh ~= -1 and new_sh ~= nil then
                             if players.exists(new_sh) then
-                                notify("Script Host migrated from " .. sh_name .. " to " .. players.get_name(new_sh))
-                                log("[Lena | Script Host Migration] Script Host migrated from " .. sh_name .. " to " .. players.get_name(new_sh))
+                                notify("Script Host migrated from "..sh_name.." to "..players.get_name(new_sh))
+                                log("[Lena | Script Host Migration] Script Host migrated from "..sh_name.." to "..players.get_name(new_sh))
                             end
                         end
                     end
@@ -1140,7 +1140,7 @@ end)
             local HostQueue = players.get_host_queue(false, false, true)
             for idx, pid in HostQueue do
                 if idx <= curPos then
-                    trigger_commands("kick" .. players.get_name(pid))
+                    trigger_commands("kick"..players.get_name(pid))
                     wait(100)
                 end
             end
@@ -1225,7 +1225,7 @@ end)
                 local class = VEHICLE.GET_VEHICLE_CLASS(vehicle)
                 if class ~= 15 and class ~= 16 and veh_speed >= 200 and (players.get_vehicle_model(pid) ~= joaat("oppressor") or players.get_vehicle_model(pid) ~= joaat("oppressor2")) then
                     local PedID = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
-                    notify(players.get_name(PedID) .. " Is Using Super Drive!")
+                    notify(players.get_name(PedID).." Is Using Super Drive!")
                     break
                 end
             end
@@ -1238,39 +1238,10 @@ end)
         menu.toggle_loop(detections, "Spectate", {""}, "Detects if someone is spectating you.", function()
             for _, pid in players.list(false, true, true, true, false) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                if not PED.IS_PED_DEAD_OR_DYING(ped) then
-                    if v3.distance(ENTITY.GET_ENTITY_COORDS(players.user_ped(), false), players.get_cam_pos(pid)) < 15.0 and v3.distance(ENTITY.GET_ENTITY_COORDS(players.user_ped(), false), players.get_position(pid)) > 20.0 then
-                        notify(players.get_name(pid) .. " Is Watching You!")
-                        break
-                    end
-                end
-            end
-        end)
-
-        -------------------------------------
-        -- No-clip
-        -------------------------------------
-
-        menu.toggle_loop(detections, "Noclip", {""}, "Detects if the player is using noclip a.k.a levitation.", function()
-            for _, pid in players.list(false, true, true, true, true) do
-                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                local ped_ptr = entities.handle_to_pointer(ped)
-                local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
-                local oldpos = players.get_position(pid)
-                wait()
-                local currentpos = players.get_position(pid)
-                local vel = ENTITY.GET_ENTITY_VELOCITY(ped)
-                if not util.is_session_transition_active() and players.exists(pid)
-                and get_interior_player_is_in(pid) == 0 and get_spawn_state(pid) ~= 0
-                and not PED.IS_PED_IN_ANY_VEHICLE(ped, false)
-                and not NETWORK.NETWORK_IS_PLAYER_FADING(pid) and ENTITY.IS_ENTITY_VISIBLE(ped) and not PED.IS_PED_DEAD_OR_DYING(ped)
-                and not PED.IS_PED_CLIMBING(ped) and not PED.IS_PED_VAULTING(ped) and not PED.IS_PED_USING_SCENARIO(ped)
-                and not TASK.GET_IS_TASK_ACTIVE(ped, 160) and not TASK.GET_IS_TASK_ACTIVE(ped, 2)
-                and v3.distance(ENTITY.GET_ENTITY_COORDS(players.user_ped(), false), players.get_position(pid)) <= 395.0 -- 400 is causing false positives
-                and ENTITY.GET_ENTITY_HEIGHT_ABOVE_GROUND(ped) > 5.0 and not ENTITY.IS_ENTITY_IN_AIR(ped) and entities.player_info_get_game_state(ped_ptr) == 0
-                and oldpos.x ~= currentpos.x and oldpos.y ~= currentpos.y and oldpos.z ~= currentpos.z 
-                and vel.x == 0.0 and vel.y == 0.0 and vel.z == 0.0 then
-                    notify(players.get_name(pid) .. " Is Noclipping!")
+                local cam_dist = v3.distance(players.get_position(players.user()), players.get_cam_pos(pid))
+                local ped_dist = v3.distance(players.get_position(players.user()), players.get_position(pid))
+                if cam_dist < 20.0 and ped_dist > 75.0 and not PED.IS_PED_DEAD_OR_DYING(ped) and not NETWORK.NETWORK_IS_PLAYER_FADING(pid) then
+                    notify(players.get_name(pid).." is watching you ")
                     break
                 end
             end
@@ -1292,7 +1263,7 @@ end)
                             if v3.distance(oldpos, currentpos) > 500 and oldpos.x ~= currentpos.x and oldpos.y ~= currentpos.y and oldpos.z ~= currentpos.z then
                                 wait(500)
                                 if get_interior_player_is_in(pid) == interior and PLAYER.IS_PLAYER_PLAYING(pid) and players.exists(pid) then
-                                    notify(players.get_name(pid) .. " Just teleported!")
+                                    notify(players.get_name(pid).." just teleported!")
                                 end
                             end
                         end
@@ -1333,8 +1304,8 @@ end)
                 local kdratio = players.get_kd(pid)
                 if kdratio < 0 or kdratio > 21  or kills > 100000 or rank > 1500 or money > 1500000000 then
                     if isLegit[pid] and not mightNotBeLegit[pid] then
-                        notify("" .. players.get_name(pid) .. " might not be legit.\nRank: " .. rank .. "\nMoney: " .. string.format("%.2f", money/1000000) .. "M$\nKills: " .. kills .. "\nKD: " .. string.format("%.2f", kdratio))
-                        log("[Lena | Unlegit Stats]" .. players.get_name(pid) .. " might not be legit.\nRank: " .. rank .. "\nMoney: " .. string.format("%.2f", money/1000000) .. "M$\nKills: " .. kills .. "\nKD: " .. string.format("%.2f", kdratio))
+                        notify(players.get_name(pid).." might not be legit.\nRank: "..rank.."\nMoney: "..string.format("%.2f", money/1000000).."M$\nKills: "..kills.."\nKD: "..string.format("%.2f", kdratio))
+                        log("[Lena | Unlegit Stats]"..players.get_name(pid).." might not be legit.\nRank: "..rank.."\nMoney: "..string.format("%.2f", money/1000000).."M$\nKills: "..kills.."\nKD: "..string.format("%.2f", kdratio))
                     end
                     isLegit[pid] = false
                     mightNotBeLegit[pid] = true
@@ -1349,10 +1320,10 @@ end)
         -------------------------------------
         -- Spawned Vehicle
         -------------------------------------
-        -- Full credits to Prism, I just wanted this feature without having to load more luas.
+        -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for _, pid in players.list(true, true, true, true, true) do
+            for _, pid in players.list(false, true, true, true, false) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
@@ -1369,19 +1340,19 @@ end)
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if players.get_name(driver) ~= "InvalidPlayer" and not pegasusveh and pid == driver then
                         if bitset == 1024 then
-                            util.draw_debug_text(players.get_name(driver) .. " Is likely a 2Take1 User")
+                            util.draw_debug_text(players.get_name(driver).." Is likely a 2Take1 User")
                             break
                         elseif plate_text == " TERROR " then
-                            util.draw_debug_text(players.get_name(driver) .. " Is a Terror User")
+                            util.draw_debug_text(players.get_name(driver).." Is a Terror User")
                             break
                         elseif plate_text == " MXMENU " then
-                            util.draw_debug_text(players.get_name(driver) .. " Is a MXMenu User")
+                            util.draw_debug_text(players.get_name(driver).." Is a MXMenu User")
                             break
                         elseif plate_text == "  FATE  " then
-                            util.draw_debug_text(players.get_name(driver) .. " Is a Fate User")
+                            util.draw_debug_text(players.get_name(driver).." Is a Fate User")
                             break
                         elseif bitset == 8 or plate_text == "46EEK572" then
-                            util.draw_debug_text(players.get_name(driver) .. " is using a spawned vehicle " .. "(" .. lang.get_localised(util.get_label_text(players.get_vehicle_model(pid))) .. ")")
+                            util.draw_debug_text(players.get_name(driver).." is using a spawned vehicle ".."("..lang.get_localised(util.get_label_text(players.get_vehicle_model(pid)))..")")
                             break
                         end
                     end
@@ -1401,8 +1372,8 @@ end)
                 local new_sh = players.get_script_host()
                 if old_sh ~= new_sh then
                     if get_spawn_state(pid) == 0 and players.get_script_host() == pid then
-                        notify(players.get_name(pid) .. " triggered a detection (Thunder Join) and is now classified as a Modder")
-                        log(players.get_name(pid) .. " triggered a detection (Thunder Join) and is now classified as a Modder")
+                        notify(players.get_name(pid).." triggered a detection (Thunder Join) and is now classified as a Modder")
+                        log(players.get_name(pid).." triggered a detection (Thunder Join) and is now classified as a Modder")
                     end
                 end
             end
@@ -1422,7 +1393,6 @@ end)
             local BlockIncSyncs = menu.ref_by_path("Online>Protections>Syncs>Incoming>Any Incoming Sync>Block>Enabled")
             local UnblockIncSyncs = menu.ref_by_path("Online>Protections>Syncs>Incoming>Any Incoming Sync>Block>Disabled")
             if toggled then
-                notify("Rendering GTA Uncrashable...")
                 trigger_commands("desyncall on; anticrashcamera on")
                 trigger_command(BlockIncSyncs)
                 trigger_command(BlockNetEvents)
@@ -1464,7 +1434,7 @@ end)
                     if IsPlayerUsingOrbitalCannon(pid) and TASK.GET_IS_TASK_ACTIVE(ped, 135)
                     and v3.distance(ENTITY.GET_ENTITY_COORDS(players.user_ped(), false), cam_pos) < 400
                     and v3.distance(ENTITY.GET_ENTITY_COORDS(players.user_ped(), false), cam_pos) > 340 then
-                        notify(players.get_name(pid) .. " Is targeting you with the Orbital Cannon.")
+                        notify(players.get_name(pid).." Is targeting you with the Orbital Cannon.")
                     end
                     if players.is_in_interior(pid) then
                         if IsPlayerUsingOrbitalCannon(pid) then
@@ -1523,16 +1493,16 @@ end)
                 for pid in players.list(false, true, true, true, false) do
                     if players.get_position(pid).x > 323 and players.get_position(pid).y < 4834 and players.get_position(pid).y > 4822 and players.get_position(pid).z <= -59.36 then
                         if IsOutOfOrbRoom[pid] and not IsInOrbRoom[pid] then
-                            notify(players.get_name(pid) .." has entered the orbital cannon room.")
+                            notify(players.get_name(pid).." has entered the orbital cannon room.")
                             if announce_orb then
-                                chat.send_message("> ".. players.get_name(pid) .." has entered the orbital cannon room.", true, true, true)
+                                chat.send_message("> "..players.get_name(pid).." has entered the orbital cannon room.", true, true, true)
                             end
                         end
                         if players.get_position(pid).x < 331 and players.get_position(pid).x > 330.40 and players.get_position(pid).y > 4830 and players.get_position(pid).y < 4830.40 and players.get_position(pid).z <= -59.36 then
                             if IsNotAtOrbTable[pid] and not IsAtOrbTable[pid] then
-                                notify(players.get_name(pid) .." is calling an Orbital Strike!")
+                                notify(players.get_name(pid).." is calling an Orbital Strike!")
                                 if announce_orb then
-                                    chat.send_message("> ".. players.get_name(pid) .." is calling an Orbital Strike!", true, true, true)
+                                    chat.send_message("> "..players.get_name(pid).." is calling an Orbital Strike!", true, true, true)
                                 end
                             end
                             IsAtOrbTable[pid] = true
@@ -1542,9 +1512,9 @@ end)
                         IsOutOfOrbRoom[pid] = false
                     else
                         if IsInOrbRoom[pid] and not IsOutOfOrbRoom[pid] then
-                            notify(players.get_name(pid) .." has left the orbital cannon room.")
+                            notify(players.get_name(pid).." has left the orbital cannon room.")
                             if announce_orb then
-                                chat.send_message("> ".. players.get_name(pid) .." has left the orbital cannon room.", true, true, true)
+                                chat.send_message("> "..players.get_name(pid).." has left the orbital cannon room.", true, true, true)
                             end
                         end
                         IsAtOrbTable[pid] = false
@@ -1584,7 +1554,7 @@ end)
                         local cam_pos = players.get_cam_pos(pid)
                         if players.is_in_interior(pid) then
                             if IsPlayerUsingOrbitalCannon(pid) then 
-                                util.draw_debug_text(players.get_name(pid) .. " is Using the Orbital Cannon!")
+                                util.draw_debug_text(players.get_name(pid).." is Using the Orbital Cannon!")
                                 if orbital_blips[pid] == nil then 
                                     local blip = HUD.ADD_BLIP_FOR_COORD(cam_pos.x, cam_pos.y, cam_pos.z)
                                     HUD.SET_BLIP_SPRITE(blip, 588)
@@ -1694,18 +1664,18 @@ end)
                     if WEAPON.HAS_PED_GOT_WEAPON(ped, 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(PLAYER.GET_PLAYER_PED(pid), 177293209, 2313935527) then
                         if explo_reactions == 1 then
                             WEAPON.REMOVE_WEAPON_FROM_PED(ped, 177293209)
-                            notify("Removed Weapon From Explo Sniper User\n" .. players.get_name(pid) .. " / " .. players.get_rockstar_id(pid))
+                            notify("Removed Weapon From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
                         elseif explo_reactions == 2 then
                             WEAPON.REMOVE_WEAPON_COMPONENT_FROM_PED(ped, 177293209, 2313935527)
-                            notify("Removed Attachment From Explo Sniper User\n" .. players.get_name(pid) .. " / " .. players.get_rockstar_id(pid))
+                            notify("Removed Attachment From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
                         elseif explo_reactions == 3 then
                             WEAPON.REMOVE_ALL_PED_WEAPONS(ped)
-                            notify("Removed All Weapons From Explo Sniper User\n" .. players.get_name(pid) .. " / " .. players.get_rockstar_id(pid))
+                            notify("Removed All Weapons From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
                         elseif explo_reactions == 4 then
                             trigger_commands("explode"..players.get_name(pid))
-                            notify("Killed Explo Sniper User\n" .. players.get_name(pid) .. " / " .. players.get_rockstar_id(pid))
+                            notify("Killed Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
                         elseif explo_reactions == 5 then
-                            notify("Kicked Explo Sniper User\n" .. players.get_name(pid) .. " / " .. players.get_rockstar_id(pid))
+                            notify("Kicked Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
                             wait(50)
                             trigger_commands("kick"..players.get_name(pid))
                             wait(5000)
@@ -1924,7 +1894,7 @@ end)
         menu.action(missions_tunables, "Take over LSIA", {"lsia"}, "Starts the CEO Mission 'Hostile Takeover'.", function()
             if players.get_boss(players.user()) == -1 then
                 trigger_commands("ceostart")
-                notify("Starting CEO... Please wait for a few seconds.")
+                notify("Starting CEO. Please wait for a few seconds.")
                 wait(5000)
             end
             wait(500)
@@ -1958,7 +1928,7 @@ end)
             if counter == 0 then
                 notify("No Pickups Found. :/")
             else
-                notify("Teleported ".. tostring(counter) .." Pickups to you.")
+                notify("Teleported "..tostring(counter).." Pickups to you.")
             end
         end)
 
@@ -1979,7 +1949,7 @@ end)
                 if counter == 0 then
                     notify("No Pickups Found. :/")
                 else
-                    notify("Teleported ".. tostring(counter) .." Pickups to you.")
+                    notify("Teleported "..tostring(counter).." Pickups to you.")
                 end
             end
         end)
@@ -2000,7 +1970,7 @@ end)
             if counter == 0 then
                 notify("No Peds Found. :/")
             else
-                notify("Killed ".. tostring(counter) .." Mission Peds.")
+                notify("Killed "..tostring(counter).." Mission Peds.")
             end
         end)
 
@@ -2176,38 +2146,38 @@ end)
         -------------------------------------
 
         menu.action(clear_area_locally, "Clear Area", {"ca"}, "Clears the Area around you without sending Freeze events.", function()
-            local cleanse_ENTITYcount = 0
+            local cleanse_entity_count = 0
             for _, ped in entities.get_all_peds_as_handles() do
                 if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(ped) and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION() or NETWORK.NETWORK_IS_ACTIVITY_SESSION() and not ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) then
                     entities.delete_by_handle(ped)
-                    cleanse_ENTITYcount += 1
+                    cleanse_entity_count += 1
                     wait()
                 end
             end
-            notify("Cleared " .. cleanse_ENTITYcount .. " Peds!")
-            cleanse_ENTITYcount = 0
+            notify("Cleared "..cleanse_entity_count.." Peds!")
+            cleanse_entity_count = 0
             for _, vehicle in entities.get_all_vehicles_as_handles() do
                 if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
                     entities.delete_by_handle(vehicle)
-                    cleanse_ENTITYcount += 1
+                    cleanse_entity_count += 1
                     wait()
                 end
             end
-            notify("Cleared ".. cleanse_ENTITYcount .." Vehicles!")
-            cleanse_ENTITYcount = 0
+            notify("Cleared ".. cleanse_entity_count .." Vehicles!")
+            cleanse_entity_count = 0
             for _, object in entities.get_all_objects_as_handles() do
                 entities.delete_by_handle(object)
-                cleanse_ENTITYcount += 1
+                cleanse_entity_count += 1
                 wait()
             end
-            notify("Cleared " .. cleanse_ENTITYcount .. " Objects!")
-            cleanse_ENTITYcount = 0
+            notify("Cleared "..cleanse_entity_count.." Objects!")
+            cleanse_entity_count = 0
             for _, pickup in entities.get_all_pickups_as_handles() do
                 entities.delete_by_handle(pickup)
-                cleanse_ENTITYcount += 1
+                cleanse_entity_count += 1
                 wait()
             end
-            notify("Cleared " .. cleanse_ENTITYcount .. " Pickups!")
+            notify("Cleared "..cleanse_entity_count.." Pickups!")
             local temp = memory.alloc(4)
             for i = 0, 100 do
                 memory.write_int(temp, i)
@@ -2906,6 +2876,7 @@ local function player(pid)
     local trolling = menu.list(lena, "Trolling", {""}, "")
     local customExplosion = menu.list(trolling, "Custom Explosion", {""}, "")
     local mpcage = menu.list(trolling, "Cage", {""}, "")
+    local vehattack = menu.list(trolling, "Attackers", {""}, "")
     local tp_player = menu.list(trolling, "Teleport Player", {""}, "")
     local clubhouse = menu.list(tp_player, "Clubhouse", {""}, "")
     local facility = menu.list(tp_player, "Facility", {""}, "")
@@ -2944,7 +2915,7 @@ local function player(pid)
             local deaths = players.get_deaths(pid)
             local kdratio = players.get_kd(pid)
             local language = language_string(players.get_language(pid))
-            notify("Name : " .. players.get_name(pid).."\nLanguage: "..language.. "\nRank: " .. rank .. "\nMoney: " .. string.format("%.2f", money/1000000) .. "M$" .. "\nKills/Deaths: " .. kills .. "/" .. deaths .. "\nRatio: " .. string.format("%.2f", kdratio))
+            notify("Name : "..players.get_name(pid).."\nLanguage: "..language.. "\nRank: "..rank.."\nMoney: "..string.format("%.2f", money/1000000).."M$".."\nKills/Deaths: "..kills.."/"..deaths.."\nRatio: "..string.format("%.2f", kdratio))
         end)
 
         -------------------------------------
@@ -2979,7 +2950,7 @@ local function player(pid)
 
         menu.action(friendly, "Fix Blackscreen", {"fixblackscreen"}, "Tries to fix a stuck Blackscreen for the selected Player.", function()
             local player = players.get_name(pid)
-            trigger_commands("givesh" .. player.."; aptme" .. player)
+            trigger_commands("givesh"..player.."; aptme"..player)
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
         -------------------------------------
@@ -3133,6 +3104,149 @@ local function player(pid)
     -------------------------------------
 
         -------------------------------------
+        -- Cage
+        -------------------------------------   
+
+            -------------------------------------
+            -- AUTOMATIC
+            -------------------------------------
+
+            local cagePos
+            local timer <const> = newTimer()
+            menu.toggle_loop(mpcage, "Automatic Cage", {"autocage"}, "Automatically Cages the Player.", function()
+                if not is_player_active(pid, false, true) then
+                    util.stop_thread()
+                elseif not timer.isEnabled() or timer.elapsed() > 1000 then
+                    local targetPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                    local playerPos = ENTITY.GET_ENTITY_COORDS(targetPed, false)
+                    if not cagePos or cagePos:distance(playerPos) >= 4.0 then
+                        TASK.CLEAR_PED_TASKS_IMMEDIATELY(targetPed)
+                        if PED.IS_PED_IN_ANY_VEHICLE(targetPed, false) then return end
+                        cagePos = playerPos
+                        trapcage(pid, "prop_gold_cont_01", true)
+                        local playername = players.get_name(pid)
+                        if playername ~= "**Invalid**" then
+                            notify(playername.." was out of the cage!")
+                            trapcage(pid, "prop_gold_cont_01", true)
+                        end
+                    end
+                    timer.reset()
+                end
+            end)
+
+            -------------------------------------
+            -- Small Cage
+            -------------------------------------
+
+            menu.action(mpcage, "Small Cage", {""}, "", function()
+                TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
+                wait(250)
+                trapcage(pid, "prop_gold_cont_01", true)
+            end)
+
+            -------------------------------------
+            -- Small Invisible Cage
+            -------------------------------------
+
+            menu.action(mpcage, "Small Invisible Cage", {""}, "", function()
+                TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
+                wait(250)
+                trapcage(pid, "prop_gold_cont_01", false)
+            end)
+
+            -------------------------------------
+            -- Invisible Cage
+            -------------------------------------
+
+            local elevatorPOS
+            menu.toggle_loop(mpcage, "Invisible Cage", {""}, "", function()
+                if not elevatorPOS or elevatorPOS:distance(players.get_position(pid)) >= 6.0 then
+                    TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
+                    wait(250)
+                    local spawnped = joaat("u_m_m_jesus_01")
+                    local spawn1 = joaat("prop_test_elevator"); local spawn2 = joaat("prop_test_elevator")
+                    elevatorPOS = players.get_position(pid)
+                    util.request_model(spawnped)
+                    local temp_ped = entities.create_ped(2, spawnped, players.get_position(pid), 0)
+
+                    if ENTITY.IS_ENTITY_A_PED(temp_ped) then
+                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
+                        PED.SET_PED_CONFIG_FLAG(temp_ped, 62, 1)
+                        ENTITY.FREEZE_ENTITY_POSITION(temp_ped, true)
+                        util.request_model(spawn1); util.request_model(spawn2)
+                        local cage1 = entities.create_object(spawn1, players.get_position(pid))
+                        local cage2 = entities.create_object(spawn2, players.get_position(pid))
+                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, true)
+                        ENTITY.ATTACH_ENTITY_TO_ENTITY(cage1, temp_ped, 0, 0,0,0, 0,0,0, false, true, true, 0, true)
+                        ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
+                        ENTITY.ATTACH_ENTITY_TO_ENTITY(cage2, temp_ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -90.0, 0,  false, true, true, 0, true)
+                        ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
+                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
+                        spawned_objects[#spawned_objects + 1] = cage1
+                        spawned_objects[#spawned_objects + 1] = cage2
+                    else
+                        entities.delete_by_handle(temp_ped)
+                    end
+                    local name = players.get_name(pid)
+                    if name ~= "**Invalid**" then
+                        notify(name.." was out of the cage!")
+                    end
+                end
+                wait(1000)
+            end)
+
+            -------------------------------------
+            -- Delete all Cages
+            -------------------------------------
+                            
+            menu.action(mpcage, "Delete all Cages", {""}, "Stand Issue, Doesn't work.", function()
+                local entitycount = 0
+                for i, object in spawned_objects do
+                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(object, false, false)
+                    entities.delete_by_handle(object)
+                    spawned_objects[i] = nil
+                    entitycount = entitycount + 1
+                end
+                notify("Cleared "..entitycount.." Spawned Cage Objects")
+                spawned_objects = {}
+            end)
+
+        -------------------------------------
+        -- Attackers
+        -------------------------------------
+
+        menu.toggle(vehattack, "Enable Godmode", {""}, "", function(toggled)
+            gm_on = toggled
+        end)
+
+            -------------------------------------
+            -- Tank
+            -------------------------------------
+
+            menu.action(vehattack, "Send Tank", {""}, "", function()
+                local player_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local spawn_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player_ped, 30.0, -30.0, 0.0)
+                local ped = spawn_ped("s_m_y_blackops_01", spawn_pos, gm_on)  -- Assign the returned ped to a variable
+                local vehicle = spawn_vehicle("rhino", spawn_pos, gm_on)
+                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(vehicle), true)
+                PED.SET_PED_INTO_VEHICLE(ped, vehicle, -1)
+                PED.SET_PED_COMBAT_ATTRIBUTES(ped, 3, false)
+                PED.SET_PED_COMBAT_ATTRIBUTES(ped, 5, true)
+                PED.SET_PED_COMBAT_ATTRIBUTES(ped, 46, true)
+                TASK.TASK_COMBAT_PED(ped, player_ped, 0, 16)
+                TASK.TASK_VEHICLE_CHASE(ped, player_ped)
+                AUDIO.STOP_PED_SPEAKING(ped, true)
+                PED.SET_PED_ACCURACY(ped, 100.0)
+                PED.SET_PED_SHOOT_RATE(ped, 1000)
+                VEHICLE.SET_VEHICLE_DOORS_LOCKED(vehicle, 2)
+                local blip = HUD.ADD_BLIP_FOR_ENTITY(vehicle)
+                HUD.SET_BLIP_SPRITE(blip, 421)
+                HUD.SET_BLIP_COLOUR(blip, 2)
+                local ptr = entities.handle_to_pointer(vehicle)
+                entities.set_can_migrate(ptr, false)
+            end)            
+
+        -------------------------------------
         -- Send To Online Intro
         -------------------------------------        
 
@@ -3223,118 +3337,7 @@ local function player(pid)
                 end
             end
         end)
-
-        -------------------------------------
-        -- Cage
-        -------------------------------------   
-
-            -------------------------------------
-            -- AUTOMATIC
-            -------------------------------------
-
-            local cagePos
-            local timer <const> = newTimer()
-            menu.toggle_loop(mpcage, "Automatic Cage", {"autocage"}, "Automatically Cages the Player.", function()
-                if not is_player_active(pid, false, true) then
-                    util.stop_thread()
-                elseif not timer.isEnabled() or timer.elapsed() > 1000 then
-                    local targetPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                    local playerPos = ENTITY.GET_ENTITY_COORDS(targetPed, false)
-                    if not cagePos or cagePos:distance(playerPos) >= 4.0 then
-                        TASK.CLEAR_PED_TASKS_IMMEDIATELY(targetPed)
-                        if PED.IS_PED_IN_ANY_VEHICLE(targetPed, false) then return end
-                        cagePos = playerPos
-                        trapcage(pid, "prop_gold_cont_01", true)
-                        local playername = players.get_name(pid)
-                        if playername ~= "**Invalid**" then
-                            notify(playername.." was out of the cage!")
-                            trapcage(pid, "prop_gold_cont_01", true)
-                        end
-                    end
-                    timer.reset()
-                end
-            end)
-
-            -------------------------------------
-            -- Small Cage
-            -------------------------------------
-
-            menu.action(mpcage, "Small Cage", {""}, "", function()
-                TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                wait(250)
-                trapcage(pid, "prop_gold_cont_01", true)
-            end)
-
-            -------------------------------------
-            -- Small Invisible Cage
-            -------------------------------------
-
-            menu.action(mpcage, "Small Invisible Cage", {""}, "", function()
-                TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                wait(250)
-                trapcage(pid, "prop_gold_cont_01", false)
-            end)
-
-            -------------------------------------
-            -- Invisible Cage
-            -------------------------------------
-
-            local elevatorPOS
-            menu.toggle_loop(mpcage, "Invisible Cage", {""}, "", function()
-                if not elevatorPOS or elevatorPOS:distance(players.get_position(pid)) >= 6.0 then
-                    TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                    wait(250)
-                    local spawnped = joaat("u_m_m_jesus_01")
-                    local spawn1 = joaat("prop_test_elevator")
-                    local spawn2 = joaat("prop_test_elevator")
-                    elevatorPOS = players.get_position(pid)
-                    util.request_model(spawnped)
-                    local temp_ped = entities.create_ped(2, spawnped, players.get_position(pid), 0)
-
-                    if ENTITY.IS_ENTITY_A_PED(temp_ped) then
-                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
-                        PED.SET_PED_CONFIG_FLAG(temp_ped, 62, 1)
-                        ENTITY.FREEZE_ENTITY_POSITION(temp_ped, true)
-                        util.request_model(spawn1)
-                        util.request_model(spawn2)
-                        local cage1 = entities.create_object(spawn1, players.get_position(pid))
-                        local cage2 = entities.create_object(spawn2, players.get_position(pid))
-                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, true)
-                        ENTITY.ATTACH_ENTITY_TO_ENTITY(cage1, temp_ped, 0, 0,0,0, 0,0,0, false, true, true, 0, true)
-                        ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
-                        ENTITY.ATTACH_ENTITY_TO_ENTITY(cage2, temp_ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -90.0, 0,  false, true, true, 0, true)
-                        ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
-                        ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
-                        spawned_objects[#spawned_objects + 1] = cage1
-                        spawned_objects[#spawned_objects + 1] = cage2
-                    else
-                        entities.delete_by_handle(temp_ped)
-                    end
-                    local name = players.get_name(pid)
-                    if name ~= "**Invalid**" then
-                        notify(name.." was out of the cage!")
-                    end
-                end
-                wait(1000)
-            end)
-
-            -------------------------------------
-            -- Delete all Cages
-            -------------------------------------
-                            
-            menu.action(mpcage, "Delete all Cages", {""}, "Stand Issue, Doesn't work.", function()
-                local ENTITYcount = 0
-                for i, object in spawned_objects do
-                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(object, false, false)
-                    entities.delete_by_handle(object)
-                    spawned_objects[i] = nil
-                    ENTITYcount = ENTITYcount + 1
-                end
-                notify("Cleared " .. ENTITYcount .. " Spawned Cage Objects")
-                spawned_objects = {}
-            end)
             
-
         -------------------------------------
         -- Kill Player Inside Interior
         -------------------------------------
@@ -3530,10 +3533,10 @@ local function player(pid)
         --[[local kick_root = menu.ref_by_rel_path(menu.player_root(pid), "Kick")
         menu.action(kick_root, "Rape", {"rape"}, "A Unblockable kick that won't tell the target or non-hosts who did it.", function()
             if savekicked then
-                trigger_commands("savep" .. players.get_name(pid))
+                trigger_commands("savep"..players.get_name(pid))
                 wait(500)
             end
-            trigger_commands("breakup" .. players.get_name(pid))
+            trigger_commands("breakup"..players.get_name(pid))
         end, nil, nil, COMMANDPERM_RUDE)]]
 
         -------------------------------------
@@ -3546,10 +3549,10 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                 end
                 wait(100)
-                trigger_commands("historyblock" .. players.get_name(pid) .. " on")
+                trigger_commands("historyblock"..players.get_name(pid).." on")
                 log("[Lena | Ban Block] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
                 if menu.get_edition() >= 2 then
                     wait(100)
@@ -3565,11 +3568,11 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 wait(100)
-                trigger_commands("historyblock" .. players.get_name(pid) .. " on")
+                trigger_commands("historyblock"..players.get_name(pid).." on")
                 log("[Lena | Block Join] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
                 wait(100)
                 if menu.get_edition() >= 2 then
@@ -3585,11 +3588,11 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 wait(100)
-                trigger_commands("historyblock" .. players.get_name(pid) .. " on")
+                trigger_commands("historyblock"..players.get_name(pid).." on")
                 log("[Lena | Blacklist] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
                 wait(100)
                 trigger_commands("kick"..players.get_name(pid))
@@ -3601,11 +3604,11 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 if menu.get_edition() >= 2 then 
-                    trigger_commands("breakup" .. players.get_name(pid))
+                    trigger_commands("breakup"..players.get_name(pid))
                 else
                     trigger_commands("kick"..players.get_name(pid))
                 end
@@ -3618,7 +3621,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if menu.get_edition() >= 2 then
-                    trigger_commands("orgasmkick" .. players.get_name(pid))
+                    trigger_commands("orgasmkick"..players.get_name(pid))
                 else
                     trigger_commands("kick"..players.get_name(pid))
                 end
@@ -3662,7 +3665,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 local user = players.user()
@@ -3694,7 +3697,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 local user = players.user()
@@ -3725,7 +3728,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 BlockSyncs(pid, function()
@@ -3742,7 +3745,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 BlockSyncs(pid, function()
@@ -3760,7 +3763,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3792,7 +3795,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep" .. players.get_name(pid))
+                    trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
