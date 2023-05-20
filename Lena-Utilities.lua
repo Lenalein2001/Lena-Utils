@@ -34,12 +34,13 @@ joaat = util.joaat
 friends_in_this_session = {}
 modders_in_this_session = {}
 all_objects = {}
-spawned_objects = {}
+spawned_cages = {}
+spawned_attackers = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
 natives_version = 1681379138, "uno"
 local flare_veh = {788747387, -82626025, 1181327175, -1281684762}
-local anti_explo_sniper = {"Remove Weapon", "Remove Component", "Remove All Weapons", "Kill", "Kick"}
+local anti_explo_sniper = {"Remove Weapon", "Remove Component", "Notify", "Kill", "Kick"}
 local interior_stuff = {0, 233985, 169473, 169729, 169985, 170241, 177665, 177409, 185089, 184833, 184577, 163585, 167425, 167169}
 local launch_vehicle = {"Launch Up", "Launch Forward", "Launch Backwards", "Launch Down", "Slingshot"}
 local thrust_offset = 0x8
@@ -1323,7 +1324,7 @@ end)
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for _, pid in players.list(false, true, true, true, false) do
+            for _, pid in players.list(true, true, true, true, false) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
@@ -1665,23 +1666,23 @@ end)
                         if explo_reactions == 1 then
                             WEAPON.REMOVE_WEAPON_FROM_PED(ped, 177293209)
                             notify("Removed Weapon From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
+                            wait(5000)
                         elseif explo_reactions == 2 then
                             WEAPON.REMOVE_WEAPON_COMPONENT_FROM_PED(ped, 177293209, 2313935527)
                             notify("Removed Attachment From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
+                            wait(5000)
                         elseif explo_reactions == 3 then
-                            WEAPON.REMOVE_ALL_PED_WEAPONS(ped)
-                            notify("Removed All Weapons From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
+                            util.draw_debug_text(players.get_name(pid).." Is using the Explo Sniper.")
                         elseif explo_reactions == 4 then
                             trigger_commands("explode"..players.get_name(pid))
                             notify("Killed Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
+                            wait(5000)
                         elseif explo_reactions == 5 then
                             notify("Kicked Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
-                            wait(50)
                             trigger_commands("kick"..players.get_name(pid))
+                            wait(5000)
                         end
-                        wait(5000)
                     end
-                    util.draw_debug_text(players.get_name(pid).." Is using the Explo Sniper.")
                 end
             end
         end)
@@ -3182,8 +3183,8 @@ local function player(pid)
                         ENTITY.ATTACH_ENTITY_TO_ENTITY(cage2, temp_ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -90.0, 0,  false, true, true, 0, true)
                         ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
                         ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
-                        spawned_objects[#spawned_objects + 1] = cage1
-                        spawned_objects[#spawned_objects + 1] = cage2
+                        spawned_cages[#spawned_cages + 1] = cage1
+                        spawned_cages[#spawned_cages + 1] = cage2
                     else
                         entities.delete_by_handle(temp_ped)
                     end
@@ -3199,16 +3200,16 @@ local function player(pid)
             -- Delete all Cages
             -------------------------------------
                             
-            menu.action(mpcage, "Delete all Cages", {""}, "Stand Issue, Doesn't work.", function()
+            menu.action(mpcage, "Delete all Cages", {""}, "", function()
                 local entitycount = 0
-                for i, object in spawned_objects do
+                for i, object in spawned_cages do
                     ENTITY.SET_ENTITY_AS_MISSION_ENTITY(object, false, false)
                     entities.delete_by_handle(object)
-                    spawned_objects[i] = nil
+                    spawned_cages[i] = nil
                     entitycount = entitycount + 1
                 end
                 notify("Cleared "..entitycount.." Spawned Cage Objects")
-                spawned_objects = {}
+                spawned_cages = {}
             end)
 
         -------------------------------------
@@ -3244,7 +3245,21 @@ local function player(pid)
                 HUD.SET_BLIP_COLOUR(blip, 2)
                 local ptr = entities.handle_to_pointer(vehicle)
                 entities.set_can_migrate(ptr, false)
-            end)            
+                spawned_attackers[#spawned_attackers + 1] = ped
+                spawned_attackers[#spawned_attackers + 1] = vehicle
+            end)
+
+        menu.action(vehattack, "Delete all Attackers", {""}, "", function()
+            local entitycount = 0
+            for i, object in spawned_attackers do
+                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(object, false, false)
+                entities.delete_by_handle(object)
+                spawned_attackers[i] = nil
+                entitycount = entitycount + 1
+            end
+            notify("Cleared "..entitycount.." Attackers")
+            spawned_attackers = {}
+        end)
 
         -------------------------------------
         -- Send To Online Intro
