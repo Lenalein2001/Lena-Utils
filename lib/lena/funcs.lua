@@ -218,7 +218,7 @@ function trapcage(pid, object, visible)
     local pos = players.get_position(pid)
     local obj = entities.create_object(objHash, pos)
     entities.set_can_migrate(entities.handle_to_pointer(obj), false)
-    spawned_objects[#spawned_objects + 1] = obj
+    spawned_cages[#spawned_cages + 1] = obj
     ENTITY.SET_ENTITY_VISIBLE(obj, visible)
     ENTITY.FREEZE_ENTITY_POSITION(obj, true)
     STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(objHash)
