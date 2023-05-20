@@ -2,32 +2,6 @@ json = require "pretty.json"
 local self = {}
 self.version = 27
 
-Config = {
-	controls = {
-		vehicleweapons = 86,
-		airstrikeaircraft = 86
-	},
-	general = {
-		standnotifications = false,
-		displayhealth = true,
-		language = "english",
-		developer = false, 	-- developer flag (enables/disables some debug features)
-		showintro = true
-	},
-	ufo = {
-		disableboxes = false, 	-- determines if boxes are drawn on players to show their position
-		targetplayer = false 	-- wether tractor beam only targets players or not
-	},
-	vehiclegun = {
-		disablepreview = false,
-	},
-	healthtxtpos = {
-		x = 0.03,
-		y = 0.05
-	},
-	handlingAutoload = {}
-}
-
 HudColour =
 {
 	pureWhite = 0,
@@ -74,95 +48,12 @@ notification =
 	defaultColour = HudColour.black
 }
 
-function notification.stand(msg)
-	assert(type(msg) == "string", "msg must be a string, got " .. type(msg))
-	msg = msg:gsub('~[%w_]-~', ""):gsub('<C>(.-)</C>', '%1')
-	util.toast("[Lena] " .. msg)
-end
-
-function notification:help(format, colour, ...)
-	assert(type(format) == "string", "msg must be a string, got " .. type(format))
-
-	local msg = string.format(format, ...)
-	if Config.general.standnotifications then
-		return self.stand(msg)
-	end
-
-	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or self.defaultColour)
-	util.BEGIN_TEXT_COMMAND_THEFEED_POST("~BLIP_INFO_ICON~ " .. msg)
-	HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER_WITH_TOKENS(true, true)
-end
-
 function notification:normal(format, colour, ...)
 	assert(type(format) == "string", "msg must be a string, got " .. type(format))
-
-	local msg = string.format(format, ...)
-	if Config.general.standnotifications then
-		return self.stand(msg)
-	end
-
 	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or self.defaultColour)
 	util.BEGIN_TEXT_COMMAND_THEFEED_POST(msg)
 	HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(self.txdDict, self.txdName, true, 4, self.title, self.subtitle)
 	HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)
-end
-
---------------------------
--- FILE
---------------------------
-
-Ini = {}
-function Ini.save(fileName, obj)
-	local file <close> = assert(io.open(fileName, "w"), "error loading file")
-	local s = {}
-	for section, tbl in pairs(obj) do
-		assert(type(tbl) == "table", "expected field " .. section .. " to be a table, got " .. type(tbl))
-		local l = {}
-		table.insert(l, string.format("[%s]", section))
-		for k, v in pairs(tbl) do table.insert(l, string.format("%s=%s", k, v)) end
-		table.insert(s, table.concat(l, '\n') .. '\n')
-	end
-	file:write(table.concat(s, '\n'))
-end
-
-function Ini.load(fileName)
-	assert(type(fileName) == "string", "fileName must be a string")
-	local file <close> = assert(io.open(fileName, "r"), "error loading file: " .. fileName)
-	local data = {}
-	local section
-	for line in io.lines(fileName) do
-		local tempSection = string.match(line, '^%[([^%]]+)%]$')
-
-		if tempSection ~= nil then
-			section = tonumber(tempSection) and tonumber(tempSection) or tempSection
-			data[section] = data[section] or {}
-		end
-
-		local param, value = string.match(line, '^([%w_]+)%s*=%s*(.+)$')
-		if section ~= nil and param and value ~= nil then
-			if value == "true" then
-				value = true
-			elseif value == "false" then
-				value = false
-			elseif tonumber(value) then
-				value = tonumber(value)
-			end
-			data[section][tonumber(param) or param] = value
-		end
-	end
-	return data
-end
-
-local parseJson = json.parse
-
-json.parse = function (filePath, withoutNull)
-	local file <close> = assert(io.open(filePath, "r"), filePath .. " does not exist")
-	local content = file:read("a")
-	local fileName = string.match(filePath, '^.+\\(.+)')
-	if #content == 0 then
-		return false,  fileName .. " is empty"
-	end
-	return pcall(parseJson, content, withoutNull)
 end
 
 --------------------------
@@ -207,17 +98,6 @@ function Sound:stop()
         AUDIO.RELEASE_SOUND_ID(self.Id)
         self.Id = -1
     end
-end
-
-function Sound:hasFinished()
-	return AUDIO.HAS_SOUND_FINISHED(self.Id)
-end
-
-function Sound:playFromEntity(entity)
-	if self.Id == -1 then
-		self.Id = AUDIO.GET_SOUND_ID()
-		AUDIO.PLAY_SOUND_FROM_ENTITY(self.Id, self.name, entity, self.reference, true, 0)
-	end
 end
 
 --------------------------
@@ -507,53 +387,6 @@ local draw_rect = function (pos0, pos1, pos2, pos3, colour)
 	GRAPHICS.DRAW_POLY(pos0.x, pos0.y, pos0.z, pos1.x, pos1.y, pos1.z, pos3.x, pos3.y, pos3.z, colour.r, colour.g, colour.b, colour.a)
 	GRAPHICS.DRAW_POLY(pos3.x, pos3.y, pos3.z, pos2.x, pos2.y, pos2.z, pos0.x, pos0.y, pos0.z, colour.r, colour.g, colour.b, colour.a)
 end
-	
-function draw_bounding_box(entity, showPoly, colour)
-	if not ENTITY.DOES_ENTITY_EXIST(entity) then
-		return
-	end
-	colour = colour or {r = 255, g = 0, b = 0, a = 255}
-	local min = v3.new()
-	local max = v3.new()
-	MISC.GET_MODEL_DIMENSIONS(ENTITY.GET_ENTITY_MODEL(entity), min, max)
-	min:abs(); max:abs()
-
-	local upperLeftRear = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity, -max.x, -max.y, max.z)
-	local upperRightRear = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity, min.x, -max.y, max.z)
-	local lowerLeftRear = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity, -max.x, -max.y, -min.z)
-	local lowerRightRear = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity, min.x, -max.y, -min.z)
-
-	draw_line(upperLeftRear, upperRightRear, colour)
-	draw_line(lowerLeftRear, lowerRightRear, colour)
-	draw_line(upperLeftRear, lowerLeftRear, colour)
-	draw_line(upperRightRear, lowerRightRear, colour)
-
-	local upperLeftFront = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity, -max.x, min.y, max.z)
-	local upperRightFront = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity, min.x, min.y, max.z)
-	local lowerLeftFront = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity, -max.x, min.y, -min.z)
-	local lowerRightFront = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity, min.x, min.y, -min.z)
-
-	draw_line(upperLeftFront, upperRightFront, colour)
-	draw_line(lowerLeftFront, lowerRightFront, colour)
-	draw_line(upperLeftFront, lowerLeftFront, colour)
-	draw_line(upperRightFront, lowerRightFront, colour)
-
-	draw_line(upperLeftRear, upperLeftFront, colour)
-	draw_line(upperRightRear, upperRightFront, colour)
-	draw_line(lowerLeftRear, lowerLeftFront, colour)
-	draw_line(lowerRightRear, lowerRightFront, colour)
-
-	if type(showPoly) ~= "boolean" or showPoly then
-		draw_rect(lowerLeftRear, upperLeftRear, lowerLeftFront, upperLeftFront, colour)
-		draw_rect(upperRightRear, lowerRightRear, upperRightFront, lowerRightFront, colour)
-
-		draw_rect(lowerLeftFront, upperLeftFront, lowerRightFront, upperRightFront, colour)
-		draw_rect(upperLeftRear, lowerLeftRear, upperRightRear, lowerRightRear, colour)
-
-		draw_rect(upperRightRear, upperRightFront, upperLeftRear, upperLeftFront, colour)
-		draw_rect(lowerRightFront, lowerRightRear, lowerLeftFront, lowerLeftRear, colour)
-	end
-end
 
 function set_decor_flag(entity, flag)
 	DECORATOR.DECOR_SET_INT(entity, "Casino_Game_Info_Decorator", flag)
@@ -668,46 +501,6 @@ function is_player_in_interior(player)
 	elseif read_global.int(2657589 + (player * 466 + 1) + 321 + 7) ~= -1 then
 		return true
 	end
-	return false
-end
-
-function is_player_in_rc_bandito(player)
-	if player ~= -1 then
-		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 365)
-		return BitTest(memory.read_int(address), 29)
-	end
-	return false
-end
-
-function is_player_in_rc_tank(player)
-	if player ~= -1 then
-		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 2)
-		return BitTest(memory.read_int(address), 16)
-	end
-	return false
-end
-
-function is_player_in_rc_personal_vehicle(player)
-	if player ~= -1 then
-		local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 428 + 3)
-		return BitTest(memory.read_int(address), 6)
-	end
-	return false
-end
-
-function is_player_in_any_rc_vehicle(player)
-	if is_player_in_rc_bandito(player) then
-		return true
-	end
-
-	if is_player_in_rc_tank(player) then
-		return true
-	end
-
-	if is_player_in_rc_personal_vehicle(player) then
-		return true
-	end
-
 	return false
 end
 
@@ -932,94 +725,8 @@ HudTimer.DisableThisFrame = function()
 	write_global.int(2696211, 1)
 end
 
-function EnableOTR()
-	local toggle_addr = 2657589 + ((PLAYER.PLAYER_ID() * 466) + 1) + 210
-	if read_global.int(toggle_addr) == 1 then
-		return
-	end
-	write_global.int(toggle_addr, 1)
-	write_global.int(2672505 + 56, NETWORK.GET_NETWORK_TIME() + 1)
-end
-
-function DisableOTR()
-	write_global.int(2657589 + ((PLAYER.PLAYER_ID() * 466) + 1) + 210, 0)
-end
-
 function DisablePhone()
     write_global.int(20366, 1)
-end
-
-
-function is_phone_open()
-	if SCRIPT.GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(util.joaat("cellphone_flashhand")) > 0 then
-		return true
-	end
-	return false
-end
-
-function memory_scan(name, pattern, callback)
-	local address = memory.scan(pattern)
-
-	if address == NULL then error("Failed to find " .. name) end
-
-	callback(address)
-end
-
---------------------------
--- TABLE
---------------------------
-
-function table.random(t)
-	if rawget(t, 1) ~= nil then
-		return t[ math.random(#t) ]
-	end
-	local list = {}
-	for _, value in pairs(t) do
-		table.insert(list, value)
-	end
-	local result = list[math.random(#list)]
-	return type(result) ~= "table" and result or table.random(result)
-end
-
-
-function pairs_by_keys(t, f)
-	local a = {}
-	for n in pairs(t) do table.insert(a, n) end
-	table.sort(a, f)
-	local i = 0
-	local iter = function()
-		i = i + 1
-		if a[i] == nil then return nil
-		else return a[i], t[a[i]]
-		end
-	end
-	return iter
-end
-
-function table.insert_once(t, value)
-	if not table.find(t, value) then table.insert(t, value) end
-end
-
-function table.find_if(t, f)
-	for k, v in pairs(t) do
-		if f(k, v) then return k end
-	end
-	return nil
-end
-
-function table.find(t, value)
-	for k, v in pairs(t) do
-		if value == v then return k end
-	end
-	return nil
-end
-
-function table.count_if(t, f)
-	local count = 0
-	for k, v in pairs(t) do
-		if f(k, v) then count = count + 1 end
-	end
-	return count
 end
 
 --------------------------
@@ -1063,70 +770,12 @@ function get_ground_z(pos)
 	return groundz
 end
 
-function get_input_from_screen_keyboard(windowName, maxInput, defaultText)
-	MISC.DISPLAY_ONSCREEN_KEYBOARD(0, windowName, "", defaultText, "", "", "", maxInput);
-	while MISC.UPDATE_ONSCREEN_KEYBOARD() == 0 do
-		util.yield_once()
-	end
-	if MISC.UPDATE_ONSCREEN_KEYBOARD() == 1 then
-		return MISC.GET_ONSCREEN_KEYBOARD_RESULT()
-	end
-	return ""
-end
-
-function draw_string(s, x, y, scale, font)
-	HUD.BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING")
-	HUD.SET_TEXT_FONT(font or 0)
-	HUD.SET_TEXT_SCALE(scale, scale)
-	HUD.SET_TEXT_DROP_SHADOW()
-	HUD.SET_TEXT_WRAP(0.0, 1.0)
-	HUD.SET_TEXT_DROPSHADOW(1, 0, 0, 0, 0)
-	HUD.SET_TEXT_OUTLINE()
-	HUD.SET_TEXT_EDGE(1, 0, 0, 0, 0)
-	HUD.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(s)
-	HUD.END_TEXT_COMMAND_DISPLAY_TEXT(x, y, 0)
-end
-
-
 function capitalize(txt)
 	return tostring(txt):gsub('^%l', string.upper)
 end
 
 function random_float(min, max)
 	return min + math.random() * (max - min)
-end
-
-function draw_marker(type, pos, scale, colour, textureDict, textureName)
-	textureDict = textureDict or 0
-	textureName = textureName or 0
-	GRAPHICS.DRAW_MARKER(
-		type,
-		pos.x, pos.y, pos.z,
-		0.0, 0.0, 0.0,
-		0.0, 0.0, 0.0,
-		scale, scale, scale,
-		colour.r, colour.g, colour.b, colour.a,
-		false, false, 0, true, textureDict, textureName, false
-	)
-end
-
-local orgLog = util.log
-
----@param format string
----@param ... any
---[[util.log = function (format, ...)
-	local strg = type(format) ~= "string" and tostring(format) or format:format(...)
-	orgLog("[Lena] " .. strg)
-end]]
-
-function draw_debug_text(...)
-	local arg = {...}
-	local strg = ""
-	for _, w in ipairs(arg) do
-		strg = strg .. tostring(w) .. '\n'
-	end
-	local colour = {r = 1.0, g = 0.0, b = 0.0, a = 1.0}
-	directx.draw_text(0.05, 0.05, strg, ALIGN_TOP_LEFT, 1.0, colour, false)
 end
 
 return self

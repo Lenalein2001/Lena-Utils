@@ -3,15 +3,8 @@ notificationBits = 0
 nearbyNotificationBits = 0
 blips = {}
 
-local scriptdir <const> = filesystem.scripts_dir()
-local lenaDir <const> = scriptdir .. "Lena\\"
-if not filesystem.exists(lenaDir) then
-	filesystem.mkdir(lenaDir)
-end
-
-if not filesystem.exists(lenaDir .. "Players") then
-	filesystem.mkdir(lenaDir .. "Players")
-end
+local scriptdir = filesystem.scripts_dir()
+local lenaDir = scriptdir .. "Lena\\"
 
 HudColour =
 {
@@ -93,10 +86,6 @@ function play_anim(dict, name, duration)
     TASK.TASK_PLAY_ANIM(ped, dict, name, 1.0, 1.0, duration, 3, 0.5, false, false, false)
 end
 
-function BitTest(bits, place)
-	return (bits & (1 << place)) ~= 0
-end
-
 function restartsession()
     local host = players.get_name(players.get_host())
     local script_host = players.get_name(players.get_script_host())
@@ -142,20 +131,6 @@ function request_control(entity, timeOut)
 	return start.elapsed() < timeOut
 end
 
-function request_model_load(hash)
-    request_time = os.time()
-    if not STREAMING.IS_MODEL_VALID(hash) then
-        return
-    end
-    STREAMING.REQUEST_MODEL(hash)
-    while not STREAMING.HAS_MODEL_LOADED(hash) do
-        if os.time() - request_time >= 10 then
-            break
-        end
-        wait()
-    end
-end
-
 function spawn_ped(ped_name, pos, godmode)
     local hash = util.joaat(ped_name)
     if STREAMING.IS_MODEL_A_PED(hash) then
@@ -179,6 +154,7 @@ function spawn_vehicle(model_name, pos, godmode)
         ENTITY.SET_ENTITY_INVINCIBLE(veh, godmode)
         local ptr = entities.handle_to_pointer(veh)
         entities.set_can_migrate(ptr, false)
+        ENTITY.SET_ENTITY_SHOULD_FREEZE_WAITING_ON_COLLISION(veh, true)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return veh
     else
@@ -210,6 +186,11 @@ end
 
 function get_interior_player_is_in(pid)
     return memory.read_int(memory.script_global(((2657589 + 1) + (pid * 466)) + 245)) -- Global_2657589[bVar0 /*466*/].f_245
+end
+
+function is_player_in_any_interior(player)
+	local address = memory.script_global(2657589 + (player * 466 + 1) + 245)
+	return address ~= NULL and memory.read_int(address) ~= 0
 end
 
 function trapcage(pid, object, visible)
@@ -256,14 +237,6 @@ function mod_uses(type, incr)
     end
 end
 
-function SetLocalInt(script_str, script_local, value)
-    local addr = memory.script_local(script_str, script_local)
-    if addr ~= 0 then
-        memory.write_int(addr, value)
-    end
-    return addr ~= 0
-end
-
 function GET_INT_LOCAL(Script, Local)
     if memory.script_local(Script, Local) ~= 0 then
         local Value = memory.read_int(memory.script_local(Script, Local))
@@ -271,11 +244,6 @@ function GET_INT_LOCAL(Script, Local)
             return Value
         end
     end
-end
-
-function GetLocalInt(script_str, script_local)
-    local addr = memory.script_local(script_str, script_local)
-    return addr ~= 0 and memory.read_int(addr) or nil
 end
 
 function getMPX()
@@ -318,10 +286,6 @@ function SET_FLOAT_GLOBAL(Global, Value)
     memory.write_float(memory.script_global(Global), Value)
 end
 
-function GET_INT_GLOBAL(Global)
-    return memory.read_int(memory.script_global(Global))
-end
-
 function SET_PACKED_INT_GLOBAL(StartGlobal, EndGlobal, Value)
     for i = StartGlobal, EndGlobal do
         SET_INT_GLOBAL(262145 + i, Value)
@@ -334,27 +298,8 @@ function SET_INT_LOCAL(Script, Local, Value)
     end
 end
 
-function SET_FLOAT_LOCAL(Script, Local, Value)
-    if memory.script_local(Script, Local) ~= 0 then
-        memory.write_float(memory.script_local(Script, Local), Value)
-    end
-end
-
 function STAT_SET_INT(Stat, Value)
     STATS.STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
-end
-function STAT_SET_FLOAT(Stat, Value)
-    STATS.STAT_SET_FLOAT(joaat(ADD_MP_INDEX(Stat)), Value, true)
-end
-function STAT_SET_BOOL(Stat, Value)
-    STATS.STAT_SET_BOOL(joaat(ADD_MP_INDEX(Stat)), Value, true)
-end
-function STAT_SET_STRING(Stat, Value)
-    STATS.STAT_SET_STRING(joaat(ADD_MP_INDEX(Stat)), Value, true)
-end
-
-function SET_FLOAT_GLOBAL(Global, Value)
-    memory.write_float(memory.script_global(Global), Value)
 end
 
 function get_seat_ped_is_in(ped)
@@ -421,12 +366,6 @@ function BlockSyncs(pid, callback)
             trigger_command(outSync, "off")
         end
     end
-end
-
-function memoryScan(name, pattern, callback)
-	local address = memory.scan(pattern)
-	assert(address ~= NULL, "memory scan failed: " .. name)
-	callback(address)
 end
 
 function is_entity_a_projectile(hash)
@@ -520,20 +459,6 @@ function language_string(language)
       [12] = "Chinese Simplified (zh-CN)"
     }
     return language_table[language] or "Unknown"
-end
-
-function money_drop_auto_reply(packet_sender, text, team_chat, networked)
-    if not money_drop_reply then
-        return
-    end
-    if not players.get_name(packet_sender) == players.get_name(players.user()) then
-        local lowercase_text = string.lower(text)
-        if string.find(lowercase_text, "money drop") or 
-        string.find(lowercase_text, "mone drop") or 
-        string.find(lowercase_text, "money drpo") then
-            chat.send_message("Money drops are a waste of time and risky. They offer little reward and often result in lost progress. Even if I were to participate in money drops, I wouldn't because they are simply a waste of time. Stick to safer and more profitable options.", false, true, true)
-        end
-    end
 end
 
 function on_math_message(sender, reserved, text, team_chat, networked, is_auto)
@@ -738,11 +663,6 @@ function is_player_passive(player)
 		if address ~= NULL then return memory.read_int(address) == 1 end
 	end
 	return false
-end
-
-function is_player_in_any_interior(player)
-	local address = memory.script_global(2657589 + (player * 466 + 1) + 245)
-	return address ~= NULL and memory.read_int(address) ~= 0
 end
 
 -- Weapon Speed Modifier

@@ -113,20 +113,20 @@ local teleport = menu.list(misc, "Teleport", {""}, "")
 
 local status, auto_updater = pcall(require, "auto-updater")
 if not status then
-    local auto_update_complete = nil notify("Installing auto-updater...", TOAST_ALL)
+    local auto_update_complete = nil notify("Installing auto-updater...")
     async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/main/auto-updater.lua",
         function(result, headers, status_code)
             local function parse_auto_update_result(result, headers, status_code)
                 local error_prefix = "Error downloading auto-updater: "
-                if status_code ~= 200 then notify(error_prefix..status_code, TOAST_ALL) return false end
-                if not result or result == "" then notify(error_prefix.."Found empty file.", TOAST_ALL) return false end
+                if status_code ~= 200 then notify(error_prefix..status_code) return false end
+                if not result or result == "" then notify(error_prefix.."Found empty file.") return false end
                 filesystem.mkdir(filesystem.scripts_dir().."lib")
                 local file = io.open(filesystem.scripts_dir().."lib\\auto-updater.lua", "wb")
-                if file == nil then notify(error_prefix.."Could not open file for writing.", TOAST_ALL) return false end
-                file:write(result) file:close() notify("Successfully installed auto-updater lib", TOAST_ALL) return true
+                if file == nil then notify(error_prefix.."Could not open file for writing.") return false end
+                file:write(result) file:close() notify("Successfully installed auto-updater lib") return true
             end
             auto_update_complete = parse_auto_update_result(result, headers, status_code)
-        end, function() notify("Error downloading auto-updater lib. Update failed to download.", TOAST_ALL) end)
+        end, function() notify("Error downloading auto-updater lib. Update failed to download.") end)
     async_http.dispatch() local i = 1 while (auto_update_complete == nil and i < 40) do wait(250) i = i + 1 end
     if auto_update_complete == nil then error("Error downloading auto-updater lib. HTTP Request timeout") end
     auto_updater = require("auto-updater")
@@ -1324,7 +1324,7 @@ end)
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for _, pid in players.list_except(false, false, false, true) do
+            for _, pid in players.list(true, false, false, true, true) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
@@ -2625,16 +2625,6 @@ for _, developer in s_developer do
         end)
         chat.on_message(on_math_message)
 
-        menu.toggle(sdebug, "Money Drop reply", {""}, "", function(enabled)
-            money_drop_reply = enabled
-            if money_drop_reply then
-                notify("Enabled")
-            else
-                notify("Disabled")
-            end
-        end)
-        chat.on_message(money_drop_auto_reply)
-
         menu.toggle(sdebug, "Chat Relay", {"chatrelay"}, "Enable Discord Webhook", function(enabled)
             webhook_enabled = enabled
             -- Check if the webhook URL is valid
@@ -3096,6 +3086,22 @@ local function player(pid)
                     ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 100000.0, 0.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
                     break
                 end
+        end)
+
+        -------------------------------------
+        -- Hurricane
+        -------------------------------------
+
+        menu.toggle(mpvehicle, "Hurricane", {""}, "", function(toggled)
+            local ram = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Ram")
+            local speed = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Speed")
+            local veh = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Vehicle>Commercial>Terrorbyte")
+            trigger_command(veh); speed.value = 200
+            usinghurricane = toggled
+            while usinghurricane and not PLAYER.IS_PLAYER_DEAD(pid) do
+                trigger_command(ram)
+                wait(100)
+            end
         end)
 
     -------------------------------------
