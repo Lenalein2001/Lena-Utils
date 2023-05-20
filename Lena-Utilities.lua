@@ -38,7 +38,7 @@ spawned_cages = {}
 spawned_attackers = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
-natives_version = 1681379138, "uno"
+natives_version = "natives-1681379138.uno"
 local flare_veh = {788747387, -82626025, 1181327175, -1281684762}
 local anti_explo_sniper = {"Remove Weapon", "Remove Component", "Notify", "Kill", "Kick"}
 local interior_stuff = {0, 233985, 169473, 169729, 169985, 170241, 177665, 177409, 185089, 184833, 184577, 163585, 167425, 167169}
@@ -55,7 +55,7 @@ local better_heli_handling_offsets = {
     ["fPitchStabilise"] = 0x3C
 }
 dev_vers = true
-
+    
 -------------------------------------
 -- Natives
 -------------------------------------
@@ -1324,7 +1324,7 @@ end)
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for _, pid in players.list(true, true, true, true, false) do
+            for _, pid in players.list_except(false, false, false, true) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
@@ -3224,6 +3224,7 @@ local function player(pid)
             -- Tank
             -------------------------------------
 
+            local gm_on = false
             menu.action(vehattack, "Send Tank", {""}, "", function()
                 local player_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local spawn_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player_ped, 30.0, -30.0, 0.0)
@@ -3295,10 +3296,10 @@ local function player(pid)
         -- Unfair Triggerbot
         -------------------------------------
 
-        menu.toggle_loop(trolling, "Unfair Triggerbot", {"triggerbot"}, "It tries to Aim for the head, but chances are low if they are moving.", function()
+        paimbor = menu.toggle_loop(trolling, "Unfair Triggerbot", {"triggerbot"}, "It tries to Aim for the head, but chances are low if they are moving.", function()
             if pid == players.user() then 
                 notify(lang.get_localised(-1974706693)) 
-                trigger_commands("triggerbot "..players.get_name(players.user()).." off")
+                paimbor.value = false
                 util.stop_thread()
             end
 
@@ -3310,10 +3311,10 @@ local function player(pid)
             local wpnCoords = ENTITY.GET_ENTITY_BONE_POSTION(wpnEnt, ENTITY.GET_ENTITY_BONE_INDEX_BY_NAME(wpnEnt, "gun_muzzle"))
             if ENTITY.GET_ENTITY_ALPHA(ped) < 255 then return end
             if PLAYER.IS_PLAYER_FREE_AIMING_AT_ENTITY(players.user(), ped) and not PED.IS_PED_RELOADING(players.user_ped()) then
-                local pos = PED.GET_PED_BONE_COORDS(ped, 31086, 0.0, 0.0, 0.0)
-                MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(wpnCoords, pos, dmg, true, wpn, players.user_ped(), true, false, 10000)
-                PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 24, 1.0)
-                wait(delay * 1000)
+                local pos = PED.GET_PED_BONE_COORDS(ped, 31086, 0.0, 0.0, 0.0) -- 31086 = Headshot
+                MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(wpnCoords, pos, dmg, true, wpn, players.user_ped(), true, false)
+                PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 24, 1.0) -- shooting manually after so it has the effect of you shooting to seem more legit despite there being nothing legit about this
+                util.yield(delay * 1000)
             end
         end)
 
@@ -3324,9 +3325,10 @@ local function player(pid)
         menu.toggle_loop(trolling, "Rocket Aimbot", {"rocketaimbot"}, "", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local user = players.user_ped()
+            local pos = players.get_position(pid)
             local control = (PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 76))
             if not PED.IS_PED_DEAD_OR_DYING(ped) and control and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
-                VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, players.get_position(pid))
+                VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, pos.x, pos.y, pos.z)
             end
         end)
 
