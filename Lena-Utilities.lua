@@ -2960,7 +2960,7 @@ local function player(pid)
 
         menu.action(friendly, "Set Waypoint", {"setwp"}, "", function()
             local pos = players.get_position(pid)
-            HUD.SET_NEW_WAYPOINT(pos)
+            HUD.SET_NEW_WAYPOINT(pos.x, pos.y)
         end)
 
         -------------------------------------
