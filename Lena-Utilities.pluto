@@ -54,8 +54,8 @@ local better_heli_handling_offsets = {
     ["fWindMult"] = 0x58,
     ["fPitchStabilise"] = 0x3C
 }
-dev_vers = true
-    
+dev_vers = false
+
 -------------------------------------
 -- Natives
 -------------------------------------
@@ -135,7 +135,7 @@ if auto_updater == true then error("Invalid auto-updater lib. Please delete your
 
 local default_check_interval = 604800
 local auto_update_config = {
-    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lena-Utilities.lua",
+    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lena-Utilities.pluto",
     script_relpath=SCRIPT_RELPATH,
     switch_to_branch=selected_branch,
     verify_file_begins_with="--",
