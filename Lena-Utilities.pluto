@@ -54,7 +54,7 @@ local better_heli_handling_offsets = {
     ["fWindMult"] = 0x58,
     ["fPitchStabilise"] = 0x3C
 }
-dev_vers = true
+dev_vers = false
 
 -------------------------------------
 -- Natives
