@@ -162,8 +162,8 @@ local auto_update_config = {
         },
         {
             name="Natives",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/natives-1663599444-uno.lua",
-            script_relpath="/lib/natives-1663599444-uno.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/natives-1681379138/uno.lua",
+            script_relpath="/lib/natives-1681379138/uno.lua",
             check_interval=default_check_interval,
         },
         {
@@ -174,19 +174,19 @@ local auto_update_config = {
         },
         {
             name="Constant",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/lib/pretty/json/constant.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/pretty/json/constant.lua",
             script_relpath="/lib/pretty/json/constant.lua",
             check_interval=default_check_interval,
         },
         {
             name="Parser",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/lib/pretty/json/parser.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/pretty/json/parser.lua",
             script_relpath="/lib/pretty/json/parser.lua",
             check_interval=default_check_interval,
         },
         {
             name="Serializer",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/V4.2/lib/pretty/json/serializer.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/pretty/json/serializer.lua",
             script_relpath="/lib/pretty/json/serializer.lua",
             check_interval=default_check_interval,
         },
