@@ -54,7 +54,7 @@ local better_heli_handling_offsets = {
     ["fWindMult"] = 0x58,
     ["fPitchStabilise"] = 0x3C
 }
-dev_vers = false
+dev_vers = true
 
 -------------------------------------
 -- Natives
@@ -2150,25 +2150,25 @@ end)
             local clean_amount = 0
             switch index do
                 case 1:
-                    for entities.get_all_vehicles_as_pointers() as veh do
-                        if not (entities.get_vehicle_has_been_owned_by_player(veh) and NETWORK.NETWORK_IS_ACTIVITY_SESSION()) and entities.get_owner(veh) == players.user() then
-                            entities.delete_by_pointer(veh)
+                    for entities.get_all_vehicles_as_handles() as vehicle do
+                        if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+                            entities.delete_by_handle(vehicle)
                             clean_amount += 1
-                            wait(50)
                         end
+                        wait(50)
                     end
                     break
                 case 2:
-                    for entities.get_all_peds_as_pointers() as ped do
-                        if not (PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) and entities.get_owner(ped) == players.user() then
-                            entities.delete_by_pointer(ped)
+                    for entities.get_all_peds_as_handles() as ped do
+                        if not (PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(ped) then
+                            entities.delete_by_handle(ped)
                             clean_amount += 1
                             wait(50)
                         end
                     end
                 break
             end
-            notify("Cleared "..tostring(counter).." "..name:lower()..".")
+            notify("Cleared "..tostring(clean_amount).." "..name:lower()..".")
         end)
 
         -------------------------------------
