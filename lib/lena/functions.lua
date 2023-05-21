@@ -2,6 +2,32 @@ json = require "pretty.json"
 local self = {}
 self.version = 27
 
+Config = {
+	controls = {
+		vehicleweapons = 86,
+		airstrikeaircraft = 86
+	},
+	general = {
+		standnotifications = false,
+		displayhealth = true,
+		language = "english",
+		developer = false, 	-- developer flag (enables/disables some debug features)
+		showintro = true
+	},
+	ufo = {
+		disableboxes = false, 	-- determines if boxes are drawn on players to show their position
+		targetplayer = false 	-- wether tractor beam only targets players or not
+	},
+	vehiclegun = {
+		disablepreview = false,
+	},
+	healthtxtpos = {
+		x = 0.03,
+		y = 0.05
+	},
+	handlingAutoload = {}
+}
+
 HudColour =
 {
 	pureWhite = 0,
@@ -48,10 +74,19 @@ notification =
 	defaultColour = HudColour.black
 }
 
+function notification.stand(msg)
+	assert(type(msg) == "string", "msg must be a string, got " .. type(msg))
+	msg = msg:gsub('~[%w_]-~', ""):gsub('<C>(.-)</C>', '%1')
+	util.toast("[Lena] " .. msg)
+end
+
 function notification:help(format, colour, ...)
 	assert(type(format) == "string", "msg must be a string, got " .. type(format))
 
 	local msg = string.format(format, ...)
+	if Config.general.standnotifications then
+		return self.stand(msg)
+	end
 
 	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or self.defaultColour)
 	util.BEGIN_TEXT_COMMAND_THEFEED_POST("~BLIP_INFO_ICON~ " .. msg)
@@ -60,10 +95,74 @@ end
 
 function notification:normal(format, colour, ...)
 	assert(type(format) == "string", "msg must be a string, got " .. type(format))
+
+	local msg = string.format(format, ...)
+	if Config.general.standnotifications then
+		return self.stand(msg)
+	end
+
 	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or self.defaultColour)
 	util.BEGIN_TEXT_COMMAND_THEFEED_POST(msg)
 	HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(self.txdDict, self.txdName, true, 4, self.title, self.subtitle)
 	HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)
+end
+
+--------------------------
+-- FILE
+--------------------------
+
+Ini = {}
+function Ini.save(fileName, obj)
+	local file <close> = assert(io.open(fileName, "w"), "error loading file")
+	local s = {}
+	for section, tbl in pairs(obj) do
+		assert(type(tbl) == "table", "expected field " .. section .. " to be a table, got " .. type(tbl))
+		local l = {}
+		table.insert(l, string.format("[%s]", section))
+		for k, v in pairs(tbl) do table.insert(l, string.format("%s=%s", k, v)) end
+		table.insert(s, table.concat(l, '\n') .. '\n')
+	end
+	file:write(table.concat(s, '\n'))
+end
+
+function Ini.load(fileName)
+	assert(type(fileName) == "string", "fileName must be a string")
+	local file <close> = assert(io.open(fileName, "r"), "error loading file: " .. fileName)
+	local data = {}
+	local section
+	for line in io.lines(fileName) do
+		local tempSection = string.match(line, '^%[([^%]]+)%]$')
+
+		if tempSection ~= nil then
+			section = tonumber(tempSection) and tonumber(tempSection) or tempSection
+			data[section] = data[section] or {}
+		end
+
+		local param, value = string.match(line, '^([%w_]+)%s*=%s*(.+)$')
+		if section ~= nil and param and value ~= nil then
+			if value == "true" then
+				value = true
+			elseif value == "false" then
+				value = false
+			elseif tonumber(value) then
+				value = tonumber(value)
+			end
+			data[section][tonumber(param) or param] = value
+		end
+	end
+	return data
+end
+
+local parseJson = json.parse
+
+json.parse = function (filePath, withoutNull)
+	local file <close> = assert(io.open(filePath, "r"), filePath .. " does not exist")
+	local content = file:read("a")
+	local fileName = string.match(filePath, '^.+\\(.+)')
+	if #content == 0 then
+		return false,  fileName .. " is empty"
+	end
+	return pcall(parseJson, content, withoutNull)
 end
 
 --------------------------

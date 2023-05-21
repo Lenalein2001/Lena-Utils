@@ -141,8 +141,8 @@ function RequestModel(hash, timeout)
     return STREAMING.HAS_MODEL_LOADED(hash)
 end
 
-function spawn_ped(ped_name, pos, godmode)
-    local hash = util.joaat(ped_name)
+function spawn_ped(model_name, pos, godmode)
+    local hash = util.joaat(model_name)
     if STREAMING.IS_MODEL_A_PED(hash) then
         util.request_model(hash)
         local ped = entities.create_ped(2, hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
@@ -152,7 +152,21 @@ function spawn_ped(ped_name, pos, godmode)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return ped
     else
-        util.toast(ped_name .. " is not a valid ped model name :/")
+        util.toast(hash .. " is not a valid ped model name :/")
+    end
+end
+
+function spawn_obj(model_name, pos)
+    local hash = util.joaat(model_name)
+    if STREAMING.IS_MODEL_VALID(hash) then
+        util.request_model(hash)
+        local obj = entities.create_object(hash, pos)
+        local ptr = entities.handle_to_pointer(obj)
+        entities.set_can_migrate(ptr, false)
+        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+        return obj
+    else
+        util.toast(hash .. " is not a valid ped model name :/")
     end
 end
 

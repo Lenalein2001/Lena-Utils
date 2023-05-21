@@ -54,7 +54,7 @@ local better_heli_handling_offsets = {
     ["fWindMult"] = 0x58,
     ["fPitchStabilise"] = 0x3C
 }
-dev_vers = false
+dev_vers = true
     
 -------------------------------------
 -- Natives
@@ -2142,6 +2142,36 @@ end)
     -------------------------------------
 
         -------------------------------------
+        -- Clear Vehicles
+        -------------------------------------
+
+        menu.list_action(clear_area_locally, "Clear All", {""}, "", {"Vehicles", "Peds", "Objects", "Pickups"}, function(index, name)
+            notify("Clearing "..name:lower().."...")
+            local clean_amount = 0
+            switch index do
+                case 1:
+                    for entities.get_all_vehicles_as_pointers() as veh do
+                        if not (entities.get_vehicle_has_been_owned_by_player(veh) and NETWORK.NETWORK_IS_ACTIVITY_SESSION()) and entities.get_owner(veh) == players.user() then
+                            entities.delete_by_pointer(veh)
+                            clean_amount += 1
+                            wait(50)
+                        end
+                    end
+                    break
+                case 2:
+                    for entities.get_all_peds_as_pointers() as ped do
+                        if not (PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) and entities.get_owner(ped) == players.user() then
+                            entities.delete_by_pointer(ped)
+                            clean_amount += 1
+                            wait(50)
+                        end
+                    end
+                break
+            end
+            notify("Cleared "..tostring(counter).." "..name:lower()..".")
+        end)
+
+        -------------------------------------
         -- Clear Area All
         -------------------------------------
 
@@ -2437,7 +2467,7 @@ end)
 
     local config = {
         disable_traffic = true,
-        disable_peds = true,
+        disable_peds = false,
     }
     local pop_multiplier_id
     
@@ -2762,9 +2792,6 @@ for _, developer in s_developer do
         -- Test Features
         -------------------------------------
 
-        menu.action(sdebug, "Test", {""}, "", function()
-            game_notification("Test", HudColour.red)
-        end)
 
         -------------------------------------
         -- Natives
@@ -3169,18 +3196,18 @@ local function player(pid)
                 if not elevatorPOS or elevatorPOS:distance(players.get_position(pid)) >= 6.0 then
                     TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                     wait(250)
-                    local spawnped = joaat("u_m_m_jesus_01")
-                    local spawn1 = joaat("prop_test_elevator"); local spawn2 = joaat("prop_test_elevator")
+                    local spawnped = "u_m_m_jesus_01"
+                    local spawn1 = "prop_test_elevator"
+                    local spawn2 = "prop_test_elevator"
                     elevatorPOS = players.get_position(pid)
-                    spawn_ped(spawnped, players.get_position(pid), true)
+                    local temp_ped = spawn_ped(spawnped, players.get_position(pid), true)
 
                     if ENTITY.IS_ENTITY_A_PED(temp_ped) then
                         ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
                         PED.SET_PED_CONFIG_FLAG(temp_ped, 62, 1)
                         ENTITY.FREEZE_ENTITY_POSITION(temp_ped, true)
-                        util.request_model(spawn1); util.request_model(spawn2)
-                        local cage1 = entities.create_object(spawn1, players.get_position(pid))
-                        local cage2 = entities.create_object(spawn2, players.get_position(pid))
+                        local cage1 = spawn_obj(spawn1, players.get_position(pid))
+                        local cage2 = spawn_obj(spawn2, players.get_position(pid))
                         ENTITY.SET_ENTITY_VISIBLE(temp_ped, true)
                         ENTITY.ATTACH_ENTITY_TO_ENTITY(cage1, temp_ped, 0, 0,0,0, 0,0,0, false, true, true, 0, true)
                         ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
@@ -3233,7 +3260,7 @@ local function player(pid)
                 local player_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local spawn_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player_ped, 30.0, -30.0, 0.0)
                 local ped = spawn_ped("s_m_y_blackops_01", spawn_pos, gm_on)  -- Assign the returned ped to a variable
-                local vehicle = spawn_vehicle("rhino", spawn_pos, gm_on)
+                local vehicle = spawn_vehicle(joaat("rhino"), spawn_pos, gm_on)
                 NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(vehicle), true)
                 PED.SET_PED_INTO_VEHICLE(ped, vehicle, -1)
                 PED.SET_PED_COMBAT_ATTRIBUTES(ped, 3, false)
