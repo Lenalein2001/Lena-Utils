@@ -54,7 +54,7 @@ local better_heli_handling_offsets = {
     ["fWindMult"] = 0x58,
     ["fPitchStabilise"] = 0x3C
 }
-dev_vers = true
+dev_vers = false
     
 -------------------------------------
 -- Natives
@@ -1324,7 +1324,7 @@ end)
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for _, pid in players.list(true, false, false, true, true) do
+            for _, pid in players.list(true, true, true, true, true) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
@@ -1661,8 +1661,8 @@ end)
         menu.toggle_loop(weapon_reactions, "Anti Explo Sniper", {""}, "", function()
             for _, pid in players.list(true, true, true, true, true) do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                if WEAPON.IS_PED_ARMED(ped, 4) then
-                    if WEAPON.HAS_PED_GOT_WEAPON(ped, 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(PLAYER.GET_PLAYER_PED(pid), 177293209, 2313935527) then
+                if WEAPON.IS_PED_ARMED(ped, 4) and PLAYER.IS_PLAYER_FREE_AIMING(ped) then
+                    if WEAPON.HAS_PED_GOT_WEAPON(ped, 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(ped, 177293209, 2313935527) then
                         if explo_reactions == 1 then
                             WEAPON.REMOVE_WEAPON_FROM_PED(ped, 177293209)
                             notify("Removed Weapon From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
@@ -1756,13 +1756,12 @@ end)
     menu.toggle_loop(online, "Kick Attackers", {""}, "", function()
         if util.is_session_started() and not util.is_session_transition_active() then
             for _, pid in players.list(false, false, true, true, false) do
-                local attacker = players.is_marked_as_attacker(pid)
                 local pname = players.get_name(pid)
                 local rid = players.get_rockstar_id(pid)
-                if attacker then
+                if players.is_marked_as_attacker(pid) then
                     trigger_commands("savep"..pname)
                     notify(pname.." has been Kicked for attacking you.")
-                    log("[Lena | Kick Attackers] "..pname.." ("..rid..") has attacked you and got Kicked & Blocked.")
+                    log("[Lena | Kick Attackers] "..pname.." ("..rid..") has attacked you and got Kicked.")
                     wait(50)
                     trigger_commands("kick "..pname)
                 end
@@ -3173,8 +3172,7 @@ local function player(pid)
                     local spawnped = joaat("u_m_m_jesus_01")
                     local spawn1 = joaat("prop_test_elevator"); local spawn2 = joaat("prop_test_elevator")
                     elevatorPOS = players.get_position(pid)
-                    util.request_model(spawnped)
-                    local temp_ped = entities.create_ped(2, spawnped, players.get_position(pid), 0)
+                    spawn_ped(spawnped, players.get_position(pid), true)
 
                     if ENTITY.IS_ENTITY_A_PED(temp_ped) then
                         ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
@@ -3757,7 +3755,7 @@ local function player(pid)
                 BlockSyncs(pid, function()
                     local object = entities.create_object(joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
                     OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
-                    wait(1000)
+                    wait(5000)
                     entities.delete_by_handle(object)
                 end)
             end
@@ -3772,8 +3770,7 @@ local function player(pid)
                     wait(50)
                 end
                 BlockSyncs(pid, function()
-                    local coords = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                    local object = entities.create_object(joaat("h4_prop_tree_palm_trvlr_03"), coords)
+                    local object = entities.create_object(joaat("h4_prop_tree_palm_trvlr_03"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
                     OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
                     wait(5000)
                     entities.delete_by_handle(object)
@@ -3892,7 +3889,9 @@ end)
 
 players.on_leave(function(pid)
     if showleaveInfomsg then
-        notify(names[pid].." left.")
+        if names[pid] ~= nil then
+            notify(names[pid].." left.")
+        end
     end
     if showleaveInfolog then
         log("[Lena | Leave Reactions] "..names[pid].." left. (RID: "..rids[pid].." | Slot: "..allplayers[pid].." | Time in Session: "..math.floor(os.clock()-Jointimes[pid]+0.5).."s = "..math.floor((os.clock()-Jointimes[pid])/60).."m)")

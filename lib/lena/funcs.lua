@@ -131,6 +131,16 @@ function request_control(entity, timeOut)
 	return start.elapsed() < timeOut
 end
 
+function RequestModel(hash, timeout)
+    timeout = timeout or 3
+    util.request_model(hash)
+    local end_time = os.time() + timeout
+    repeat
+        wait()
+    until STREAMING.HAS_MODEL_LOADED(hash) or os.time() >= end_time
+    return STREAMING.HAS_MODEL_LOADED(hash)
+end
+
 function spawn_ped(ped_name, pos, godmode)
     local hash = util.joaat(ped_name)
     if STREAMING.IS_MODEL_A_PED(hash) then
