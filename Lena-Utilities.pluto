@@ -708,7 +708,7 @@ end)
         local delay = WEAPON.GET_WEAPON_TIME_BETWEEN_SHOTS(wpn)
         local wpnEnt = WEAPON.GET_CURRENT_PED_WEAPON_ENTITY_INDEX(PLAYER.PLAYER_PED_ID(), false)
         local wpnCoords = ENTITY.GET_ENTITY_BONE_POSTION(wpnEnt, ENTITY.GET_ENTITY_BONE_INDEX_BY_NAME(wpnEnt, "gun_muzzle"))
-        for _, pid in players.list(false, true, true, true, false) do
+        for players.list(false, true, true, true, false) as pid do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = PED.GET_PED_BONE_COORDS(ped, 31086, 0.0, 0.0, 0.0)
             if PLAYER.IS_PLAYER_FREE_AIMING_AT_ENTITY(players.user(), ped) and not PED.IS_PED_RELOADING(players.user_ped()) then
@@ -724,7 +724,7 @@ end)
     ------------------------------------- 
 
     menu.toggle_loop(weap, "Rocket Aimbot", {""}, "", function()
-        for _, pid in players.list(false, false, true, true, false) do
+        for players.list(false, false, true, true, false) as pid do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local user = players.user_ped()
             local ped_dist = v3.distance(players.get_position(user), players.get_position(pid))
@@ -797,7 +797,7 @@ end)
         menu.action(better_vehicles, "Better heli mode", {"betterheli"}, "Disabables Heli auto stablization.", function ()
             local CflyingHandling = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 2) or get_sub_handling_types(entities.get_user_vehicle_as_handle(), 1)
             if CflyingHandling then
-                for _, offset in better_heli_handling_offsets do
+                for better_heli_handling_offsets as offset do
                     memory.write_float(CflyingHandling + offset, 0)
                 end
                 wait(100)
@@ -845,8 +845,8 @@ end)
         end)
 
         menu.toggle(doorcontrol, "Lock Doors for Randoms", {"lock"}, "Locks your current Vehicle so only friends can enter it.", function(toggled)
-            for _, players in players.list(false, false, true, true, false) do
-                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(player_cur_car, players, toggled)
+            for players.list(false, false, true, true, false) as pid do
+                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(player_cur_car, pid, toggled)
             end
         end)
 
@@ -1004,7 +1004,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Bypass Anti-Lockon", {""}, "Bypass No Lock-on features. Works great on Kiddions Users.", function()
-        for _, pid in players.list(false, true, true, true, false) do
+        for players.list(false, true, true, true, false) as pid do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local veh = PED.GET_VEHICLE_PED_IS_USING(ped)
             if PED.IS_PED_IN_ANY_VEHICLE(ped, false) then
@@ -1131,7 +1131,7 @@ end)
             end
             local friendsHostQueue = players.get_host_queue(false, true, false)
             if #friendsHostQueue > 0 then
-                for _, pid in friendsHostQueue do
+                for friendsHostQueue as pid do
                     if players.get_host_queue_position(pid) < curPos then
                         notify("Failed, one of the players in the queue is your friend. Forcing Session Host is impossible until your friend re-joins the Session with a higher Host queue index.")
                         return
@@ -1182,7 +1182,7 @@ end)
         menu.toggle_loop(mpsession, "Show Talking Players", {""}, "Draws a debug text of players current talking.", function()
             if util.is_session_started() and not util.is_session_transition_active() then
                 local talking = 0
-                for _, pid in players.list(true, true, true, true, true) do
+                for players.list(true, true, true, true, true) as pid do
                     if NETWORK.NETWORK_IS_PLAYER_TALKING(pid) then
                         util.draw_debug_text(players.get_name(pid).." is talking", ALIGN_TOP_CENTRE)
                         talking = talking + 0.03
@@ -1219,7 +1219,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Super Drive", {""}, "Detects Players using Super Drive.", function()
-            for _, pid in players.list(false, true, true, true, false) do
+            for players.list(false, true, true, true, false) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local veh_speed = (ENTITY.GET_ENTITY_SPEED(vehicle)* 2.236936)
@@ -1237,7 +1237,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Spectate", {""}, "Detects if someone is spectating you.", function()
-            for _, pid in players.list(false, true, true, true, false) do
+            for players.list(false, true, true, true, false) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local cam_dist = v3.distance(players.get_position(players.user()), players.get_cam_pos(pid))
                 local ped_dist = v3.distance(players.get_position(players.user()), players.get_position(pid))
@@ -1253,7 +1253,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Teleport", {""}, "Detects if the player has teleported.", function()
-            for _, pid in players.list(false, true, true, true, true) do
+            for players.list(false, true, true, true, true) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if not NETWORK.NETWORK_IS_PLAYER_FADING(pid) and ENTITY.IS_ENTITY_VISIBLE(ped) and not PED.IS_PED_DEAD_OR_DYING(ped) then
                     local oldpos = players.get_position(pid)
@@ -1284,7 +1284,7 @@ end)
                 end
             end
             end, function()
-                for i in blips do
+                for blips as i do
                     removeBlipIndex(i)
                 end
                 notificationBits = 0
@@ -1298,7 +1298,7 @@ end)
         local isLegit = {}
         local mightNotBeLegit = {}
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function ()
-            for _, pid in players.list(false, false, true, true, true) do
+            for players.list(false, false, true, true, true) as pid do
                 local rank = players.get_rank(pid)
                 local money = players.get_money(pid)
                 local kills = players.get_kills(pid)
@@ -1324,7 +1324,7 @@ end)
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for _, pid in players.list(true, true, true, true, true) do
+            for players.list(true, true, true, true, true) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
@@ -1332,7 +1332,7 @@ end)
                 local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
                 local plyveh = DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle")
                 local pegasusveh = DECORATOR.DECOR_GET_BOOL(vehicle, "CreatedByPegasus")
-                for _, veh in veh_things do
+                for veh_things as veh do
                     if hash == joaat(veh) and DECORATOR.DECOR_GET_INT(vehicle, "MPBitset") == 8 then
                         return 
                     end
@@ -1366,7 +1366,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Thunder Join", {""}, "Detects if someone is using thunder join.", function()
-            for _, pid in players.list(false, true, true, true, true) do
+            for players.list(false, true, true, true, true) as pid do
                 if get_spawn_state(players.user()) == 0 then return end
                 local old_sh = players.get_script_host()
                 wait(100)
@@ -1429,7 +1429,7 @@ end)
 
         menu.toggle_loop(anti_orb, "Ghost", {"ghostorb"}, "Automatically ghost Players that are using the Orbital Cannon.", function()
             if not util.is_session_transition_active() then
-                for _, pid in players.list(false, true, true, true, false) do
+                for players.list(false, true, true, true, false) as pid do
                     local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                     local cam_pos = players.get_cam_pos(pid)
                     if IsPlayerUsingOrbitalCannon(pid) and TASK.GET_IS_TASK_ACTIVE(ped, 135)
@@ -1491,7 +1491,7 @@ end)
         announce_orb = false
         menu.toggle(anti_orb, "Notify on orb usage", {"notifyorb"}, "Notifies you if a Player has entered the Orbital Cannon Room.", function()
             util.create_tick_handler(function()  
-                for pid in players.list(false, true, true, true, false) do
+                for players.list(false, true, true, true, false) as pid do
                     if players.get_position(pid).x > 323 and players.get_position(pid).y < 4834 and players.get_position(pid).y > 4822 and players.get_position(pid).z <= -59.36 then
                         if IsOutOfOrbRoom[pid] and not IsInOrbRoom[pid] then
                             notify(players.get_name(pid).." has entered the orbital cannon room.")
@@ -1550,7 +1550,7 @@ end)
                         end
                         break 
                     end
-                    for _, pid in players.list(false, true, true, true, true) do
+                    for players.list(false, true, true, true, true) as pid do
                         local cam_rot = players.get_cam_rot(pid)
                         local cam_pos = players.get_cam_pos(pid)
                         if players.is_in_interior(pid) then
@@ -1659,7 +1659,7 @@ end)
             explo_reactions = index
         end)
         menu.toggle_loop(weapon_reactions, "Anti Explo Sniper", {""}, "", function()
-            for _, pid in players.list(true, true, true, true, true) do
+            for players.list(true, true, true, true, true) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if WEAPON.IS_PED_ARMED(ped, 4) and PLAYER.IS_PLAYER_FREE_AIMING(ped) then
                     if WEAPON.HAS_PED_GOT_WEAPON(ped, 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(ped, 177293209, 2313935527) then
@@ -1736,7 +1736,7 @@ end)
 
     menu.toggle_loop(online, "Kick High-Ping", {""}, "Kicks Everyone with a high ping (180)\nNote that the average ping is in most Sessions quite high. Expect false positives.", function()
         if util.is_session_started() and not util.is_session_transition_active() then
-            for _, pid in players.list(false, false, true, true, false) do
+            for players.list(false, false, true, true, false) as pid do
                 local ping = NETWORK.NETWORK_GET_AVERAGE_LATENCY(pid)
                 local pname = players.get_name(pid)
                 if ping >= 180 then 
@@ -1755,7 +1755,7 @@ end)
 
     menu.toggle_loop(online, "Kick Attackers", {""}, "", function()
         if util.is_session_started() and not util.is_session_transition_active() then
-            for _, pid in players.list(false, false, true, true, false) do
+            for players.list(false, false, true, true, false) as pid do
                 local pname = players.get_name(pid)
                 local rid = players.get_rockstar_id(pid)
                 if players.is_marked_as_attacker(pid) then
@@ -1920,7 +1920,7 @@ end)
         menu.action(missions_tunables, "Teleport Pickups To Me", {"tppu"}, "Teleports all pickups to you.", function()
             local counter = 0
             local pos = players.get_position(players.user())
-            for _, pickup in entities.get_all_pickups_as_handles() do
+            for entities.get_all_pickups_as_handles() as pickup do
                 ENTITY.SET_ENTITY_COORDS(pickup, pos, false, false, false, false)
                 counter += 1
                 wait(100)
@@ -1940,7 +1940,7 @@ end)
             local counter = 0
             local pos = players.get_position(players.user())
             local Blip = HUD.GET_FIRST_BLIP_INFO_ID(478) -- https://docs.fivem.net/docs/game-references/blips/
-            for _, pickup in entities.get_all_pickups_as_handles() do
+            for entities.get_all_pickups_as_handles() as pickup do
                 while HUD.DOES_BLIP_EXIST(Blip) and HUD.GET_BLIP_COLOUR(pickup) == 2 do
                     ENTITY.SET_ENTITY_COORDS(Blip, pos, false, false, false, false)
                     counter += 1
@@ -1960,7 +1960,7 @@ end)
 
         menu.action(missions_tunables, "Kill All Peds", {"killpeds"}, "Kills all Mission Peds.", function()
             local counter = 0
-            for _, ped in entities.get_all_peds_as_handles() do
+            for entities.get_all_peds_as_handles() as ped do
                 if HUD.GET_BLIP_COLOUR(HUD.GET_BLIP_FROM_ENTITY(ped)) == 1 or TASK.GET_IS_TASK_ACTIVE(ped, 352) then
                     ENTITY.SET_ENTITY_HEALTH(ped, 0)
                     counter += 1
@@ -2186,7 +2186,7 @@ end)
 
         menu.action(clear_area_locally, "Clear Area", {"ca"}, "Clears the Area around you without sending Freeze events.", function()
             local cleanse_entity_count = 0
-            for _, ped in entities.get_all_peds_as_handles() do
+            for entities.get_all_peds_as_handles() as ped do
                 if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(ped) and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION() or NETWORK.NETWORK_IS_ACTIVITY_SESSION() and not ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) then
                     entities.delete_by_handle(ped)
                     cleanse_entity_count += 1
@@ -2195,7 +2195,7 @@ end)
             end
             notify("Cleared "..cleanse_entity_count.." Peds!")
             cleanse_entity_count = 0
-            for _, vehicle in entities.get_all_vehicles_as_handles() do
+            for entities.get_all_vehicles_as_handles() as vehicle do
                 if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
                     entities.delete_by_handle(vehicle)
                     cleanse_entity_count += 1
@@ -2204,14 +2204,14 @@ end)
             end
             notify("Cleared ".. cleanse_entity_count .." Vehicles!")
             cleanse_entity_count = 0
-            for _, object in entities.get_all_objects_as_handles() do
+            for entities.get_all_objects_as_handles() as object do
                 entities.delete_by_handle(object)
                 cleanse_entity_count += 1
                 wait()
             end
             notify("Cleared "..cleanse_entity_count.." Objects!")
             cleanse_entity_count = 0
-            for _, pickup in entities.get_all_pickups_as_handles() do
+            for entities.get_all_pickups_as_handles() as pickup do
                 entities.delete_by_handle(pickup)
                 cleanse_entity_count += 1
                 wait()
@@ -2258,7 +2258,7 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Stop all sound events", {"stopsounds"}, "Stops all current Sounds from playing. Does not stop Scripted Music.", function()
-            for i=1,99 do
+            for i = 1, 99 do
                 AUDIO.STOP_SOUND(i)
                 AUDIO.RELEASE_SOUND_ID(i)
                 AUDIO.STOP_PED_RINGTONE(players.user_ped())
@@ -2403,7 +2403,7 @@ end)
 
     menu.toggle_loop(misc, "Disable Numpad", {"dn"}, "Disables the Numpad while Stand is open.", function()
         if not menu.is_open() then return end
-        for _, control in numpadControls do
+        for numpadControls as control do
             PAD.DISABLE_CONTROL_ACTION(2, control, true)
         end
     end)
@@ -2436,7 +2436,7 @@ end)
     menu.toggle_loop(misc, "Auto Accept Joining Games", {""}, "Will auto accept join screens.", function()
         local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
         local hashes = {99184332, 15890625, -398982408, -587688989, 15890625}
-        for _, hash in hashes do
+        for hashes as hash do
             if message_hash == hash then
                 PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201, 1.0)
                 wait(50)
@@ -2451,7 +2451,7 @@ end)
     menu.toggle_loop(misc, "Skip Warning Messages", {""}, "Skips annoying Warning Messages.", function()
         local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
         local hashes = {1990323196}
-        for _, hash in hashes do
+        for hashes as hash do
             if message_hash == hash then
                 PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201, 1.0)
                 wait(50)
@@ -2614,8 +2614,8 @@ end)
         local num_breaks = 0
         num_breaks = num_breaks + 1
         if num_breaks % (break_interval / 1000) == 0 then
-        notify("Time to take a break! "..num_breaks)
-        log("[Lena | Break reminder] Time to take a break! Number of breaks: "..num_breaks)
+            notify("Time to take a break! "..num_breaks)
+            log("[Lena | Break reminder] Time to take a break! Number of breaks: "..num_breaks)
         end
         wait(1000)
     end)
@@ -2652,7 +2652,7 @@ end)
 
 local s_developer = {3+0x10C69C46/2, 3+0x19C423D4/2, 3+0x18B33334/2, 3+0x1AB46072/2, (3+0x18B33334/2)-128}
 
-for _, developer in s_developer do
+for s_developer as developer do
     if dev_vers and players.get_rockstar_id(players.user()) == developer then
         local sdebug = menu.list(menu.my_root(), "[Debug]", {"lenadebug"}, "")
         local nativec = menu.list(sdebug, "Native Feedback", {""}, "")
@@ -2796,12 +2796,7 @@ for _, developer in s_developer do
             local newmass = mass.value / 100000
             notify("Old / New: ".. oldmass.." / "..newmass)
         end)
-
-        -------------------------------------
-        -- Test Features
-        -------------------------------------
-
-
+        
         -------------------------------------
         -- Natives
         -------------------------------------
@@ -2881,7 +2876,7 @@ local function player(pid)
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
 
-    for _, rid in idiots do
+    for idiots as rid do
         if players.get_rockstar_id(pid) == rid and get_spawn_state(pid) ~= 0 then 
             trigger_commands("historyblock"..players.get_name(pid).." on")
             wait(500)
@@ -3381,7 +3376,7 @@ local function player(pid)
                 return util.stop_thread()
             end
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-            for _, vehicle in get_vehicles_in_player_range(pid, 70.0) do
+            for get_vehicles_in_player_range(pid, 70.0) as vehicle do
                 if TASK.GET_ACTIVE_VEHICLE_MISSION_TYPE(vehicle) ~= 6 then
                     local driver = VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1, false)
                     if ENTITY.DOES_ENTITY_EXIST(driver) and not PED.IS_PED_A_PLAYER(driver) then
@@ -3403,7 +3398,7 @@ local function player(pid)
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = ENTITY.GET_ENTITY_COORDS(ped)
             local stun = joaat("weapon_stungun")
-            for _, id in interior_stuff do
+            for interior_stuff as id do
                 if get_interior_player_is_in(pid) == id then
                     notify("Player is not in any interior. :/")
                 return end
