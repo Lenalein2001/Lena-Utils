@@ -206,11 +206,6 @@ local auto_update_config = {
 
 if not dev_vers then
     auto_updater.run_auto_update(auto_update_config)
-    menu.show_warning(menu.my_root(), CLICK_MENU, "This lua will send some data to a Webhook to see how many people are using it. No information is being shared. If you don't like it, don't use it.", function()
-        notify("Have Fun")
-    end, function()
-        util.stop_script()
-    end, false)
 end
 
 if PED == nil then
