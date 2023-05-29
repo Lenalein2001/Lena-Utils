@@ -31,8 +31,6 @@ trigger_commands = menu.trigger_commands
 trigger_command = menu.trigger_command
 sendse = util.trigger_script_event
 joaat = util.joaat
-friends_in_this_session = {}
-modders_in_this_session = {}
 all_objects = {}
 spawned_cages = {}
 spawned_attackers = {}
@@ -43,16 +41,11 @@ local flare_veh = {788747387, -82626025, 1181327175, -1281684762}
 local anti_explo_sniper = {"Remove Weapon", "Remove Component", "Notify", "Kill", "Kick"}
 local interior_stuff = {0, 233985, 169473, 169729, 169985, 170241, 177665, 177409, 185089, 184833, 184577, 163585, 167425, 167169}
 local launch_vehicle = {"Launch Up", "Launch Forward", "Launch Backwards", "Launch Down", "Slingshot"}
-local thrust_offset = 0x8
-local better_heli_handling_offsets = {
-    ["fYawMult"] = 0x18,
-    ["fYawStabilise"] = 0x20,
-    ["fSideSlipMult"] = 0x24,
-    ["fRollStabilise"] = 0x30,
-    ["fAttackLiftMult"] = 0x48,
-    ["fAttackDiveMult"] = 0x4C,
-    ["fWindMult"] = 0x58,
-    ["fPitchStabilise"] = 0x3C
+local better_heli_offsets = {0x18, 0x20, 0x24, 0x30, 0x48, 0x4C, 0x58, 0x3C}
+local better_planes = {
+    {0x00B0, 10},
+    {0x0050, 0.3},
+    {0x0054, 1}
 }
 dev_vers = false
 
@@ -135,7 +128,7 @@ if auto_updater == true then error("Invalid auto-updater lib. Please delete your
 
 local default_check_interval = 604800
 local auto_update_config = {
-    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lena-Utilities.pluto",
+    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lena-Utilities.lua",
     script_relpath=SCRIPT_RELPATH,
     switch_to_branch=selected_branch,
     verify_file_begins_with="--",
@@ -784,24 +777,23 @@ end)
         -------------------------------------
 
         menu.divider(better_vehicles, "Better Heli")
-
-        menu.slider_float(better_vehicles, "Thrust", {"helithrust"}, "Set the Heli thrust.", 0, 1000, 220, 10, function (value)
-            local CflyingHandling = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 2) or get_sub_handling_types(entities.get_user_vehicle_as_handle(), 1)
-            if CflyingHandling then
-                memory.write_float(CflyingHandling + thrust_offset, value * 0.01)
-            else
-                notify("Failed\nGet in a Heli first.")
+        menu.slider_float(better_vehicles, "Thrust", {"helithrust"}, "Set the Heli thrust.", 0, 1000, 220, 10, function(value)
+            if PED.IS_PED_IN_ANY_HELI(players.user_ped()) then
+                local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+                local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
+                if CflyingHandling then
+                    memory.write_float(CflyingHandling + 0x8, value * 0.01)
+                end
             end
         end)
 
-        menu.action(better_vehicles, "Better heli mode", {"betterheli"}, "Disabables Heli auto stablization.", function ()
-            local CflyingHandling = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 2) or get_sub_handling_types(entities.get_user_vehicle_as_handle(), 1)
-            if CflyingHandling then
-                for better_heli_handling_offsets as offset do
-                    memory.write_float(CflyingHandling + offset, 0)
+        menu.action(better_vehicles, "Better heli mode", {"betterheli"}, "Disabables Heli auto stablization.", function()
+            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+            local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
+            for better_heli_offsets as offsets do
+                if CflyingHandling then
+                    memory.write_float(CflyingHandling + offsets, 0)
                 end
-                wait(100)
-                trigger_commands("gravitymult 1; helithrust 2.3; fovfpinveh 80")
             end
         end)
 
@@ -811,7 +803,15 @@ end)
 
         menu.divider(better_vehicles, "Better Lazer")
         menu.action(better_vehicles, "Better Lazer", {"betterlazer"}, "", function()
-            trigger_commands("vhengineoffglidemulti 10; vhgeardownliftmult 1; gravitymult 2; vhgeardowndragv 0.3; fovfpinveh 80")
+            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+            local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
+            for better_planes as offsets do
+                local handling = offsets[1]
+                local value = offsets[2]
+                if CflyingHandling then
+                    memory.write_float(CflyingHandling + handling, value)
+                end
+            end
             notify("Better Lazer has been enabled.")
         end)
 
@@ -985,7 +985,8 @@ end)
     -------------------------------------
 
     menu.action(vehicle, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current vehicle.", function ()
-        local CVehicleWeaponHandlingDataAddress = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 9)
+        local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+        local CVehicleWeaponHandlingDataAddress = entities.handling_get_subhandling(CHandlingData, 9)
         local WeaponSeats = CVehicleWeaponHandlingDataAddress + 0x0020
         local success, seat = get_seat_ped_is_in(PLAYER.PLAYER_PED_ID())
         if CVehicleWeaponHandlingDataAddress == 0 then 
@@ -995,7 +996,7 @@ end)
             for i = 0, 4, 1 do
                 memory.write_int(WeaponSeats + i * 4, seat + 1)
             end
-            trigger_commands("repair")
+            trigger_commands("fixvehicle")
         end
     end)
 
@@ -1019,7 +1020,8 @@ end)
 
     menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) then
-            if VEHICLE.IS_THIS_MODEL_A_CAR(players.get_vehicle_model(players.user())) then
+            local veh = players.get_vehicle_model(players.user())
+            if VEHICLE.IS_THIS_MODEL_A_CAR(veh) or VEHICLE.IS_THIS_MODEL_A_BIKE(veh) then
                 trigger_commands("turbo on; armour 4; brakes 2; engine 3; transmission 3; bulletprooftyres on")
             end
         end
@@ -1219,15 +1221,16 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Super Drive", {""}, "Detects Players using Super Drive.", function()
-            for players.list(false, true, true, true, false) as pid do
+            for players.list(true, true, true, true, true) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local veh_speed = (ENTITY.GET_ENTITY_SPEED(vehicle)* 2.236936)
                 local class = VEHICLE.GET_VEHICLE_CLASS(vehicle)
                 if class ~= 15 and class ~= 16 and veh_speed >= 200 and (players.get_vehicle_model(pid) ~= joaat("oppressor") or players.get_vehicle_model(pid) ~= joaat("oppressor2")) then
-                    local PedID = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
-                    notify(players.get_name(PedID).." Is Using Super Drive!")
-                    break
+                    local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
+                    if not IsDetectionPresent(pid, "Super Drive") then
+                        players.add_detection(pid, "Super Drive", 8, 50)
+                    end
                 end
             end
         end)
@@ -1243,7 +1246,9 @@ end)
                 local ped_dist = v3.distance(players.get_position(players.user()), players.get_position(pid))
                 if cam_dist < 20.0 and ped_dist > 75.0 and not PED.IS_PED_DEAD_OR_DYING(ped) and not NETWORK.NETWORK_IS_PLAYER_FADING(pid) then
                     notify(players.get_name(pid).." is watching you ")
-                    break
+                    if not IsDetectionPresent(pid, "Spectate") then
+                        players.add_detection(pid, "Spectate", 0, 0)
+                    end
                 end
             end
         end)
@@ -1264,7 +1269,9 @@ end)
                             if v3.distance(oldpos, currentpos) > 500 and oldpos.x ~= currentpos.x and oldpos.y ~= currentpos.y and oldpos.z ~= currentpos.z then
                                 wait(500)
                                 if get_interior_player_is_in(pid) == interior and PLAYER.IS_PLAYER_PLAYING(pid) and players.exists(pid) then
-                                    notify(players.get_name(pid).." just teleported!")
+                                    if not IsDetectionPresent(pid, "Teleport") then
+                                        players.add_detection(pid, "Teleport", 8, 50)
+                                    end
                                 end
                             end
                         end
@@ -1295,8 +1302,6 @@ end)
         -- Stat Detection
         -------------------------------------
 
-        local isLegit = {}
-        local mightNotBeLegit = {}
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function ()
             for players.list(false, false, true, true, true) as pid do
                 local rank = players.get_rank(pid)
@@ -1304,15 +1309,9 @@ end)
                 local kills = players.get_kills(pid)
                 local kdratio = players.get_kd(pid)
                 if kdratio < 0 or kdratio > 21  or kills > 100000 or rank > 1500 or money > 1500000000 then
-                    if isLegit[pid] and not mightNotBeLegit[pid] then
-                        notify(players.get_name(pid).." might not be legit.\nRank: "..rank.."\nMoney: "..string.format("%.2f", money/1000000).."M$\nKills: "..kills.."\nKD: "..string.format("%.2f", kdratio))
-                        log("[Lena | Unlegit Stats]"..players.get_name(pid).." might not be legit.\nRank: "..rank.."\nMoney: "..string.format("%.2f", money/1000000).."M$\nKills: "..kills.."\nKD: "..string.format("%.2f", kdratio))
+                    if not IsDetectionPresent(pid, "Unlegit Stats") then
+                        players.add_detection(pid, "Unlegit Stats", 8, 50)
                     end
-                    isLegit[pid] = false
-                    mightNotBeLegit[pid] = true
-                else
-                    isLegit[pid] = true
-                    mightNotBeLegit[pid] = false
                 end
                 wait(5000)
             end
@@ -1366,15 +1365,30 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Thunder Join", {""}, "Detects if someone is using thunder join.", function()
-            for players.list(false, true, true, true, true) as pid do
+            for players.list(true, true, true, true, true) as pid do
                 if get_spawn_state(players.user()) == 0 then return end
                 local old_sh = players.get_script_host()
                 wait(100)
                 local new_sh = players.get_script_host()
                 if old_sh ~= new_sh then
                     if get_spawn_state(pid) == 0 and players.get_script_host() == pid then
-                        notify(players.get_name(pid).." triggered a detection (Thunder Join) and is now classified as a Modder")
-                        log(players.get_name(pid).." triggered a detection (Thunder Join) and is now classified as a Modder")
+                        if not IsDetectionPresent(pid, "Thunder Join") then
+                            players.add_detection(pid, "Thunder Join", 8)
+                        end
+                    end
+                end
+            end
+        end)
+
+        -------------------------------------
+        -- VPN
+        -------------------------------------
+
+        menu.toggle_loop(detections, "VPN Check", {""}, "Detects if someone is using a VPN.", function()
+            for players.list(true, true, true, true, true) as pid do
+                if players.is_using_vpn(pid) then
+                    if not IsDetectionPresent(pid, "VPN") then
+                        players.add_detection(pid, "VPN", 1, 0)
                     end
                 end
             end
@@ -2205,9 +2219,11 @@ end)
             notify("Cleared ".. cleanse_entity_count .." Vehicles!")
             cleanse_entity_count = 0
             for entities.get_all_objects_as_handles() as object do
-                entities.delete_by_handle(object)
-                cleanse_entity_count += 1
-                wait()
+                if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(object) then
+                    entities.delete_by_handle(object)
+                    cleanse_entity_count += 1
+                    wait()
+                end
             end
             notify("Cleared "..cleanse_entity_count.." Objects!")
             cleanse_entity_count = 0
@@ -2526,9 +2542,11 @@ end)
         if chat.is_open() or PLAYER.IS_PLAYER_FREE_AIMING(players.user()) or util.is_interaction_menu_open() or menu.is_open() then
             if phone.value == false then
                 phone.value = true
+                notify("on")
             end
         elseif phone.value == true then
             phone.value = false
+            notify("off")
         end
     end)
 
@@ -2741,26 +2759,27 @@ for s_developer as developer do
             local is_plane = VEHICLE.IS_THIS_MODEL_A_PLANE(vmodel)
             local is_heli = VEHICLE.IS_THIS_MODEL_A_HELI(vmodel)
             local is_blimp = util.is_this_model_a_blimp(vmodel)
+            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+            local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
             if is_plane then
                 if vmodel == -1700874274 then
                     trigger_commands("vhengineoffglidemulti 10")
                     trigger_commands("vhgeardownliftmult 1")
-                    trigger_commands("gravitymult 2")
-                    trigger_commands("fovfpinveh 90")
-                    notify("Due to the Starling being a little fucker, I had to change my Code.")
+                    notify("Better Planes have been enabled for: "..vname)
                 else
-                    trigger_commands("vhengineoffglidemulti 10")
-                    trigger_commands("vhgeardownliftmult 1")
-                    trigger_commands("gravitymult 2")
-                    trigger_commands("vhgeardowndragv 0.3")
-                    trigger_commands("fovfpinveh 90")
+                    for better_planes as offsets do
+                        local handling = offsets[1]
+                        local value = offsets[2]
+                        memory.write_float(CflyingHandling + handling, value)
+                    end
                     notify("Better Planes have been enabled for: "..vname)
                 end
+                trigger_commands("gravitymult 2; fovfpinveh 90")
             elseif is_heli then
-                trigger_commands("betterheli")
+                for better_heli_offsets as offset do
+                    memory.write_float(CflyingHandling + offset, 0)
+                end
                 trigger_commands("gravitymult 1")
-                trigger_commands("helithrust 2.3")
-                trigger_commands("fovfpinveh 90")
                 notify("Better Helis have been enabled for: "..vname)
             elseif is_blimp then
                 notify("Better Blimps have been enabled for: "..vname)
@@ -2771,7 +2790,6 @@ for s_developer as developer do
                 notify("Not a Vehicle suitable for the Better Vehicle Settings :/\nCurrent Vehicle: "..vname)
                 trigger_commands("gravitymult 2")
                 trigger_commands("fovfpinveh -5")
-                trigger_commands("forceflares off")
             end
         end)
 
@@ -2830,8 +2848,8 @@ for s_developer as developer do
                 log("[Lena | Debug] Hash: "..vmodel.." | Name: "..vname.." | Joaat: "..modelname.." | Bitset: "..bitset.." | Plate:".. plate_text.."|")
             end)
             menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
-                local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "0Bitches", "Get Good", "2Take1", "Fate"}
-                VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle(), first_to_upper(string.lower(plate_texts[math.random(#plate_texts)])))
+                local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "FATE", "WHORE"}
+                VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle(), plate_texts[math.random(#plate_texts)])
             end)
 
             -------------------------------------
@@ -2871,13 +2889,13 @@ local function player(pid)
     0x0CFF2596, 0x0C9CE642, 0x0C4FBEC1, 0x0BB7CBB2, 0x0AD078FA, 0x0ACD50CE, 0x0BEBF7A0, 0x080A4E57, 0x04CB6ACE, 0x093EA186, 0x0BF770F5, 0x0C732D5C, 0x0C732D5C, 0x0CC8C37C,
     0x0A507921, 0x04BE7D5E, 0x0C42877C, 0x09025232, 0x0962404A, 0x07B42014, 0x0B1800ED, 0x0D2D6965, 0x06B87017, 0x0D67118D, 0x0AE5341D, 0x05207167, 0x0CC31372, 0x0D66E920,
     0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
-    0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697,
+    0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336,
     -- Retard
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
 
     for idiots as rid do
-        if players.get_rockstar_id(pid) == rid and get_spawn_state(pid) ~= 0 then 
+        if players.get_rockstar_id(pid) == rid and players.are_stats_ready(pid) and not util.is_session_transition_active() then 
             trigger_commands("historyblock"..players.get_name(pid).." on")
             wait(500)
             if menu.get_edition() >= 2 then
@@ -3197,6 +3215,10 @@ local function player(pid)
 
             local elevatorPOS
             menu.toggle_loop(mpcage, "Invisible Cage", {""}, "", function()
+                if not players.exists(pid) then
+                    util.stop_thread()
+                    return
+                end
                 if not elevatorPOS or elevatorPOS:distance(players.get_position(pid)) >= 6.0 then
                     TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                     wait(250)

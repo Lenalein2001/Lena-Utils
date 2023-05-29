@@ -217,6 +217,17 @@ function is_player_in_any_interior(player)
 	return address ~= NULL and memory.read_int(address) ~= 0
 end
 
+function IsDetectionPresent(pid, detection)
+    if players.exists(pid) then
+        for menu.player_root(pid):getChildren() as cmd do
+            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath(detection):isValid() then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 function trapcage(pid, object, visible)
     local objHash = util.joaat(object)
     request_model(objHash)
@@ -337,41 +348,10 @@ function get_seat_ped_is_in(ped)
     return false
 end
 
-function first_to_upper(str)
-    return (str:gsub("^%l", string.upper))
-end
-
 function request_animation(hash)
     STREAMING.REQUEST_ANIM_DICT(hash)
     while not STREAMING.HAS_ANIM_DICT_LOADED(hash) do
         wait()
-    end
-end
-
-function get_vtable_entry_pointer(address, index)
-    return memory.read_long(memory.read_long(address) + (8 * index))
-end
-function get_sub_handling_types(vehicle, type)
-    local veh_handling_address = memory.read_long(entities.handle_to_pointer(vehicle) + 0x918)
-    local sub_handling_array = memory.read_long(veh_handling_address + 0x0158)
-    local sub_handling_count = memory.read_ushort(veh_handling_address + 0x0160)
-    local types = {registerd = sub_handling_count, found = 0}
-    for i = 0, sub_handling_count - 1, 1 do
-        local sub_handling_data = memory.read_long(sub_handling_array + 8 * i)
-        if sub_handling_data ~= 0 then
-            local GetSubHandlingType_address = get_vtable_entry_pointer(sub_handling_data, 2)
-            local result = util.call_foreign_function(GetSubHandlingType_address, sub_handling_data)
-            if type and type == result then
-                return sub_handling_data
-            end
-            types[#types+1] = {type = result, address = sub_handling_data}
-            types.found = types.found + 1
-        end
-    end
-    if type then
-        return nil
-    else
-        return types
     end
 end
 
