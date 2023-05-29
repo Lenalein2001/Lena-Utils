@@ -1229,7 +1229,7 @@ end)
                 if class ~= 15 and class ~= 16 and veh_speed >= 200 and (players.get_vehicle_model(pid) ~= joaat("oppressor") or players.get_vehicle_model(pid) ~= joaat("oppressor2")) then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if not IsDetectionPresent(pid, "Super Drive") then
-                        players.add_detection(pid, "Super Drive", 8, 50)
+                        players.add_detection(pid, "Super Drive", 7, 50)
                     end
                 end
             end
@@ -1247,7 +1247,7 @@ end)
                 if cam_dist < 20.0 and ped_dist > 75.0 and not PED.IS_PED_DEAD_OR_DYING(ped) and not NETWORK.NETWORK_IS_PLAYER_FADING(pid) then
                     notify(players.get_name(pid).." is watching you ")
                     if not IsDetectionPresent(pid, "Spectate") then
-                        players.add_detection(pid, "Spectate", 0, 0)
+                        players.add_detection(pid, "Spectate", 7, 0)
                     end
                 end
             end
@@ -1270,7 +1270,7 @@ end)
                                 wait(500)
                                 if get_interior_player_is_in(pid) == interior and PLAYER.IS_PLAYER_PLAYING(pid) and players.exists(pid) then
                                     if not IsDetectionPresent(pid, "Teleport") then
-                                        players.add_detection(pid, "Teleport", 8, 50)
+                                        players.add_detection(pid, "Teleport", 7, 50)
                                     end
                                 end
                             end
@@ -1310,7 +1310,7 @@ end)
                 local kdratio = players.get_kd(pid)
                 if kdratio < 0 or kdratio > 21  or kills > 100000 or rank > 1500 or money > 1500000000 then
                     if not IsDetectionPresent(pid, "Unlegit Stats") then
-                        players.add_detection(pid, "Unlegit Stats", 8, 50)
+                        players.add_detection(pid, "Unlegit Stats", 7, 50)
                     end
                 end
                 wait(5000)
@@ -1340,20 +1340,36 @@ end)
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if players.get_name(driver) ~= "InvalidPlayer" and not pegasusveh and pid == driver then
                         if bitset == 1024 then
-                            util.draw_debug_text(players.get_name(driver).." Is likely a 2Take1 User")
-                            break
+                            util.draw_debug_text(players.get_name(driver).." Is a 2Take1 User")
+                            if not IsDetectionPresent(pid, "2Take1 User") then
+                                players.add_detection(pid, "2Take1 User", 7)
+                                break
+                            end
                         elseif plate_text == " TERROR " then
                             util.draw_debug_text(players.get_name(driver).." Is a Terror User")
-                            break
+                            if not IsDetectionPresent(pid, "Terror User") then
+                                players.add_detection(pid, "Terror User", 7)
+                                break
+                            end
                         elseif plate_text == " MXMENU " then
                             util.draw_debug_text(players.get_name(driver).." Is a MXMenu User")
-                            break
+                            if not IsDetectionPresent(pid, "MXMenu User") then
+                                players.add_detection(pid, "MXMenu User", 7)
+                                break
+                            end
                         elseif plate_text == "  FATE  " then
                             util.draw_debug_text(players.get_name(driver).." Is a Fate User")
-                            break
+                            if not IsDetectionPresent(pid, "Fate User") then
+                                players.add_detection(pid, "Fate User", 7)
+                                break
+                            end
                         elseif bitset == 8 or plate_text == "46EEK572" then
-                            util.draw_debug_text(players.get_name(driver).." is using a spawned vehicle ".."("..lang.get_localised(util.get_label_text(players.get_vehicle_model(pid)))..")")
-                            break
+                            local used_vehicle = lang.get_localised(util.get_label_text(players.get_vehicle_model(pid)))
+                            util.draw_debug_text(players.get_name(driver).." is using a spawned vehicle ".."("..used_vehicle..")")
+                            if not IsDetectionPresent(pid, "Spawned Vehicle") then
+                                players.add_detection(pid, "Spawned Vehicle", 7, 50)
+                                break
+                            end
                         end
                     end
                 end
@@ -1373,7 +1389,7 @@ end)
                 if old_sh ~= new_sh then
                     if get_spawn_state(pid) == 0 and players.get_script_host() == pid then
                         if not IsDetectionPresent(pid, "Thunder Join") then
-                            players.add_detection(pid, "Thunder Join", 8)
+                            players.add_detection(pid, "Thunder Join", 7)
                         end
                     end
                 end
