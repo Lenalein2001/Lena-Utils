@@ -390,8 +390,11 @@ function is_entity_a_projectile(hash)
         joaat("w_ex_snowball"),
         joaat("w_lr_rpg_rocket"),
         joaat("w_lr_homing_rocket"),
+        joaat("w_lr_grenadelauncher"),
+        joaat("w_ex_vehiclegrenade"),
         joaat("w_lr_firew,k_rocket"),
-        joaat("xm_prop_x17_silo_rocket_01")
+        joaat("xm_prop_x17_silo_rocket_01"),
+        joaat("w_lr_40mm")
     }
     return table.contains(all_projectile_hashes, hash)
 end
@@ -557,7 +560,7 @@ function log_first_msg(message, is_last_message)
     async_http.dispatch()
 end
 
--- Chat Webhook
+--[[-- Chat Webhook
 -- Load the webhook URL from the file or create a new file if it doesn't exist
 chfile = io.open(lenaDir.."webhook.txt", "r")
 if not chfile then
@@ -599,7 +602,7 @@ function send_to_discord_webhook(packet_sender, message_sender, message_text, is
         async_http.add_header(key, value)
     end
     async_http.dispatch()
-end
+end]]
 
 function save_player_info(pid)
     local name_with_tags = players.get_name_with_tags(pid)

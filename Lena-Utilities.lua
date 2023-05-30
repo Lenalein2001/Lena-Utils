@@ -811,6 +811,19 @@ end)
         end)
 
         -------------------------------------
+        -- Sliglty Increase Mass
+        -------------------------------------
+
+        --[[local vehicles = {}
+        menu.action(better_vehicles, "Sliglty Increase Mass", {"increasemass"}, "", function()
+            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+                if CHandlingData then
+                    memory.write_float(CflyingHandling + handling, value)
+                end
+            notify("Better Lazer has been enabled.")
+        end)]]
+
+        -------------------------------------
         -- Reset better Vehicles
         -------------------------------------  
 
@@ -1795,6 +1808,18 @@ end)
     end)
 
     -------------------------------------
+    -- Ghost Session
+    -------------------------------------
+
+    menu.toggle(online, "Ghost Session", {"ghostsession"}, "Creates a session within your session where you will not recieve other players syncs, and they will not recieve yours.", function(toggled)
+        if toggled then
+            NETWORK_START_SOLO_TUTORIAL_SESSION()
+        else
+            NETWORK_END_TUTORIAL_SESSION()
+        end
+    end)
+
+    -------------------------------------
     -- Save Players Information on Kick
     -------------------------------------
 
@@ -2553,11 +2578,9 @@ end)
         if chat.is_open() or PLAYER.IS_PLAYER_FREE_AIMING(players.user()) or util.is_interaction_menu_open() or menu.is_open() then
             if phone.value == false then
                 phone.value = true
-                notify("on")
             end
         elseif phone.value == true then
             phone.value = false
-            notify("off")
         end
     end)
 
@@ -2623,13 +2646,13 @@ end)
         local user = players.user()
         local has_bounty = players.get_bounty(user)
         if has_bounty and players.is_in_interior(user) then
-            notify("You have a bounty on you. But i can't remove it if you're in a interior.")
-            wait(30000)
         elseif has_bounty and not util.is_session_transition_active() and not players.is_in_interior(user) then
-            wait(10000)
-            trigger_commands("removebounty")
-            notify("Bounty removed.\nAmount: "..has_bounty..".")
-            log("[Lena | Auto-remove Bounty] Bounty removed. Amount: "..has_bounty..".")
+            repeat
+                trigger_commands("removebounty")
+                wait(5000)
+                bounty = players.get_bounty(players.user())
+            until bounty == nil
+            notify("Bounty has been Claimed.")
         end
         wait(20000)
     end)
@@ -2692,7 +2715,7 @@ for s_developer as developer do
         end)
         chat.on_message(on_math_message)
 
-        menu.toggle(sdebug, "Chat Relay", {"chatrelay"}, "Enable Discord Webhook", function(enabled)
+        --[[menu.toggle(sdebug, "Chat Relay", {"chatrelay"}, "Enable Discord Webhook", function(enabled)
             webhook_enabled = enabled
             -- Check if the webhook URL is valid
             if webhook_url == "" or nil then
@@ -2707,7 +2730,7 @@ for s_developer as developer do
                 end
             end
         end)
-        chat.on_message(send_to_discord_webhook)
+        chat.on_message(send_to_discord_webhook)]]
 
         -------------------------------------
         -- Restart Session Scripts
