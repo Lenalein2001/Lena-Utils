@@ -94,7 +94,7 @@ function restartsession()
     log("[Lena | Session Restart] Restating Session Scripts. Current Host and Script Host: "..host.." and "..script_host..".")
 end
 
-function getClosestVehicle(myPos)
+function closestveh(myPos)
     local closestDist = 999999999999
     local closestVeh = nil
     for entities.get_all_vehicles_as_pointers() as veh do
@@ -560,50 +560,6 @@ function log_first_msg(message, is_last_message)
     async_http.dispatch()
 end
 
---[[-- Chat Webhook
--- Load the webhook URL from the file or create a new file if it doesn't exist
-chfile = io.open(lenaDir.."webhook.txt", "r")
-if not chfile then
-    chfile = io.open(lenaDir.."webhook.txt", "w")
-    chfile:close()
-    chfile = io.open(lenaDir.."webhook.txt", "r")
-end
-
-local webhook_url = chfile:read("*all")
-chfile:close()
-
-local json = require("json")
-function send_to_discord_webhook(packet_sender, message_sender, message_text, is_team_chat)
-    if not webhook_enabled then
-        return
-    end
-    local divider = " [ALL] "
-    if is_team_chat then
-        divider = " [TEAM] "
-    end
-    local player_name = players.get_name(packet_sender)
-    local message = player_name .. divider .. message_text
-    local content_type = "application/json"
-    local payload = json.encode({content = message})
-    local headers = {
-        ["Content-Type"] = content_type,
-        ["Content-Length"] = #payload
-    }
-
-    async_http.init(webhook_url,
-        function(body, header_fields, status_code)
-            -- Success
-        end,
-        function(error_msg)
-            -- Fail
-        end)
-    async_http.set_post(content_type, payload)
-    for key, value in pairs(headers) do
-        async_http.add_header(key, value)
-    end
-    async_http.dispatch()
-end]]
-
 function save_player_info(pid)
     local name_with_tags = players.get_name_with_tags(pid)
     local name = players.get_name(pid)
@@ -644,7 +600,7 @@ function save_player_info(pid)
         local file = io.open(filepath, "w")
         file:write(os.date("%a, %d. %B %X"), "\n\n")
         file:write("Name with Tags: ", name_with_tags, "\n")
-        file:write("ID: ", rockstar_id, "\n")
+        file:write("RID/SCID: ", rockstar_id, "\n")
         file:write("Is Modder: ", is_modder and "Yes" or "No", "\n")
         file:write("Rank: ", rank, "\n")
         file:write("Money: ", moneyStr, "\n")

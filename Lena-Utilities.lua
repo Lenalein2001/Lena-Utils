@@ -811,19 +811,6 @@ end)
         end)
 
         -------------------------------------
-        -- Sliglty Increase Mass
-        -------------------------------------
-
-        --[[local vehicles = {}
-        menu.action(better_vehicles, "Sliglty Increase Mass", {"increasemass"}, "", function()
-            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
-                if CHandlingData then
-                    memory.write_float(CflyingHandling + handling, value)
-                end
-            notify("Better Lazer has been enabled.")
-        end)]]
-
-        -------------------------------------
         -- Reset better Vehicles
         -------------------------------------  
 
@@ -906,7 +893,7 @@ end)
     menu.action(vehicle, "Enter Nearest Vehicle", {""}, "Enters the nearest Vehicle that can be found.", function()
         if not PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             local player_pos = players.get_position(players.user())
-            local veh = getClosestVehicle(player_pos)
+            local veh = closestveh(player_pos)
             local ped = VEHICLE.GET_PED_IN_VEHICLE_SEAT(veh, -1, true)
             PED.SET_PED_INTO_VEHICLE(players.user_ped(), veh, -1)
             wait(100)
@@ -1191,11 +1178,9 @@ end)
 
         menu.toggle_loop(mpsession, "Show Talking Players", {""}, "Draws a debug text of players current talking.", function()
             if util.is_session_started() and not util.is_session_transition_active() then
-                local talking = 0
                 for players.list(true, true, true, true, true) as pid do
                     if NETWORK.NETWORK_IS_PLAYER_TALKING(pid) then
                         util.draw_debug_text(players.get_name(pid).." is talking", ALIGN_TOP_CENTRE)
-                        talking = talking + 0.03
                     end
                 end
             end
@@ -1239,6 +1224,7 @@ end)
                     if not IsDetectionPresent(pid, "Super Drive") then
                         players.add_detection(pid, "Super Drive", 7, 50)
                     end
+                    break
                 end
             end
         end)
@@ -1257,6 +1243,7 @@ end)
                     if not IsDetectionPresent(pid, "Spectate") then
                         players.add_detection(pid, "Spectate", 7, 0)
                     end
+                    break
                 end
             end
         end)
@@ -1280,6 +1267,7 @@ end)
                                     if not IsDetectionPresent(pid, "Teleport") then
                                         players.add_detection(pid, "Teleport", 7, 50)
                                     end
+                                    break
                                 end
                             end
                         end
@@ -1311,17 +1299,34 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function ()
-            for players.list(false, false, true, true, true) as pid do
+            for players.list() as pid do
                 local rank = players.get_rank(pid)
                 local money = players.get_money(pid)
                 local kills = players.get_kills(pid)
                 local kdratio = players.get_kd(pid)
-                if kdratio < 0 or kdratio > 21  or kills > 100000 or rank > 1500 or money > 1500000000 then
-                    if not IsDetectionPresent(pid, "Unlegit Stats") then
-                        players.add_detection(pid, "Unlegit Stats", 7, 50)
+                if players.are_stats_ready(pid) then
+                    if kdratio < 0 or kdratio > 21 then
+                        if not IsDetectionPresent(pid, "Unlegit Stats (K/D)") then
+                            players.add_detection(pid, "Unlegit Stats (K/D)", 7, 50)
+                        end
                     end
+                    if kills > 100000 then
+                        if not IsDetectionPresent(pid, "Unlegit Stats (Kills)") then
+                            players.add_detection(pid, "Unlegit Stats (Kills)", 7, 50)
+                        end
+                    end
+                    if rank > 1500 then
+                        if not IsDetectionPresent(pid, "Unlegit Stats (Rank)") then
+                            players.add_detection(pid, "Unlegit Stats (Rank)", 7, 50)
+                        end
+                    end
+                    if money > 1500000000 then
+                        if not IsDetectionPresent(pid, "Unlegit Stats (Money)") then
+                            players.add_detection(pid, "Unlegit Stats (Money)", 7, 50)
+                        end
+                    end
+                    wait(5000)
                 end
-                wait(5000)
             end
         end)
 
@@ -1405,17 +1410,25 @@ end)
         end)
 
         -------------------------------------
-        -- VPN
+        -- Vehicle Godmode
         -------------------------------------
 
-        menu.toggle_loop(detections, "VPN Check", {""}, "Detects if someone is using a VPN.", function()
-            for players.list(true, true, true, true, true) as pid do
-                if players.is_using_vpn(pid) then
-                    if not IsDetectionPresent(pid, "VPN") then
-                        players.add_detection(pid, "VPN", 1, 0)
+        menu.toggle_loop(detections, "Vehicle Godmode", {}, "Detects if someone is using a vehicle that is in godmode.", function()
+            for players.list() as pid do
+                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
+                if PED.IS_PED_IN_ANY_VEHICLE(ped, false) then
+                    local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
+                    if not ENTITY.GET_ENTITY_CAN_BE_DAMAGED(vehicle) and not NETWORK.NETWORK_IS_PLAYER_FADING(pid) and ENTITY.IS_ENTITY_VISIBLE(ped) 
+                    and players.are_stats_ready(pid) and not players.is_in_interior(pid) and pid == driver then
+                        util.draw_debug_text(players.get_name(driver) ..  " is in vehicle godmode")
+                        if not IsDetectionPresent(pid, "Vehicle Godmode") then
+                            players.add_detection(pid, "Vehicle Godmode", 7)
+                        end
+                        break
                     end
                 end
-            end
+            end 
         end)
 
     -------------------------------------
@@ -2641,7 +2654,7 @@ end)
     -- Remove Bounty
     -------------------------------------
 
-    -- Note that this is not fully made by ChatGPT. I stil had to debug shitty code.
+    -- Note that this is not fully made by ChatGPT. I still had to debug shitty code.
     menu.toggle_loop(ai_made, "Remove Bounty", {"remove_bounty"}, "Automatically remove bounties.", function()
         local user = players.user()
         local has_bounty = players.get_bounty(user)
@@ -2923,7 +2936,7 @@ local function player(pid)
     0x0CFF2596, 0x0C9CE642, 0x0C4FBEC1, 0x0BB7CBB2, 0x0AD078FA, 0x0ACD50CE, 0x0BEBF7A0, 0x080A4E57, 0x04CB6ACE, 0x093EA186, 0x0BF770F5, 0x0C732D5C, 0x0C732D5C, 0x0CC8C37C,
     0x0A507921, 0x04BE7D5E, 0x0C42877C, 0x09025232, 0x0962404A, 0x07B42014, 0x0B1800ED, 0x0D2D6965, 0x06B87017, 0x0D67118D, 0x0AE5341D, 0x05207167, 0x0CC31372, 0x0D66E920,
     0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
-    0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336,
+    0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8,
     -- Retard
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3000,6 +3013,15 @@ local function player(pid)
             wait(100)
             trigger_commands("summon"..players.get_name(pid))
         end, nil, nil, COMMANDPERM_RUDE)
+
+        -------------------------------------
+        -- Give Vehicle NET Control
+        ------------------------------------- 
+
+        menu.action(friendly, "Give Vehicle NET Control", {""}, "", function()
+            local veh = entities.get_user_vehicle_as_handle(true)
+            entities.give_control_by_handle(veh, pid)
+        end)
 
         -------------------------------------
         -- Invite to CEO/MC
