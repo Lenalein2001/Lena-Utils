@@ -2947,7 +2947,9 @@ local function player(pid)
     }
 
     for idiots as rid do
-        if players.get_rockstar_id(pid) == rid and players.are_stats_ready(pid) and not util.is_session_transition_active() then 
+        if players.get_rockstar_id(pid) == rid and players.are_stats_ready(pid) and not util.is_session_transition_active() then
+            local msg = "An Idiot was detected in your Lobby. Kicking Player Now."
+            notify(msg); log(msg)
             trigger_commands("historyblock"..players.get_name(pid).." on")
             wait(500)
             if menu.get_edition() >= 2 then
