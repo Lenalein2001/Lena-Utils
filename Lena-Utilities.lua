@@ -2212,18 +2212,18 @@ end)
             local clean_amount = 0
             switch index do
                 case 1:
-                    for entities.get_all_vehicles_as_handles() as vehicle do
-                        if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
-                            entities.delete_by_handle(vehicle)
+                    for entities.get_all_vehicles_as_pointers() as vehicle do
+                        if vehicle ~= entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() then
+                            entities.delete(vehicle)
                             clean_amount += 1
+                            wait(50)
                         end
-                        wait(50)
                     end
                     break
                 case 2:
-                    for entities.get_all_peds_as_handles() as ped do
-                        if not (PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(ped) then
-                            entities.delete_by_handle(ped)
+                    for entities.get_all_peds_as_pointers() as ped do
+                        if not (NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) and entities.get_owner(ped) == players.user() then
+                            entities.delete(ped)
                             clean_amount += 1
                             wait(50)
                         end
@@ -2231,10 +2231,10 @@ end)
                 break
                 case 3:
                     for entities.get_all_objects_as_handles() as object do
-                        if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(object) then
-                            entities.delete_by_handle(object)
-                            counter += 1
-                            util.yield()
+                        if entities.get_owner(object) == players.user() then
+                            entities.delete(object)
+                            clean_amount += 1
+                            wait(50)
                         end
                     end
                 break
@@ -2247,51 +2247,48 @@ end)
         -------------------------------------
 
         menu.action(clear_area_locally, "Clear Area", {"ca"}, "Clears the Area around you without sending Freeze events.", function()
-            local cleanse_entity_count = 0
+            local clear_ropes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
+            local count = 0
             for entities.get_all_peds_as_pointers() as ped do
-                if ped ~= players.user_ped() and entities.get_owner(ped) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ped ~= nil then
-                    entities.delete(ped)
-                    cleanse_entity_count += 1
+                if ped ~= players.user_ped() and entities.get_owner(ped) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() then
+                    entities.delete_by_pointer(ped)
+                    count += 1
                     wait(10)
                 end
             end
-            notify("Cleared "..cleanse_entity_count.." Peds!")
-            cleanse_entity_count = 0
-
+            notify("Deleted "..count.." Peds!")
+            count = 0
+            wait(100)
             for entities.get_all_vehicles_as_pointers() as vehicle do
-                if vehicle ~= entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() and vehicle ~= nil then
-                    entities.delete(vehicle)
-                    cleanse_entity_count += 1
+                if vehicle ~= entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() then
+                    entities.delete_by_pointer(vehicle)
+                    count += 1
                     wait(10)
                 end
             end
-            notify("Cleared ".. cleanse_entity_count .." Vehicles!")
-            cleanse_entity_count = 0
-
-            for entities.get_all_objects_as_pointers() as object do
-                if entities.get_owner(object) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() and object ~= nil then
+            notify("Deleted ".. count .." Vehicles!")
+            count = 0
+            wait(100)
+            for entities.get_all_objects_as_handles() as object do
+                if entities.get_owner(object) == players.user() then
                     entities.delete(object)
-                    cleanse_entity_count += 1
+                    count += 1
                     wait(10)
                 end
             end
-            notify("Cleared "..cleanse_entity_count.." Objects!")
-            cleanse_entity_count = 0
-
+            notify("Deleted "..count.." Objects!")
+            count = 0
+            wait(100)
             for entities.get_all_pickups_as_pointers() as pickup do
-                if entities.get_owner(pickup) == players.user() and not pickup ~= nil then
-                    entities.delete(pickup)
-                    cleanse_entity_count += 1
+                if entities.get_owner(pickup) == players.user() then
+                    entities.delete_by_pointer(pickup)
+                    count += 1
                     wait(10)
                 end
             end
-            notify("Cleared "..cleanse_entity_count.." Pickups!")
-
-            local temp = memory.alloc(4)
-            for i = 0, 100 do
-                memory.write_int(temp, i)
-                PHYSICS.DELETE_ROPE(temp)
-            end
+            notify("Deleted "..count.." Pickups!")
+            wait(100)
+            trigger_command(clear_ropes)
         end)
 
     -------------------------------------
@@ -2944,7 +2941,7 @@ local function player(pid)
     0x0CFF2596, 0x0C9CE642, 0x0C4FBEC1, 0x0BB7CBB2, 0x0AD078FA, 0x0ACD50CE, 0x0BEBF7A0, 0x080A4E57, 0x04CB6ACE, 0x093EA186, 0x0BF770F5, 0x0C732D5C, 0x0C732D5C, 0x0CC8C37C,
     0x0A507921, 0x04BE7D5E, 0x0C42877C, 0x09025232, 0x0962404A, 0x07B42014, 0x0B1800ED, 0x0D2D6965, 0x06B87017, 0x0D67118D, 0x0AE5341D, 0x05207167, 0x0CC31372, 0x0D66E920,
     0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
-    0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95,
+    0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239,
     -- Retard
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
