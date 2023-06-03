@@ -372,6 +372,25 @@ function BlockSyncs(pid, callback)
     end
 end
 
+function decimalToHex2s(decimal, numBits)
+    local hex = ""
+    local hexDigits = "0123456789ABCDEF"
+    local maxValue = 2^(numBits - 1) - 1
+    local minValue = -2^(numBits - 1)
+    if decimal < minValue or decimal > maxValue then
+        return nil, "Decimal value out of range for the specified number of bits."
+    end
+    if decimal < 0 then
+        decimal = decimal + 2^numBits
+    end
+    while decimal > 0 do
+        local remainder = decimal % 16
+        hex = hexDigits:sub(remainder + 1, remainder + 1) .. hex
+        decimal = math.floor(decimal / 16)
+    end
+    return "0x0"..hex
+end
+
 function is_entity_a_projectile(hash)
     local all_projectile_hashes = {
         joaat("w_ex_vehiclemissile_1"),

@@ -623,7 +623,7 @@ end)
         local ped = players.user_ped()
         if toggled then
             LegitRapidFire = true
-            util.create_thread(function ()
+            util.create_thread(function()
                 while LegitRapidFire do
                     if PED.IS_PED_SHOOTING(ped) then
                         local currentWpMem = memory.alloc()
@@ -814,16 +814,15 @@ end)
         -- Reset better Vehicles
         -------------------------------------  
 
-        menu.action(better_vehicles, "Reset Better Vehicles", {"rbv"}, "", function ()
+        menu.action(better_vehicles, "Reset Better Vehicles", {"rbv"}, "", function()
             trigger_commands("gravitymult 2; fovfpinveh -5")
-            notify("Better Vehicles have been disabled.")
         end)
 
         -------------------------------------
         -- Reduce Burnout
         -------------------------------------  
 
-        menu.toggle(better_vehicles, "Reduce Burnout", {""}, "Makes it to where the vehicle does not burnout as easily.", function (toggled)
+        menu.toggle(better_vehicles, "Reduce Burnout", {""}, "Makes it to where the vehicle does not burnout as easily.", function(toggled)
             PHYSICS.SET_IN_ARENA_MODE(toggled)
         end)
 
@@ -963,7 +962,7 @@ end)
         local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
         trigger_command(count, "2")
         trigger_command(how)
-        util.create_thread(function ()
+        util.create_thread(function()
             while PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) do
                 if util.is_key_down("E") and not chat.is_open() then
                     trigger_command(deploy)
@@ -979,7 +978,7 @@ end)
     -- VPC
     -------------------------------------
 
-    menu.action(vehicle, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current vehicle.", function ()
+    menu.action(vehicle, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current vehicle.", function()
         local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
         local CVehicleWeaponHandlingDataAddress = entities.handling_get_subhandling(CHandlingData, 9)
         local WeaponSeats = CVehicleWeaponHandlingDataAddress + 0x0020
@@ -1217,9 +1216,9 @@ end)
             for players.list(true, true, true, true, true) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
-                local veh_speed = (ENTITY.GET_ENTITY_SPEED(vehicle)* 2.236936)
+                local veh_speed = (ENTITY.GET_ENTITY_SPEED(vehicle)* 3.6)
                 local class = VEHICLE.GET_VEHICLE_CLASS(vehicle)
-                if class ~= 15 and class ~= 16 and veh_speed >= 200 and (players.get_vehicle_model(pid) ~= joaat("oppressor") or players.get_vehicle_model(pid) ~= joaat("oppressor2")) then
+                if class ~= 15 and class ~= 16 and veh_speed >= 320 and (players.get_vehicle_model(pid) ~= joaat("oppressor") or players.get_vehicle_model(pid) ~= joaat("oppressor2")) then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if not IsDetectionPresent(pid, "Super Drive") then
                         players.add_detection(pid, "Super Drive", 7, 50)
@@ -1298,7 +1297,7 @@ end)
         -- Stat Detection
         -------------------------------------
 
-        menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function ()
+        menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
             for players.list() as pid do
                 local rank = players.get_rank(pid)
                 local money = players.get_money(pid)
@@ -1310,14 +1309,14 @@ end)
                             players.add_detection(pid, "Unlegit Stats (K/D)", 7, 50)
                         end
                     end
-                    if kills > 100000 then
+                    if kills > 150000 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Kills)") then
                             players.add_detection(pid, "Unlegit Stats (Kills)", 7, 50)
                         end
                     end
                     if rank > 1500 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Rank)") then
-                            players.add_detection(pid, "Unlegit Stats (Rank)", 7, 50)
+                            players.add_detection(pid, "Unlegit Stats (Rank)", 7, 75)
                         end
                     end
                     if money > 1500000000 then
@@ -1325,7 +1324,7 @@ end)
                             players.add_detection(pid, "Unlegit Stats (Money)", 7, 50)
                         end
                     end
-                    wait(5000)
+                    wait(1000)
                 end
             end
         end)
@@ -1580,7 +1579,7 @@ end)
 
         menu.toggle_loop(anti_orb, "Send to Team chat", {""}, "Notifies Players in your CEO/MC.", function()
             announce_orb = true
-            end, function ()
+            end, function()
             announce_orb = false
         end)
 
@@ -2249,39 +2248,45 @@ end)
 
         menu.action(clear_area_locally, "Clear Area", {"ca"}, "Clears the Area around you without sending Freeze events.", function()
             local cleanse_entity_count = 0
-            for entities.get_all_peds_as_handles() as ped do
-                if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(ped) and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION() or NETWORK.NETWORK_IS_ACTIVITY_SESSION() and not ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) then
-                    entities.delete_by_handle(ped)
+            for entities.get_all_peds_as_pointers() as ped do
+                if ped ~= players.user_ped() and entities.get_owner(ped) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ped ~= nil then
+                    entities.delete(ped)
                     cleanse_entity_count += 1
-                    wait()
+                    wait(10)
                 end
             end
             notify("Cleared "..cleanse_entity_count.." Peds!")
             cleanse_entity_count = 0
-            for entities.get_all_vehicles_as_handles() as vehicle do
-                if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
-                    entities.delete_by_handle(vehicle)
+
+            for entities.get_all_vehicles_as_pointers() as vehicle do
+                if vehicle ~= entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() and vehicle ~= nil then
+                    entities.delete(vehicle)
                     cleanse_entity_count += 1
-                    wait()
+                    wait(10)
                 end
             end
             notify("Cleared ".. cleanse_entity_count .." Vehicles!")
             cleanse_entity_count = 0
-            for entities.get_all_objects_as_handles() as object do
-                if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(object) then
-                    entities.delete_by_handle(object)
+
+            for entities.get_all_objects_as_pointers() as object do
+                if entities.get_owner(object) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() and object ~= nil then
+                    entities.delete(object)
                     cleanse_entity_count += 1
-                    wait()
+                    wait(10)
                 end
             end
             notify("Cleared "..cleanse_entity_count.." Objects!")
             cleanse_entity_count = 0
-            for entities.get_all_pickups_as_handles() as pickup do
-                entities.delete_by_handle(pickup)
-                cleanse_entity_count += 1
-                wait()
+
+            for entities.get_all_pickups_as_pointers() as pickup do
+                if entities.get_owner(pickup) == players.user() and not pickup ~= nil then
+                    entities.delete(pickup)
+                    cleanse_entity_count += 1
+                    wait(10)
+                end
             end
             notify("Cleared "..cleanse_entity_count.." Pickups!")
+
             local temp = memory.alloc(4)
             for i = 0, 100 do
                 memory.write_int(temp, i)
@@ -2567,9 +2572,11 @@ end)
         local name_esp_on = menu.ref_by_path("World>Inhabitants>Player ESP>Name ESP>Name ESP>Low Latency Rendering")
         local name_esp_off = menu.ref_by_path("World>Inhabitants>Player ESP>Name ESP>Name ESP>Disabled")
         if toggled then
-            trigger_command(bone_esp_off.."; "..name_esp_off)
+            trigger_command(bone_esp_off)
+            trigger_command(name_esp_off)
         else
-            trigger_command(bone_esp_on.."; "..name_esp_on)
+            trigger_command(bone_esp_on)
+            trigger_command(name_esp_on)
         end
     end)
 
@@ -2826,7 +2833,7 @@ for s_developer as developer do
                 for better_heli_offsets as offset do
                     memory.write_float(CflyingHandling + offset, 0)
                 end
-                trigger_commands("gravitymult 1")
+                trigger_commands("gravitymult 1; helithrust 2.3")
                 notify("Better Helis have been enabled for: "..vname)
             elseif is_blimp then
                 notify("Better Blimps have been enabled for: "..vname)
@@ -2861,7 +2868,7 @@ for s_developer as developer do
             local newmass = mass.value / 100000
             notify("Old / New: ".. oldmass.." / "..newmass)
         end)
-        
+
         -------------------------------------
         -- Natives
         -------------------------------------
@@ -2894,6 +2901,7 @@ for s_developer as developer do
                 notify("Hash: "..vmodel.."\nName: ".. vname.."\nJoaat: "..modelname.."\nBitset: "..bitset)
                 log("[Lena | Debug] Hash: "..vmodel.." | Name: "..vname.." | Joaat: "..modelname.." | Bitset: "..bitset.." | Plate:".. plate_text.."|")
             end)
+            
             menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
                 local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "FATE", "WHORE"}
                 VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle(), plate_texts[math.random(#plate_texts)])
@@ -2936,7 +2944,7 @@ local function player(pid)
     0x0CFF2596, 0x0C9CE642, 0x0C4FBEC1, 0x0BB7CBB2, 0x0AD078FA, 0x0ACD50CE, 0x0BEBF7A0, 0x080A4E57, 0x04CB6ACE, 0x093EA186, 0x0BF770F5, 0x0C732D5C, 0x0C732D5C, 0x0CC8C37C,
     0x0A507921, 0x04BE7D5E, 0x0C42877C, 0x09025232, 0x0962404A, 0x07B42014, 0x0B1800ED, 0x0D2D6965, 0x06B87017, 0x0D67118D, 0x0AE5341D, 0x05207167, 0x0CC31372, 0x0D66E920,
     0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
-    0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8,
+    0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95,
     -- Retard
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3678,18 +3686,18 @@ local function player(pid)
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
+                hex = decimalToHex2s(rids, 32)
                 if savekicked then
                     trigger_commands("savep"..players.get_name(pid))
                 end
                 wait(100)
                 trigger_commands("historyblock"..players.get_name(pid).." on")
-                log("[Lena | Ban Block] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
-                if menu.get_edition() >= 2 then
-                    wait(100)
-                    trigger_commands("ban"..players.get_name(pid))
+                if not dev_vers then
+                    log("[Lena | Ban Block] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
                 else
-                    trigger_commands("kick"..players.get_name(pid))
+                    log("[Lena | Ban Block] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked and Blocked.")
                 end
+                trigger_commands("kick"..players.get_name(pid))
             end
         end, nil, nil, COMMANDPERM_RUDE)
 
@@ -3697,33 +3705,13 @@ local function player(pid)
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
+                hex = decimalToHex2s(rids, 32)
                 if savekicked then
                     trigger_commands("savep"..players.get_name(pid))
-                    wait(50)
                 end
                 wait(100)
                 trigger_commands("historyblock"..players.get_name(pid).." on")
                 log("[Lena | Block Join] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
-                wait(100)
-                if menu.get_edition() >= 2 then
-                    trigger_commands("breakup"..players.get_name(pid))
-                else
-                    trigger_commands("kick"..players.get_name(pid))
-                end
-            end
-        end, nil, nil, COMMANDPERM_RUDE)
-
-        menu.action(kicks, "Blacklist", {"blacklist"}, "Will kick and block the player from joining you ever again.", function()
-            if players.get_name(pid) == players.get_name(players.user()) then
-                notify(lang.get_localised(-1974706693))
-            else
-                if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
-                    wait(50)
-                end
-                wait(100)
-                trigger_commands("historyblock"..players.get_name(pid).." on")
-                log("[Lena | Blacklist] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
                 wait(100)
                 trigger_commands("kick"..players.get_name(pid))
             end
@@ -3733,20 +3721,21 @@ local function player(pid)
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
+                hex = decimalToHex2s(rids, 32)
                 if savekicked then
                     trigger_commands("savep"..players.get_name(pid))
-                    wait(50)
                 end
-                if menu.get_edition() >= 2 then 
-                    trigger_commands("breakup"..players.get_name(pid))
+                trigger_commands("kick"..players.get_name(pid))
+                if not dev_vers then
+                    log("[Lena | Rape] Player "..players.get_name(pid).." ("..rids..") has been Kicked.")
                 else
-                    trigger_commands("kick"..players.get_name(pid))
+                    log("[Lena | Rape] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked")
                 end
-                log("[Lena | Rape] Player "..players.get_name(pid).." ("..rids..") has been Kicked.")
             end
         end, nil, nil, COMMANDPERM_RUDE)
 
         menu.action(kicks, "Stealth Host", {"stealth"}, "Works on legits and free menus. ", function()
+            -- Sup
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
@@ -3764,21 +3753,24 @@ local function player(pid)
         -------------------------------------
 
         menu.action(crashes, "Block Join Crash", {"gtfo"}, "Crashes the Player and Blocks them from joining you again.", function()
-            local rids = players.get_rockstar_id(pid)
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
+                hex = decimalToHex2s(rids, 32)
                 if savekicked then
                     trigger_commands("savep"..players.get_name(pid))
                     wait(50)
                 end
                 local player = players.get_name(pid)
-                wait(500)
                 trigger_commands("ngcrash"..players.get_name(pid))
                 wait(500)
                 trigger_commands("crash"..players.get_name(pid))
                 wait(500)
-                log("[Lena | Crash] Player "..players.get_name(pid).." ("..rids..") has been Crashed and Blocked.")
+                if not dev_vers then
+                    log("[Lena | Block Join Crash] Player "..players.get_name(pid).." ("..rids..") has been Crashed and Blocked.")
+                else
+                    log("[Lena | Block Join Crash] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Crashed and Blocked.")
+                end
                 trigger_commands("historyblock" ..players.get_name(pid).." on")
                 wait(10000)
                 if players.get_name(pid) == player then
