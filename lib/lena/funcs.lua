@@ -110,25 +110,18 @@ function closestveh(myPos)
     end
 end
 
-function request_control_once(entity)
-	if not NETWORK.NETWORK_IS_IN_SESSION() then
-		return true
-	end
-	local netid = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(entity)
-	NETWORK.SET_NETWORK_ID_CAN_MIGRATE(netid, true)
-	return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
-end
-
-function request_control(entity, timeOut)
-	if not ENTITY.DOES_ENTITY_EXIST(entity) then
-		return false
-	end
-	timeOut = timeOut or 500
-	local start = newTimer()
-	while not request_control_once(entity) and start.elapsed() < timeOut do
-		wait_once()
-	end
-	return start.elapsed() < timeOut
+function request_control(vehicle)
+    local ctr = 0
+    while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) do
+        if ctr >= 250 then
+            notify("Failed to get control of players vehicle. :/")
+            ctr = 0
+            return
+        end
+        NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vehicle)
+        util.yield()
+        ctr += 1
+    end
 end
 
 function RequestModel(hash, timeout)

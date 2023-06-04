@@ -835,11 +835,13 @@ end)
         -------------------------------------
 
         menu.toggle(doorcontrol, "Lock doors", {"lock"}, "Locks your current Vehicle so randoms can't enter it.", function(toggled)
+            VEHICLE.SET_VEHICLE_RESPECTS_LOCKS_WHEN_HAS_DRIVER(player_cur_car, toggled)
             VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, toggled)
         end)
 
         menu.toggle(doorcontrol, "Lock Doors for Randoms", {"lock"}, "Locks your current Vehicle so only friends can enter it.", function(toggled)
             for players.list(false, false, true, true, false) as pid do
+                VEHICLE.SET_VEHICLE_RESPECTS_LOCKS_WHEN_HAS_DRIVER(player_cur_car, toggled)
                 VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(player_cur_car, pid, toggled)
             end
         end)
@@ -911,24 +913,27 @@ end)
     end)
 
     -------------------------------------
-    -- Move To Seat
+    -- Disable Crash Damage
     -------------------------------------
 
-    local seat_id = -1
-    local moved_seat = menu.click_slider(vehicle, "Move To Seat", {""}, "Switch seats by using the Slider. -1 is the Driver.", 1, 1, 1, 1, function(seat_id)
-        TASK.TASK_WARP_PED_INTO_VEHICLE(players.user_ped(), entities.get_user_vehicle_as_handle(), seat_id - 2)
+    menu.toggle(vehicle, "Disable Crash Damage", {""}, "Vehicle will not take crash damage, but is still susceptible to damage from bullets and explosives.", function(toggled)
+        VEHICLE.SET_VEHICLE_STRONG(toggled)
     end)
 
-    menu.on_tick_in_viewport(moved_seat, function()
-        if not PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
-            moved_seat.max_value = 0
-        return end
+    -------------------------------------
+    -- Disable Visible Damage
+    -------------------------------------
 
-        if not PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
-            moved_seat.max_value = 0
-        return end
+    menu.toggle(vehicle, "Disable Visible Damage", {""}, "Vehicle will not take any visible damage.", function(toggled)
+        VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(toggled)
+    end)
+        
+    -------------------------------------
+    -- Unbreakable Lights
+    -------------------------------------   
 
-        moved_seat.max_value = VEHICLE.GET_VEHICLE_MODEL_NUMBER_OF_SEATS(ENTITY.GET_ENTITY_MODEL(entities.get_user_vehicle_as_handle()))
+    menu.toggle(vehicle, "Unbreakable Lights", {""}, "Makes the Lights unbreakable on your current Vehicle.", function(toggled)
+        VEHICLE.SET_VEHICLE_HAS_UNBREAKABLE_LIGHTS(player_cur_car, toggled)
     end)
 
     -------------------------------------
@@ -943,15 +948,6 @@ end)
         end
     end)
 
-    -------------------------------------
-    -- Unbreakable Lights
-    -------------------------------------   
-
-    menu.toggle(vehicle, "Unbreakable Lights", {""}, "Makes the Lights unbreakable on your current Vehicle.", function(toggled)
-        VEHICLE.SET_VEHICLE_HAS_UNBREAKABLE_LIGHTS(player_cur_car, toggled)
-    end)
-
-    
     -------------------------------------
     -- Force flares
     -------------------------------------
@@ -2866,6 +2862,9 @@ for s_developer as developer do
             notify("Old / New: ".. oldmass.." / "..newmass)
         end)
 
+        menu.action(sdebug, "Test", {""}, "", function()
+        end)
+
         -------------------------------------
         -- Natives
         -------------------------------------
@@ -3111,7 +3110,7 @@ local function player(pid)
 
         menu.toggle(mpvehicle, "God Mode", {"vgm"}, "Toggles Vehicle Godmode.", function(on)
             local vehicle = get_vehicle_player_is_in(pid)
-            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle, 1000) then
+            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle) then
                 if on then
                     VEHICLE.SET_VEHICLE_ENVEFF_SCALE(vehicle, 0.0)
                     VEHICLE.SET_VEHICLE_BODY_HEALTH(vehicle, 1000.0)
@@ -3143,7 +3142,7 @@ local function player(pid)
 
         menu.action(mpvehicle, "Repair Vehicle", {"rpv"}, "Repais the current Vehicle.", function()
             local vehicle = get_vehicle_player_is_in(pid)
-            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle, 1000) then
+            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle) then
                 VEHICLE.SET_VEHICLE_FIXED(vehicle)
                 VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
@@ -3156,7 +3155,7 @@ local function player(pid)
 
         menu.action(mpvehicle, "Clean Vehicle", {"cleanv"}, "Cleans the current Vehicle.", function()
             local vehicle = get_vehicle_player_is_in(pid)
-            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle, 1000) then
+            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle) then
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
@@ -3172,14 +3171,7 @@ local function player(pid)
                 notify("Player isn't in a vehicle. :/")
                 return
             end
-            while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(veh) do
-                NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(veh)
-                wait()
-            end
-            if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(veh) then
-                notify("Failed to get control of the vehicle. :/")
-                return
-            end
+            request_control(veh)
             pluto_switch value do
                 case "Launch Up":
                     ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 0.0, 100000.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
@@ -3231,25 +3223,24 @@ local function player(pid)
             -------------------------------------
 
             local cagePos
-            local timer <const> = newTimer()
-            menu.toggle_loop(mpcage, "Automatic Cage", {"autocage"}, "Automatically Cages the Player.", function()
-                if not is_player_active(pid, false, true) then
+            auto_cage = menu.toggle_loop(mpcage, "Automatic Cage", {"autocage"}, "Automatically Cages the Player.", function()
+                if not players.exists(pid) then
                     util.stop_thread()
-                elseif not timer.isEnabled() or timer.elapsed() > 1000 then
-                    local targetPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                    local playerPos = ENTITY.GET_ENTITY_COORDS(targetPed, false)
-                    if not cagePos or cagePos:distance(playerPos) >= 4.0 then
-                        TASK.CLEAR_PED_TASKS_IMMEDIATELY(targetPed)
-                        if PED.IS_PED_IN_ANY_VEHICLE(targetPed, false) then return end
-                        cagePos = playerPos
+                    auto_cage.value = false
+                    return
+                end
+                local targetPed = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local playerPos = ENTITY.GET_ENTITY_COORDS(targetPed, false)
+                if not cagePos or cagePos:distance(playerPos) >= 4.0 then
+                    TASK.CLEAR_PED_TASKS_IMMEDIATELY(targetPed)
+                    if PED.IS_PED_IN_ANY_VEHICLE(targetPed, false) then return end
+                    cagePos = playerPos
+                    trapcage(pid, "prop_gold_cont_01", true)
+                    local playername = players.get_name(pid)
+                    if playername ~= "**Invalid**" then
+                        notify(playername.." was out of the cage!")
                         trapcage(pid, "prop_gold_cont_01", true)
-                        local playername = players.get_name(pid)
-                        if playername ~= "**Invalid**" then
-                            notify(playername.." was out of the cage!")
-                            trapcage(pid, "prop_gold_cont_01", true)
-                        end
                     end
-                    timer.reset()
                 end
             end)
 
@@ -3278,9 +3269,10 @@ local function player(pid)
             -------------------------------------
 
             local elevatorPOS
-            menu.toggle_loop(mpcage, "Invisible Cage", {""}, "", function()
+            elevator_cage = menu.toggle_loop(mpcage, "Invisible Cage", {""}, "", function()
                 if not players.exists(pid) then
                     util.stop_thread()
+                    elevator_cage.value = false
                     return
                 end
                 if not elevatorPOS or elevatorPOS:distance(players.get_position(pid)) >= 6.0 then
@@ -3434,7 +3426,7 @@ local function player(pid)
             if PLAYER.IS_PLAYER_FREE_AIMING_AT_ENTITY(players.user(), ped) and not PED.IS_PED_RELOADING(players.user_ped()) then
                 local pos = PED.GET_PED_BONE_COORDS(ped, 31086, 0.0, 0.0, 0.0) -- 31086 = Headshot
                 MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(wpnCoords, pos, dmg, true, wpn, players.user_ped(), true, false)
-                PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 24, 1.0) -- shooting manually after so it has the effect of you shooting to seem more legit despite there being nothing legit about this
+                PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 24, 1.0)
                 util.yield(delay * 1000)
             end
         end)
@@ -3466,7 +3458,7 @@ local function player(pid)
                 if TASK.GET_ACTIVE_VEHICLE_MISSION_TYPE(vehicle) ~= 6 then
                     local driver = VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1, false)
                     if ENTITY.DOES_ENTITY_EXIST(driver) and not PED.IS_PED_A_PLAYER(driver) then
-                        request_control_once(driver)
+                        request_control(driver)
                         PED.SET_PED_MAX_HEALTH(driver, 300)
                         ENTITY.SET_ENTITY_HEALTH(driver, 300, 0)
                         PED.SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(driver, true)
