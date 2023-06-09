@@ -1937,6 +1937,7 @@ end)
         menu.action(missions_tunables, "Finish Headhunter", {""}, "Tries to finish the Mission.", function()
             local Blip = HUD.GET_FIRST_BLIP_INFO_ID(432) -- https://docs.fivem.net/docs/game-references/blips/
             while HUD.DOES_BLIP_EXIST(Blip) do
+                request_control(Blip, false)
                 local Ped = HUD.GET_BLIP_INFO_ID_ENTITY_INDEX(Blip)
                 ENTITY.SET_ENTITY_HEALTH(Ped, 0)
                 Blip = HUD.GET_NEXT_BLIP_INFO_ID(432)
@@ -2938,7 +2939,8 @@ local function player(pid)
     0x0A507921, 0x04BE7D5E, 0x0C42877C, 0x09025232, 0x0962404A, 0x07B42014, 0x0B1800ED, 0x0D2D6965, 0x06B87017, 0x0D67118D, 0x0AE5341D, 0x05207167, 0x0CC31372, 0x0D66E920,
     0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
     0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239, 0x03506E1C, 0x0D887E44,
-    0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21,
+    0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
+    0x0B473EB5,
     -- Retard/Sexual Abuser
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3924,6 +3926,30 @@ local function player(pid)
                 ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, my_pos, false, false, false)
             end
         end)
+
+        menu.action(crashes, "Bozo Crash", {""}, "", function()
+            if players.get_name(pid) == players.get_name(players.user()) then
+                notify(lang.get_localised(-1974706693))
+            else
+                if savekicked then
+                    trigger_commands("savep"..players.get_name(pid))
+                    wait(50)
+                end
+                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local coords = ENTITY.GET_ENTITY_COORDS(ped, true)
+                coords.x = coords['x']
+                coords.y = coords['y']
+                coords.z = coords['z']
+                local hash = 3613262246
+                local hash2 = 3613262246
+                util.request_model(hash2)
+                util.request_model(hash)
+                local crash2 = OBJECT.CREATE_OBJECT_NO_OFFSET(hash2, coords['x'], coords['y'], coords['z'], true, false, false)
+                local crash1 = OBJECT.CREATE_OBJECT_NO_OFFSET(hash, coords['x'], coords['y'], coords['z'], true, false, false)
+                ENTITY.SET_ENTITY_ROTATION(crash1, 0.0, -90.0, 0.0, 1, true)
+            end
+        end)
+
         local objcrasheslist = menu.list(crashes, "Object Crashes", {""}, "")
         local crash_models = {
             {"Positive", "prop_fragtest_cnst_04"},
