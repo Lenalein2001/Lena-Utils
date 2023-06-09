@@ -211,7 +211,7 @@ end
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
     local msg2 = "Please download the file and everything else again from my Github."
-    util.show_corner_help(msg1.."natives-"..natives_version..".lua\n"..msg2)
+    util.show_corner_help(msg1..""..natives_version.."\n"..msg2)
     util.stop_script()
 end
 if lang.get_current() ~= "en" then
