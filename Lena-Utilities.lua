@@ -2921,7 +2921,7 @@ local function player(pid)
     0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
     0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239, 0x03506E1C, 0x0D887E44,
     0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
-    0x0B473EB5, 0x0BD6DB64, 0x0BE008C1,
+    0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0,
     -- Retard/Sexual Abuser
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3683,7 +3683,7 @@ local function player(pid)
                 end
                 wait(100)
                 trigger_commands("historyblock"..players.get_name(pid).." on")
-                log("[Lena | Block Join] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
+                log("[Lena | Block Join] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked and Blocked.")
                 wait(100)
                 trigger_commands("kick"..players.get_name(pid))
             end
