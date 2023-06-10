@@ -718,7 +718,6 @@ end)
             local control = (PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 76))
             if not PED.IS_PED_DEAD_OR_DYING(ped) and control and ped_dist < 500.0 and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
                 VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, players.get_position(pid))
-                notify("Shot")
             end
         end
     end)
