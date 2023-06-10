@@ -86,7 +86,7 @@ local detects_protex = menu.list(online, "Detections&Protections", {""}, "")
 local detections = menu.list(detects_protex, "Detections", {""}, "")
 local protex = menu.list(detects_protex, "Protections", {""}, "")
 local anti_orb = menu.list(protex, "Anti Orb", {""}, "Protections against the Orbital Cannon.")
-local friend_lists = menu.list(online, "Friend List", {""}, "")
+friend_lists = menu.list(online, "Friend List", {""}, "")
 local reactions = menu.list(online, "Reactions", {""}, "")
 local join_reactions = menu.list(reactions, "Join Reactions", {""}, "")
 local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
@@ -595,7 +595,6 @@ end)
         local health = ENTITY.GET_ENTITY_HEALTH(ped)
         if health <= 140 and not PED.IS_PED_DEAD_OR_DYING(ped) then
             trigger_commands("refillhealth; refillarmour")
-            notify("Health set to max!")
         end
     end)
 
@@ -839,7 +838,7 @@ end)
             VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, toggled)
         end)
 
-        menu.toggle(doorcontrol, "Lock Doors for Randoms", {"lock"}, "Locks your current Vehicle so only friends can enter it.", function(toggled)
+        menu.toggle(doorcontrol, "Lock Doors for Randoms", {"lockrandoms"}, "Locks your current Vehicle so only friends can enter it.", function(toggled)
             for players.list(false, false, true, true, false) as pid do
                 VEHICLE.SET_VEHICLE_RESPECTS_LOCKS_WHEN_HAS_DRIVER(player_cur_car, toggled)
                 VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(player_cur_car, pid, toggled)
@@ -1209,7 +1208,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Super Drive", {""}, "Detects Players using Super Drive.", function()
-            for players.list(true, true, true, true, true) as pid do
+            for players.list() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local veh_speed = (ENTITY.GET_ENTITY_SPEED(vehicle)* 3.6)
@@ -1229,7 +1228,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Spectate", {""}, "Detects if someone is spectating you.", function()
-            for players.list(false, true, true, true, false) as pid do
+            for players.list(false, true, true, true, true) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local cam_dist = v3.distance(players.get_position(players.user()), players.get_cam_pos(pid))
                 local ped_dist = v3.distance(players.get_position(players.user()), players.get_position(pid))
@@ -1248,7 +1247,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Teleport", {""}, "Detects if the player has teleported.", function()
-            for players.list(false, true, true, true, true) as pid do
+            for players.list() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if not NETWORK.NETWORK_IS_PLAYER_FADING(pid) and ENTITY.IS_ENTITY_VISIBLE(ped) and not PED.IS_PED_DEAD_OR_DYING(ped) then
                     local oldpos = players.get_position(pid)
@@ -1331,7 +1330,7 @@ end)
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for players.list(true, true, true, true, true) as pid do
+            for players.list() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
@@ -1389,7 +1388,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Thunder Join", {""}, "Detects if someone is using thunder join.", function()
-            for players.list(true, true, true, true, true) as pid do
+            for players.list() as pid do
                 if get_spawn_state(players.user()) == 0 then return end
                 local old_sh = players.get_script_host()
                 wait(100)
@@ -1627,23 +1626,6 @@ end)
     -------------------------------------
     -- Friend List
     -------------------------------------
-
-    function gen_fren_funcs(name)
-        local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)
-        menu.divider(friend_player_function, name)
-        menu.action(friend_player_function, "Join", {"jf "..name}, "Join "..name, function()
-            trigger_commands("join "..name)
-        end)
-        menu.action(friend_player_function, "Spectate", {"sf "..name}, "Spectate "..name, function()
-            trigger_commands("namespectate "..name)
-        end)
-        menu.action(friend_player_function, "Invite", {"if "..name}, "Invite "..name, function()
-            trigger_commands("invite "..name)
-        end)
-        menu.action(friend_player_function, "Open profile", {"pf "..name}, "Open SC Profile from "..name, function()
-            trigger_commands("nameprofile "..name)
-        end)
-    end
     
     menu.divider(friend_lists, "frens:)")
     for i = 0, NETWORK.NETWORK_GET_FRIEND_COUNT() do
@@ -2940,7 +2922,7 @@ local function player(pid)
     0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
     0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239, 0x03506E1C, 0x0D887E44,
     0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
-    0x0B473EB5,
+    0x0B473EB5, 0x0BD6DB64,
     -- Retard/Sexual Abuser
     0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3024,7 +3006,7 @@ local function player(pid)
         -- Give Vehicle NET Control
         ------------------------------------- 
 
-        menu.action(friendly, "Give Vehicle NET Control", {""}, "", function()
+        menu.action(friendly, "Give Vehicle NET Control", {""}, "Player Needs to be aware of Entity.", function()
             local veh = entities.get_user_vehicle_as_handle(true)
             entities.give_control_by_handle(veh, pid)
         end)

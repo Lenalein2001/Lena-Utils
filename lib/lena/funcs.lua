@@ -37,6 +37,23 @@ HudColour =
 	friendly = 118,
 }
 
+function gen_fren_funcs(name)
+    local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)
+    menu.divider(friend_player_function, name)
+    menu.action(friend_player_function, "Join", {"jf "..name}, "Join "..name, function()
+        trigger_commands("join "..name)
+    end)
+    menu.action(friend_player_function, "Spectate", {"sf "..name}, "Spectate "..name, function()
+        trigger_commands("namespectate "..name)
+    end)
+    menu.action(friend_player_function, "Invite", {"if "..name}, "Invite "..name, function()
+        trigger_commands("invite "..name)
+    end)
+    menu.action(friend_player_function, "Open profile", {"pf "..name}, "Open SC Profile from "..name, function()
+        trigger_commands("nameprofile "..name)
+    end)
+end
+
 function game_notification(format, colour, ...)
 	local msg = string.format(format, ...)
     --local txdDict = "DIA_ZOMBIE1",
@@ -151,6 +168,7 @@ function spawn_ped(model_name, pos, godmode)
         return ped
     else
         util.toast(hash .. " is not a valid ped model name :/")
+        return nil
     end
 end
 
@@ -165,6 +183,7 @@ function spawn_obj(model_name, pos)
         return obj
     else
         util.toast(hash .. " is not a valid ped model name :/")
+        return nil
     end
 end
 
