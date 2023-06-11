@@ -2495,7 +2495,7 @@ end)
 
     menu.toggle_loop(misc, "Skip Warning Messages", {""}, "Skips annoying Warning Messages.", function()
         local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
-        local hashes = {1990323196}
+        local hashes = {1990323196, 1748022689}
         for hashes as hash do
             if message_hash == hash then
                 PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201, 1.0)
