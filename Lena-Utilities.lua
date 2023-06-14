@@ -502,22 +502,6 @@ end)
     -------------------------------------
 
         -------------------------------------
-        -- Fast Respawn
-        -------------------------------------
-
-        menu.toggle_loop(fast_stuff, "Fast Respawn", {""}, "Skips the slow dying Animation.", function()
-            local gwobaw = memory.script_global(2672505 + 1684 + 756) -- Global_2672505.f_1684.f_756
-            if PED.IS_PED_DEAD_OR_DYING(players.user_ped()) then
-                GRAPHICS.ANIMPOSTFX_STOP_ALL()
-                memory.write_int(gwobaw, memory.read_int(gwobaw) | 1 << 1) -- https://www.unknowncheats.me/forum/3694517-post118.html
-            end
-        end,
-            function()
-            local gwobaw = memory.script_global(2672505 + 1684 + 756)
-            memory.write_int(gwobaw, memory.read_int(gwobaw) &~ (1 << 1)) 
-        end)
-
-        -------------------------------------
         -- Fast Vehicle Enter/Exit
         -------------------------------------
 
@@ -1267,7 +1251,7 @@ end)
                     local oldpos = players.get_position(pid)
                     wait(1000)
                     local currentpos = players.get_position(pid)
-                    if get_transition_state(pid) ~= 0 then
+                    if get_spawn_state(pid) ~= 0 then
                         for i, interior in interior_stuff do
                             if v3.distance(oldpos, currentpos) > 500 and oldpos.x ~= currentpos.x and oldpos.y ~= currentpos.y and oldpos.z ~= currentpos.z then
                                 wait(500)
@@ -1460,21 +1444,6 @@ end)
                 trigger_commands("desyncall off; anticrashcamera off")
                 trigger_command(UnblockIncSyncs)
                 trigger_command(UnblockNetEvents)
-            end
-        end)
-
-        -------------------------------------
-        -- Lessen Breakup
-        -------------------------------------
-
-        menu.toggle_loop(protex, "Automatically Lessen Breakups Kicks", {"bandaid"}, "Automatically enable Lessen if you're Session Host.", function()
-            local lessen = menu.ref_by_path("Online>Protections>Lessen Breakup Kicks As Host")
-            if not util.is_session_transition_active() then
-                if players.get_host() == players.user() then
-                    trigger_command(lessen, "on")
-                elseif players.get_host() ~= players.user() then
-                    trigger_command(lessen, "off")
-                end
             end
         end)
 
@@ -2366,24 +2335,9 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Unload", {"ul", "bye"}, "Blocks all Cwashes.", function()
-            trigger_commands("bandaid off")
-            wait(2000)
-            trigger_commands("breakupbandaid off")
-            notify("Lessen has been disabled. Unloading in 3 seconds.")
             log("[Lena | Unload] Lessen has been disabled. The Menu will unload in 3 seconds.")
             wait(3000)
             trigger_commands("unload")
-        end)
-
-        -------------------------------------
-        -- No lessen
-        -------------------------------------
-
-        menu.action(shortcuts, "No lessen", {"nolessen", "nl"}, "Disabled Lessen Breakups so you don't break Missions.", function()
-            trigger_commands("bandaid off")
-            wait(2000)
-            trigger_commands("breakupbandaid off")
-            notify("Lessen has been disabled.")
         end)
 
         -------------------------------------
@@ -2949,11 +2903,7 @@ local function player(pid)
             notify(msg); log(msg)
             trigger_commands("historyblock"..players.get_name(pid).." on")
             wait(500)
-            if menu.get_edition() >= 2 then
-                trigger_commands("breakup "..players.get_name(pid))
-            else
-                trigger_commands("kick "..players.get_name(pid))
-            end
+            trigger_commands("kick "..players.get_name(pid))
         end
     end
 
@@ -3586,7 +3536,7 @@ local function player(pid)
         -------------------------------------
 
         menu.action(customExplosion, "Kill With Orbital Cannon", {"orb"}, "Kills the selected player with the Orbital Cannon. Uses the Interface.", function()
-            if is_player_in_any_interior(pid) then
+            if players.is_in_interior(pid) then
                 notify("The player is in interior.")
             elseif is_player_passive(pid) then
                 notify("The player is in passive mode.")
@@ -3671,7 +3621,7 @@ local function player(pid)
         -------------------------------------
 
         local rids = players.get_rockstar_id(pid)
-        menu.action(kicks, "Ban Block", {"emp"}, "Will kick and block the player from joining you ever again.", function()
+        menu.action(kicks, "Block Kick", {"emp", "block"}, "Will kick and block the player from joining you ever again.", function()
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
@@ -3686,22 +3636,6 @@ local function player(pid)
                 else
                     log("[Lena | Ban Block] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked and Blocked.")
                 end
-                trigger_commands("kick"..players.get_name(pid))
-            end
-        end, nil, nil, COMMANDPERM_RUDE)
-
-        menu.action(kicks, "Block Join", {"block"}, "Will kick and block the player from joining you ever again.", function()
-            if players.get_name(pid) == players.get_name(players.user()) then
-                notify(lang.get_localised(-1974706693))
-            else
-                hex = decimalToHex2s(rids, 32)
-                if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
-                end
-                wait(100)
-                trigger_commands("historyblock"..players.get_name(pid).." on")
-                log("[Lena | Block Join] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked and Blocked.")
-                wait(100)
                 trigger_commands("kick"..players.get_name(pid))
             end
         end, nil, nil, COMMANDPERM_RUDE)

@@ -213,25 +213,16 @@ function BitTest(bits, place)
     return (bits & (1 << place)) ~= 0
 end
 
-function get_transition_state(pid)
-    return memory.read_int(memory.script_global(((0x2908D3 + 1) + (pid * 0x1C5)) + 230))
-end
-
 function IsPlayerUsingOrbitalCannon(player)
-    return BitTest(memory.read_int(memory.script_global((2657589 + (player * 466 + 1) + 427))), 0) -- Global_2657589[PLAYER::PLAYER_ID() /*466*/].f_427), 0
+    return BitTest(memory.read_int(memory.script_global((2657704 + (player * 463 + 1) + 424))), 0) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_424 -- Global_2657589[PLAYER::PLAYER_ID() /*466*/].f_427), 0
 end
 
 function get_spawn_state(pid)
-    return memory.read_int(memory.script_global(((2657589 + 1) + (pid * 466)) + 232)) -- Global_2657589[PLAYER::PLAYER_ID() /*466*/].f_232
+    return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 232)) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_232 -- Global_2657589[PLAYER::PLAYER_ID() /*466*/].f_232
 end
 
 function get_interior_player_is_in(pid)
-    return memory.read_int(memory.script_global(((2657589 + 1) + (pid * 466)) + 245)) -- Global_2657589[bVar0 /*466*/].f_245
-end
-
-function is_player_in_any_interior(player)
-	local address = memory.script_global(2657589 + (player * 466 + 1) + 245)
-	return address ~= NULL and memory.read_int(address) ~= 0
+    return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 245)) -- Global_2657704[bVar0 /*463*/].f_245 -- Global_2657589[bVar0 /*466*/].f_245
 end
 
 function IsDetectionPresent(pid, detection)
@@ -671,8 +662,7 @@ end
 
 -- Drone and TV Detection
 function isPlayerFlyingAnyDrone(player)
-    local address = memory.script_global(1853910 + (player * 862 + 1) + 267 + 365)
-    return BitTest(memory.read_int(address), 26)
+    return BitTest(memory.read_int(memory.script_global(1853988 + (player * 867 + 1) + 267 + 366)), 26) -- Global_1853988[PLAYER::PLAYER_ID() /*867*/].f_267.f_366, 26)
 end
 
 function getDroneType(player)
