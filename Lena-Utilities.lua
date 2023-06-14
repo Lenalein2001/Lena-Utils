@@ -3349,19 +3349,9 @@ local function player(pid)
         -------------------------------------        
 
         menu.action(trolling, "Send To Online Intro", {"intro"}, "Sends player to the GTA Online intro.", function()
-            local int = memory.read_int(memory.script_global(1894573 + 1 + (pid * 608) + 510))
-            sendse(1 << pid, {-95341040, players.user(), 20, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
-            sendse(1 << pid, {1742713914, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-        end)
-
-        -------------------------------------
-        -- Send To Golf
-        -------------------------------------        
-    
-        menu.action(trolling, "Send To Golf", {"golf"}, "Sends player to go play golf.", function()
-            local int = memory.read_int(memory.script_global(1894573 + 1 + (pid * 608) + 510))
-            sendse(1 << pid, {-95341040, players.user(), 116, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
-            sendse(1 << pid, {1742713914, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+            local int = memory.read_int(memory.script_global(1895156 + 1 + (pid * 609) + 511)) --Global_1895156[PLAYER::PLAYER_ID() /*609*/].f_511;
+            sendse(1 << pid, {-366707054, players.user(), 20, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
+            sendse(1 << pid, {1757622014, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
         end)
 
         -------------------------------------
@@ -3369,9 +3359,9 @@ local function player(pid)
         -------------------------------------   
         
         menu.action(trolling, "Force 1v1", {"1v1"}, "Forces them into a 1v1.", function()
-            local int = memory.read_int(memory.script_global(1894573 + 1 + (pid * 608) + 510))
-            sendse(1 << pid, {-95341040, players.user(), 197, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
-            sendse(1 << pid, {1742713914, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+            local int = memory.read_int(memory.script_global(1895156 + 1 + (pid * 609) + 511))
+            sendse(1 << pid, {-366707054, players.user(), 197, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
+            sendse(1 << pid, {1757622014, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
         end)
 
         -------------------------------------
@@ -3440,19 +3430,30 @@ local function player(pid)
         -- Kill Player Inside Interior
         -------------------------------------
 
-        menu.action(trolling, "Kill Player Inside Interior", {""}, "Works in Casino and Nightclubs.", function()
+        menu.action(trolling, "Force Player Outside of Interior", {""}, "", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-            local pos = ENTITY.GET_ENTITY_COORDS(ped)
-            local stun = joaat("weapon_stungun")
+            local pos = players.get_position(pid)
+            local glitch_hash = joaat("prop_windmill_01")
+            local mdl = joaat("brickade2")
+            RequestModel(glitch_hash)
+            RequestModel(mdl)
             for interior_stuff as id do
                 if get_interior_player_is_in(pid) == id then
-                    notify("Player is not in any interior. :/")
+                    notify(players.get_name(pid) .. " isn't in an interior. :/")
                 return end
-                if get_interior_player_is_in(pid) ~= id then
-                    sendse(1 << pid, {113023613, pid, 1771544554, math.random(0, 9999)})
-                    wait(100)
-                    MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(pos.x, pos.y, pos.z + 1, pos.x, pos.y, pos.z, 1000, true, stun, players.user_ped(), false, true, 1.0)
-                end
+            end
+            for i = 0, 3 do
+                local obj = entities.create_object(glitch_hash, pos)
+                local veh = entities.create_vehicle(mdl, pos, 0)
+                ENTITY.SET_ENTITY_VISIBLE(obj, false)
+                ENTITY.SET_ENTITY_VISIBLE(veh, false)
+                ENTITY.SET_ENTITY_INVINCIBLE(veh, true)
+                ENTITY.SET_ENTITY_COLLISION(obj, true, true)
+                ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
+                wait(250)
+                entities.delete(obj)
+                entities.delete(veh)
+                wait(250)     
             end
         end)
 
