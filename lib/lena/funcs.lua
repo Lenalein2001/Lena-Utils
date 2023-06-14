@@ -236,6 +236,17 @@ function IsDetectionPresent(pid, detection)
     return false
 end
 
+function StandUser(pid) -- credit to sapphire for this
+    if players.exists(pid) and pid != players.user() then
+        for menu.player_root(pid):getChildren() as cmd do
+            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath("Stand User"):isValid() then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 function trapcage(pid, object, visible)
     local objHash = util.joaat(object)
     request_model(objHash)
@@ -666,13 +677,13 @@ function isPlayerFlyingAnyDrone(player)
 end
 
 function getDroneType(player)
-    local p_type = memory.script_global(1914091 + (player * 297 + 1) + 97)
-    return memory.read_int(p_type)
+	local p_type = memory.script_global(1914091 + (player * 297 + 1) + 97)
+	return memory.read_int(p_type)
 end
 
 function getPlayerDroneObject(player)
-    local p_object = memory.script_global(1914091 + (players.user() * 297 + 1) + 64 + (player + 1))
-    return memory.read_int(p_object)
+	local p_object = memory.script_global(1914091 + (players.user() * 297 + 1) + 64 + (player + 1))
+	return memory.read_int(p_object)
 end
 
 function invertHeading(heading)

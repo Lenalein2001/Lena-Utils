@@ -91,6 +91,7 @@ local reactions = menu.list(online, "Reactions", {""}, "")
 local join_reactions = menu.list(reactions, "Join Reactions", {""}, "")
 local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
 local weapon_reactions = menu.list(reactions, "Weapon Reactions", {""}, "")
+local spoofing_opt = menu.list(online, "Spoofing", {""}, "")
 -- Tunables
 local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 local sell_stuff = menu.list(tunables, "Selling", {""}, "")
@@ -812,14 +813,20 @@ end)
         -- Better B11 Minigun
         -------------------------------------  
 
-        menu.toggle_loop(better_vehicles, "Better B11 Minigun", {""}, "Higher Damage Output.", function()
+        menu.toggle_loop(better_vehicles, "Better Jet Minigun", {""}, "Higher Damage Output. [Doesn't work because an API feature is broken]", function()
             local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Bombushka Cannon")
             local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
-            if players.get_vehicle_model(players.user()) == joaat("strikeforce") and not toggle_ammo.value == true then
-                ammo:trigger()
-                toggle_ammo.value = true
-            elseif players.get_vehicle_model(players.user()) ~= joaat("strikeforce") and toggle_ammo.value == true then
-                toggle_ammo.value = false
+            local vehicles = {239897677, 1692272545} -- raiju, strikeforce 
+            for vehicles as veh do
+                local hash = players.get_vehicle_model(players.user())
+                if veh == hash then
+                    ammo:trigger()
+                    toggle_ammo.value = true
+                    notify("Yes")
+                else
+                    toggle_ammo.value = false
+                    notify("No")
+                end
             end
         end)
 
@@ -1699,30 +1706,41 @@ end)
         end)
 
     -------------------------------------
-    -- Spoof Assets
-    -------------------------------------
-    
-    menu.toggle(online, "Spoof Assets", {"spoofassets", "spoofass"}, "Spoof Session Assets.", function(toggled)
-        trigger_commands("extratoggle "..toggled)
-    end)
+    -- Spoofing Options
+    -------------------------------------   
 
-    -------------------------------------
-    -- Spoof Session
-    -------------------------------------
+        -------------------------------------
+        -- Spoof Assets
+        -------------------------------------
+        
+        menu.toggle(spoofing_opt, "Spoof Assets", {"spoofassets", "spoofass"}, "Spoof Session Assets.", function(toggled)
+            trigger_commands("extratoggle "..toggled)
+        end)
 
-    menu.toggle(online, "Spoof Session", {"enablespoofing"}, "Enable Session Spoofing. No one will be able to Join, Track or Spectate you.", function(toggled)
-        local spoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Story Mode")
-        local unspoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Disabled")
-        if menu.get_edition() == 3 then
-            if toggled then
-                trigger_command(spoof_ses)
+        -------------------------------------
+        -- Spoof Session
+        -------------------------------------
+
+        menu.toggle(spoofing_opt, "Spoof Session", {"enablespoofing"}, "Enable Session Spoofing. No one will be able to Join, Track or Spectate you.", function(toggled)
+            local spoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Story Mode")
+            local unspoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Disabled")
+            if menu.get_edition() == 3 then
+                if toggled then
+                    trigger_command(spoof_ses)
+                else
+                    trigger_command(unspoof_ses)
+                end
             else
-                trigger_command(unspoof_ses)
+                notify("You need Ultimate in order to do that!")
             end
-        else
-            notify("You need Ultimate in order to do that!")
-        end
-    end, nil, nil, COMMANDPERM_FRIENDLY)
+        end, nil, nil, COMMANDPERM_FRIENDLY)
+
+        -------------------------------------
+        -- Spoof Host Token
+        -------------------------------------
+
+        --[[spoof_ht = menu.toggle_loop(spoofing_opt, "Host Token", {"enablespoofing"}, "Enable Session Spoofing. No one will be able to Join, Track or Spectate you.", function()
+        end)]]
 
     -------------------------------------
     -- Whitelist Session
@@ -2814,8 +2832,12 @@ for s_developer as developer do
         end)
 
         menu.action(sdebug, "Test", {""}, "", function()
-            local user = players.get_tags_string(players.user())
-            log(user)
+            local hash = players.get_vehicle_model(players.user())
+            if hash == 239897677 then
+                notify("Yes")
+            else
+                notify("No")
+            end
         end)
 
         -------------------------------------
@@ -2892,7 +2914,7 @@ local function player(pid)
         0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
         0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239, 0x03506E1C, 0x0D887E44,
         0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
-        0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB,
+        0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066,
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3289,7 +3311,7 @@ local function player(pid)
                 local player_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local spawn_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player_ped, 30.0, -30.0, 0.0)
                 local ped = spawn_ped("s_m_y_blackops_01", spawn_pos, gm_on)  -- Assign the returned ped to a variable
-                local vehicle = spawn_vehicle(joaat("rhino"), spawn_pos, gm_on)
+                local vehicle = spawn_vehicle("rhino", spawn_pos, gm_on)
                 NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(vehicle), true)
                 PED.SET_PED_INTO_VEHICLE(ped, vehicle, -1)
                 PED.SET_PED_COMBAT_ATTRIBUTES(ped, 3, false)
