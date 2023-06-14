@@ -813,20 +813,16 @@ end)
         -- Better B11 Minigun
         -------------------------------------  
 
-        menu.toggle_loop(better_vehicles, "Better Jet Minigun", {""}, "Higher Damage Output. [Doesn't work because an API feature is broken]", function()
+        menu.toggle_loop(better_vehicles, "Better Jet Minigun", {""}, "Higher Damage Output.", function()
             local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Bombushka Cannon")
             local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
-            local vehicles = {239897677, 1692272545} -- raiju, strikeforce 
-            for vehicles as veh do
-                local hash = players.get_vehicle_model(players.user())
-                if veh == hash then
-                    ammo:trigger()
-                    toggle_ammo.value = true
-                    notify("Yes")
-                else
-                    toggle_ammo.value = false
-                    notify("No")
-                end
+            local veh = 239897677 or 1692272545 -- raiju, strikeforce 
+            local hash = players.get_vehicle_model(players.user())
+            if hash == veh and toggle_ammo.value == false then
+                ammo:trigger()
+                toggle_ammo.value = true
+            elseif hash != veh and toggle_ammo.value == true then
+                toggle_ammo.value = false
             end
         end)
 
