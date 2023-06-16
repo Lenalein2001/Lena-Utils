@@ -721,7 +721,7 @@ end)
             end
         end)
 
-        menu.action(better_vehicles, "Better heli mode", {"betterheli"}, "Disabables Heli auto stablization.", function()
+        menu.action(better_vehicles, "Better Heli Mode", {"betterheli"}, "Disabables Heli auto stablization.", function()
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
             local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
             for better_heli_offsets as offsets do
@@ -770,9 +770,9 @@ end)
         -------------------------------------  
 
         menu.toggle_loop(better_vehicles, "Better Jet Minigun", {""}, "Higher Damage Output.", function()
-            local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Bombushka Cannon")
+            local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade")
             local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
-            local veh = 239897677 or 1692272545 -- raiju, strikeforce 
+            local veh = 239897677 or 1692272545 or -1281684762 -- raiju, strikeforce, lazer
             local hash = players.get_vehicle_model(players.user())
             if hash == veh and toggle_ammo.value == false then
                 ammo:trigger()
@@ -834,13 +834,23 @@ end)
                 VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, true, true, false)
             end
         end)
-
         menu.action(engine_control, "Toggle Engine On", {""}, "Starts the Engine of the current Vehicle.", function()
             VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, true, true, true)
         end)
-
         menu.action(engine_control, "Toggle Engine Off", {""}, "Stops The Engine of the current Vehicle.", function()
             VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, false, true, true)
+        end)
+
+        -------------------------------------
+        -- Disable Engine Fires
+        -------------------------------------
+
+        local previous_car = nil
+        menu.toggle_loop(engine_control, "Disable Engine Fires", {""}, "", function()
+            if player_cur_car ~= previous_car then
+                VEHICLE.SET_DISABLE_VEHICLE_ENGINE_FIRES(player_cur_car, true)
+                previous_car = player_car
+            end
         end)
 
     -------------------------------------
@@ -1686,13 +1696,6 @@ end)
                 notify("You need Ultimate in order to do that!")
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
-
-        -------------------------------------
-        -- Spoof Host Token
-        -------------------------------------
-
-        --[[spoof_ht = menu.toggle_loop(spoofing_opt, "Host Token", {"enablespoofing"}, "Enable Session Spoofing. No one will be able to Join, Track or Spectate you.", function()
-        end)]]
 
     -------------------------------------
     -- Whitelist Session
@@ -2838,7 +2841,7 @@ local function player(pid)
         0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
         0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239, 0x03506E1C, 0x0D887E44,
         0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
-        0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066,
+        0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0,
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
