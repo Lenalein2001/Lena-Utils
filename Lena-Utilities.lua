@@ -294,50 +294,6 @@ local numpadControls = {
     128,
 }
 
-local All_business_properties = {
-    -- Clubhouses
-    "1334 Roy Lowenstein Blvd",
-    "7 Del Perro Beach",
-    "75 Elgin Avenue",
-    "101 Route 68",
-    "1 Paleto Blvd",
-    "47 Algonquin Blvd",
-    "137 Capital Blvd",
-    "2214 Clinton Avenue",
-    "1778 Hawick Avenue",
-    "2111 East Joshua Road",
-    "68 Paleto Blvd",
-    "4 Goma Street",
-    -- Facilities
-    "Grand Senora Desert",
-    "Route 68",
-    "Sandy Shores",
-    "Mount Gordo",
-    "Paleto Bay",
-    "Lago Zancudo",
-    "Zancudo River",
-    "Ron Alternates Wind Farm",
-    "Land Act Reservoir",
-    -- Arcades
-    "Pixel Pete's - Paleto Bay",
-    "Wonderama - Grapeseed",
-    "Warehouse - Davis",
-    "Eight-Bit - Vinewood",
-    "Insert Coin - Rockford Hills",
-    "Videogeddon - La Mesa",
-}
-
-local large_warehouses = {
-    [6] = "Xero Gas Factory",  
-    [8] = "Bilgeco Warehouse", 
-    [16] = "Logistics Depot", 
-    [17] = "Darnell Bros Warehouse", 
-    [18] = "Wholesale Furniture", 
-    [19] = "Cypress Warehouses", 
-    [20] = "West Vinewood Backlot", 
-    [22] = "Walker & Sons Warehouse"
-}
-
 local interiors = {
     {"AFK Room", {x=-158.71494, y=-982.75885, z=149.13135}},
     {"Torture Room", {x=147.170, y=-2201.804, z=4.688}},
@@ -3442,52 +3398,6 @@ local function player(pid)
         end)
 
         -------------------------------------
-        -- Remote TP's
-        -------------------------------------
-
-        for id, name in All_business_properties do
-            if id <= 12 then
-                menu.action(clubhouse, name, {"clubhouse"..name}, "", function()
-                    sendse(1 << pid, {0xDEE5ED91, pid, id, 0x20, NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, math.random(1, 10)})
-                end)
-            elseif id > 12 and id <= 21 then
-                menu.action(facility, name, {"facility"..name}, "", function()
-                    sendse(1 << pid, {0xDEE5ED91, pid, id, 0x20, NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-                end)
-            elseif id > 21 then
-                menu.action(arcade, name, {"arcade"..name}, "", function() 
-                    sendse(1 << pid, {0xDEE5ED91, pid, id, 0x20, NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1})
-                end)
-            end
-        end
-
-        for id, name in large_warehouses do
-            menu.action(large, name, {"whtp"..name}, "Teleports the Player to the Warehouse.", function()
-                sendse(1 << pid, {0x7EFC3716, pid, 0, 1, id})
-            end)
-        end
-
-        menu.action(tp_player, "Heist Passed Apartment Teleport", {""}, "", function()
-            sendse(1 << pid, {0xAD1762A7, players.user(), pid, -1, 1, 1, 0, 1, 0}) 
-        end) 
-
-        menu.action(cayop, "Cayo Perico (Cutscene)", {""}, "Sends the Player to Cayo Perico.", function()
-            sendse(1 << pid, {0x4868BC31, pid, 0, 0, 0x3, 1})
-        end)
-
-        menu.action(cayop, "Cayo Perico (No Cutscene)", {"cayo"}, "Sends the Player to Cayo Perico without the cutscene.", function()
-            sendse(1 << pid, {0x4868BC31, pid, 0, 0, 0x4, 1})
-        end)
-
-        menu.action(cayop, "Leaving Cayo Perico", {"cayoleave"}, "Player Must Be At Cayo Perico To Trigger This Event.", function()
-            sendse(1 << pid, {0x4868BC31, pid, 0, 0, 0x3})
-        end)
-
-        menu.action(cayop, "Kicked From Cayo Perico", {"cayokick"}, "Sends them to the Beach.", function()
-            sendse(1 << pid, {0x4868BC31, pid, 0, 0, 0x4, 0})
-        end)
-
-        -------------------------------------
         -- EXPLOSIONS
         -------------------------------------
 
@@ -3531,7 +3441,7 @@ local function player(pid)
                 notify("The player is in interior.")
             elseif is_player_passive(pid) then
                 notify("The player is in passive mode.")
-            elseif not OrbitalCannon.exists() and PLAYER.IS_PLAYER_PLAYING(pid) then
+            elseif not OrbitalCannon.exists() and players.exists(pid) then
                 OrbitalCannon.create(pid)
             end
         end)
