@@ -1835,7 +1835,7 @@ end)
 
         menu.toggle(missions_tunables, "Mission Friendly Mode", {"missionfriendly", "mfr"}, "Enables or disables Settings that might interfere with missions.", function(toggled)
             if toggled then
-                trigger_commands("nolessen; hosttoken off; lockoutfit off; svmreimpl off")
+                trigger_commands("lockoutfit off; svmreimpl off; debugnatives off; seamless off")
                 wait(5000)
                 notify("Mission friendly mode has been activated.")
             end
