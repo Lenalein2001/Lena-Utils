@@ -1679,6 +1679,10 @@ end)
             trigger_commands("extratoggle "..toggled)
         end)
 
+        menu.toggle(spoofing_opt, "Lena's Matchmaking", {""}, "Spoof Session Assets so you'll only be able to play with me.", function(toggled)
+            trigger_commands("extratoggle "..toggled.."; resetassetchecksum; extravalue 20010224")
+        end)
+
         -------------------------------------
         -- Spoof Session
         -------------------------------------
@@ -2932,13 +2936,13 @@ local function player(pid)
 
         menu.action(friendly, "Invite to CEO/MC", {"ceoinv"}, "Invites the Player to your CEO/MC.", function()
             sendse(1 << pid, {
-                -1367443755,
+                -245642440,
                 players.user(),
                 4,
                 10000, -- wage?
                 0, 0, 0, 0,
-                memory.read_int(memory.script_global(1923597 + 9)), -- f_8
-                memory.read_int(memory.script_global(1923597 + 10)), -- f_9
+                memory.read_int(memory.script_global(1924276 + 9)), -- .f_8
+                memory.read_int(memory.script_global(1924276 + 10)), -- .f_9
             })
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
