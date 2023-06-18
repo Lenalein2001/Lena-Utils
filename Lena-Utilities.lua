@@ -112,7 +112,7 @@ if not status then
         function(result, headers, status_code)
             local function parse_auto_update_result(result, headers, status_code)
                 local error_prefix = "Error downloading auto-updater: "
-                if status_code ~= 200 then notify(error_prefix..status_code) return false end
+                if status_code != 200 then notify(error_prefix..status_code) return false end
                 if not result or result == "" then notify(error_prefix.."Found empty file.") return false end
                 filesystem.mkdir(filesystem.scripts_dir().."lib")
                 local file = io.open(filesystem.scripts_dir().."lib\\auto-updater.lua", "wb")
@@ -215,7 +215,7 @@ if PED == nil then
     util.show_corner_help(msg1..""..natives_version.."\n"..msg2)
     util.stop_script()
 end
-if lang.get_current() ~= "en" then
+if lang.get_current() != "en" then
     notify("This Lua is made using the english translation of Stand. If things break it's most likely because you are using a different language.\nTry to use: Stand>Settings>Language>English (UK).")
 end
 if not SCRIPT_SILENT_START then
@@ -608,12 +608,12 @@ end)
         end
         local ammoSpeed = AmmoSpeed.new(ammoSpeedAddress)
         modifiedSpeed = modifiedSpeed or ammoSpeed
-        if ammoSpeed ~= modifiedSpeed then
+        if ammoSpeed != modifiedSpeed then
             modifiedSpeed:reset()
             modifiedSpeed = ammoSpeed
         end
         local newValue = modifiedSpeed.defaultValue * multiplier
-        if modifiedSpeed:getValue() ~= newValue then
+        if modifiedSpeed:getValue() != newValue then
             modifiedSpeed:setValue(newValue)
         end
     end)
@@ -847,7 +847,7 @@ end)
 
         local previous_car = nil
         menu.toggle_loop(engine_control, "Disable Engine Fires", {""}, "", function()
-            if player_cur_car ~= previous_car then
+            if player_cur_car != previous_car then
                 VEHICLE.SET_DISABLE_VEHICLE_ENGINE_FIRES(player_cur_car, true)
                 previous_car = player_car
             end
@@ -989,7 +989,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Shot Flames", {""}, "", function()
-        if players.get_vehicle_model(players.user()) ~= 0 then
+        if players.get_vehicle_model(players.user()) != 0 then
             entities.set_rpm(entities.get_user_vehicle_as_pointer(), 1.2)
             wait(100)
         end
@@ -1013,13 +1013,13 @@ end)
             local sh -- Session Host
             local sh_name -- Session Host Name
             if util.is_session_started() then
-                if players.get_host() ~= -1 and players.get_host() ~= nil then
+                if players.get_host() != -1 and players.get_host() != nil then
                     sh = players.get_host()
                     sh_name = players.get_name(sh)
                     wait(2000)
-                    if sh ~= -1 and sh ~= nil then
+                    if sh != -1 and sh != nil then
                         local new_sh = players.get_host()
-                        if sh ~= new_sh and new_sh ~= -1 and new_sh ~= nil then
+                        if sh != new_sh and new_sh != -1 and new_sh != nil then
                             if players.exists(new_sh) then
                                 notify("Session Host migrated from "..sh_name.." to "..players.get_name(new_sh))
                                 log("[Lena | Host Migration] Session Host migrated from "..sh_name.." to "..players.get_name(new_sh))
@@ -1038,13 +1038,13 @@ end)
             local sh -- Script Host
             local sh_name -- Script Host Name
             if util.is_session_started() then
-                if players.get_script_host() ~= -1 and players.get_script_host() ~= nil then
+                if players.get_script_host() != -1 and players.get_script_host() != nil then
                     sh = players.get_script_host()
                     sh_name = players.get_name(sh)
                     wait(2000)
-                    if sh ~= -1 and sh ~= nil then
+                    if sh != -1 and sh != nil then
                         local new_sh = players.get_script_host()
-                        if sh ~= new_sh and new_sh ~= -1 and new_sh ~= nil then
+                        if sh != new_sh and new_sh != -1 and new_sh != nil then
                             if players.exists(new_sh) then
                                 notify("Script Host migrated from "..sh_name.." to "..players.get_name(new_sh))
                                 log("[Lena | Script Host Migration] Script Host migrated from "..sh_name.." to "..players.get_name(new_sh))
@@ -1180,7 +1180,7 @@ end)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local veh_speed = (ENTITY.GET_ENTITY_SPEED(vehicle)* 3.6)
                 local class = VEHICLE.GET_VEHICLE_CLASS(vehicle)
-                if class ~= 15 and class ~= 16 and veh_speed >= 320 and (players.get_vehicle_model(pid) ~= joaat("oppressor") or players.get_vehicle_model(pid) ~= joaat("oppressor2")) then
+                if class != 15 and class != 16 and veh_speed >= 320 and (players.get_vehicle_model(pid) != joaat("oppressor") or players.get_vehicle_model(pid) != joaat("oppressor2")) then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if not IsDetectionPresent(pid, "Super Drive") then
                         players.add_detection(pid, "Super Drive", 7, 50)
@@ -1220,9 +1220,9 @@ end)
                     local oldpos = players.get_position(pid)
                     wait(1000)
                     local currentpos = players.get_position(pid)
-                    if get_spawn_state(pid) ~= 0 then
+                    if get_spawn_state(pid) != 0 then
                         for i, interior in interior_stuff do
-                            if v3.distance(oldpos, currentpos) > 500 and oldpos.x ~= currentpos.x and oldpos.y ~= currentpos.y and oldpos.z ~= currentpos.z then
+                            if v3.distance(oldpos, currentpos) > 500 and oldpos.x != currentpos.x and oldpos.y != currentpos.y and oldpos.z != currentpos.z then
                                 wait(500)
                                 if get_interior_player_is_in(pid) == interior and PLAYER.IS_PLAYER_PLAYING(pid) and players.exists(pid) then
                                     if not IsDetectionPresent(pid, "Teleport") then
@@ -1310,9 +1310,9 @@ end)
                         return 
                     end
                 end
-                if players.get_vehicle_model(pid) ~= 0 and not TASK.GET_IS_TASK_ACTIVE(ped, 160) and get_spawn_state(players.user()) ~= 0 then
+                if players.get_vehicle_model(pid) != 0 and not TASK.GET_IS_TASK_ACTIVE(ped, 160) and get_spawn_state(players.user()) != 0 then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
-                    if players.get_name(driver) ~= "InvalidPlayer" and not pegasusveh and pid == driver and not players.is_in_interior(pid) then
+                    if players.get_name(driver) != "InvalidPlayer" and not pegasusveh and pid == driver and not players.is_in_interior(pid) then
                         if bitset == 1024 then
                             util.draw_debug_text(players.get_name(driver).." Is a 2Take1 User")
                             if not IsDetectionPresent(pid, "2Take1 User") then
@@ -1360,7 +1360,7 @@ end)
                 local old_sh = players.get_script_host()
                 wait(100)
                 local new_sh = players.get_script_host()
-                if old_sh ~= new_sh then
+                if old_sh != new_sh then
                     if get_spawn_state(pid) == 0 and players.get_script_host() == pid then
                         if not IsDetectionPresent(pid, "Thunder Join") then
                             players.add_detection(pid, "Thunder Join", 7)
@@ -1471,7 +1471,7 @@ end)
             end
             wait(50)
         end, function()
-            if orb_obj ~= nil or orb_obj2 ~= nil then
+            if orb_obj != nil or orb_obj2 != nil then
                 entities.delete_by_handle(orb_obj)
                 entities.delete_by_handle(orb_obj2)
             end
@@ -1563,7 +1563,7 @@ end)
                                     HUD.SET_BLIP_COORDS(orbital_blips[pid], cam_pos.x, cam_pos.y, cam_pos.z)
                                 end
                             else
-                                if orbital_blips[pid] ~= nil then 
+                                if orbital_blips[pid] != nil then 
                                     util.remove_blip(orbital_blips[pid])
                                     orbital_blips[pid] = nil
                                 end
@@ -1800,7 +1800,6 @@ end)
         -------------------------------------
 
         -- https://www.unknowncheats.me/forum/3347568-post13086.html
-
         menu.toggle_loop(sell_stuff, "Tony's Cut of Nightclub be gone", {""}, "", function()
             SET_FLOAT_GLOBAL(262145 + 24496, 0) -- -1002770353
         end, function()
@@ -1980,10 +1979,10 @@ end)
     -------------------------------------
 
     menu.toggle_loop(missions_tunables, "Skip Casino Hacking Process", {""}, "Works on Fingerprint and Keypad.", function()
-        if GET_INT_LOCAL("fm_mission_controller", 52962) ~= 1 then -- Fingerprint: https://www.unknowncheats.me/forum/3418914-post13398.html
+        if GET_INT_LOCAL("fm_mission_controller", 52962) != 1 then -- Fingerprint: https://www.unknowncheats.me/forum/3418914-post13398.html
             SET_INT_LOCAL("fm_mission_controller", 52962, 5)
         end
-        if GET_INT_LOCAL("fm_mission_controller", 54024) ~= 1 then -- Keypad: https://www.unknowncheats.me/forum/3455828-post8.html
+        if GET_INT_LOCAL("fm_mission_controller", 54024) != 1 then -- Keypad: https://www.unknowncheats.me/forum/3455828-post8.html
             SET_INT_LOCAL("fm_mission_controller", 54024, 5)
         end
     end)
@@ -2124,7 +2123,7 @@ end)
             switch index do
                 case 1:
                     for entities.get_all_vehicles_as_pointers() as vehicle do
-                        if vehicle ~= entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() then
+                        if vehicle != entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() then
                             entities.delete(vehicle)
                             clean_amount += 1
                             wait(50)
@@ -2161,7 +2160,7 @@ end)
             local clear_ropes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
             local count = 0
             for entities.get_all_peds_as_pointers() as ped do
-                if ped ~= players.user_ped() and entities.get_owner(ped) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() then
+                if ped != players.user_ped() and entities.get_owner(ped) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() then
                     entities.delete_by_pointer(ped)
                     count += 1
                     wait(10)
@@ -2171,7 +2170,7 @@ end)
             count = 0
             wait(100)
             for entities.get_all_vehicles_as_pointers() as vehicle do
-                if vehicle ~= entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() then
+                if vehicle != entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() then
                     entities.delete_by_pointer(vehicle)
                     count += 1
                     wait(10)
@@ -2328,7 +2327,7 @@ end)
                 notify("Starting CEO... Please wait for a few secs.")
                 wait(5000)
             end
-            if players.get_boss(players.user()) ~= -1 then
+            if players.get_boss(players.user()) != -1 then
                 if players.get_boss(players.user()) == players.user() then
                     wait(500)
                     IA_MENU_OPEN_OR_CLOSE()
@@ -2653,7 +2652,7 @@ for s_developer as developer do
             trigger_commands("skiprepeatwar off; commandsskip off")
             wait(1000)
             if not util.is_session_transition_active() then
-                if players.get_script_host() == nil and players.get_host() ~= players.user() then
+                if players.get_script_host() == nil and players.get_host() != players.user() then
                     notify("Session seems to be in a broken State but you are not the Host.")
                     menu.show_warning(rss, click_type, "Do you want to restart the session? This can fix the session, but also cancel deliveries or current missions for other players.", function()
                         menu.show_warning(rss, click_type, "Are you Sure? Doing this as a Non-Host might make it even worse.", function()
@@ -2671,7 +2670,7 @@ for s_developer as developer do
                     end, function()
                         notify("Aborted.")
                     end, true)
-                elseif players.get_script_host() ~= nil and players.get_host() ~= players.user() then
+                elseif players.get_script_host() != nil and players.get_host() != players.user() then
                     notify("Session seems to be in a working State but you are not the Host.")
                     menu.show_warning(rss, click_type, "Do you want to restart the session? This can fix the session, but also cancel deliveries or current missions for other players.", function()
                         menu.show_warning(rss, click_type, "Are you Sure? Doing this as a Non-Host might make it even worse.", function()
@@ -2682,7 +2681,7 @@ for s_developer as developer do
                     end, function()
                         notify("Aborted.")
                     end, true)
-                elseif players.get_script_host() ~= nil then
+                elseif players.get_script_host() != nil then
                     notify("Session seems to be in a working State")
                     menu.show_warning(rss, click_type, "The Session seems to be in a fixed state, do you still want to restart it? This can fix the session, but also cancel deliveries or ongoing missions for other players.", function()
                         restartsession()
@@ -3137,7 +3136,7 @@ local function player(pid)
                     cagePos = playerPos
                     trapcage(pid, "prop_gold_cont_01", true)
                     local playername = players.get_name(pid)
-                    if playername ~= "**Invalid**" then
+                    if playername != "**Invalid**" then
                         notify(playername.." was out of the cage!")
                         trapcage(pid, "prop_gold_cont_01", true)
                     end
@@ -3202,7 +3201,7 @@ local function player(pid)
                         entities.delete_by_handle(temp_ped)
                     end
                     local name = players.get_name(pid)
-                    if name ~= "**Invalid**" then
+                    if name != "**Invalid**" then
                         notify(name.." was out of the cage!")
                     end
                 end
@@ -3344,7 +3343,7 @@ local function player(pid)
             if not players.exists(pid) then return end
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             for get_vehicles_in_player_range(pid, 70.0) as vehicle do
-                if TASK.GET_ACTIVE_VEHICLE_MISSION_TYPE(vehicle) ~= 6 then
+                if TASK.GET_ACTIVE_VEHICLE_MISSION_TYPE(vehicle) != 6 then
                     local driver = VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1, false)
                     if ENTITY.DOES_ENTITY_EXIST(driver) and not PED.IS_PED_A_PLAYER(driver) then
                         request_control(driver)
@@ -3865,7 +3864,7 @@ end)
 
 players.on_leave(function(pid)
     if showleaveInfomsg then
-        if names[pid] ~= nil then
+        if names[pid] != nil then
             notify(names[pid].." left.")
         end
     end
