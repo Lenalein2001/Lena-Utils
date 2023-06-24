@@ -1933,28 +1933,6 @@ end)
         end)
 
         -------------------------------------
-        -- Teleport BB Crates To Me
-        -------------------------------------
-
-        menu.action(missions_tunables, "Teleport BB Crates To Me", {"tpbb"}, "Teleports all BB Crates to you.", function()
-            local counter = 0
-            local pos = players.get_position(players.user())
-            local Blip = HUD.GET_FIRST_BLIP_INFO_ID(478) -- https://docs.fivem.net/docs/game-references/blips/
-            for entities.get_all_pickups_as_handles() as pickup do
-                while HUD.DOES_BLIP_EXIST(Blip) and HUD.GET_BLIP_COLOUR(pickup) == 2 do
-                    ENTITY.SET_ENTITY_COORDS(Blip, pos, false, false, false, false)
-                    counter += 1
-                    wait(100)
-                end
-                if counter == 0 then
-                    notify("No Pickups Found. :/")
-                else
-                    notify("Teleported "..tostring(counter).." Pickups to you.")
-                end
-            end
-        end)
-
-        -------------------------------------
         -- Kill All Peds
         -------------------------------------
 
@@ -2412,7 +2390,7 @@ end)
 
     menu.toggle_loop(misc, "Skip Warning Messages", {""}, "Skips annoying Warning Messages.", function()
         local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
-        local hashes = {1990323196, 1748022689}
+        local hashes = {1990323196, 1748022689, -396931869}
         for hashes as hash do
             if message_hash == hash then
                 PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201, 1.0)
@@ -2699,43 +2677,34 @@ for s_developer as developer do
         -------------------------------------
 
         menu.action(sdebug, "Better Vehicles", {"bv"}, "", function()
-            local pped = players.user()
-            local vmodel = players.get_vehicle_model(pped)
+            local vmodel = players.get_vehicle_model(players.user())
             local vname = util.get_label_text(vmodel)
-            local is_plane = VEHICLE.IS_THIS_MODEL_A_PLANE(vmodel)
-            local is_heli = VEHICLE.IS_THIS_MODEL_A_HELI(vmodel)
-            local is_blimp = util.is_this_model_a_blimp(vmodel)
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
             local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
-            if is_plane then
+            if VEHICLE.IS_THIS_MODEL_A_PLANE(vmodel) then
                 if vmodel == -1700874274 then
-                    trigger_commands("vhengineoffglidemulti 10")
-                    trigger_commands("vhgeardownliftmult 1")
-                    notify("Better Planes have been enabled for: "..vname)
+                    trigger_commands("vhengineoffglidemulti 10; vhgeardownliftmult 1")
                 else
                     for better_planes as offsets do
                         local handling = offsets[1]
                         local value = offsets[2]
                         memory.write_float(CflyingHandling + handling, value)
                     end
-                    notify("Better Planes have been enabled for: "..vname)
                 end
-                trigger_commands("gravitymult 2; fovfpinveh 90")
-            elseif is_heli then
+                notify("Better Planes have been enabled for: "..vname)
+                trigger_commands("fovfpinveh 90")
+            elseif VEHICLE.IS_THIS_MODEL_A_HELI(vmodel) then
                 for better_heli_offsets as offset do
                     memory.write_float(CflyingHandling + offset, 0)
                 end
                 trigger_commands("gravitymult 1; helithrust 2.3")
                 notify("Better Helis have been enabled for: "..vname)
-            elseif is_blimp then
+            elseif util.is_this_model_a_blimp(vmodel) then
                 notify("Better Blimps have been enabled for: "..vname)
-                trigger_commands("gravitymult 1")
-                trigger_commands("betterheli")
-                trigger_commands("helithrust 2.3")
+                trigger_commands("gravitymult 1; helithrust 2.3; betterheli")
             else
                 notify("Not a Vehicle suitable for the Better Vehicle Settings :/\nCurrent Vehicle: "..vname)
-                trigger_commands("gravitymult 2")
-                trigger_commands("fovfpinveh -5")
+                trigger_commands("gravitymult 2; fovfpinveh -5")
             end
         end)
 
@@ -2844,7 +2813,7 @@ local function player(pid)
         0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
         0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239, 0x03506E1C, 0x0D887E44,
         0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
-        0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0,
+        0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B,
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -2852,7 +2821,7 @@ local function player(pid)
     for idiots as rid do
         if players.get_rockstar_id(pid) == rid and players.are_stats_ready(pid) and not util.is_session_transition_active() then
             local msg = "An Idiot was detected in your Lobby. Kicking Player Now."
-            notify(msg); log(msg)
+            notify(msg)
             trigger_commands("historyblock"..players.get_name(pid).." on")
             wait(500)
             trigger_commands("kick "..players.get_name(pid))
@@ -3539,9 +3508,9 @@ local function player(pid)
                 wait(100)
                 trigger_commands("historyblock"..players.get_name(pid).." on")
                 if not dev_vers then
-                    log("[Lena | Ban Block] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
+                    log("[Lena | Block Kick] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
                 else
-                    log("[Lena | Ban Block] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked and Blocked.")
+                    log("[Lena | Block Kick] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked and Blocked.")
                 end
                 trigger_commands("kick"..players.get_name(pid))
             end
