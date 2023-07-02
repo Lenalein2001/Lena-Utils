@@ -1,6 +1,6 @@
 json = require "pretty.json"
 local self = {}
-self.version = 29.51
+self.version = 5.5
 
 Config = {
 	controls = {
@@ -27,8 +27,6 @@ Config = {
 	},
 	handlingAutoload = {}
 }
-
----@alias HudColour integer
 
 HudColour =
 {
@@ -71,16 +69,15 @@ notification =
 {
 	txdDict = "DIA_ZOMBIE1",
 	txdName = "DIA_ZOMBIE1",
-	title = "WiriScript",
+	title = "Lena Utils",
 	subtitle = "~c~" .. util.get_label_text("PM_PANE_FEE") .. "~s~",
 	defaultColour = HudColour.black
 }
 
----@param msg string
 function notification.stand(msg)
 	assert(type(msg) == "string", "msg must be a string, got " .. type(msg))
 	msg = msg:gsub('~[%w_]-~', ""):gsub('<C>(.-)</C>', '%1')
-	util.toast("[WiriScript] " .. msg)
+	util.toast("[Lena] " .. msg)
 end
 
 function notification:help(format, colour, ...)
