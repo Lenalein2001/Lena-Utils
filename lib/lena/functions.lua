@@ -1,6 +1,6 @@
 json = require "pretty.json"
 local self = {}
-self.version = 27
+self.version = 29.51
 
 Config = {
 	controls = {
@@ -27,6 +27,8 @@ Config = {
 	},
 	handlingAutoload = {}
 }
+
+---@alias HudColour integer
 
 HudColour =
 {
@@ -69,15 +71,16 @@ notification =
 {
 	txdDict = "DIA_ZOMBIE1",
 	txdName = "DIA_ZOMBIE1",
-	title = "Lena Utils",
+	title = "WiriScript",
 	subtitle = "~c~" .. util.get_label_text("PM_PANE_FEE") .. "~s~",
 	defaultColour = HudColour.black
 }
 
+---@param msg string
 function notification.stand(msg)
 	assert(type(msg) == "string", "msg must be a string, got " .. type(msg))
 	msg = msg:gsub('~[%w_]-~', ""):gsub('<C>(.-)</C>', '%1')
-	util.toast("[Lena] " .. msg)
+	util.toast("[WiriScript] " .. msg)
 end
 
 function notification:help(format, colour, ...)
@@ -108,10 +111,95 @@ function notification:normal(format, colour, ...)
 end
 
 --------------------------
+-- MENU
+--------------------------
+
+Features = {}
+Translation = {}
+
+function translate(section, name)
+	Features[section] = Features[section] or {}
+	Features[section][name] = Features[section][name] or ""
+	if Config.general.language == "english" then
+		return name
+	end
+	Translation[section] = Translation[section] or Features[section]
+	if not Translation[section][name] then
+		Translation[section][name] = ""
+		return name
+	end
+	if Translation[section][name] == "" then
+		return name
+	end
+	return Translation[section][name]
+end
+
+function type_match (value, e)
+	local t = type(value)
+	for w in e:gmatch('[^|]+') do
+		if t == w then return true end
+	end
+	local msg = "must be %s, got %s"
+	return false, msg:format(e:gsub('|', " or "), t)
+end
+
+local check_table_types = function (tbl, types)
+	if type(tbl) ~= "table" then
+		return false, "tbl must be a tble"
+	end
+	for key, value in pairs(tbl) do
+		local ok, errmsg = type_match(key, types[1])
+		if not ok then return false, "field " .. key .. ' ' .. errmsg end
+
+		local ok, errmsg = type_match(value, types[2])
+		if not ok then return false, "field " .. key .. ' ' .. errmsg end
+	end
+	return true
+end
+
+function is_translation_valid (obj)
+	for sect_name, section in pairs(obj) do
+		if type(sect_name) ~= "string" then
+			return false, "got unexpected key type: " .. type(sect_name)
+		end
+
+		if type(section) ~= "table" then
+			return false, "field " .. sect_name .. " must be a table, got " .. type(section)
+		end
+
+		local ok, err = check_table_types(section, {"string", "string"})
+		if not ok then return false, err end
+	end
+	return true
+end
+
+function load_translation(language)
+	local path = filesystem.scripts_dir() .. "WiriScript\\language\\" .. language
+	if not filesystem.exists(path) then
+		return false, "no such a file"
+	end
+
+	local ok, result = json.parse(path, false)
+	if not ok then
+		return false, result
+	end
+
+	local ok, errmsg = is_translation_valid(result)
+	if not ok then
+		return false, errmsg
+	end
+
+	Translation = result
+	util.log("Translation file successfully loaded: %s", language)
+	return true
+end
+
+--------------------------
 -- FILE
 --------------------------
 
 Ini = {}
+
 function Ini.save(fileName, obj)
 	local file <close> = assert(io.open(fileName, "w"), "error loading file")
 	local s = {}
@@ -153,8 +241,8 @@ function Ini.load(fileName)
 	return data
 end
 
-local parseJson = json.parse
 
+local parseJson = json.parse
 json.parse = function (filePath, withoutNull)
 	local file <close> = assert(io.open(filePath, "r"), filePath .. " does not exist")
 	local content = file:read("a")
@@ -186,7 +274,6 @@ end
 
 Sound = {Id = -1, name = "", reference = ""}
 Sound.__index = Sound
-
 function Sound.new(name, reference)
 	local inst = setmetatable({}, Sound)
 	inst.name = name
@@ -288,6 +375,7 @@ end
 
 Instructional = {scaleform = 0}
 
+---@return boolean
 function Instructional:begin ()
 	if GRAPHICS.HAS_SCALEFORM_MOVIE_LOADED(self.scaleform) then
 		GRAPHICS.BEGIN_SCALEFORM_MOVIE_METHOD(self.scaleform, "CLEAR_ALL")
@@ -340,6 +428,7 @@ function Instructional:set_background_colour(r, g, b, a)
 	GRAPHICS.SCALEFORM_MOVIE_METHOD_ADD_PARAM_INT(a)
 	GRAPHICS.END_SCALEFORM_MOVIE_METHOD()
 end
+
 
 function Instructional:draw ()
 	GRAPHICS.BEGIN_SCALEFORM_MOVIE_METHOD(self.scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
@@ -448,6 +537,27 @@ function set_blip_name(blip, name, isLabel)
 	HUD.END_TEXT_COMMAND_SET_BLIP_NAME(blip)
 end
 
+function request_control_once(entity)
+	if not NETWORK.NETWORK_IS_IN_SESSION() then
+		return true
+	end
+	local netId = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(entity)
+	NETWORK.SET_NETWORK_ID_CAN_MIGRATE(netId, true)
+	return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
+end
+
+function request_control(entity, timeOut)
+	if not ENTITY.DOES_ENTITY_EXIST(entity) then
+		return false
+	end
+	timeOut = timeOut or 500
+	local start = newTimer()
+	while not request_control_once(entity) and start.elapsed() < timeOut do
+		util.yield_once()
+	end
+	return start.elapsed() < timeOut
+end
+
 function get_ped_nearby_peds(ped, maxPeds, ignore)
 	maxPeds = maxPeds or 16
 	local pEntityList = memory.alloc((maxPeds + 1) * 8)
@@ -489,6 +599,16 @@ function get_peds_in_player_range(player, radius)
 		end
 	end
 	return peds
+end
+
+function get_vehicles_in_player_range(player, radius)
+	local vehicles = {}
+	local pos = players.get_position(player)
+	for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
+		local vehPos = ENTITY.GET_ENTITY_COORDS(vehicle, true)
+		if pos:distance(vehPos) <= radius then table.insert(vehicles, vehicle) end
+	end
+	return vehicles
 end
 
 function get_entities_in_player_range(pId, radius)
@@ -568,6 +688,8 @@ function is_decor_flag_set(entity, flag)
 	return false
 end
 
+
+---@param entity Entity
 function remove_decor(entity)
 	DECORATOR.DECOR_REMOVE(entity, "Casino_Game_Info_Decorator")
 end
@@ -654,6 +776,22 @@ end
 function get_entity_owner(entity)
 	local net_obj = get_net_obj(entity)
 	return net_obj ~= NULL and memory.read_byte(net_obj + 0x49) or -1
+end
+
+function is_player_passive(player)
+	if player ~= players.user() then
+		local address = memory.script_global(1894573 + (player * 608 + 1) + 8)
+		if address ~= NULL then return memory.read_byte(address) == 1 end
+	else
+		local address = memory.script_global(1574582)
+		if address ~= NULL then return memory.read_int(address) == 1 end
+	end
+	return false
+end
+
+function is_player_in_any_interior(player)
+	local address = memory.script_global(2657589 + (player * 466 + 1) + 245)
+	return address ~= NULL and memory.read_int(address) ~= 0
 end
 
 function is_player_in_interior(player)
@@ -756,6 +894,18 @@ function get_player_org_blip_colour(player)
 	return 0
 end
 
+function get_condensed_player_name(player)
+	local condensed = "<C>" .. PLAYER.GET_PLAYER_NAME(player) .. "</C>"
+
+	if players.get_boss(player) ~= -1  then
+		local colour = players.get_org_colour(player)
+		local hudColour = get_hud_colour_from_org_colour(colour)
+		return string.format("~HC_%d~%s~s~", hudColour, condensed)
+	end
+
+	return condensed
+end
+
 function is_player_active(player, isPlaying, inTransition)
 	if player == -1 or
 	not NETWORK.NETWORK_IS_PLAYER_ACTIVE(player) then
@@ -765,11 +915,12 @@ function is_player_active(player, isPlaying, inTransition)
 		return false
 	end
 	if inTransition and
-	read_global.int(2657589 + (player * 466 + 1)) ~= 4 then
+	read_global.int(2657704 + (player * 463 + 1)) ~= 4 then -- func_21 build 2944
 		return false
 	end
 	return true
 end
+
 
 --------------------------
 -- CAM
@@ -846,6 +997,7 @@ function request_weapon_asset(hash)
 	while not WEAPON.HAS_WEAPON_ASSET_LOADED(hash) do util.yield_once() end
 end
 
+---Credits to aaron
 function request_streamed_texture_dict(textureDict)
 	util.spoof_script("main_persistent", function()
 		GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(textureDict, false)
@@ -923,7 +1075,6 @@ read_global = {
 }
 
 HudTimer = {}
-
 HudTimer.SetHeightMultThisFrame = function (mult)
 	write_global.int(1655472 + 1163, mult)
 end
@@ -949,7 +1100,6 @@ function DisablePhone()
     write_global.int(20366, 1)
 end
 
-
 function is_phone_open()
 	if SCRIPT.GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(util.joaat("cellphone_flashhand")) > 0 then
 		return true
@@ -957,18 +1107,25 @@ function is_phone_open()
 	return false
 end
 
+---@param name string
+---@param pattern string
+---@param callback fun(address: integer)
 function memory_scan(name, pattern, callback)
 	local address = memory.scan(pattern)
 
 	if address == NULL then error("Failed to find " .. name) end
 
 	callback(address)
+	util.log("Found %s", name)
 end
 
 --------------------------
 -- TABLE
 --------------------------
 
+---Returns a random value from the given table.
+---@param t table
+---@return any
 function table.random(t)
 	if rawget(t, 1) ~= nil then
 		return t[ math.random(#t) ]
@@ -1026,10 +1183,12 @@ end
 -- MISC
 --------------------------
 
+---Credits to Sainan
 function int_to_uint(int)
     if int >= 0 then return int end
     return (1 << 32) + int
 end
+
 
 function interpolate(y0, y1, perc)
 	perc = perc > 1.0 and 1.0 or perc
@@ -1110,14 +1269,12 @@ function draw_marker(type, pos, scale, colour, textureDict, textureName)
 	)
 end
 
-local orgLog = util.log
 
----@param format string
----@param ... any
---[[util.log = function (format, ...)
+local orgLog = util.log
+util.log = function (format, ...)
 	local strg = type(format) ~= "string" and tostring(format) or format:format(...)
-	orgLog("[Lena] " .. strg)
-end]]
+	orgLog("" .. strg)
+end
 
 function draw_debug_text(...)
 	local arg = {...}

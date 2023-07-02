@@ -213,16 +213,16 @@ function BitTest(bits, place)
     return (bits & (1 << place)) ~= 0
 end
 
-function IsPlayerUsingOrbitalCannon(player)
-    return BitTest(memory.read_int(memory.script_global((2657704 + (player * 463 + 1) + 424))), 0) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_424 -- Global_2657589[PLAYER::PLAYER_ID() /*466*/].f_427), 0
+function IS_PLAYER_USING_ORBITAL_CANNON(player)
+    return BitTest(memory.read_int(memory.script_global((2657704 + (player * 463 + 1) + 424))), 0) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_424
 end
 
-function get_spawn_state(pid)
-    return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 232)) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_232 -- Global_2657589[PLAYER::PLAYER_ID() /*466*/].f_232
+function GET_SPAWN_STATE(pid)
+    return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 232)) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_232
 end
 
-function get_interior_player_is_in(pid)
-    return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 245)) -- Global_2657704[bVar0 /*463*/].f_245 -- Global_2657589[bVar0 /*466*/].f_245
+function GET_INTERIOR_FROM_PLAYER(pid)
+    return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 245)) -- Global_2657704[bVar0 /*463*/].f_245
 end
 
 function IsDetectionPresent(pid, detection)
@@ -518,10 +518,20 @@ function on_math_message(sender, reserved, text, team_chat, networked, is_auto)
         if result then
             chat.send_message("That expression evaluates to " .. tostring(result) .. ". :)", false, true, true)
         else
-            chat.send_message("Sorry, I couldn't evaluate that expression", false, true, true)
+            chat.send_message("Sorry, I couldn't evaluate that expression :/", false, true, true)
             log("[Lena | Math] Error trying to evaluate an expression. Error: "..error_message)
         end
     end
+end
+
+function get_modder_int()
+    local modderCount = 0
+    for players.list() as pid do
+        if players.is_marked_as_modder(pid) then
+            modderCount = modderCount + 1
+        end
+    end
+    return modderCount
 end
 
 function get_vehicles_in_player_range(player, radius)
@@ -672,29 +682,36 @@ function AmmoSpeed:reset()
 end
 
 -- Drone and TV Detection
-function isPlayerFlyingAnyDrone(player)
-    return BitTest(memory.read_int(memory.script_global(1853988 + (player * 867 + 1) + 267 + 366)), 26) -- Global_1853988[PLAYER::PLAYER_ID() /*867*/].f_267.f_366, 26)
+local function isPlayerFlyingAnyDrone(player)
+	local address = memory.script_global(1853988 + (player * 867 + 1) + 267 + 365)
+	return BitTest(memory.read_int(address), 26)
 end
 
-function getDroneType(player)
+local function getDroneType(player)
 	local p_type = memory.script_global(1914091 + (player * 297 + 1) + 97)
 	return memory.read_int(p_type)
 end
 
-function getPlayerDroneObject(player)
+local function getPlayerDroneObject(player)
 	local p_object = memory.script_global(1914091 + (players.user() * 297 + 1) + 64 + (player + 1))
 	return memory.read_int(p_object)
 end
 
-function invertHeading(heading)
-    if heading > 180.0 then
-        return heading - 180.0
-    end
-    return heading + 180.0
+local function invertHeading(heading)
+	if heading > 180.0 then
+		return heading - 180.0
+	end
+	return heading + 180.0
 end
 
-function getDroneBlipSprite(droneType)
-    return (droneType == 8 or droneType == 4) and 548 or 627
+local function getDroneBlipSprite(droneType)
+	return (droneType == 8 or droneType == 4) and 548 or 627
+end
+
+function removeBlipIndex(index)
+	if HUD.DOES_BLIP_EXIST(blips[index]) then
+		util.remove_blip(blips[index]); blips[index] = 0
+	end
 end
 
 function getNotificationMsg(droneType, nearby)
@@ -704,58 +721,53 @@ function getNotificationMsg(droneType, nearby)
     return nearby and "%s's drone is ~r~nearby~s~." or "%s is flying a drone."
 end
 
-function removeBlipIndex(index)
-    if HUD.DOES_BLIP_EXIST(blips[index]) then
-        util.remove_blip(blips[index]); blips[index] = 0
-    end
-end
-
 function addBlipForPlayerDrone(player)
-    if not blips[player] then
-        blips[player] = 0
-    end
-    if is_player_active(player, true, true) and players.user() ~= player and isPlayerFlyingAnyDrone(player) then
-        if ENTITY.DOES_ENTITY_EXIST(getPlayerDroneObject(player)) then
-            local obj = getPlayerDroneObject(player)
-            local pos = ENTITY.GET_ENTITY_COORDS(obj, true)
-            local heading = invertHeading(ENTITY.GET_ENTITY_HEADING(obj))
+	if not blips[player] then
+		blips[player] = 0
+	end
 
-            if not HUD.DOES_BLIP_EXIST(blips[player]) then
-                blips[player] = HUD.ADD_BLIP_FOR_ENTITY(obj)
-                local sprite = getDroneBlipSprite(getDroneType(player))
-                HUD.SET_BLIP_SPRITE(blips[player], sprite)
-                HUD.SHOW_HEIGHT_ON_BLIP(blips[player], false)
-                HUD.SET_BLIP_SCALE(blips[player], 0.8)
-                HUD.SET_BLIP_NAME_TO_PLAYER_NAME(blips[player], player)
-                HUD.SET_BLIP_COLOUR(blips[player], get_player_org_blip_colour(player))
+	if is_player_active(player, true, true) and isPlayerFlyingAnyDrone(player) then
+		if ENTITY.DOES_ENTITY_EXIST(getPlayerDroneObject(player)) then
+			local obj = getPlayerDroneObject(player)
+			local pos = ENTITY.GET_ENTITY_COORDS(obj, true)
+			local heading = invertHeading(ENTITY.GET_ENTITY_HEADING(obj))
 
-            else
-                HUD.SET_BLIP_DISPLAY(blips[player], 2)
-                HUD.SET_BLIP_COORDS(blips[player], pos.x, pos.y, pos.z)
-                HUD.SET_BLIP_ROTATION(blips[player], math.ceil(heading))
-                HUD.SET_BLIP_PRIORITY(blips[player], 9)
-            end
+			if not HUD.DOES_BLIP_EXIST(blips[player]) then
+				blips[player] = HUD.ADD_BLIP_FOR_ENTITY(obj)
+				local sprite = getDroneBlipSprite(getDroneType(player))
+				HUD.SET_BLIP_SPRITE(blips[player], sprite)
+				HUD.SHOW_HEIGHT_ON_BLIP(blips[player], false)
+				HUD.SET_BLIP_SCALE(blips[player], 0.8)
+				HUD.SET_BLIP_NAME_TO_PLAYER_NAME(blips[player], player)
+				HUD.SET_BLIP_COLOUR(blips[player], get_player_org_blip_colour(player))
 
-            if not BitTest(nearbyNotificationBits, player) and HUD.DOES_BLIP_EXIST(blips[player]) then
-                local msg = getNotificationMsg(getDroneType(player), true)
-                notification:normal(msg, HudColour.purpleDark, get_condensed_player_name(player))
-                nearbyNotificationBits = SetBit(nearbyNotificationBits, player)
-            end
+			else
+				HUD.SET_BLIP_DISPLAY(blips[player], 2)
+				HUD.SET_BLIP_COORDS(blips[player], pos.x, pos.y, pos.z)
+				HUD.SET_BLIP_ROTATION(blips[player], math.ceil(heading))
+				HUD.SET_BLIP_PRIORITY(blips[player], 9)
+			end
 
-        else
-            removeBlipIndex(player)
-            nearbyNotificationBits = ClearBit(nearbyNotificationBits, player)
-        end
+			if not BitTest(nearbyNotificationBits, player) and HUD.DOES_BLIP_EXIST(blips[player]) then
+				local msg = getNotificationMsg(getDroneType(player), true)
+				notification:normal(msg, HudColour.purpleDark, get_condensed_player_name(player))
+				nearbyNotificationBits = SetBit(nearbyNotificationBits, player)
+			end
 
-        if not BitTest(notificationBits, player) then
-            local msg = getNotificationMsg(getDroneType(player), false)
-            notification:normal(msg, HudColour.purpleDark, get_condensed_player_name(player))
-            notificationBits = SetBit(notificationBits, player)
-        end
+		else
+			removeBlipIndex(player)
+			nearbyNotificationBits = ClearBit(nearbyNotificationBits, player)
+		end
 
-    else
-        removeBlipIndex(player)
-        notificationBits = ClearBit(notificationBits, player)
-        nearbyNotificationBits = ClearBit(nearbyNotificationBits, player)
-    end
+		if not BitTest(notificationBits, player) then
+			local msg = getNotificationMsg(getDroneType(player), false)
+			notification:normal(msg, HudColour.purpleDark, get_condensed_player_name(player))
+			notificationBits = SetBit(notificationBits, player)
+		end
+
+	else
+		removeBlipIndex(player)
+		notificationBits = ClearBit(notificationBits, player)
+		nearbyNotificationBits = ClearBit(nearbyNotificationBits, player)
+	end
 end
