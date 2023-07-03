@@ -391,6 +391,25 @@ function BlockSyncs(pid, callback)
     end
 end
 
+function address_from_pointer_chain(address, offsets)
+    local addr = address
+    for k = 1, (#offsets - 1) do
+        addr = memory.read_long(addr + offsets[k])
+        if addr == 0 then
+            return 0
+        end
+    end
+    addr += offsets[#offsets]
+    return addr
+end
+function getWeaponHash(ped)
+    local wpn_ptr = memory.alloc_int()
+    if WEAPON.GET_CURRENT_PED_VEHICLE_WEAPON(ped, wpn_ptr) then -- only returns true if the weapon is a vehicle weapon
+        return memory.read_int(wpn_ptr), true
+    end
+    return WEAPON.GET_SELECTED_PED_WEAPON(ped), false
+end
+
 function decimalToHex2s(decimal, numBits)
     local hex = ""
     local hexDigits = "0123456789ABCDEF"

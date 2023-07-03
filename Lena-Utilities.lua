@@ -820,10 +820,10 @@ end)
         menu.toggle_loop(doorcontrol, "Tase Players trying to Enter", {""}, "", function()
             if util.is_session_transition_active() then return end
             if player_cur_car == nil then return end
-            for players.exept(true) as pid do
+            for players.list_except() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local pos = players.get_position(pid)
-                if VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_Ped() and PED.GET_VEHICLE_PED_IS_TRYING_TO_ENTER(ped) == player_cur_car then
+                if VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() and PED.GET_VEHICLE_PED_IS_TRYING_TO_ENTER(ped) == player_cur_car then
                     MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(pos, pos, 1, true, joaat("WEAPON_STUNGUN"), players.user(), true, false, 10000)
                 end
             end
@@ -1965,11 +1965,11 @@ end)
     -------------------------------------
 
     menu.toggle_loop(missions_tunables, "Skip Casino Hacking Process", {""}, "Works on Fingerprint and Keypad.", function()
-        if GET_INT_LOCAL("fm_mission_controller", 52899) ~= 1 then -- func_13586(&Local_52962, &(Local_52897[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
-            SET_INT_LOCAL("fm_mission_controller", 52899, 5)
+        if GET_INT_LOCAL("fm_mission_controller", 52964) ~= 1 then -- func_13586(&Local_52962, &(Local_52897[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
+            SET_INT_LOCAL("fm_mission_controller", 52964, 5)
         end
-        if GET_INT_LOCAL("fm_mission_controller", 53961) ~= 1 then -- func_13588(&Local_54024, &(Local_53959[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
-            SET_INT_LOCAL("fm_mission_controller", 53961, 5)
+        if GET_INT_LOCAL("fm_mission_controller", 54026) ~= 1 then -- func_13588(&Local_54024, &(Local_53959[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
+            SET_INT_LOCAL("fm_mission_controller", 54026, 5)
         end
     end)
 
@@ -2692,21 +2692,35 @@ for s_developer as developer do
             notify("Old / New: "..oldmass.." / "..newmass)
         end)
 
-        menu.action(sdebug, "Test", {"test"}, "", function()
-            local filepath = lenaDir.. "All Weapons.txt"
-            local file = io.open(filepath, "w")
-            local weapons = util.get_weapons()
-            file:write("return {\n")
-            for i, weapon in ipairs(weapons) do
-                file:write("\t{\n")
-                file:write(string.format("\t\t%s = %d,\n", "hash", weapon.hash))
-                file:write(string.format("\t\t%s = '%s',\n", "label_key", weapon.label_key))
-                file:write(string.format("\t\t%s = '%s',\n", "category", weapon.category))
-                file:write(string.format("\t\t%s = %d,\n", "category_id", weapon.category_id))
-                file:write("\t},\n")
+        local modifiedRange = {}
+        menu.toggle_loop(sdebug, "Increase Weapon Range", {""}, "", function()
+            if util.is_session_transition_active() then return end
+            if players.is_in_interior(players.user()) then return end
+            local user = players.user_ped()
+            local weaponHash, vehicleWeapon = getWeaponHash(user)
+            if modifiedRange[weaponHash] then return end
+            local pointer = (vehicleWeapon and 0x70 or 0x20)
+            local PedPointer = entities.handle_to_pointer(user)
+            modifiedRange[weaponHash] = {
+                minAddress   = address_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x178}),
+                maxAddress   = address_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}),
+                rangeAddress = address_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}),
+            }
+                
+            modifiedRange[weaponHash].originalMin   = memory.read_float(modifiedRange[weaponHash].minAddress)
+            modifiedRange[weaponHash].originalMax   = memory.read_float(modifiedRange[weaponHash].maxAddress)
+            modifiedRange[weaponHash].originalRange = memory.read_float(modifiedRange[weaponHash].rangeAddress)
+        
+            memory.write_float(modifiedRange[weaponHash].minAddress,   10000)
+            memory.write_float(modifiedRange[weaponHash].maxAddress,   10000)
+            memory.write_float(modifiedRange[weaponHash].rangeAddress, 10000)
+        end, function()
+            for hash, _ in pairs(modifiedRange) do
+                memory.write_float(modifiedRange[hash].minAddress, modifiedRange[hash].originalMin)
+                memory.write_float(modifiedRange[hash].maxAddress, modifiedRange[hash].originalMax)
+                memory.write_float(modifiedRange[hash].rangeAddress, modifiedRange[hash].originalRange)
+                modifiedRange[hash] = nil
             end
-            file:write("}\n")
-            file:close()
         end)
 
         -------------------------------------
@@ -2723,7 +2737,7 @@ for s_developer as developer do
 
             menu.action(nativehud, "Get Warning Screen hash.", {""}, "", function()
                 local hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
-                log("[Lena | Debug] Warning Screen hash: "..hash)
+                log($"[Lena | Debug] Warning Screen hash: {hash}")
             end)
 
             -------------------------------------
