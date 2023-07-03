@@ -93,7 +93,6 @@ local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
 local weapon_reactions = menu.list(reactions, "Weapon Reactions", {""}, "")
 local spoofing_opt = menu.list(online, "Spoofing", {""}, "")
 -- Tunables
-local multipliers = menu.list(tunables, "Multipliers", {""}, "")
 local sell_stuff = menu.list(tunables, "Selling", {""}, "Shit's broken")
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 -- Misc
