@@ -1027,16 +1027,6 @@ end
 -- MEMORY
 --------------------------
 
-function addr_from_pointer_chain(addr, offsets)
-	if addr == 0 then return 0 end
-	for k = 1, (#offsets - 1) do
-		addr = memory.read_long(addr + offsets[k])
-		if addr == 0 then return 0 end
-	end
-	addr = addr + offsets[#offsets]
-	return addr
-end
-
 write_global = {
 	byte = function(global, value)
 		local address = memory.script_global(global)

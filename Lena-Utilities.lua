@@ -617,9 +617,8 @@ end)
     -- Max Lockon Range
     -------------------------------------    
 
-    menu.toggle_loop(weap, "Max Lockon Range", {""}, "Sets your players lockon range with homing missles and auto aim to the max.", function()
-        PLAYER.SET_PLAYER_LOCKON_RANGE_OVERRIDE(players.user(), 99999999)
-    end)
+    -- menu.toggle_loop(weap, "Max Lockon Range", {""}, "Sets your players lockon range with homing missles and auto aim to the max.", function()
+    -- end)
 
     -------------------------------------
     -- Unfair Triggerbot
@@ -1003,6 +1002,13 @@ end)
         end
     end)
 
+    menu.toggle_loop(vehicle, "Keep Vehicle Clean", {""}, "", function()
+        if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1 and entities.get_owner(player_cur_car) == players.user() then
+            VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0)
+            notify("Vehicle Cleaned")
+        end
+    end)
+
 -------------------------------------
 -------------------------------------
 -- Online
@@ -1361,15 +1367,17 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Thunder Join", {""}, "Detects if someone is using thunder join.", function()
-            for players.list() as pid do
-                if GET_SPAWN_STATE(players.user()) == 0 then return end
+            for players.list_except(true) as pid do
+                if util.is_session_transition_active() then return end
                 local old_sh = players.get_script_host()
-                wait(100)
+                util.yield(100)
                 local new_sh = players.get_script_host()
                 if old_sh != new_sh then
                     if GET_SPAWN_STATE(pid) == 0 and players.get_script_host() == pid then
                         if not IsDetectionPresent(pid, "Thunder Join") then
-                            players.add_detection(pid, "Thunder Join", 7)
+                            players.add_detection(pid, "Thunder Join", TOAST_DEFAULT, 100)
+                            notify(players.get_name(pid) .. " just broke the session. :/")
+                            break
                         end
                     end
                 end
@@ -1757,7 +1765,7 @@ end)
                     trigger_commands($"savep {pname}")
                     notify($"{pname} has been Kicked for attacking you.")
                     if dev_vers then
-                        log($"[Lena | Kick Attackers] ({pname} / {rid} / {hex}) has attacked you and got Kicked.")
+                        log($"[Lena | Kick Attackers] {pname} ({rid} / {hex}) has attacked you and got Kicked.")
                     end
                     trigger_commands($"kick {pname}")
                     wait(30000)
@@ -2460,6 +2468,7 @@ end)
 -------------------------------------
 -------------------------------------
 -- AI Made Actions
+-- Note that this is not fully made by ChatGPT. I still had to debug shitty code.
 -------------------------------------
 -------------------------------------
 
@@ -2498,7 +2507,6 @@ end)
     -- Remove Bounty
     -------------------------------------
 
-    -- Note that this is not fully made by ChatGPT. I still had to debug shitty code.
     menu.toggle_loop(ai_made, "Remove Bounty", {"remove_bounty"}, "Automatically remove bounties.", function()
         local user = players.user()
         local has_bounty = players.get_bounty(user)
@@ -2678,18 +2686,8 @@ for s_developer as developer do
         end)
 
         -------------------------------------
-        -- Get Mass
+        -- Increase Weapon Range
         -------------------------------------
-
-        menu.action(sdebug, "Get and Set Mass", {""}, "", function()
-            local mass = menu.ref_by_path("Vehicle>Movement>Handling Editor>Car>IncreasedRammingForceScale")
-            local oldmass = mass.value / 100000
-            wait(1000)
-            trigger_command(mass, oldmass + 1)
-            wait(1000)
-            local newmass = mass.value / 100000
-            notify("Old / New: "..oldmass.." / "..newmass)
-        end)
 
         local modifiedRange = {}
         menu.toggle_loop(sdebug, "Increase Weapon Range", {""}, "", function()
@@ -2701,9 +2699,9 @@ for s_developer as developer do
             local pointer = (vehicleWeapon and 0x70 or 0x20)
             local PedPointer = entities.handle_to_pointer(user)
             modifiedRange[weaponHash] = {
-                minAddress   = address_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x178}),
-                maxAddress   = address_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}),
-                rangeAddress = address_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}),
+                minAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x178}),
+                maxAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}),
+                rangeAddress = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}),
             }
                 
             modifiedRange[weaponHash].originalMin   = memory.read_float(modifiedRange[weaponHash].minAddress)
@@ -2797,7 +2795,7 @@ local function player(pid)
         0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239, 0x03506E1C, 0x0D887E44,
         0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
-        0x0C080BB7,
+        0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC,
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
