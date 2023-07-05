@@ -1254,24 +1254,6 @@ end)
         end)
 
         -------------------------------------
-        -- Drones & Missiles
-        -------------------------------------
-
-        menu.toggle_loop(detections, "Missile and Drone Detection", {""}, "Drone and Missile Detection.", function()
-            if not util.is_session_transition_active() then
-                if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-                    for player = 0, 32 do addBlipForPlayerDrone(player) end
-                end
-            end
-            end, function()
-                for blips as i do
-                    removeBlipIndex(i)
-                end
-                notificationBits = 0
-                nearbyNotificationBits = 0
-        end)
-
-        -------------------------------------
         -- Stat Detection
         -------------------------------------
 
