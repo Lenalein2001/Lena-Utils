@@ -60,21 +60,21 @@ util.require_natives(natives_version)
 -------------------------------------
 
 local self = menu.list(menu.my_root(), "Self", {"lenaself"}, "Self Options")
-local vehicle = menu.list(menu.my_root(), "Vehicle", {"lenaveh"}, "Vehicle Options")
+local vehicle = menu.list(menu.my_root(), "Vehicle", {"lenavehicle"}, "Vehicle Options")
 local online = menu.list(menu.my_root(), "Online", {"lenaonline"}, "Online Options")
-local tunables = menu.list(menu.my_root(), "Tunables", {"lenatun"}, "Tunables")
+local tunables = menu.list(menu.my_root(), "Tunables", {"lenatunables"}, "Tunables")
 local misc = menu.list(menu.my_root(), "Misc", {"lenamisc"}, "")
-local ai_made = menu.list(menu.my_root(), "AI Made", {"ai_made"}, "The following options have been generated using ChatGPT, a cutting-edge AI language model.\nI had to make some adjustments, but overall they work great.")
+local ai_made = menu.list(menu.my_root(), "AI Made", {"lenaai"}, "The following options have been generated using ChatGPT, a cutting-edge AI language model.\nI had to make some adjustments, but overall they work great.")
 
 -------------------------------------
 -- Sub Tabs
 -------------------------------------
 
 -- Self
-local anims = menu.list(self, "Animations", {""}, "Some Animations")
-local fast_stuff = menu.list(self, "Fast Stuff", {""}, "Skips certain Animations")
-local weap = menu.list(self, "Weapons", {""}, "Weapon Options")
-local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam")
+local anims = menu.list(self, "Animations", {""}, "Some Animations.")
+local fast_stuff = menu.list(self, "Fast Stuff", {""}, "Skips certain Animations.")
+local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
+local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam.")
 -- Vehicle
 local better_vehicles = menu.list(vehicle, "Better Vehicles", {""}, "")
 local doorcontrol = menu.list(vehicle, "Doors", {""}, "")
@@ -343,7 +343,6 @@ local interiors = {
     {"FIB Top Floor", {x=135.94359, y=-749.4102, z=258.152}},
     {"FIB Floor 47", {x=134.5835, y=-766.486, z=234.152}},
     {"FIB Floor 49", {x=134.635, y=-765.831, z=242.152}},
-    {"Big Fat White Cock", {x=-31.007448, y=6317.047, z=40.04039}},
     {"Strip Club DJ Booth", {x=121.398254, y=-1281.0024, z=29.480522}},
     {"Single Garage", {x=-144.11609, y=-576.5855, z=31.845743}},
     {"FIB Destroyed Floor", {x=158.44386, y=-738.07367, z=246.15218}},
@@ -461,7 +460,7 @@ end)
         -- Fast Vehicle Enter/Exit
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.\n'Lock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.\nLock Outfit seems to break it.", function()
             if (TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 160) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 167) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 165)) and not TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 195) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -471,7 +470,7 @@ end)
         -- Fast Weapon swap
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Hands", {""}, "Swaps your weapons faster.\n'Lock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Hands", {""}, "Swaps your weapons faster.\nLock Outfit seems to break it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 56) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -481,7 +480,7 @@ end)
         -- Fast Reload
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.\n'Lock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.\nLock Outfit seems to break it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 298) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -491,7 +490,7 @@ end)
         -- Fast Mount
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.\n'Lock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.\nLock Outfit seems to break it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 50) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 51) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -624,7 +623,7 @@ end)
     -- Unfair Triggerbot
     -------------------------------------  
 
-    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "", function()
+    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "Slightly worse than Stand's triggerbot.", function()
         local wpn = WEAPON.GET_SELECTED_PED_WEAPON(players.user_ped())
         local dmg = SYSTEM.ROUND(WEAPON.GET_WEAPON_DAMAGE(wpn, 0))
         local delay = WEAPON.GET_WEAPON_TIME_BETWEEN_SHOTS(wpn)
@@ -3794,7 +3793,7 @@ end)
 menu.action(menu.my_root(), "Check for Updates", {""}, "", function()
     auto_update_config.check_interval = 0
     if auto_updater.run_auto_update(auto_update_config) then
-        notify("No updates have been found")
+        notify("No updates have been found.")
     end
 end)
 
