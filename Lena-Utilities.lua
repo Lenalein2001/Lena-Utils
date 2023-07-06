@@ -968,7 +968,7 @@ end)
             if not PED.IS_PED_IN_ANY_VEHICLE(ped) then 
                 continue 
             end
-            if memory.read_byte(entities.handle_to_pointer(veh) + 0xA9E) == 0 then
+            if memory.read_byte(entities.handle_to_pointer(veh) + 0x0A9E) == 0 then
                 VEHICLE.SET_VEHICLE_ALLOW_HOMING_MISSLE_LOCKON(veh, true)
             end
         end
@@ -2154,7 +2154,7 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Grab Script Host", {"sh"}, "Grabs Script Host in a less destructive way.", function()
-            trigger_commands("givesh" .. players.get_name(players.user()))
+            trigger_commands("givesh"..players.get_name(players.user()))
         end)
 
         -------------------------------------
@@ -2162,7 +2162,7 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Really easy Way out", {"kms"}, "Kill yourself.", function()
-            local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped(), false)
+            local pos = players.get_position(players.user())
             FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), pos.x, pos.y, pos.z - 1.0, 5, 1.0, false, false, 1.0)
         end)
 
@@ -2212,16 +2212,6 @@ end)
                 end
             end)
         end
-
-        -------------------------------------
-        -- Yeet
-        -------------------------------------
-
-        menu.action(shortcuts, "Unload", {"ul", "bye"}, "Blocks all Cwashes.", function()
-            log("[Lena | Unload] Lessen has been disabled. The Menu will unload in 3 seconds.")
-            wait(3000)
-            trigger_commands("unload")
-        end)
 
         -------------------------------------
         -- Buy Ammo
@@ -2703,8 +2693,8 @@ if is_developer() then
             local vehicle = PED.GET_VEHICLE_PED_IS_USING(players.user_ped())
             local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
             local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
-            notify("Hash: "..vmodel.."\nName: ".. vname.."\nJoaat: "..modelname.."\nBitset: "..bitset)
-            log("[Lena | Debug] Hash: "..vmodel.." | Name: "..vname.." | Joaat: "..modelname.." | Bitset: "..bitset.." | Plate:".. plate_text.."|")
+            notify("Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
+            log("[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}|")
         end)
         
         menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
@@ -2827,10 +2817,8 @@ local function player(pid)
         -- Summon
         -------------------------------------        
 
-        menu.action(friendly, "TP to Me", {"tptome"}, "Teleports the Player to you.", function()
-            trigger_commands("givesh"..players.get_name(pid))
-            wait(100)
-            trigger_commands("summon"..players.get_name(pid))
+        menu.action(friendly, "TP to Me", {"tptome"}, "Improved \"summon\" Command", function()
+            trigger_commands("givesh"..players.get_name(pid)); wait(100); trigger_commands("summon"..players.get_name(pid))
         end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
@@ -2975,7 +2963,7 @@ local function player(pid)
         -- Launch Player Vehicle
         -------------------------------------
 
-        menu.action_slider(mpvehicle, "Launch Player Vehicle", {""}, "Launches the Player's Vehicle in the Selected direction.", launch_vehicle, function(index, value)
+        menu.action_slider(mpvehicle, "Launch Player Vehicle", {"launch"}, "Launches the Player's Vehicle in the Selected direction.", launch_vehicle, function(index, value)
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
             if not PED.IS_PED_IN_ANY_VEHICLE(ped, false) then
@@ -3001,7 +2989,7 @@ local function player(pid)
                     ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 100000.0, 0.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
                     break
                 end
-        end)
+        end, nil, nil, COMMANDPERM_FRIENDLY)
 
         -------------------------------------
         -- Hurricane
@@ -3017,7 +3005,7 @@ local function player(pid)
                 trigger_command(ram)
                 wait(100)
             end
-        end)
+        end, nil, nil, COMMANDPERM_RUDE)
 
     -------------------------------------
     -------------------------------------
@@ -3053,7 +3041,7 @@ local function player(pid)
                         trapcage(pid, "prop_gold_cont_01", true)
                     end
                 end
-            end)
+            end, nil, nil, COMMANDPERM_RUDE)
 
             -------------------------------------
             -- Small Cage
@@ -3118,7 +3106,7 @@ local function player(pid)
                     end
                 end
                 wait(1000)
-            end)
+            end, nil, nil, COMMANDPERM_RUDE)
 
             -------------------------------------
             -- Delete all Cages
