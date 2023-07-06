@@ -2755,9 +2755,14 @@ local function player(pid)
 
     for idiots as rid do
         if players.get_rockstar_id(pid) == rid and players.are_stats_ready(pid) and not util.is_session_transition_active() then
-            trigger_commands("historyblock"..players.get_name(pid).." on")
-            wait(500)
-            trigger_commands("kick "..players.get_name(pid))
+            if NETWORK.NETWORK_IS_HOST() then
+                trigger_commands("historyblock"..players.get_name(pid).." on")
+                wait(100)
+                trigger_commands("kick "..players.get_name(pid))
+            else
+                trigger_commands("historyblock"..players.get_name(pid).." on")
+                trigger_commands("loveletter"..players.get_name(pid))
+            end
         end
     end
 
