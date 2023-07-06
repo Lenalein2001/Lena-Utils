@@ -141,18 +141,6 @@ local auto_update_config = {
             check_interval=default_check_interval,
         },
         {
-            name="Functions",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/lena/functions.lua",
-            script_relpath="/lib/lena/functions.lua",
-            check_interval=default_check_interval,
-        },
-        {
-            name="Orbital Cannon",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/lena/orbital_cannon.lua",
-            script_relpath="/lib/lena/orbital_cannon.lua",
-            check_interval=default_check_interval,
-        },
-        {
             name="Natives",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/natives-2944a/uno.lua",
             script_relpath="/lib/natives-2944a/uno.lua",
@@ -220,21 +208,12 @@ end
 -- Required Files
 -------------------------------------
 
-local Functions = require "lena.functions"
-local OrbitalCannon = require "lena.orbital_cannon"
 local scaleForm = require("ScaleformLib")
 local funcs = require("lena.funcs")
 
 local scriptdir = filesystem.scripts_dir()
 local lenaDir = scriptdir.."Lena\\"
 local lyrics_dir = lenaDir.."lyrics\\"
-
-if filesystem.exists(filesystem.resources_dir().."lena.ytd") then
-	util.register_file(filesystem.resources_dir().."lena.ytd")
-	notification.txdDict = "lena"
-	notification.txdName = "logo"
-	request_streamed_texture_dict("lena")
-end
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
@@ -3340,20 +3319,6 @@ local function player(pid)
             becomeorb.value = false
         end)
 
-        -------------------------------------
-        -- KILL AS THE ORBITAL CANNON
-        -------------------------------------
-
-        menu.action(customExplosion, "Kill With Orbital Cannon", {"orb"}, "Kills the selected player with the Orbital Cannon. Uses the Interface.", function()
-            if players.is_in_interior(pid) then
-                notify("The player is in an interior.")
-            elseif is_player_passive(pid) then
-                notify("The player is in passive mode.")
-            elseif not OrbitalCannon.exists() and players.exists(pid) then
-                OrbitalCannon.create(pid)
-            end
-        end)
-
         local usingExplosionLoop = false
         menu.slider(customExplosion, "Loop Speed", {"expspeed"}, "", 50, 10000, 1000, 10, function(value)
             local delay = value 
@@ -3815,10 +3780,5 @@ end)
 
 players.on_join(player)
 players.dispatch_on_join()
-
-while true do
-    OrbitalCannon.mainLoop()
-    wait_once()
-end
 
 util.keep_running()
