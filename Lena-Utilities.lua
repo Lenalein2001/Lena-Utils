@@ -3761,7 +3761,6 @@ util.create_tick_handler(function()
 end)
 
 util.on_stop(function()
-	set_streamed_texture_dict_as_no_longer_needed("lena")
     for pid, blip in orbital_blips do 
         util.remove_blip(blip)
     end
