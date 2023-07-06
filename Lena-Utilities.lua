@@ -36,7 +36,7 @@ spawned_cages = {}
 spawned_attackers = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
-natives_version = "natives-1681379138.uno"
+natives_version = "natives-2944a.uno"
 local flare_veh = {788747387, -82626025, 1181327175, -1281684762}
 local anti_explo_sniper = {"Remove Weapon", "Remove Component", "Notify", "Kill", "Kick"}
 local interior_stuff = {0, 233985, 169473, 169729, 169985, 170241, 177665, 177409, 185089, 184833, 184577, 163585, 167425, 167169}
@@ -154,8 +154,8 @@ local auto_update_config = {
         },
         {
             name="Natives",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/natives-1681379138/uno.lua",
-            script_relpath="/lib/natives-1681379138/uno.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/natives-2944a/uno.lua",
+            script_relpath="/lib/natives-2944a/uno.lua",
             check_interval=default_check_interval,
         },
         {
