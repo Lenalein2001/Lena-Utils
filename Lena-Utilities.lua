@@ -2755,7 +2755,6 @@ local function player(pid)
 
     for idiots as rid do
         if players.get_rockstar_id(pid) == rid and players.are_stats_ready(pid) and not util.is_session_transition_active() then
-            notify("An Idiot was detected in your Lobby. Kicking Player Now.")
             trigger_commands("historyblock"..players.get_name(pid).." on")
             wait(500)
             trigger_commands("kick "..players.get_name(pid))
@@ -2764,6 +2763,13 @@ local function player(pid)
 
     menu.divider(menu.player_root(pid), "Lena Utilities")
     local lena = menu.list(menu.player_root(pid), "Lena Utilities", {"lenau"}, "")
+
+    menu.action(lena, "Mark As Modder", {}, "", function()
+        if not IsDetectionPresent(pid, "Manual") then
+            players.add_detection(pid, "Manual", 7, 100)
+        end
+    end)
+
     local friendly = menu.list(lena, "Friendly", {""}, "")
 
     local mpvehicle = menu.list(lena, "Vehicle", {""}, "")
@@ -2783,7 +2789,6 @@ local function player(pid)
     local player_removals = menu.list(lena, "Player Removals", {""}, "")
     local kicks = menu.list(player_removals, "Kicks", {""}, "")
     local crashes = menu.list(player_removals, "Crashes", {""}, "")
-
 
     -------------------------------------
     -------------------------------------
@@ -2862,8 +2867,7 @@ local function player(pid)
         -------------------------------------
 
         menu.action(friendly, "Set Waypoint", {"setwp"}, "", function()
-            local pos = players.get_position(pid)
-            HUD.SET_NEW_WAYPOINT(pos.x, pos.y)
+            HUD.SET_NEW_WAYPOINT(players.get_position(pid))
         end)
 
         -------------------------------------
