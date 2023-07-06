@@ -207,7 +207,6 @@ local auto_update_config = {
 if not dev_vers then
     auto_updater.run_auto_update(auto_update_config)
 end
-
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
     local msg2 = "Please download the file and everything else again from my Github."
@@ -470,7 +469,7 @@ end)
         -- Fast Weapon swap
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Hands", {""}, "Swaps your weapons faster.\nLock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Weapon Switch", {""}, "Swaps your weapons faster.\nLock Outfit seems to break it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 56) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -501,7 +500,7 @@ end)
     -- Friendly AI
     -------------------------------------
 
-    menu.toggle_loop(self, "Friendly AI", {""}, "The AI will ignore you.", function()
+    menu.toggle_loop(self, "Friendly NPCs", {""}, "The NPCs will ignore you.", function()
         PED.SET_PED_RESET_FLAG(players.user_ped(), 124, true)
     end)
 
