@@ -177,12 +177,6 @@ local auto_update_config = {
             check_interval=default_check_interval,
         },
         {
-            name="Texture",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/resources/lena.ytd",
-            script_relpath="/resources/lena.ytd",
-            check_interval=default_check_interval,
-        },
-        {
             name="Labels",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/all_labels.lua",
             script_relpath="/lib/all_labels.lua",
@@ -210,7 +204,6 @@ end
 
 local scaleForm = require("ScaleformLib")
 local funcs = require("lena.funcs")
-
 local scriptdir = filesystem.scripts_dir()
 local lenaDir = scriptdir.."Lena\\"
 local lyrics_dir = lenaDir.."lyrics\\"
@@ -218,15 +211,12 @@ local lyrics_dir = lenaDir.."lyrics\\"
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
 end
-
 if not filesystem.exists(lenaDir.."lyrics") then
 	filesystem.mkdir(lenaDir.."lyrics")
 end
-
 if not filesystem.exists(lenaDir.."Session") then
 	filesystem.mkdir(lenaDir.."Session")
 end
-
 if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
 end
