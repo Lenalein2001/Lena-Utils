@@ -47,7 +47,6 @@ local better_planes = {
     {0x0050, 0.3},
     {0x0054, 1}
 }
-dev_vers = false
 
 -------------------------------------
 -- Natives
@@ -204,9 +203,6 @@ local auto_update_config = {
     }
 }
 
-if not dev_vers then
-    auto_updater.run_auto_update(auto_update_config)
-end
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
     local msg2 = "Please download the file and everything else again from my Github."
@@ -254,6 +250,9 @@ end
 
 if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
+end
+if not is_developer() then
+    auto_updater.run_auto_update(auto_update_config)
 end
 
 -----------------------------------
@@ -1744,7 +1743,7 @@ end)
                     local hex = decimalToHex2s(rid, 32)
                     trigger_commands($"savep {pname}")
                     notify($"{pname} has been Kicked for attacking you.")
-                    if dev_vers then
+                    if is_developer() then
                         log($"[Lena | Kick Attackers] {pname} ({rid} / {hex}) has attacked you and got Kicked.")
                     end
                     trigger_commands($"kick {pname}")
@@ -2183,7 +2182,7 @@ end)
         -- Start a CEO
         ------------------------------------- 
 
-        if dev_vers then
+        if is_developer() then
             menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO.", function()
                 if players.get_boss(players.user()) == -1 then
                     trigger_commands("ceostart")
@@ -2534,201 +2533,197 @@ end)
 -------------------------------------
 -------------------------------------
 
-local s_developer = {3+0x10C69C46/2, 3+0x19C423D4/2, 3+0x18B33334/2, 3+0x1AB46072/2, (3+0x18B33334/2)-128}
+if is_developer() then
+    local sdebug = menu.list(menu.my_root(), "[Debug]", {"lenadebug"}, "")
+    local nativec = menu.list(sdebug, "Native Feedback", {""}, "")
+    local json = require("json")
 
-for s_developer as developer do
-    if dev_vers and players.get_rockstar_id(players.user()) == developer then
-        local sdebug = menu.list(menu.my_root(), "[Debug]", {"lenadebug"}, "")
-        local nativec = menu.list(sdebug, "Native Feedback", {""}, "")
-        local json = require("json")
+    menu.toggle(sdebug, "Math Bot", {"mathbot"}, "Enables the math bot to evaluate math expressions. Usage: @vel <expression>.", function(enabled)
+        math_reply = enabled
+    end)
+    chat.on_message(on_math_message)
 
-        menu.toggle(sdebug, "Math Bot", {"mathbot"}, "Enables the math bot to evaluate math expressions. Usage: @vel <expression>.", function(enabled)
-            math_reply = enabled
-        end)
-        chat.on_message(on_math_message)
-
-        --[[menu.toggle(sdebug, "Chat Relay", {"chatrelay"}, "Enable Discord Webhook", function(enabled)
-            webhook_enabled = enabled
-            -- Check if the webhook URL is valid
-            if webhook_url == "" or nil then
-                notify("Webhook URL is not set.")
-                util.open_folder(lenaDir)
-                trigger_commands("chatrelay off")
+    --[[menu.toggle(sdebug, "Chat Relay", {"chatrelay"}, "Enable Discord Webhook", function(enabled)
+        webhook_enabled = enabled
+        -- Check if the webhook URL is valid
+        if webhook_url == "" or nil then
+            notify("Webhook URL is not set.")
+            util.open_folder(lenaDir)
+            trigger_commands("chatrelay off")
+        else
+            if webhook_enabled then
+                notify("Discord Webhook enabled.")
             else
-                if webhook_enabled then
-                    notify("Discord Webhook enabled.")
-                else
-                    notify("Discord Webhook disabled.")
-                end
+                notify("Discord Webhook disabled.")
             end
-        end)
-        chat.on_message(send_to_discord_webhook)]]
+        end
+    end)
+    chat.on_message(send_to_discord_webhook)]]
 
-        -------------------------------------
-        -- Restart Session Scripts
-        -------------------------------------
+    -------------------------------------
+    -- Restart Session Scripts
+    -------------------------------------
 
-        rss = menu.action(sdebug, "Restart Session Scripts", {"rss"}, "Restarts the freemode.c script.\nThis will remove your weapons for some reason. Kill yourself and you will get them back.", function(click_type)
-            trigger_commands("skiprepeatwar off; commandsskip off")
-            wait(1000)
-            if not util.is_session_transition_active() then
-                if players.get_script_host() == nil and players.get_host() != players.user() then
-                    notify("Session seems to be in a broken State but you are not the Host.")
-                    menu.show_warning(rss, click_type, "Do you want to restart the session? This can fix the session, but also cancel deliveries or current missions for other players.", function()
-                        menu.show_warning(rss, click_type, "Are you Sure? Doing this as a Non-Host might make it even worse.", function()
-                            restartsession()
-                        end, function()
-                            notify("Aborted.")
-                        end, true)
-                    end, function()
-                        notify("Aborted.")
-                    end, true)
-                elseif players.get_script_host() == nil then
-                    notify("Session seems to be in a broken State")
-                    menu.show_warning(rss, click_type, "Do you want to restart the session? This can fix the session, but also cancel deliveries or current missions for other players.", function()
+    rss = menu.action(sdebug, "Restart Session Scripts", {"rss"}, "Restarts the freemode.c script.\nThis will remove your weapons for some reason. Kill yourself and you will get them back.", function(click_type)
+        trigger_commands("skiprepeatwar off; commandsskip off")
+        wait(1000)
+        if not util.is_session_transition_active() then
+            if players.get_script_host() == nil and players.get_host() != players.user() then
+                notify("Session seems to be in a broken State but you are not the Host.")
+                menu.show_warning(rss, click_type, "Do you want to restart the session? This can fix the session, but also cancel deliveries or current missions for other players.", function()
+                    menu.show_warning(rss, click_type, "Are you Sure? Doing this as a Non-Host might make it even worse.", function()
                         restartsession()
                     end, function()
                         notify("Aborted.")
                     end, true)
-                elseif players.get_script_host() != nil and players.get_host() != players.user() then
-                    notify("Session seems to be in a working State but you are not the Host.")
-                    menu.show_warning(rss, click_type, "Do you want to restart the session? This can fix the session, but also cancel deliveries or current missions for other players.", function()
-                        menu.show_warning(rss, click_type, "Are you Sure? Doing this as a Non-Host might make it even worse.", function()
-                            restartsession()
-                        end, function()
-                            notify("Aborted.")
-                        end, true)
-                    end, function()
-                        notify("Aborted.")
-                    end, true)
-                elseif players.get_script_host() != nil then
-                    notify("Session seems to be in a working State")
-                    menu.show_warning(rss, click_type, "The Session seems to be in a fixed state, do you still want to restart it? This can fix the session, but also cancel deliveries or ongoing missions for other players.", function()
+                end, function()
+                    notify("Aborted.")
+                end, true)
+            elseif players.get_script_host() == nil then
+                notify("Session seems to be in a broken State")
+                menu.show_warning(rss, click_type, "Do you want to restart the session? This can fix the session, but also cancel deliveries or current missions for other players.", function()
+                    restartsession()
+                end, function()
+                    notify("Aborted.")
+                end, true)
+            elseif players.get_script_host() != nil and players.get_host() != players.user() then
+                notify("Session seems to be in a working State but you are not the Host.")
+                menu.show_warning(rss, click_type, "Do you want to restart the session? This can fix the session, but also cancel deliveries or current missions for other players.", function()
+                    menu.show_warning(rss, click_type, "Are you Sure? Doing this as a Non-Host might make it even worse.", function()
                         restartsession()
                     end, function()
                         notify("Aborted.")
                     end, true)
-                end
-            else
-                notify("Aborting. You first need to join a Session.")
+                end, function()
+                    notify("Aborted.")
+                end, true)
+            elseif players.get_script_host() != nil then
+                notify("Session seems to be in a working State")
+                menu.show_warning(rss, click_type, "The Session seems to be in a fixed state, do you still want to restart it? This can fix the session, but also cancel deliveries or ongoing missions for other players.", function()
+                    restartsession()
+                end, function()
+                    notify("Aborted.")
+                end, true)
             end
-        end)
+        else
+            notify("Aborting. You first need to join a Session.")
+        end
+    end)
 
-        -------------------------------------
-        -- Easier Better Vehicles
-        -------------------------------------
+    -------------------------------------
+    -- Easier Better Vehicles
+    -------------------------------------
 
-        menu.action(sdebug, "Better Vehicles", {"bv"}, "", function()
-            local vmodel = players.get_vehicle_model(players.user())
-            local vname = util.get_label_text(vmodel)
-            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
-            local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
-            if VEHICLE.IS_THIS_MODEL_A_PLANE(vmodel) then
-                if vmodel == -1700874274 then
-                    trigger_commands("vhengineoffglidemulti 10; vhgeardownliftmult 1")
-                else
-                    for better_planes as offsets do
-                        local handling = offsets[1]
-                        local value = offsets[2]
-                        memory.write_float(CflyingHandling + handling, value)
-                    end
-                end
-                notify("Better Planes have been enabled for: "..vname)
-                trigger_commands("fovfpinveh 90")
-            elseif VEHICLE.IS_THIS_MODEL_A_HELI(vmodel) then
-                for better_heli_offsets as offset do
-                    memory.write_float(CflyingHandling + offset, 0)
-                end
-                trigger_commands("gravitymult 1; helithrust 2.3")
-                notify("Better Helis have been enabled for: "..vname)
-            elseif util.is_this_model_a_blimp(vmodel) then
-                notify("Better Blimps have been enabled for: "..vname)
-                trigger_commands("gravitymult 1; helithrust 2.3; betterheli")
+    menu.action(sdebug, "Better Vehicles", {"bv"}, "", function()
+        local vmodel = players.get_vehicle_model(players.user())
+        local vname = util.get_label_text(vmodel)
+        local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+        local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
+        if VEHICLE.IS_THIS_MODEL_A_PLANE(vmodel) then
+            if vmodel == -1700874274 then
+                trigger_commands("vhengineoffglidemulti 10; vhgeardownliftmult 1")
             else
-                notify("Not a Vehicle suitable for the Better Vehicle Settings :/\nCurrent Vehicle: "..vname)
-                trigger_commands("gravitymult 2; fovfpinveh -5")
+                for better_planes as offsets do
+                    local handling = offsets[1]
+                    local value = offsets[2]
+                    memory.write_float(CflyingHandling + handling, value)
+                end
             end
-        end)
+            notify("Better Planes have been enabled for: "..vname)
+            trigger_commands("fovfpinveh 90")
+        elseif VEHICLE.IS_THIS_MODEL_A_HELI(vmodel) then
+            for better_heli_offsets as offset do
+                memory.write_float(CflyingHandling + offset, 0)
+            end
+            trigger_commands("gravitymult 1; helithrust 2.3")
+            notify("Better Helis have been enabled for: "..vname)
+        elseif util.is_this_model_a_blimp(vmodel) then
+            notify("Better Blimps have been enabled for: "..vname)
+            trigger_commands("gravitymult 1; helithrust 2.3; betterheli")
+        else
+            notify("Not a Vehicle suitable for the Better Vehicle Settings :/\nCurrent Vehicle: "..vname)
+            trigger_commands("gravitymult 2; fovfpinveh -5")
+        end
+    end)
 
-        -------------------------------------
-        -- Increase Weapon Range
-        -------------------------------------
+    -------------------------------------
+    -- Increase Weapon Range
+    -------------------------------------
 
-        local modifiedRange = {}
-        menu.toggle_loop(sdebug, "Increase Weapon Range", {""}, "", function()
-            if util.is_session_transition_active() then return end
-            if players.is_in_interior(players.user()) then return end
-            local user = players.user_ped()
-            local weaponHash, vehicleWeapon = getWeaponHash(user)
-            if modifiedRange[weaponHash] then return end
-            local pointer = (vehicleWeapon and 0x70 or 0x20)
-            local PedPointer = entities.handle_to_pointer(user)
-            modifiedRange[weaponHash] = {
-                minAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x178}),
-                maxAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}),
-                rangeAddress = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}),
-            }
-                
-            modifiedRange[weaponHash].originalMin   = memory.read_float(modifiedRange[weaponHash].minAddress)
-            modifiedRange[weaponHash].originalMax   = memory.read_float(modifiedRange[weaponHash].maxAddress)
-            modifiedRange[weaponHash].originalRange = memory.read_float(modifiedRange[weaponHash].rangeAddress)
-        
-            memory.write_float(modifiedRange[weaponHash].minAddress,   10000)
-            memory.write_float(modifiedRange[weaponHash].maxAddress,   10000)
-            memory.write_float(modifiedRange[weaponHash].rangeAddress, 10000)
-        end)
-
-        -------------------------------------
-        -- Natives
-        -------------------------------------
-
-            local nativehud = menu.list(nativec, "HUD", {""}, "")
-            local nativevehicle = menu.list(nativec, "VEHICLE", {""}, "")
-            local nativeentity = menu.list(nativec, "ENTITY", {""}, "")
-
-            -------------------------------------
-            -- HUD
-            -------------------------------------
-
-            menu.action(nativehud, "Get Warning Screen hash.", {""}, "", function()
-                local hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
-                log($"[Lena | Debug] Warning Screen hash: {hash}")
-            end)
-
-            -------------------------------------
-            -- VEHICLE
-            -------------------------------------
-
-            menu.action(nativevehicle, "Get Vehicle", {""}, "Gets The current Model and Name.", function()
-                local user = players.user()
-                local vname = lang.get_localised(util.get_label_text(players.get_vehicle_model(user)))
-                local vmodel = players.get_vehicle_model(user)
-                local modelname = util.reverse_joaat(vmodel)
-                local vehicle = PED.GET_VEHICLE_PED_IS_USING(players.user_ped())
-                local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
-                local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
-                notify("Hash: "..vmodel.."\nName: ".. vname.."\nJoaat: "..modelname.."\nBitset: "..bitset)
-                log("[Lena | Debug] Hash: "..vmodel.." | Name: "..vname.." | Joaat: "..modelname.." | Bitset: "..bitset.." | Plate:".. plate_text.."|")
-            end)
+    local modifiedRange = {}
+    menu.toggle_loop(sdebug, "Increase Weapon Range", {""}, "", function()
+        if util.is_session_transition_active() then return end
+        if players.is_in_interior(players.user()) then return end
+        local user = players.user_ped()
+        local weaponHash, vehicleWeapon = getWeaponHash(user)
+        if modifiedRange[weaponHash] then return end
+        local pointer = (vehicleWeapon and 0x70 or 0x20)
+        local PedPointer = entities.handle_to_pointer(user)
+        modifiedRange[weaponHash] = {
+            minAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x178}),
+            maxAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}),
+            rangeAddress = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}),
+        }
             
-            menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
-                local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "FATE", "WHORE"}
-                VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle(), plate_texts[math.random(#plate_texts)])
-            end)
+        modifiedRange[weaponHash].originalMin   = memory.read_float(modifiedRange[weaponHash].minAddress)
+        modifiedRange[weaponHash].originalMax   = memory.read_float(modifiedRange[weaponHash].maxAddress)
+        modifiedRange[weaponHash].originalRange = memory.read_float(modifiedRange[weaponHash].rangeAddress)
+    
+        memory.write_float(modifiedRange[weaponHash].minAddress,   10000)
+        memory.write_float(modifiedRange[weaponHash].maxAddress,   10000)
+        memory.write_float(modifiedRange[weaponHash].rangeAddress, 10000)
+    end)
 
-            -------------------------------------
-            -- ENTITY
-            -------------------------------------
+    -------------------------------------
+    -- Natives
+    -------------------------------------
 
-            menu.action(nativeentity, "Clone Player", {""}, "Clones the Player Ped.", function()
-                local whore = PED.CLONE_PED(players.user_ped(), true, true, true)
-                local cords = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), -5.0, 0.0, 0.0)
-                ENTITY.SET_ENTITY_COORDS(whore, cords.x, cords.y, cords.z)
-                ENTITY.FREEZE_ENTITY_POSITION(whore, true)
-                -- TASK.TASK_START_SCENARIO_IN_PLACE(whore, "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", 0, false) -- Shrugs
-            end)
-        --end
-    end
+        local nativehud = menu.list(nativec, "HUD", {""}, "")
+        local nativevehicle = menu.list(nativec, "VEHICLE", {""}, "")
+        local nativeentity = menu.list(nativec, "ENTITY", {""}, "")
+
+        -------------------------------------
+        -- HUD
+        -------------------------------------
+
+        menu.action(nativehud, "Get Warning Screen hash.", {""}, "", function()
+            local hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
+            log($"[Lena | Debug] Warning Screen hash: {hash}")
+        end)
+
+        -------------------------------------
+        -- VEHICLE
+        -------------------------------------
+
+        menu.action(nativevehicle, "Get Vehicle", {""}, "Gets The current Model and Name.", function()
+            local user = players.user()
+            local vname = lang.get_localised(util.get_label_text(players.get_vehicle_model(user)))
+            local vmodel = players.get_vehicle_model(user)
+            local modelname = util.reverse_joaat(vmodel)
+            local vehicle = PED.GET_VEHICLE_PED_IS_USING(players.user_ped())
+            local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
+            local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
+            notify("Hash: "..vmodel.."\nName: ".. vname.."\nJoaat: "..modelname.."\nBitset: "..bitset)
+            log("[Lena | Debug] Hash: "..vmodel.." | Name: "..vname.." | Joaat: "..modelname.." | Bitset: "..bitset.." | Plate:".. plate_text.."|")
+        end)
+        
+        menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
+            local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "FATE", "WHORE"}
+            VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle(), plate_texts[math.random(#plate_texts)])
+        end)
+
+        -------------------------------------
+        -- ENTITY
+        -------------------------------------
+
+        menu.action(nativeentity, "Clone Player", {""}, "Clones the Player Ped.", function()
+            local whore = PED.CLONE_PED(players.user_ped(), true, true, true)
+            local cords = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), -5.0, 0.0, 0.0)
+            ENTITY.SET_ENTITY_COORDS(whore, cords.x, cords.y, cords.z)
+            ENTITY.FREEZE_ENTITY_POSITION(whore, true)
+            -- TASK.TASK_START_SCENARIO_IN_PLACE(whore, "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", 0, false) -- Shrugs
+        end)
+    --end
 end
 
 --------------------------------------------------------------------------------
@@ -3448,7 +3443,7 @@ local function player(pid)
                 end
                 wait(100)
                 trigger_commands("historyblock"..players.get_name(pid).." on")
-                if not dev_vers then
+                if not is_developer() then
                     log("[Lena | Block Kick] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
                 else
                     log("[Lena | Block Kick] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked and Blocked.")
@@ -3466,7 +3461,7 @@ local function player(pid)
                     trigger_commands("savep"..players.get_name(pid))
                 end
                 trigger_commands("kick"..players.get_name(pid))
-                if not dev_vers then
+                if not is_developer() then
                     log("[Lena | Rape] Player "..players.get_name(pid).." ("..rids..") has been Kicked.")
                 else
                     log("[Lena | Rape] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked")
@@ -3501,7 +3496,7 @@ local function player(pid)
                 wait(500)
                 trigger_commands("crash"..players.get_name(pid))
                 wait(500)
-                if not dev_vers then
+                if not is_developer() then
                     log("[Lena | Block Join Crash] Player "..players.get_name(pid).." ("..rids..") has been Crashed and Blocked.")
                 else
                     log("[Lena | Block Join Crash] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Crashed and Blocked.")
@@ -3796,7 +3791,7 @@ menu.action(menu.my_root(), "Check for Updates", {""}, "", function()
     end
 end)
 
-if not dev_vers then
+if not is_developer() then
     log_failsafe()
 end
 

