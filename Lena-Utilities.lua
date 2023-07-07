@@ -2730,7 +2730,7 @@ local function player(pid)
     menu.divider(menu.player_root(pid), "Lena Utilities")
     local lena = menu.list(menu.player_root(pid), "Lena Utilities", {"lenau"}, "")
 
-    menu.action(lena, "Mark As Modder", {}, "", function()
+    menu.action(lena, "Mark As Modder", {"manual"}, "", function()
         if not IsDetectionPresent(pid, "Manual") then
             players.add_detection(pid, "Manual", 7, 100)
         end
