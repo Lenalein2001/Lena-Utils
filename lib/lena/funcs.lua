@@ -146,14 +146,15 @@ function request_control(vehicle, migrate)
     end
 end
 
-function RequestModel(hash, timeout)
+function RequestModel(model_name, timeout)
+    local hash = joaat(model_name)
     timeout = timeout or 3
     util.request_model(hash)
     local end_time = os.time() + timeout
     repeat
         wait()
     until STREAMING.HAS_MODEL_LOADED(hash) or os.time() >= end_time
-    return STREAMING.HAS_MODEL_LOADED(hash)
+    return hash
 end
 
 function spawn_ped(model_name, pos, godmode)

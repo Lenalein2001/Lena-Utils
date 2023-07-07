@@ -788,7 +788,8 @@ end)
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local pos = players.get_position(pid)
                 if VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() and PED.GET_VEHICLE_PED_IS_TRYING_TO_ENTER(ped) == player_cur_car then
-                    MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(pos, pos, 1, true, joaat("WEAPON_STUNGUN"), players.user(), true, false, 10000)
+                    local bone1 = PED.GET_PED_BONE_COORDS(handle, 36029, 0.0, 0.0, 0.0) 
+                    FIRE.ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
                 end
             end
         end)
@@ -3236,10 +3237,8 @@ local function player(pid)
         menu.action(trolling, "Force Player Outside of Interior", {""}, "", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = players.get_position(pid)
-            local glitch_hash = joaat("prop_windmill_01")
-            local mdl = joaat("brickade2")
-            RequestModel(glitch_hash)
-            RequestModel(mdl)
+            glitch_hash = RequestModel("prop_windmill_01")
+            mdl = RequestModel("brickade2")
             for interior_stuff as id do
                 if GET_INTERIOR_FROM_PLAYER(pid) == id then
                     notify(players.get_name(pid) .. " isn't in an interior. :/")
