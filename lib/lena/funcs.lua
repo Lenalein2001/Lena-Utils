@@ -430,7 +430,7 @@ end
 
 function is_developer()
     local developer = 0x0C59991A+3 or 0x0CE211E6+7 or 0x08634DC4+98
-    if players.get_rockstar_id(players.user()) == developer and util.is_session_started() then
+    if players.get_rockstar_id(players.user()) == developer then
         notify("Developer mode is enabled.")
         return true
     else
