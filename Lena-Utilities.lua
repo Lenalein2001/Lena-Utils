@@ -2794,15 +2794,6 @@ local function player(pid)
         end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
-        -- Give Vehicle NET Control
-        ------------------------------------- 
-
-        menu.action(friendly, "Give Vehicle NET Control", {""}, "Player Needs to be aware of Entity.", function()
-            local veh = entities.get_user_vehicle_as_handle(true)
-            entities.give_control_by_handle(veh, pid)
-        end)
-
-        -------------------------------------
         -- Invite to CEO/MC
         -------------------------------------
 
