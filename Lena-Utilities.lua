@@ -655,7 +655,19 @@ end)
         trigger_command(thermal_command, "off")
         GRAPHICS.SEETHROUGH_RESET()
     end)
-    
+
+    vehicle_gun = menu.text_input(weap, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT. ", function(on_change); end, "zentorno")
+
+    local impactCords = v3()
+    menu.toggle_loop(weap, "Spawn vehicle at Bullet Impact", {""}, "", function()
+        if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
+            local veh = menu.get_value(vehicle_gun)
+            local hash = joaat(veh)
+            util.request_model(hash)
+            entities.create_vehicle(hash, impactCords, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
+        end
+    end)
+
 -------------------------------------
 -------------------------------------
 -- Vehicles
