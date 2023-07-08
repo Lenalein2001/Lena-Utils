@@ -2595,7 +2595,7 @@ if is_developer() then
                         end
                     end
                     notify("Better Planes have been enabled for: "..vname)
-                    trigger_commands("fovfpinveh 90")
+                    trigger_commands("fovfpinveh 90; gravitymult 2")
                 elseif VEHICLE.IS_THIS_MODEL_A_HELI(vmodel) then
                     for better_heli_offsets as offset do
                         memory.write_float(CflyingHandling + offset, 0)
@@ -2606,7 +2606,6 @@ if is_developer() then
                     notify("Better Blimps have been enabled for: "..vname)
                     trigger_commands("gravitymult 1; helithrust 2.3; betterheli")
                 else
-                    notify("Not a Vehicle suitable for the Better Vehicle Settings :/\nCurrent Vehicle: "..vname)
                     trigger_commands("gravitymult 2; fovfpinveh -5")
                 end
                 menu.set_value(modified_vehicle, vname)
