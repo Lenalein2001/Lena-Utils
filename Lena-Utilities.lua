@@ -733,7 +733,7 @@ end)
         -- Better B11 Minigun
         -------------------------------------  
 
-        menu.toggle_loop(better_vehicles, "Better Jet Minigun", {""}, "Higher Damage Output.", function()
+        menu.toggle_loop(better_vehicles, "Better Explosive Weapons", {""}, "Higher Damage Output.", function()
             local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade")
             local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
             local veh = 239897677 or 1692272545 or -1281684762 -- raiju, strikeforce, lazer
@@ -783,15 +783,35 @@ end)
             end
         end)
 
-        menu.toggle_loop(doorcontrol, "Tase Players trying to Enter", {""}, "", function()
+        menu.toggle_loop(doorcontrol, "Taze Players trying to Enter", {""}, "", function()
             if util.is_session_transition_active() then return end
-            if player_cur_car == nil then return end
-            for players.list_except() as pid do
-                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                local pos = players.get_position(pid)
-                if VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() and PED.GET_VEHICLE_PED_IS_TRYING_TO_ENTER(ped) == player_cur_car then
-                    local bone1 = PED.GET_PED_BONE_COORDS(handle, 36029, 0.0, 0.0, 0.0) 
+            if player_cur_car != -1 then
+                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, true)
+            else
+                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, false)
+            end
+            local ped_point = entities.get_all_peds_as_pointers()
+            local ped_point_tab = {}
+            for ped_point as point do
+                local entpos = entities.get_position(point)
+                local distance = v3.distance(players.get_position(players.user_ped()), entpos)
+                if distance <= 500 then
+                    table.insert(ped_point_tab, entities.pointer_to_handle(point))
+                end
+            end
+            for ped_point_tab as handle do
+                if PED.IS_PED_TRYING_TO_ENTER_A_LOCKED_VEHICLE(handle) then
+                    local bone1 = GET_PED_BONE_COORDS(handle, 36029, 0.0, 0.0, 0.0) 
+                    GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('ent_sht_electrical_box', bone1.x, bone1.y, bone1.z, 90, 0, 0, 1, true, true, true)
                     FIRE.ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
+                elseif IS_PED_BEING_JACKED(players.user_ped()) then
+                    SET_VEHICLE_DOOR_SHUT(player_cur_car, 0, true)
+                    local jacker = GET_PEDS_JACKER(players.user_ped())
+                    PED.CLEAR_PED_TASKS_IMMEDIATELY(jacker)
+                    local bone1 = GET_PED_BONE_COORDS(jacker, 36029, 0.0, 0.0, 0.0) 
+                    FIRE.ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
+                    GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('ent_sht_electrical_box', bone1.x, bone1.y, bone1.z, 90, 0, 0, 1, true, true, true)
+                    PED.SET_PED_INTO_VEHICLE(players.user_ped(), player_cur_car, -1)
                 end
             end
         end)
