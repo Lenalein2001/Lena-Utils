@@ -2396,11 +2396,14 @@ end)
 
     menu.action(misc, "Russian Roulette", {""}, "Feeling Lucky?", function()
         local is_bullet_in_my_head = math.random(6)
+        local user = players.user_ped()
+        local pos = players.get_position(user)
+        trigger_commands("skiprepeatwar off; commandsskip off")
         if is_bullet_in_my_head == 1 then
             notify("You have lost the Game.")
             log(os.date("On %A the %x at %X your game suffered a critical error and died. It will be remembered."))
             wait(1000)
-            PED.GET_CLOSEST_PED(players.user_ped(), false, false)
+            trigger_commands("yeet")
         else
             notify("You have won the Game.")
         end
@@ -2526,7 +2529,7 @@ if is_developer() then
     -- Restart Session Scripts
     -------------------------------------
 
-    rss = menu.action(sdebug, "Restart Session Scripts", {"rss"}, "Restarts the freemode.c script.\nThis will remove your weapons for some reason. Kill yourself and you will get them back.", function(click_type)
+    rss = menu.action(sdebug, "Restart Session Scripts", {"rss"}, "This will remove your weapons for some reason. Kill yourself and you will get them back.", function(click_type)
         trigger_commands("skiprepeatwar off; commandsskip off")
         wait(1000)
         if not util.is_session_transition_active() then
