@@ -657,7 +657,7 @@ end)
         GRAPHICS.SEETHROUGH_RESET()
     end)
 
-    vehicle_gun = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT. ", function(on_change); end, "zentorno")
+    vehicle_gun = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
 
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn vehicle at Bullet Impact", {""}, "", function()

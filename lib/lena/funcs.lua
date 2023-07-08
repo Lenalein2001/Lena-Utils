@@ -183,7 +183,7 @@ function spawn_obj(model_name, pos)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return obj
     else
-        util.toast(hash .. " is not a valid ped model name :/")
+        util.toast(hash .. " is not a valid object model name :/")
         return nil
     end
 end
