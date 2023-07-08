@@ -74,6 +74,7 @@ local anims = menu.list(self, "Animations", {""}, "Some Animations.")
 local fast_stuff = menu.list(self, "Fast Stuff", {""}, "Skips certain Animations.")
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
 local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam.")
+local vehicle_gun_list = menu.list(weap, "Shoot Vehicle", {""}, "")
 -- Vehicle
 local better_vehicles = menu.list(vehicle, "Better Vehicles", {""}, "")
 local doorcontrol = menu.list(vehicle, "Doors", {""}, "")
@@ -656,10 +657,10 @@ end)
         GRAPHICS.SEETHROUGH_RESET()
     end)
 
-    vehicle_gun = menu.text_input(weap, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT. ", function(on_change); end, "zentorno")
+    vehicle_gun = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT. ", function(on_change); end, "zentorno")
 
     local impactCords = v3()
-    menu.toggle_loop(weap, "Spawn vehicle at Bullet Impact", {""}, "", function()
+    menu.toggle_loop(vehicle_gun_list, "Spawn vehicle at Bullet Impact", {""}, "", function()
         if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
             local veh = menu.get_value(vehicle_gun)
             local hash = joaat(veh)
