@@ -146,17 +146,6 @@ function request_control(vehicle, migrate)
     end
 end
 
-function RequestModel(model_name, timeout)
-    local hash = joaat(model_name)
-    timeout = timeout or 3
-    util.request_model(hash)
-    local end_time = os.time() + timeout
-    repeat
-        wait()
-    until STREAMING.HAS_MODEL_LOADED(hash) or os.time() >= end_time
-    return hash
-end
-
 function spawn_ped(model_name, pos, godmode)
     local hash = util.joaat(model_name)
     if STREAMING.IS_MODEL_A_PED(hash) then
@@ -168,13 +157,13 @@ function spawn_ped(model_name, pos, godmode)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return ped
     else
-        util.toast(hash .. " is not a valid ped model name :/")
+        notify($"{model_name} is not a valid ped model name :/")
         return nil
     end
 end
 
 function spawn_obj(model_name, pos)
-    local hash = util.joaat(model_name)
+    local hash = joaat(model_name)
     if STREAMING.IS_MODEL_VALID(hash) then
         util.request_model(hash)
         local obj = entities.create_object(hash, pos)
@@ -183,24 +172,24 @@ function spawn_obj(model_name, pos)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return obj
     else
-        util.toast(hash .. " is not a valid object model name :/")
+        notify($"{model_name} is not a valid object model name :/")
         return nil
     end
 end
 
 function spawn_vehicle(model_name, pos, godmode)
-    local hash = util.joaat(model_name)
+    local hash = joaat(model_name)
     if STREAMING.IS_MODEL_A_VEHICLE(hash) then
         util.request_model(hash)
         local veh = entities.create_vehicle(hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
-        ENTITY.SET_ENTITY_INVINCIBLE(veh, godmode)
         local ptr = entities.handle_to_pointer(veh)
+        ENTITY.SET_ENTITY_INVINCIBLE(veh, godmode)
         entities.set_can_migrate(ptr, false)
         ENTITY.SET_ENTITY_SHOULD_FREEZE_WAITING_ON_COLLISION(veh, true)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return veh
     else
-        util.toast(model_name .. " is not a valid vehicle model name :/")
+        notify($"{model_name} is not a valid vehicle model name :/")
         return nil
     end
 end

@@ -1451,7 +1451,7 @@ end)
         menu.toggle_loop(anti_orb, "Block Orbital Cannon", {"blockorb"}, "Spawns a prop that blocks the Orbital Cannon Room.", function()
             local md1 = joaat("xm_prop_cannon_room_door")
             local md2 = joaat("xm_prop_cannon_room_door")
-            request_model(md1)
+            util.request_model(md1)
             if orb_obj == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj) then
                 orb_obj = entities.create_object(md1, v3(336.56, 4833.00, -60.0))
                 entities.set_can_migrate(entities.handle_to_pointer(orb_obj), false)
@@ -1459,7 +1459,7 @@ end)
                 ENTITY.FREEZE_ENTITY_POSITION(orb_obj, true)
                 ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(players.user_ped(), orb_obj, false)
             end
-            request_model(md2)
+            util.request_model(md2)
             if orb_obj2 == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj2) then
                 orb_obj2 = entities.create_object(md2, v3(335.155, 4835.0, -60.0))
                 entities.set_can_migrate(entities.handle_to_pointer(orb_obj2), false)
@@ -3272,8 +3272,8 @@ local function player(pid)
         menu.action(trolling, "Force Player Outside of Interior", {""}, "", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = players.get_position(pid)
-            glitch_hash = RequestModel("prop_windmill_01")
-            mdl = RequestModel("brickade2")
+            glitch_hash = util.request_model("prop_windmill_01")
+            mdl = util.request_model("brickade2")
             for interior_stuff as id do
                 if GET_INTERIOR_FROM_PLAYER(pid) == id then
                     notify(players.get_name(pid) .. " isn't in an interior. :/")
