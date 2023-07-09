@@ -2111,7 +2111,7 @@ end)
             count = 0
             wait(100)
             for entities.get_all_vehicles_as_handles() as vehicle do
-                if vehicle != entities.get_user_vehicle_as_handle(true) and entities.get_owner(vehicle) == players.user() then
+                if vehicle != entities.get_user_vehicle_as_handle(true) and entities.get_owner(vehicle) == players.user() and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 then
                     entities.delete(vehicle)
                     count += 1
                     wait(10)
@@ -2139,7 +2139,7 @@ end)
             end
             notify($"Deleted {count} Pickups!")
             wait(100)
-            trigger_command(clear_ropes)
+            clear_ropes:trigger()
         end)
 
     -------------------------------------
