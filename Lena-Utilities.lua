@@ -97,7 +97,7 @@ local sell_stuff = menu.list(tunables, "Selling", {""}, "Shit's broken")
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 -- Misc
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
-local clear_area_locally = menu.list(misc, "Clear Area", {""}, "")
+local clear_area = menu.list(misc, "Clear Area", {""}, "")
 local teleport = menu.list(misc, "Teleport", {""}, "")
 
 -------------------------------------
@@ -2058,7 +2058,7 @@ end)
         -- Clear Vehicles
         -------------------------------------
 
-        menu.list_action(clear_area_locally, "Clear All", {""}, "", {"Vehicles", "Peds", "Objects"}, function(index, name)
+        menu.list_action(clear_area, "Clear All", {""}, "", {"Vehicles", "Peds", "Objects"}, function(index, name)
             notify("Clearing "..name:lower().."...")
             local clean_amount = 0
             switch index do
@@ -2097,27 +2097,27 @@ end)
         -- Clear Area All
         -------------------------------------
 
-        menu.action(clear_area_locally, "Clear Area", {"ca"}, "Clears the Area around you without sending Freeze events.", function()
+        menu.action(clear_area, "Clear Area", {"ca"}, "Clears the Area around you without sending Freeze events.", function()
             local clear_ropes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
             local count = 0
-            for entities.get_all_peds_as_pointers() as ped do
+            for entities.get_all_peds_as_handles() as ped do
                 if ped != players.user_ped() and entities.get_owner(ped) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() then
-                    entities.delete_by_pointer(ped)
+                    entities.delete(ped)
                     count += 1
                     wait(10)
                 end
             end
-            notify("Deleted "..count.." Peds!")
+            notify($"Deleted {count} Peds!")
             count = 0
             wait(100)
-            for entities.get_all_vehicles_as_pointers() as vehicle do
-                if vehicle != entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() then
-                    entities.delete_by_pointer(vehicle)
+            for entities.get_all_vehicles_as_handles() as vehicle do
+                if vehicle != entities.get_user_vehicle_as_handle(true) and entities.get_owner(vehicle) == players.user() then
+                    entities.delete(vehicle)
                     count += 1
                     wait(10)
                 end
             end
-            notify("Deleted ".. count .." Vehicles!")
+            notify($"Deleted {count} Vehicles!")
             count = 0
             wait(100)
             for entities.get_all_objects_as_handles() as object do
@@ -2127,17 +2127,17 @@ end)
                     wait(10)
                 end
             end
-            notify("Deleted "..count.." Objects!")
+            notify($"Deleted {count} Objects!")
             count = 0
             wait(100)
-            for entities.get_all_pickups_as_pointers() as pickup do
+            for entities.get_all_pickups_as_handles() as pickup do
                 if entities.get_owner(pickup) == players.user() then
-                    entities.delete_by_pointer(pickup)
+                    entities.delete(pickup)
                     count += 1
                     wait(10)
                 end
             end
-            notify("Deleted "..count.." Pickups!")
+            notify($"Deleted {count} Pickups!")
             wait(100)
             trigger_command(clear_ropes)
         end)
@@ -2691,9 +2691,11 @@ if is_developer() then
         -- HUD
         -------------------------------------
 
-        menu.action(nativehud, "Get Warning Screen hash.", {""}, "", function()
+        menu.action(nativehud, "Get Warning Screen hash", {""}, "", function()
             local hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
-            log($"[Lena | Debug] Warning Screen hash: {hash}")
+            if hash != nil then
+                log($"[Lena | Debug] Warning Screen hash: {hash}")
+            end
         end)
 
         -------------------------------------
@@ -2754,7 +2756,7 @@ local function player(pid)
         0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
-        0x0AF3A2B8,
+        0x0AF3A2B8, 0x080BF2F7,
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
