@@ -2616,12 +2616,12 @@ if is_developer() then
 
     local modified_vehicle = menu.readonly(sdebug, "Modified Vehicle: ", "N/A")
     menu.toggle_loop(sdebug, "Better Vehicles", {"bv"}, "", function()
-        local vmodel = players.get_vehicle_model(players.user())
-        local vname = util.get_label_text(vmodel)
-        local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
-        local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
         if entities.get_user_vehicle_as_pointer(false) != 0 then
-            if menu.get_value(modified_vehicle, vname) != vname then
+            local vmodel = players.get_vehicle_model(players.user())
+            local vname = util.get_label_text(vmodel)
+            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+            local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
+            if menu.get_value(modified_vehicle, vname) != vname and PLAYER.IS_PLAYER_PLAYING(players.user()) then
                 if VEHICLE.IS_THIS_MODEL_A_PLANE(vmodel) then
                     if vmodel == -1700874274 then
                         trigger_commands("vhengineoffglidemulti 10; vhgeardownliftmult 1")
@@ -2648,6 +2648,8 @@ if is_developer() then
                 end
                 menu.set_value(modified_vehicle, vname)
             end
+        elseif menu.get_value(modified_vehicle, vname) != "N/A" then
+            menu.set_value(modified_vehicle, "N/A")
         end
     end)
 
@@ -2756,7 +2758,7 @@ local function player(pid)
         0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
-        0x0AF3A2B8, 0x080BF2F7,
+        0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A,
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
