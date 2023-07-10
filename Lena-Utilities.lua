@@ -1580,9 +1580,9 @@ end)
     menu.divider(friend_lists, "frens:)")
     for i = 0, NETWORK.NETWORK_GET_FRIEND_COUNT() do
         local name = NETWORK.NETWORK_GET_FRIEND_DISPLAY_NAME(i)
-        if name == "*****" then goto yes end
+        if name == "*****" then goto skip end
         gen_fren_funcs(name)
-        ::yes::
+        ::skip::
     end
 
     -------------------------------------
@@ -2633,7 +2633,7 @@ if is_developer() then
                         end
                     end
                     notify("Better Planes have been enabled for: "..vname)
-                    trigger_commands("fovfpinveh 90; gravitymult 2")
+                    trigger_commands("fovfpinveh 90; gravitymult 2; fovtpinveh 100")
                 elseif VEHICLE.IS_THIS_MODEL_A_HELI(vmodel) then
                     for better_heli_offsets as offset do
                         memory.write_float(CflyingHandling + offset, 0)
@@ -2644,7 +2644,7 @@ if is_developer() then
                     notify("Better Blimps have been enabled for: "..vname)
                     trigger_commands("gravitymult 1; helithrust 2.3; betterheli")
                 else
-                    trigger_commands("gravitymult 2; fovfpinveh -5")
+                    trigger_commands("gravitymult 2; fovfpinveh -5; fovtpinveh -5")
                 end
                 menu.set_value(modified_vehicle, vname)
             end
