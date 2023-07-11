@@ -2509,6 +2509,7 @@ end)
         if CUTSCENE.IS_CUTSCENE_PLAYING() then
             repeat
                 CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
+                wait(10)
             until not CUTSCENE.IS_CUTSCENE_PLAYING()
             notify("Cutscene skipped!")
         end
@@ -2522,6 +2523,7 @@ end)
         if AUDIO.IS_SCRIPTED_CONVERSATION_ONGOING() then
             repeat
                 AUDIO.STOP_SCRIPTED_CONVERSATION(false)
+                wait(10)
             until not AUDIO.IS_SCRIPTED_CONVERSATION_ONGOING()
             notify("Conversation skipped!")
         end
