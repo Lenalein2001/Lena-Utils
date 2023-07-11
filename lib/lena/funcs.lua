@@ -177,13 +177,14 @@ function spawn_obj(model_name, pos)
     end
 end
 
-function spawn_vehicle(model_name, pos, godmode)
+local veh_godmode = false
+function spawn_vehicle(model_name, pos, veh_godmode)
     local hash = joaat(model_name)
     if STREAMING.IS_MODEL_A_VEHICLE(hash) then
         util.request_model(hash)
         local veh = entities.create_vehicle(hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
         local ptr = entities.handle_to_pointer(veh)
-        ENTITY.SET_ENTITY_INVINCIBLE(veh, godmode)
+        ENTITY.SET_ENTITY_INVINCIBLE(veh, veh_godmode)
         entities.set_can_migrate(ptr, false)
         ENTITY.SET_ENTITY_SHOULD_FREEZE_WAITING_ON_COLLISION(veh, true)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)

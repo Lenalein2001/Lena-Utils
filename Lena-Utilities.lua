@@ -659,13 +659,14 @@ end)
 
     vehicle_gun = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
 
+    vehicle_gun_gm = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
+
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn vehicle at Bullet Impact", {""}, "", function()
         if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
             local veh = menu.get_value(vehicle_gun)
-            local hash = joaat(veh)
-            util.request_model(hash)
-            entities.create_vehicle(hash, impactCords, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
+            local gm = menu.get_value(vehicle_gun_gm)
+            spawn_vehicle(veh, impactCords, gm)
         end
     end)
 
@@ -3149,7 +3150,6 @@ local function player(pid)
             -- Tank
             -------------------------------------
 
-            local gm_on = false
             menu.action(vehattack, "Send Tank", {""}, "", function()
                 local player_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local spawn_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player_ped, 30.0, -30.0, 0.0)
