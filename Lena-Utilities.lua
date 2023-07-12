@@ -650,15 +650,13 @@ end)
         end
     
         wait(100)
-    end,
-    function()
+    end, function()
         local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
         trigger_command(thermal_command, "off")
         GRAPHICS.SEETHROUGH_RESET()
     end)
 
     vehicle_gun = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
-
     vehicle_gun_gm = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
 
     local impactCords = v3()
@@ -681,7 +679,7 @@ end)
     -------------------------------------
 
         -------------------------------------
-        -- Realistic Heli
+        -- Heli Thrust
         -------------------------------------
 
         menu.divider(better_vehicles, "Better Heli")
@@ -694,6 +692,10 @@ end)
                 end
             end
         end)
+
+        -------------------------------------
+        -- Better Heli
+        -------------------------------------
 
         menu.action(better_vehicles, "Better Heli Mode", {"betterheli"}, "Disabables Heli auto stablization.", function()
             if PED.IS_PED_IN_ANY_HELI(players.user_ped()) then
@@ -744,7 +746,7 @@ end)
         end)
 
         -------------------------------------
-        -- Better B11 Minigun
+        -- Better Explosive Weapons
         -------------------------------------  
 
         menu.toggle_loop(better_vehicles, "Better Explosive Weapons", {""}, "Higher Damage Output.", function()
@@ -796,6 +798,10 @@ end)
                 end
             end
         end)
+
+        -------------------------------------
+        -- Taze Players
+        -------------------------------------
 
         menu.toggle_loop(doorcontrol, "Taze Players trying to Enter", {""}, "", function()
             if util.is_session_transition_active() then return end
@@ -1008,7 +1014,6 @@ end)
     menu.toggle_loop(vehicle, "Keep Vehicle Clean", {""}, "", function()
         if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1 and entities.get_owner(player_cur_car) == players.user() then
             VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0)
-            notify("Vehicle Cleaned")
         end
     end)
 
