@@ -2630,16 +2630,16 @@ if is_developer() then
                             memory.write_float(CflyingHandling + handling, value)
                         end
                     end
-                    notify("Better Planes have been enabled for: "..vname)
+                    notify("Better Planes have been enabled for: {vname}")
                     trigger_commands("fovfpinveh 90; gravitymult 2; fovtpinveh 100")
                 elseif VEHICLE.IS_THIS_MODEL_A_HELI(vmodel) then
                     for better_heli_offsets as offset do
                         memory.write_float(CflyingHandling + offset, 0)
                     end
                     trigger_commands("gravitymult 1; helithrust 2.3")
-                    notify("Better Helis have been enabled for: "..vname)
+                    notify($"Better Helis have been enabled for: {vname}")
                 elseif util.is_this_model_a_blimp(vmodel) then
-                    notify("Better Blimps have been enabled for: "..vname)
+                    notify($"Better Blimps have been enabled for: {vname}")
                     trigger_commands("gravitymult 1; helithrust 2.3; betterheli")
                 else
                     trigger_commands("gravitymult 2; fovfpinveh -5; fovtpinveh -5")
@@ -2710,8 +2710,8 @@ if is_developer() then
             local vehicle = PED.GET_VEHICLE_PED_IS_USING(players.user_ped())
             local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
             local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
-            notify("Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
-            log("[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}|")
+            notify($"Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
+            log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}|")
         end)
         
         menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
