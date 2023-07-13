@@ -438,7 +438,7 @@ end)
         -- Fast Weapon swap
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Weapon Switch", {""}, "Swaps your weapons faster.\nLock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Weapon Switch", {""}, "Swaps your weapons faster.\nLock Outfit breaks it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 56) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -448,7 +448,7 @@ end)
         -- Fast Reload
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.\nLock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.\nLock Outfit breaks it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 298) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -458,7 +458,7 @@ end)
         -- Fast Mount
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.\nLock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.\nLock Outfit breaks it.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 50) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 51) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -529,7 +529,6 @@ end)
                 while LegitRapidFire do
                     if PED.IS_PED_SHOOTING(ped) then
                         local currentWpMem = memory.alloc()
-                        local junk = WEAPON.GET_CURRENT_PED_WEAPON(ped, currentWpMem, 1)
                         local currentWP = memory.read_int(currentWpMem)
                         memory.free(currentWpMem)
                         WEAPON.SET_CURRENT_PED_WEAPON(ped, 2481070269, true)
@@ -579,13 +578,6 @@ end)
             modifiedSpeed:setValue(newValue)
         end
     end)
-
-    -------------------------------------
-    -- Max Lockon Range
-    -------------------------------------    
-
-    -- menu.toggle_loop(weap, "Max Lockon Range", {""}, "Sets your players lockon range with homing missles and auto aim to the max.", function()
-    -- end)
 
     -------------------------------------
     -- Unfair Triggerbot
@@ -662,8 +654,7 @@ end)
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn vehicle at Bullet Impact", {""}, "", function()
         if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
-            local veh = menu.get_value(vehicle_gun)
-            local gm = menu.get_value(vehicle_gun_gm)
+            local veh, gm = menu.get_value(vehicle_gun), menu.get_value(vehicle_gun_gm)
             spawn_vehicle(veh, impactCords, gm)
         end
     end)
@@ -875,7 +866,6 @@ end)
         if not PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             local player_pos = players.get_position(players.user())
             local veh = closestveh(player_pos)
-            local ped = VEHICLE.GET_PED_IN_VEHICLE_SEAT(veh, -1, true)
             PED.SET_PED_INTO_VEHICLE(players.user_ped(), veh, -1)
             wait(100)
             local vehmodel = players.get_vehicle_model(players.user())
