@@ -922,12 +922,12 @@ end)
     -- Force flares
     -------------------------------------
 
-    menu.toggle(vehicle, "Force flares", {"forceflares"}, "Forces flares on some Vehicles.", function()
+    menu.toggle(vehicle, "Force flares", {"forceflares"}, "Forces flares on some Vehicles.", function(toggled)
         local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
         local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
         local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
         trigger_command(count, "2"); trigger_command(how)
-        while PED.IS_PED_IN_ANY_PLANE(players.user_ped()) do
+        while PED.IS_PED_IN_ANY_PLANE(players.user_ped()) and toggled do
             if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
                 trigger_command(deploy)
                 wait(3000)
@@ -1125,23 +1125,23 @@ end)
         -- Block SH Migration
         -------------------------------------
 
-        menu.toggle(hosttools, "Block SH Migration", {""}, "Only works when you are the Host. Doesn't work against Modders.", function(on)
+        menu.toggle(hosttools, "Block Script Host Migration", {""}, "Only works when you are the Host. Doesn't work against Modders.", function(on)
             if util.is_session_started() and players.get_host() == players.user() then
                 NETWORK.NETWORK_PREVENT_SCRIPT_HOST_MIGRATION()
             end
         end)
 
         menu.divider(hosttools, "Session Info")
-        local host_name = menu.readonly(hosttools, "N/A")
-        local script_host_name = menu.readonly(hosttools, "N/A")
-        local players_amount = menu.readonly(hosttools, "N/A")
-        local modder_amount = menu.readonly(hosttools, "N/A")
+        local host_name = menu.readonly(hosttools, "Host", "N/A")
+        local script_host_name = menu.readonly(hosttools, "Script Host", "N/A")
+        local players_amount = menu.readonly(hosttools, "Players", "N/A")
+        local modder_amount = menu.readonly(hosttools, "Modders", "N/A")
 
         util.create_tick_handler(function()
-            menu.set_menu_name(host_name, "Host: "..players.get_name(players.get_host()))
-            menu.set_menu_name(script_host_name, "Script Host: "..players.get_name(players.get_script_host()))
-            menu.set_menu_name(players_amount, "Players: "..#players.list())
-            menu.set_menu_name(modder_amount, "Modders: " .. tostring(get_modder_int()))
+            menu.set_value(host_name,   players.get_name(players.get_host()))
+            menu.set_value(script_host_name, players.get_name(players.get_script_host()))
+            menu.set_value(players_amount, #players.list())
+            menu.set_value(modder_amount, tostring(get_modder_int()))
         end)
 
         -------------------------------------
