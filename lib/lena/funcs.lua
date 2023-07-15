@@ -94,8 +94,7 @@ end
 
 function start_fm_script(script)
     if not players.get_boss(players.user()) == players.user() then
-        repeat trigger_commands("ceo")
-        until players.get_boss(players.user()) == players.user()
+        repeat trigger_commands("ceo")  until players.get_boss(players.user()) == players.user()
         notify("Starting CEO...")
     end
 

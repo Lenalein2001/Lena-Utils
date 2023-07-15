@@ -229,6 +229,12 @@ end
 -- Tables
 -----------------------------------
 
+local script_start = {
+    {"appsmuggler", "Open Air Cargo Screen"},
+    {"appbusinesshub", "Open Nightclub Screen"},
+    {"apparcadebusinesshub", "Open Master Control Terminal"}
+}
+
 local veh_things = {
     "brickade2",
     "hauler",
@@ -2016,9 +2022,13 @@ end)
         trigger_commands("clubpopularity 100")
     end)
 
-    menu.action(tunables, "Open Air Cargo Screen", {""}, "", function()
-        start_fm_script("appsmuggler")
-    end)
+    for index, data in script_start do
+        local script = data[1]
+        local name = data[2]
+        menu.action(tunables, name, {""}, "", function()
+            start_fm_script(script)
+        end)
+    end
 
 -------------------------------------
 -------------------------------------
@@ -3714,7 +3724,7 @@ local function player(pid)
             menu.action(objcrasheslist, name, {"objcrash"..name}, "", function()
                 BlockSyncs(pid, function()
                     local coords = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                    local object = entities.create_object(joaat(spobject), coords)
+                    local object = spawn2(spobject, coords)
                     OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
                     wait(5000)
                     entities.delete_by_handle(object)
