@@ -54,19 +54,6 @@ function gen_fren_funcs(name)
     end)
 end
 
-function game_notification(format, colour, ...)
-	local msg = string.format(format, ...)
-    --local txdDict = "DIA_ZOMBIE1",
-	--local txdName = "DIA_ZOMBIE1",
-	--local title = "Lena Utils",
-	--local subtitle = "~c~" .. util.get_label_text("PM_PANE_FEE") .. "~s~",
-
-	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or HudColour.black)
-	util.BEGIN_TEXT_COMMAND_THEFEED_POST(msg)
-	--HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(txdDict, txdName, true, 4, title, subtitle)
-	HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)
-end
-
 function IA_MENU_OPEN_OR_CLOSE()
     PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 244, 1.0)
     wait(150)
@@ -90,8 +77,10 @@ function IA_MENU_LEFT(Num)
     end
 end
 function IA_MENU_ENTER(Num)
-    PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1.0)
-    wait(100)
+    for i = 1, Num do
+        PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1.0)
+        wait(100)
+    end
 end
 
 function play_anim(dict, name, duration)
@@ -101,6 +90,19 @@ function play_anim(dict, name, duration)
         wait()
     end
     TASK.TASK_PLAY_ANIM(ped, dict, name, 1.0, 1.0, duration, 3, 0.5, false, false, false)
+end
+
+function start_fm_script(script)
+    if not players.get_boss(players.user()) == players.user() then
+        repeat trigger_commands("ceo")
+        until players.get_boss(players.user()) == players.user()
+        notify("Starting CEO...")
+    end
+
+    SCRIPT.REQUEST_SCRIPT(script)
+    repeat util.yield_once() until SCRIPT.HAS_SCRIPT_LOADED(script)
+    SYSTEM.START_NEW_SCRIPT(script, 5000)
+    SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(script)
 end
 
 function restartsession()

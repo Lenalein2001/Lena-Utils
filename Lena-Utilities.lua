@@ -2017,10 +2017,7 @@ end)
     end)
 
     menu.action(tunables, "Open Air Cargo Screen", {""}, "", function()
-        SCRIPT.REQUEST_SCRIPT("appsmuggler")
-        repeat util.yield_once() until SCRIPT.HAS_SCRIPT_LOADED("appsmuggler")
-        SYSTEM.START_NEW_SCRIPT("appsmuggler", 5000)
-        SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED("appsmuggler")
+        start_fm_script("appsmuggler")
     end)
 
 -------------------------------------
