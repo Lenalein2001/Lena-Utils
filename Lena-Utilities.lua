@@ -2019,6 +2019,13 @@ end)
         trigger_commands("clubpopularity 100")
     end)
 
+    menu.action(tunables, "Open Air Cargo Screen", {""}, "", function()
+        SCRIPT.REQUEST_SCRIPT("appsmuggler")
+        repeat util.yield_once() until SCRIPT.HAS_SCRIPT_LOADED("appsmuggler")
+        SYSTEM.START_NEW_SCRIPT("appsmuggler", 5000)
+        SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED("appsmuggler")
+    end)
+
 -------------------------------------
 -------------------------------------
 -- Misc
@@ -2162,7 +2169,7 @@ end)
         -- Easy Way Out
         -------------------------------------
 
-        menu.action(shortcuts, "Really easy Way out", {"kms"}, "Kill yourself.", function()
+        menu.action(shortcuts, "Really easy Way out", {"kms", "kys"}, "Kill yourself.", function()
             local pos = players.get_position(players.user())
             FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), pos.x, pos.y, pos.z - 1.0, 5, 1.0, false, false, 1.0)
         end)
