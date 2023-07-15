@@ -147,18 +147,19 @@ function request_control(vehicle, migrate)
     end
 end
 
-function spawn_ped(model_name, pos, godmode)
+local spawnped_gm = false
+function spawn_ped(model_name, pos, spawnped_gm)
     local hash = util.joaat(model_name)
     if STREAMING.IS_MODEL_A_PED(hash) then
         util.request_model(hash)
         local ped = entities.create_ped(2, hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
-        ENTITY.SET_ENTITY_INVINCIBLE(ped, godmode)
+        ENTITY.SET_ENTITY_INVINCIBLE(ped, spawnped_gm)
         local ptr = entities.handle_to_pointer(ped)
         entities.set_can_migrate(ptr, false)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return ped
     else
-        notify($"{model_name} is not a valid ped model name :/")
+        notify($"{model_name} is not a valid ped model name. :/")
         return nil
     end
 end
@@ -173,7 +174,7 @@ function spawn_obj(model_name, pos)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return obj
     else
-        notify($"{model_name} is not a valid object model name :/")
+        notify($"{model_name} is not a valid object model name. :/")
         return nil
     end
 end
@@ -191,7 +192,7 @@ function spawn_vehicle(model_name, pos, veh_godmode)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return veh
     else
-        notify($"{model_name} is not a valid vehicle model name :/")
+        notify($"{model_name} is not a valid vehicle model name. :/")
         return nil
     end
 end

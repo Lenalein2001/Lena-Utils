@@ -3148,38 +3148,36 @@ local function player(pid)
         -- Attackers
         -------------------------------------
 
-        menu.toggle(vehattack, "Enable Godmode", {""}, "", function(toggled)
-            gm_on = toggled
+        attack_ent_gm = menu.toggle(vehattack, "Enable Godmode", {""}, "", function(); end)
+
+        -------------------------------------
+        -- Tank
+        -------------------------------------
+
+        menu.action(vehattack, "Send Tank", {""}, "", function()
+            local gm = menu.get_value(attack_ent_gm)
+            local player_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            local spawn_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player_ped, 30.0, -30.0, 0.0)
+            local ped = spawn_ped("s_m_y_blackops_01", spawn_pos, gm)
+            local vehicle = spawn_vehicle("rhino", spawn_pos, gm)
+            NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(vehicle), true)
+            PED.SET_PED_INTO_VEHICLE(ped, vehicle, -1)
+            PED.SET_PED_COMBAT_ATTRIBUTES(ped, 3, false)
+            PED.SET_PED_COMBAT_ATTRIBUTES(ped, 5, true)
+            PED.SET_PED_COMBAT_ATTRIBUTES(ped, 46, true)
+            TASK.TASK_COMBAT_PED(ped, player_ped, 0, 16)
+            TASK.TASK_VEHICLE_CHASE(ped, player_ped)
+            AUDIO.STOP_PED_SPEAKING(ped, true)
+            PED.SET_PED_ACCURACY(ped, 100.0)
+            PED.SET_PED_SHOOT_RATE(ped, 1000)
+            VEHICLE.SET_VEHICLE_DOORS_LOCKED(vehicle, 2)
+            local blip = HUD.ADD_BLIP_FOR_ENTITY(vehicle)
+            HUD.SET_BLIP_SPRITE(blip, 421)
+            HUD.SET_BLIP_COLOUR(blip, 2)
+            local ptr = entities.handle_to_pointer(vehicle)
+            entities.set_can_migrate(ptr, false)
+            spawned_attackers[#spawned_attackers + 1] = ped; spawned_attackers[#spawned_attackers + 1] = vehicle
         end)
-
-            -------------------------------------
-            -- Tank
-            -------------------------------------
-
-            menu.action(vehattack, "Send Tank", {""}, "", function()
-                local player_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                local spawn_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player_ped, 30.0, -30.0, 0.0)
-                local ped = spawn_ped("s_m_y_blackops_01", spawn_pos, gm_on)  -- Assign the returned ped to a variable
-                local vehicle = spawn_vehicle("rhino", spawn_pos, gm_on)
-                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(vehicle), true)
-                PED.SET_PED_INTO_VEHICLE(ped, vehicle, -1)
-                PED.SET_PED_COMBAT_ATTRIBUTES(ped, 3, false)
-                PED.SET_PED_COMBAT_ATTRIBUTES(ped, 5, true)
-                PED.SET_PED_COMBAT_ATTRIBUTES(ped, 46, true)
-                TASK.TASK_COMBAT_PED(ped, player_ped, 0, 16)
-                TASK.TASK_VEHICLE_CHASE(ped, player_ped)
-                AUDIO.STOP_PED_SPEAKING(ped, true)
-                PED.SET_PED_ACCURACY(ped, 100.0)
-                PED.SET_PED_SHOOT_RATE(ped, 1000)
-                VEHICLE.SET_VEHICLE_DOORS_LOCKED(vehicle, 2)
-                local blip = HUD.ADD_BLIP_FOR_ENTITY(vehicle)
-                HUD.SET_BLIP_SPRITE(blip, 421)
-                HUD.SET_BLIP_COLOUR(blip, 2)
-                local ptr = entities.handle_to_pointer(vehicle)
-                entities.set_can_migrate(ptr, false)
-                spawned_attackers[#spawned_attackers + 1] = ped
-                spawned_attackers[#spawned_attackers + 1] = vehicle
-            end)
 
         menu.action(vehattack, "Delete all Attackers", {""}, "", function()
             local entitycount = 0
@@ -3411,6 +3409,16 @@ local function player(pid)
 
         menu.toggle(trolling, "Ghost Player", {"ghost", "g"}, "Makes you ghosted to that player.", function(toggled)
             NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, toggled)
+        end)
+
+        menu.action(trolling, "Clone Player", {""}, "", function()
+            local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            local clone = PED.CLONE_PED(player, false, true)
+            local cords = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player, -5.0, 0.0, 0.0)
+            ENTITY.SET_ENTITY_COORDS(clone, cords)
+            entities.set_can_migrate(clone, false)
+            TASK.TASK_COMBAT_PED(clone, player, 0, 16)
+            WEAPON.GIVE_WEAPON_TO_PED(clone, joaat("WEAPON_HOMINGLAUNCHER"), 20, false, true)
         end)
 
     -------------------------------------
