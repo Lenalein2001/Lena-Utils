@@ -927,16 +927,13 @@ end)
         local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
         local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
         trigger_command(count, "2"); trigger_command(how)
-        util.create_thread(function()
-            while PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) do
-                if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() then
-                    trigger_command(deploy)
-                    wait(3000)
-                end
-                wait()
+        while PED.IS_PED_IN_ANY_PLANE(players.user_ped()) do
+            if util.is_key_down("E") and not (chat.is_open() and menu.command_box_is_open() and menu.is_open() and HUD.IS_PAUSE_MENU_ACTIVE()) then
+                trigger_command(deploy)
+                wait(3000)
             end
-            util.stop_thread()
-        end)
+            wait()
+        end
     end)
 
     -------------------------------------
