@@ -2623,7 +2623,7 @@ if is_developer() then
     -- Easier Better Vehicles
     -------------------------------------
 
-    local modified_vehicle = menu.readonly(sdebug, "Modified Vehicle: ", "N/A")
+    local modified_vehicle = menu.readonly(sdebug, "Current Vehicle: ", "N/A")
     menu.toggle_loop(sdebug, "Better Vehicles", {"bv"}, "", function()
         if entities.get_user_vehicle_as_pointer(false) != 0 then
             local vmodel = players.get_vehicle_model(players.user())
