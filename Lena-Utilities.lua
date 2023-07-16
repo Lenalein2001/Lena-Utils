@@ -1950,6 +1950,27 @@ end)
             end
         end)
 
+        -------------------------------------
+        -- Destroy Signal Jammers
+        -------------------------------------
+
+        menu.action(missions_tunables, "Destroy Signal Jammers", {""}, "", function()
+            local counter = 0
+            for entities.get_all_objects_as_handles() as obj do
+                local blip = HUD.GET_BLIP_FROM_ENTITY(obj)
+                if HUD.GET_BLIP_SPRITE(blip) == 485 then
+                    local pos = ENTITY.GET_ENTITY_COORDS(obj, false)
+                    FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), pos.x, pos.y, pos.z - 1.0, 5, 1.0, false, false, 1.0)
+                    counter += 1
+                    wait(100)
+                end
+            end
+            if counter == 0 then
+                notify("No Objects Found. :/")
+            else
+                notify("Destroyed "..tostring(counter).." Signal Jammers.")
+            end
+        end)
     -------------------------------------
     -- Skip Casino Hacking Process
     -------------------------------------
@@ -1987,7 +2008,7 @@ end)
     -------------------------------------
 
     menu.toggle(tunables, "Unlock R* Clothes", {""}, "Unlocks some Rockstar Clothes.", function(toggled)
-        trigger_commands("admindlc "..toggled)
+        trigger_commands($"admindlc {toggled}")
     end)
 
     -------------------------------------
@@ -2018,9 +2039,10 @@ end)
             end
         end
     end)
-    menu.action(tunables, "Max NC Popularity", {"maxnc"}, "Sets the Club Popularity to 100%.", function()
-        trigger_commands("clubpopularity 100")
-    end)
+
+    -------------------------------------
+    -- Screen Opener
+    ------------------------------------- 
 
     for index, data in script_start do
         local script = data[1]
@@ -2690,6 +2712,10 @@ if is_developer() then
         memory.write_float(modifiedRange[weaponHash].rangeAddress, 10000)
     end)
 
+    menu.action(sdebug, "Host Kick", {"hk"}, "", function()
+        trigger_commands("kick"..players.get_name(players.get_host()))
+    end)
+
     -------------------------------------
     -- Natives
     -------------------------------------
@@ -2767,7 +2793,7 @@ local function player(pid)
         0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
-        0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E,
+        0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
