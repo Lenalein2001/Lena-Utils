@@ -1966,7 +1966,7 @@ end)
                 end
             end
             if counter == 0 then
-                notify("No Objects Found. :/")
+                notify("No Jammers Found. :/")
             else
                 notify("Destroyed "..tostring(counter).." Signal Jammers.")
             end
