@@ -535,6 +535,7 @@ end)
                 while LegitRapidFire do
                     if PED.IS_PED_SHOOTING(ped) then
                         local currentWpMem = memory.alloc()
+                        local junk = WEAPON.GET_CURRENT_PED_WEAPON(ped, currentWpMem, 1)
                         local currentWP = memory.read_int(currentWpMem)
                         memory.free(currentWpMem)
                         WEAPON.SET_CURRENT_PED_WEAPON(ped, 2481070269, true)
