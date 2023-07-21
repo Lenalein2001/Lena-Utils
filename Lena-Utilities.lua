@@ -1989,7 +1989,7 @@ end)
     -- Refill Snacks and Armor
     -------------------------------------
 
-    menu.action(tunables, "Refill Snacks & Armours", {"refillsnacks"}, "Refills all Snacks and Armour.", function()
+    menu.action(tunables, "Refill Snacks & Armour", {"refillsnacks"}, "Refills all Snacks and Armour.", function()
         STAT_SET_INT("NO_BOUGHT_YUM_SNACKS", 30)
         STAT_SET_INT("NO_BOUGHT_HEALTH_SNACKS", 15)
         STAT_SET_INT("NO_BOUGHT_EPIC_SNACKS", 15)
@@ -2866,7 +2866,7 @@ local function player(pid)
             local deaths = players.get_deaths(pid)
             local kdratio = players.get_kd(pid)
             local language = language_string(players.get_language(pid))
-            notify("Name : "..players.get_name(pid).."\nLanguage: "..language.. "\nRank: "..rank.."\nMoney: "..string.format("%.2f", money/1000000).."M$".."\nKills/Deaths: "..kills.."/"..deaths.."\nRatio: "..string.format("%.2f", kdratio))
+            notify("Name: "..players.get_name(pid).."\nLanguage: "..language.. "\nRank: "..rank.."\nMoney: "..string.format("%.2f", money/1000000).."M$".."\nKills/Deaths: "..kills.."/"..deaths.."\nRatio: "..string.format("%.2f", kdratio))
         end)
 
         -------------------------------------
