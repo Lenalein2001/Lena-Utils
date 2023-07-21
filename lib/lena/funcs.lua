@@ -92,6 +92,11 @@ function play_anim(dict, name, duration)
     TASK.TASK_PLAY_ANIM(ped, dict, name, 1.0, 1.0, duration, 3, 0.5, false, false, false)
 end
 
+function IS_HELP_MSG_DISPLAYED(label)
+    HUD.BEGIN_TEXT_COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED(label)
+    return HUD.END_TEXT_COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED(0)
+end
+
 function start_fm_script(script)
     if not players.get_boss(players.user()) == players.user() then
         repeat trigger_commands("ceo")  until players.get_boss(players.user()) == players.user()
