@@ -2788,12 +2788,11 @@ local function player(pid)
 
         menu.action(friendly, "Check Stats", {"checkstats"}, "Checks the stats of the Player.", function()
             local rank = players.get_rank(pid)
-            local money = players.get_money(pid)
-            local kills = players.get_kills(pid)
-            local deaths = players.get_deaths(pid)
-            local kdratio = players.get_kd(pid)
+            local money = string.format("%.2f", players.get_money(pid)/1000000)
+            local kills, deaths, kdratio = players.get_kills(pid), players.get_deaths(pid), string.format("%.2f", players.get_kd(pid))
+            local name = players.get_name(pid)
             local language = language_string(players.get_language(pid))
-            notify("Name: "..players.get_name(pid).."\nLanguage: "..language.. "\nRank: "..rank.."\nMoney: "..string.format("%.2f", money/1000000).."M$".."\nKills/Deaths: "..kills.."/"..deaths.."\nRatio: "..string.format("%.2f", kdratio))
+            notify($"Name: {name}\nLanguage: {language}\nRank: {rank}\nMoney: {money}M$\nKills/Deaths: {kills}/{deaths}\nRatio: {kdratio}")
         end)
 
         -------------------------------------
