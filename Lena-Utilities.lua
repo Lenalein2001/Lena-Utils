@@ -83,8 +83,10 @@ local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
 local weapon_reactions = menu.list(reactions, "Weapon Reactions", {""}, "")
 local spoofing_opt = menu.list(online, "Spoofing", {""}, "")
 -- Tunables
-local sell_stuff = menu.list(tunables, "Selling", {""}, "Shit's broken")
+local sell_stuff = menu.list(tunables, "Selling", {""}, "")
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
+local tune_screens = menu.list(tunables, "Open Screens", {""}, "")
+local bm_list = menu.list(tunables, "Safe Monitor", {""}, "")
 -- Misc
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
 local clear_area = menu.list(misc, "Clear Area", {""}, "")
@@ -1750,7 +1752,7 @@ end)
         -- Headhunter
         -------------------------------------
 
-        menu.action(missions_tunables, "Headhunter", {"hh"}, "Starts the CEO mission 'Headhunter'.", function()
+        menu.action(missions_tunables, "Headhunter", {"hh"}, "Starts the CEO mission \"Headhunter\".", function()
             if players.get_boss(players.user()) == -1 then
                 trigger_commands("ceostart")
                 notify("Starting CEO... Please wait for a few seconds.")
@@ -1797,7 +1799,7 @@ end)
         -- Take over LSIA
         -------------------------------------
 
-        menu.action(missions_tunables, "Take over LSIA", {"lsia"}, "Starts the CEO Mission 'Hostile Takeover'.", function()
+        menu.action(missions_tunables, "Take over LSIA", {"lsia"}, "Starts the CEO Mission \"Hostile Takeover\".", function()
             if players.get_boss(players.user()) == -1 then
                 trigger_commands("ceostart")
                 notify("Starting CEO. Please wait for a few seconds.")
@@ -1955,8 +1957,26 @@ end)
     for index, data in script_start do
         local script = data[1]
         local name = data[2]
-        menu.action(tunables, name, {""}, "", function()
+        menu.action(tune_screens, name, {""}, "", function()
             start_fm_script(script)
+        end)
+    end
+
+    local bm_safe_table = {
+        {"Nightclub Safe", "CLUB_SAFE_CASH_VALUE", "250000"},
+        {"Arcade Safe", "ARCADE_SAFE_CASH_VALUE", "100000"},
+        {"Agency Safe", "FIXER_SAFE_CASH_VALUE", "250000"}
+    }
+
+    for index, data in bm_safe_table do
+        local name = data[1]
+        local stat = data[2]
+        local max = data[3]
+        menu.toggle_loop(bm_list, "Monitor "..name, {"monitor"..name}, "", function()
+            if util.is_session_started() then
+                local value = STAT_GET_INT(stat)
+                util.draw_debug_text($"{name} $: {value} | {max}")
+            end
         end)
     end
 
