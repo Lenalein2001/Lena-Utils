@@ -1710,19 +1710,8 @@ end)
         -- Easy MC Sell
         -------------------------------------
 
-        menu.toggle_loop(sell_stuff, "Easy MC sell", {"easymc"}, "[Broken]", function()
-            SET_INT_LOCAL("gb_biker_contraband_sell", 698 + 17, 0)
-        end)
-
-        -------------------------------------
-        -- Remove Tony's Cut
-        -------------------------------------
-
-        -- https://www.unknowncheats.me/forum/3347568-post13086.html
-        menu.toggle_loop(sell_stuff, "Tony's Cut of Nightclub be gone", {""}, "[Broken]", function()
-            SET_FLOAT_GLOBAL(262145 + 24496, 0) -- -1002770353
-        end, function()
-            SET_FLOAT_GLOBAL(262145 + 24496, 0.1)
+        menu.toggle_loop(sell_stuff, "Easy MC sell", {"easymc"}, "Toggle BEFORE Starting the Mission.", function()
+            SET_INT_LOCAL("gb_biker_contraband_sell", 699 + 17, 0) --Local_699.f_17
         end)
 
         -------------------------------------
@@ -1730,8 +1719,8 @@ end)
         -------------------------------------
 
         -- https://www.unknowncheats.me/forum/3521137-post39.html
-        menu.action(sell_stuff, "Instant Bunker Sell", {"bunker"}, "Selling Only. [Broken]", function() 
-            SET_INT_LOCAL("gb_gunrunning", 1205 + 774, 0)
+        menu.action(sell_stuff, "Instant Bunker Sell", {"bunker"}, "Selling Only.", function() 
+            SET_INT_LOCAL("gb_gunrunning", 1206 + 774, 0) -- Local_1206.f_774
         end)
 
         -------------------------------------
@@ -1739,8 +1728,8 @@ end)
         -------------------------------------
 
         -- https://www.unknowncheats.me/forum/3513482-post37.html
-        menu.action(sell_stuff, "Instant Air Cargo", {"aircargo"}, "Selling Only. [Broken]", function() 
-            SET_INT_LOCAL("gb_smuggler", 1928 + 1035, GET_INT_LOCAL("gb_smuggler", 1928 + 1078))
+        menu.action(sell_stuff, "Instant Air Cargo", {"aircargo"}, "Selling Only.", function() 
+            SET_INT_LOCAL("gb_smuggler", 1929 + 1035, GET_INT_LOCAL("gb_smuggler", 1929 + 1078))
         end)
 
     -------------------------------------
