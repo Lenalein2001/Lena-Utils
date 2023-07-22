@@ -2721,7 +2721,7 @@ local function player(pid)
         0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
-        0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84,
+        0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3075,7 +3075,7 @@ local function player(pid)
                     end
                     local name = players.get_name(pid)
                     if name != "**Invalid**" then
-                        notify(name.." was out of the cage!")
+                        notify($"{name} was out of the cage!")
                     end
                 end
                 wait(1000)
@@ -3093,7 +3093,7 @@ local function player(pid)
                     spawned_cages[i] = nil
                     entitycount = entitycount + 1
                 end
-                notify("Cleared "..entitycount.." Spawned Cage Objects")
+                notify($"Cleared {entitycount} Spawned Cages")
                 spawned_cages = {}
             end)
 
@@ -3140,7 +3140,7 @@ local function player(pid)
                 spawned_attackers[i] = nil
                 entitycount = entitycount + 1
             end
-            notify("Cleared "..entitycount.." Attackers")
+            notify($"Cleared {entitycount} Attackers")
             spawned_attackers = {}
         end)
 
@@ -3239,7 +3239,7 @@ local function player(pid)
             mdl = util.request_model("brickade2")
             for interior_stuff as id do
                 if GET_INTERIOR_FROM_PLAYER(pid) == id then
-                    notify(players.get_name(pid) .. " isn't in an interior. :/")
+                    notify(players.get_name(pid).." isn't in an interior. :/")
                 return end
             end
             for i = 0, 3 do
@@ -3394,22 +3394,23 @@ local function player(pid)
         -------------------------------------
 
         local rids = players.get_rockstar_id(pid)
+        local names = players.get_name(pid)
         menu.action(kicks, "Block Kick", {"emp", "block"}, "Will kick and block the player from joining you ever again.", function()
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
                 hex = decimalToHex2s(rids, 32)
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep {names}")
                 end
                 wait(100)
-                trigger_commands("historyblock"..players.get_name(pid).." on")
+                trigger_commands($"historyblock{names} on")
                 if not is_developer() then
-                    log("[Lena | Block Kick] Player "..players.get_name(pid).." ("..rids..") has been Kicked and Blocked.")
+                    log($"[Lena | Block Kick] Player {names} ({rids}) has been Kicked and Blocked.")
                 else
-                    log("[Lena | Block Kick] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked and Blocked.")
+                    log($"[Lena | Block Kick] Player {names} ({rids} / {hex}) has been Kicked and Blocked.")
                 end
-                trigger_commands("kick"..players.get_name(pid))
+                trigger_commands($"kick{names}")
             end
         end, nil, nil, COMMANDPERM_RUDE)
 
