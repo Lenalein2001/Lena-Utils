@@ -914,7 +914,7 @@ end)
     end)
 
     -------------------------------------
-    -- Vehicle Drift
+    -- Drift Mode
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Drift Mode", {"driftmode"}, "Hold shift to drift.", function()
@@ -929,7 +929,7 @@ end)
     -- Force flares
     -------------------------------------
 
-    menu.toggle(vehicle, "Force flares", {"forceflares"}, "Forces flares on some Vehicles.", function(toggled)
+    menu.toggle(vehicle, "Force Flares", {"forceflares"}, "Forces flares on Airborn Vehicles.", function(toggled)
         local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
         local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
         local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
@@ -944,7 +944,7 @@ end)
     end)
 
     -------------------------------------
-    -- VPC
+    -- Control Passenger Weapons
     -------------------------------------
 
     menu.action(vehicle, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current vehicle.", function()
@@ -974,8 +974,8 @@ end)
             if not PED.IS_PED_IN_ANY_VEHICLE(ped) then 
                 continue 
             end
-            if memory.read_byte(entities.handle_to_pointer(veh) + 0x0A9E) == 0 then
-                VEHICLE.SET_VEHICLE_ALLOW_HOMING_MISSLE_LOCKON(veh, true)
+            if memory.read_byte(entities.handle_to_pointer(vehicle) + 0xA9E) == 0 then
+                memory.write_byte((entities.handle_to_pointer(vehicle) + 0xA9E), 1) 
             end
         end
     end)
@@ -1004,6 +1004,10 @@ end)
             wait(100)
         end
     end)
+
+    -------------------------------------
+    -- Keep Vehicle Clean
+    -------------------------------------
 
     menu.toggle_loop(vehicle, "Keep Vehicle Clean", {""}, "", function()
         if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1 and entities.get_owner(player_cur_car) == players.user() then
@@ -2715,6 +2719,61 @@ if is_developer() then
 
     menu.action(sdebug, "Host Kick", {"hk"}, "", function()
         trigger_commands("kick"..players.get_name(players.get_host()))
+    end)
+
+    menu.toggle_loop(sdebug, "Auto Become a CEO/MC", {""}, "Detects the cases that you should be a CEO/MC to start some heists/missions, make you one of it.", function()
+        if not util.is_session_started() then return end
+        local CEOLabels = {
+            "HIP_HELP_BBOSS",
+            "HIP_HELP_BBOSS2",
+            "HPBOARD_REG",
+            "HPBOARD_REGB",
+            "HT_NOT_BOSS",
+            "HUB_PC_BLCK",
+            "NHPG_HELP_BBOSS",
+            "OFF_COMP_REG",
+            "TRUCK_PC_BLCK",
+            "TUN_HELP_BBOSS",
+            "BUNK_PC_BLCK",
+            "CH_FINALE_REG",
+            "CH_PREP_REG",
+            "CH_SETUP_REG",
+            "FHQ_PC_BLCK",
+            "HANG_PC_BLCK",
+            "HFBOARD_REG",
+            "HIBOARD_REG",
+            "HIBOARD_REGB",
+            "MP_OFF_LAP_1",
+            "MP_OFF_LAP_PC",
+            "OFF_COMP_REG",
+            "ARC_PC_BLCK",
+            "ARC_HT_0",
+            "ARC_HT_0B",
+            "ACID_SLL_HLP2",
+            "HRBOARD_REG",
+            "HRBOARD_REGB",
+            "FHQ_SEAT_RGSIT1"
+        }
+        for CEOLabels as label do
+            if IS_HELP_MSG_DISPLAYED(label) then
+                if players.get_boss(players.user()) == -1 then trigger_commands("ceostart") end
+                if players.get_org_type(players.user()) == 1 then trigger_commands("ceotomc") end
+                wait(100)
+            end
+        end
+
+        local MCLabels = {
+            "CLBHBKRREG",
+            "ARC_HT_1",
+            "ARC_HT_1B",
+        }
+        for MCLabels as label do
+            if IS_HELP_MSG_DISPLAYED(label) then
+                if players.get_boss(players.user()) == -1 then trigger_commands("mcstart") end
+                if players.get_org_type(players.user()) == 0 then trigger_commands("ceotomc") end
+                wait(100)
+            end
+        end
     end)
 
     -------------------------------------
