@@ -306,7 +306,7 @@ function STAT_GET_INT(Stat)
     local Int_PTR = memory.alloc_int()
     STATS.STAT_GET_INT(joaat(getMPX() .. Stat), Int_PTR, -1)
     return memory.read_int(Int_PTR)
-end 
+end
  
 function IS_MPPLY(Stat) 
     local Stats = { 
@@ -491,7 +491,7 @@ function format_friends_list()
 end
 
 function user_ip()
-    local connectIP = players.get_connect_ip(players.user())
+    local connectIP = players.get_ip(players.user())
     local ipStringuser = string.format("%d.%d.%d.%d",
     math.floor(connectIP / 2^24) % 256,
     math.floor(connectIP / 2^16) % 256,
@@ -501,14 +501,14 @@ function user_ip()
 end
 
 function player_ip(pid)
-    local connectIP = players.get_connect_ip(pid)
+    local connectIP = players.get_ip(pid)
     local ipStringplayer = string.format("%d.%d.%d.%d",
     math.floor(connectIP / 2^24) % 256,
     math.floor(connectIP / 2^16) % 256,
     math.floor(connectIP / 2^8) % 256,
     connectIP % 256)
     if ipStringplayer == "255.255.255.255" then
-        return "Connected to Relay"
+        return "Connected via Relay"
     else
         return ipStringplayer
     end
