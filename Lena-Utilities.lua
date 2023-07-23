@@ -369,8 +369,9 @@ end)
     -- Friendly AI
     -------------------------------------
 
-    menu.toggle_loop(self, "Friendly NPCs", {""}, "The NPCs will ignore you.", function()
+    menu.toggle_loop(self, "Friendly NPCs", {""}, "The NPCs will ignore you.", function(toggled)
         PED.SET_PED_RESET_FLAG(players.user_ped(), 124, true)
+        PLAYER.SET_EVERYONE_IGNORE_PLAYER(players.user(), toggled)
     end)
 
     -------------------------------------
@@ -1057,6 +1058,10 @@ end)
                 NETWORK.NETWORK_PREVENT_SCRIPT_HOST_MIGRATION()
             end
         end)
+
+        -------------------------------------
+        -- Session Info
+        -------------------------------------
 
         menu.divider(hosttools, "Session Info")
         local host_name = menu.readonly(hosttools, "Host", "N/A")
@@ -1991,7 +1996,7 @@ end)
         for index, data in interiors do
             local location_name = data[1]
             local location_coords = data[2]
-            menu.action(teleport, location_name, {"tpl"..location_name}, "", function()
+            menu.action(teleport, location_name, {$"tpl{location_name}"}, "", function()
                 trigger_commands("doors on; nodeathbarriers on")
                 if not PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then 
                     ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), location_coords.x, location_coords.y, location_coords.z, false, false, false)
