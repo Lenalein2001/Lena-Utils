@@ -930,6 +930,14 @@ end)
         end
     end)
 
+    -------------------------------------
+    -- Race Mode
+    -------------------------------------
+
+    menu.action(vehicle, "Race Mode", {"racemode"}, "Changes some settings that makes races more fair.", function()
+        trigger_commands("perf; gravitymult 1; enginepowermult 1")
+    end)
+
 -------------------------------------
 -------------------------------------
 -- Online
@@ -2234,14 +2242,6 @@ end)
             end
         end)
 
-        -------------------------------------
-        -- Race Mode
-        -------------------------------------
-
-        menu.action(vehicle, "Race Mode", {"racemode"}, "Changes some settings that makes races more fair.", function()
-            trigger_commands("perf; gravitymult 1; enginepowermult 1")
-        end)
-
     -------------------------------------
     -- Disable Numpad
     -------------------------------------
@@ -2257,10 +2257,10 @@ end)
     -- Toggle Thunder Weather
     -------------------------------------
 
-    menu.toggle(misc, "Toggle Thunder Weather", {"thunder"}, "Requests Thunder Session-wide.", function(on_toggle) 
+    menu.toggle(misc, "Toggle Thunder Weather", {"thunder"}, "Requests Thunder Weather Session-wide.", function(toggled) 
         local thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
         local thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
-        if on_toggle then
+        if toggled then
             trigger_commands("weather normal")
             wait(1000)
             trigger_command(thunder_on)
@@ -2270,7 +2270,7 @@ end)
             trigger_command(thunder_off)
             wait(10000)
             trigger_commands("weather extrasunny")
-            notify("Weather Set back to Normal") 
+            notify("Weather set back to Normal.") 
         end
     end)
 
@@ -2384,7 +2384,6 @@ end)
     menu.action(misc, "Russian Roulette", {""}, "Feeling Lucky?", function()
         local is_bullet_in_my_head = math.random(6)
         local user = players.user_ped()
-        local pos = players.get_position(user)
         trigger_commands("skiprepeatwar off; commandsskip off")
         if is_bullet_in_my_head == 1 then
             notify("You have lost the Game.")
@@ -2411,7 +2410,7 @@ end)
         chat.send_message("Race Starting in: ", false, true, true)
         wait(200)
         for i = 5, 1, -1 do
-            chat.send_message(i.."...", false, true, true)
+            chat.send_message($"{i} . . .", false, true, true)
             wait(1000)
         end
         chat.send_message("GO!!!", false, true, true)
