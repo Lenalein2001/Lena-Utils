@@ -544,15 +544,15 @@ end)
     -- Thermal Scope
     -------------------------------------  
 
+    local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
     menu.toggle_loop(weap, "Thermal Scope", {""}, "Press E while aiming to activate.", function()
-        local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
         local aiming = PLAYER.IS_PLAYER_FREE_AIMING(players.user())
         if PLAYER.IS_PLAYER_FREE_AIMING(players.user()) then
             if util.is_key_down(0x45) then
-                if menu.get_value(thermal_command) or not aiming then
-                    trigger_command(thermal_command, "off")
+                if thermal_command.value or not aiming then
+                    thermal_command.value = false
                 else
-                    trigger_command(thermal_command, "on")
+                    thermal_command.value = true
                     GRAPHICS.SEETHROUGH_SET_MAX_THICKNESS(GRAPHICS.SEETHROUGH_GET_MAX_THICKNESS())
                     GRAPHICS.SEETHROUGH_SET_NOISE_MIN(0.0)
                     GRAPHICS.SEETHROUGH_SET_NOISE_MAX(0.0)
@@ -562,23 +562,21 @@ end)
                 end
             end
         else
-            trigger_command(thermal_command, "off")
+            thermal_command.value = false
         end
-    
         wait(100)
     end, function()
-        local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
-        trigger_command(thermal_command, "off")
+        thermal_command.value = false
         GRAPHICS.SEETHROUGH_RESET()
     end)
 
-    vehicle_gun = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
+    vehicle_gun_ent = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
     vehicle_gun_gm = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
 
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn vehicle at Bullet Impact", {""}, "", function()
         if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
-            local veh, gm = menu.get_value(vehicle_gun), menu.get_value(vehicle_gun_gm)
+            local veh, gm = menu.get_value(vehicle_gun_ent), menu.get_value(vehicle_gun_gm)
             spawn_vehicle(veh, impactCords, gm)
         end
     end)
