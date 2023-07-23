@@ -1759,7 +1759,7 @@ end)
                 wait(8000)
             end
             if players.get_boss(players.user()) == -1 then
-                return
+                return util.stop_thread()
             end
             IA_MENU_OPEN_OR_CLOSE()
             IA_MENU_ENTER(1)
@@ -1961,12 +1961,6 @@ end)
             start_fm_script(script)
         end)
     end
-
-    local bm_safe_table = {
-        {"Nightclub Safe", "CLUB_SAFE_CASH_VALUE", "250000"},
-        {"Arcade Safe", "ARCADE_SAFE_CASH_VALUE", "100000"},
-        {"Agency Safe", "FIXER_SAFE_CASH_VALUE", "250000"}
-    }
 
     for index, data in bm_safe_table do
         local name = data[1]

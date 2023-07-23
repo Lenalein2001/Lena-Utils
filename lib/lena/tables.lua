@@ -10,6 +10,12 @@ better_planes = {
     {0x0054, 1}
 }
 
+bm_safe_table = {
+    {"Nightclub Safe", "CLUB_SAFE_CASH_VALUE", "250000"},
+    {"Arcade Safe", "ARCADE_SAFE_CASH_VALUE", "100000"},
+    {"Agency Safe", "FIXER_SAFE_CASH_VALUE", "250000"}
+}
+
 MCLabels = {
     "CLBHBKRREG",
     "ARC_HT_1",
