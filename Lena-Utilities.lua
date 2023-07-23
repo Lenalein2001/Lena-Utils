@@ -2818,8 +2818,8 @@ local function player(pid)
         -------------------------------------         
 
         menu.action(friendly, "Fix Blackscreen", {"fixblackscreen"}, "Tries to fix a stuck Blackscreen for the selected Player.", function()
-            local player = players.get_name(pid)
-            trigger_commands($"givesh {player}; aptme {player}")
+            local name = players.get_name(pid)
+            trigger_commands($"givesh {name}; aptme {name}")
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
         -------------------------------------
@@ -3233,7 +3233,7 @@ local function player(pid)
             mdl = util.request_model("brickade2")
             for interior_stuff as id do
                 if GET_INTERIOR_FROM_PLAYER(pid) == id then
-                    notify(players.get_name(pid).." isn't in an interior. :/")
+                    notify(players.get_name(pid).." isn't in an Interior. :/")
                 return end
             end
             for i = 0, 3 do
@@ -3258,11 +3258,11 @@ local function player(pid)
         bloop = menu.toggle_loop(trolling, "Bounty Loop", {"bountyloop", "bloop"}, "Will set the Players bounty always to 9000.", function(on)
             if not players.exists(pid) then bloop.value = false; util.stop_thread() end
             local bounty = players.get_bounty(pid)
-            local player = players.get_name(pid)
+            local name = players.get_name(pid)
             local interior = players.is_in_interior(pid)
             if not (bounty and interior) then
-                trigger_commands($"bounty {player} 9000")
-                notify($"Bounty set on: {player}.")
+                trigger_commands($"bounty {name} 9000")
+                notify($"Bounty set on: {name}.")
                 wait(10000)
             end
         end)
@@ -3358,14 +3358,16 @@ local function player(pid)
             NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, toggled)
         end)
 
+
+
         menu.action(trolling, "Clone Player", {""}, "", function()
             local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local clone = PED.CLONE_PED(player, false, true)
             local cords = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player, -5.0, 0.0, 0.0)
             ENTITY.SET_ENTITY_COORDS(clone, cords)
             entities.set_can_migrate(clone, false)
-            TASK.TASK_COMBAT_PED(clone, player, 0, 16)
-            WEAPON.GIVE_WEAPON_TO_PED(clone, joaat("WEAPON_HOMINGLAUNCHER"), 20, false, true)
+            --TASK.TASK_COMBAT_PED(clone, player, 0, 16)
+            --WEAPON.GIVE_WEAPON_TO_PED(clone, joaat("WEAPON_HOMINGLAUNCHER"), 20, false, true)
         end)
 
     -------------------------------------
