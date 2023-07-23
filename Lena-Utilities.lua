@@ -3255,8 +3255,8 @@ local function player(pid)
         -- Bounty Loop
         -------------------------------------
 
-        bloop = menu.toggle_loop(trolling, "Bounty Loop", {"bountyloop", "bloop"}, "Will set the Players bounty always to 9000.", function(on)
-            if not players.exists(pid) then bloop.value = false; util.stop_thread() end
+        bounty_loop = menu.toggle_loop(trolling, "Bounty Loop", {"bountyloop", "bloop"}, "Will set the Players bounty always to 9000.", function(on)
+            if not players.exists(pid) then bounty_loop.value = false; util.stop_thread() end
             local bounty = players.get_bounty(pid)
             local name = players.get_name(pid)
             local interior = players.is_in_interior(pid)
@@ -3301,12 +3301,15 @@ local function player(pid)
                 wait(5000)
             becomeorb.value = false
         end)
+  
+        -------------------------------------
+        -- Explosion Loop
+        -------------------------------------
 
         local usingExplosionLoop = false
         menu.slider(customExplosion, "Loop Speed", {"expspeed"}, "", 50, 10000, 1000, 10, function(value)
             local delay = value 
         end)
-
         menu.toggle(customExplosion, "Owned Explosion Loop", {""}, "", function(on)
             usingExplosionLoop = on
             while usingExplosionLoop and is_player_active(pid, false, true) and not util.is_session_transition_active() do
@@ -3314,7 +3317,6 @@ local function player(pid)
                 wait(delay)
             end
         end)
-
         menu.toggle(customExplosion, "Explosion Loop", {""}, "", function(on)
             usingExplosionLoop = on
             while usingExplosionLoop and is_player_active(pid, false, true) and not util.is_session_transition_active() do
@@ -3358,7 +3360,9 @@ local function player(pid)
             NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, toggled)
         end)
 
-
+        -------------------------------------
+        -- Clone Player
+        -------------------------------------
 
         menu.action(trolling, "Clone Player", {""}, "", function()
             local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
