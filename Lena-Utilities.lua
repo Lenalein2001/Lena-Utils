@@ -2845,7 +2845,7 @@ local function player(pid)
                 notify("The message is to long.")
             else
                 chat.send_targeted_message(pid, players.user(), on_command, false)
-                log(players.get_name(players.user()).." [All] ".. on_command)
+                log(players.get_name(players.user()).." [All] "..on_command)
             end
         end)
 
@@ -2867,7 +2867,6 @@ local function player(pid)
             trigger_command(nuts, toggled)
         end)
 
-        
     -------------------------------------
     -------------------------------------
     -- Vehicle
@@ -3048,26 +3047,21 @@ local function player(pid)
                 if not elevatorPOS or elevatorPOS:distance(players.get_position(pid)) >= 6.0 then
                     TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                     wait(250)
-                    local spawnped = "u_m_m_jesus_01"
-                    local spawn1 = "prop_test_elevator"
-                    local spawn2 = "prop_test_elevator"
+                    local spawnped, spawncage = "u_m_m_jesus_01", "prop_test_elevator"
                     elevatorPOS = players.get_position(pid)
                     local temp_ped = spawn_ped(spawnped, players.get_position(pid), true)
-
                     if ENTITY.IS_ENTITY_A_PED(temp_ped) then
                         ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
                         PED.SET_PED_CONFIG_FLAG(temp_ped, 62, 1)
                         ENTITY.FREEZE_ENTITY_POSITION(temp_ped, true)
-                        local cage1 = spawn_obj(spawn1, players.get_position(pid))
-                        local cage2 = spawn_obj(spawn2, players.get_position(pid))
+                        local cage1, cage2 = spawn_obj(spawncage, players.get_position(pid)), spawn_obj(spawncage, players.get_position(pid))
                         ENTITY.SET_ENTITY_VISIBLE(temp_ped, true)
                         ENTITY.ATTACH_ENTITY_TO_ENTITY(cage1, temp_ped, 0, 0,0,0, 0,0,0, false, true, true, 0, true)
                         ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
                         ENTITY.ATTACH_ENTITY_TO_ENTITY(cage2, temp_ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -90.0, 0,  false, true, true, 0, true)
                         ENTITY.PROCESS_ENTITY_ATTACHMENTS(temp_ped)
                         ENTITY.SET_ENTITY_VISIBLE(temp_ped, false)
-                        spawned_cages[#spawned_cages + 1] = cage1
-                        spawned_cages[#spawned_cages + 1] = cage2
+                        spawned_cages[#spawned_cages + 1] = cage1; spawned_cages[#spawned_cages + 1] = cage2
                     else
                         entities.delete_by_handle(temp_ped)
                     end
@@ -3109,8 +3103,7 @@ local function player(pid)
             local gm = menu.get_value(attack_ent_gm)
             local player_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local spawn_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player_ped, 30.0, -30.0, 0.0)
-            local ped = spawn_ped("s_m_y_blackops_01", spawn_pos, gm)
-            local vehicle = spawn_vehicle("rhino", spawn_pos, gm)
+            local ped, vehicle = spawn_ped("s_m_y_blackops_01", spawn_pos, gm), spawn_vehicle("rhino", spawn_pos, gm)
             NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(vehicle), true)
             PED.SET_PED_INTO_VEHICLE(ped, vehicle, -1)
             PED.SET_PED_COMBAT_ATTRIBUTES(ped, 3, false)
@@ -3233,8 +3226,7 @@ local function player(pid)
         menu.action(trolling, "Force Player Outside of Interior", {""}, "", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = players.get_position(pid)
-            glitch_hash = util.request_model("prop_windmill_01")
-            mdl = util.request_model("brickade2")
+            local glitch_hash, mdl = util.request_model("prop_windmill_01"), util.request_model("brickade2")
             for interior_stuff as id do
                 if GET_INTERIOR_FROM_PLAYER(pid) == id then
                     notify(players.get_name(pid).." isn't in an Interior. :/")
@@ -3249,8 +3241,7 @@ local function player(pid)
                 ENTITY.SET_ENTITY_COLLISION(obj, true, true)
                 ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
                 wait(250)
-                entities.delete(obj)
-                entities.delete(veh)
+                entities.delete(obj); entities.delete(veh)
                 wait(250)     
             end
         end)
@@ -3335,8 +3326,7 @@ local function player(pid)
 
         menu.action(customExplosion, "Blame Random Player", {""}, "Mister//ModzZ requested it, so I made it.", function()
             local pids = players.list(false, false, true, false, false)
-            local player = pids[math.random(#pids)]
-            local killer = PLAYER.GET_PLAYER_PED(player)
+            local player, killer = pids[math.random(#pids)], PLAYER.GET_PLAYER_PED(player)
             local victim = players.get_position(pid)
             FIRE.ADD_OWNED_EXPLOSION(killer, victim, 1, 1.0, false, true, 0.0)
             notify("Player "..players.get_name(player).." was blamed for killing "..players.get_name(pid).."!")
