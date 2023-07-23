@@ -534,7 +534,7 @@ end)
             local user = players.user_ped()
             local ped_dist = v3.distance(players.get_position(user), players.get_position(pid))
             local control = (PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 76))
-            if not PED.IS_PED_DEAD_OR_DYING(ped) and control and ped_dist < 500.0 and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
+            if not PLAYER.IS_PLAYER_PLAYING(ped) and control and ped_dist < 500.0 and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
                 VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, players.get_position(pid))
             end
         end
@@ -3199,7 +3199,7 @@ local function player(pid)
             local user = players.user_ped()
             local pos = players.get_position(pid)
             local control = PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 76)
-            if not PED.IS_PED_DEAD_OR_DYING(ped) and control and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
+            if not PLAYER.IS_PLAYER_PLAYING(ped) and control and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
                 VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, pos.x, pos.y, pos.z)
             end
         end)
