@@ -1752,7 +1752,7 @@ end)
         -- Headhunter
         -------------------------------------
 
-        menu.action(missions_tunables, "Headhunter", {"hh"}, "Starts the CEO mission \"Headhunter\".", function()
+        menu.action(missions_tunables, "Headhunter", {"hh", "headhunter"}, "Starts the CEO mission \"Headhunter\".", function()
             if players.get_boss(players.user()) == -1 then
                 trigger_commands("ceostart")
                 notify("Starting CEO... Please wait for a few seconds.")
@@ -1783,7 +1783,7 @@ end)
         -- Finish Headhunter
         -------------------------------------
 
-        menu.action(missions_tunables, "Finish Headhunter", {""}, "Tries to finish the Mission.", function()
+        menu.action(missions_tunables, "Finish Headhunter", {"finishheadhunter", "finishhh"}, "Tries to finish the Mission.", function()
             local Blip = HUD.GET_FIRST_BLIP_INFO_ID(432) -- https://docs.fivem.net/docs/game-references/blips/
             while HUD.DOES_BLIP_EXIST(Blip) do
                 request_control(Blip, false)
@@ -1966,7 +1966,7 @@ end)
         local name = data[1]
         local stat = data[2]
         local max = data[3]
-        menu.toggle_loop(bm_list, "Monitor "..name, {"monitor"..name}, "", function()
+        menu.toggle_loop(bm_list, $"Monitor {name}", {$"monitor{name}"}, "", function()
             if util.is_session_started() then
                 local value = STAT_GET_INT(stat)
                 util.draw_debug_text($"{name} $: {value} | {max}")
@@ -3280,10 +3280,10 @@ local function player(pid)
         end)
 
         -------------------------------------
-        -- Spawn Orbital Cannon Explosion
+        -- Orbital Cannon
         -------------------------------------
 
-        menu.action(customExplosion, "Orbital Cannon Explode", {"nuke"}, "Spawns the explosion on the selected Player.", function()
+        menu.action(customExplosion, "Orbital Cannon", {"nuke"}, "Spawns the explosion on the selected Player.", function()
             local becomeorb = menu.ref_by_path("Online>Become The Orbital Cannon")
             becomeorb.value = true
                 wait(200)
