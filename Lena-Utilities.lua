@@ -99,7 +99,7 @@ local teleport = menu.list(misc, "Teleport", {""}, "")
 local status, auto_updater = pcall(require, "auto-updater")
 if not status then
     local auto_update_complete = nil notify("Installing auto-updater...")
-    async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/main/auto-updater.lua",
+    async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/senpai/auto-updater.lua",
         function(result, headers, status_code)
             local function parse_auto_update_result(result, headers, status_code)
                 local error_prefix = "Error downloading auto-updater: "
@@ -120,7 +120,7 @@ if auto_updater == true then error("Invalid auto-updater lib. Please delete your
 
 local default_check_interval = 604800
 local auto_update_config = {
-    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/Lena-Utilities.lua",
+    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/Lena-Utilities.lua",
     script_relpath=SCRIPT_RELPATH,
     switch_to_branch=selected_branch,
     verify_file_begins_with="--",
@@ -129,49 +129,49 @@ local auto_update_config = {
     dependencies={
         {
             name="Funcs",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/lena/funcs.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/funcs.lua",
             script_relpath="/lib/lena/funcs.lua",
             check_interval=default_check_interval,
         },
         {
             name="Natives",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/natives-2944a/uno.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/natives-2944a/uno.lua",
             script_relpath="/lib/natives-2944a/uno.lua",
             check_interval=default_check_interval,
         },
         {
             name="Json",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/pretty/json.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json.lua",
             script_relpath="/lib/pretty/json.lua",
             check_interval=default_check_interval,
         },
         {
             name="Constant",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/pretty/json/constant.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/constant.lua",
             script_relpath="/lib/pretty/json/constant.lua",
             check_interval=default_check_interval,
         },
         {
             name="Parser",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/pretty/json/parser.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/parser.lua",
             script_relpath="/lib/pretty/json/parser.lua",
             check_interval=default_check_interval,
         },
         {
             name="Serializer",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/pretty/json/serializer.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/serializer.lua",
             script_relpath="/lib/pretty/json/serializer.lua",
             check_interval=default_check_interval,
         },
         {
             name="ScaleformLib",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/ScaleformLib.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/ScaleformLib.lua",
             script_relpath="/lib/ScaleformLib.lua",
             check_interval=default_check_interval,
         },
         {
             name="Tables",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/main/lib/lena/tables.lua",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/tables.lua",
             script_relpath="/lib/lena/tables.lua",
             check_interval=default_check_interval,
         },
