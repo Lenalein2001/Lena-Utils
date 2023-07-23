@@ -734,14 +734,14 @@ end)
             end
             for ped_point_tab as handle do
                 if PED.IS_PED_TRYING_TO_ENTER_A_LOCKED_VEHICLE(handle) then
-                    local bone1 = GET_PED_BONE_COORDS(handle, 36029, 0.0, 0.0, 0.0) 
+                    local bone1 = PED.GET_PED_BONE_COORDS(handle, 36029, 0.0, 0.0, 0.0) 
                     GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('ent_sht_electrical_box', bone1.x, bone1.y, bone1.z, 90, 0, 0, 1, true, true, true)
                     FIRE.ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
-                elseif IS_PED_BEING_JACKED(players.user_ped()) then
-                    SET_VEHICLE_DOOR_SHUT(player_cur_car, 0, true)
-                    local jacker = GET_PEDS_JACKER(players.user_ped())
+                elseif PED.IS_PED_BEING_JACKED(players.user_ped()) then
+                    VEHICLE.SET_VEHICLE_DOOR_SHUT(player_cur_car, 0, true)
+                    local jacker = PED.GET_PEDS_JACKER(players.user_ped())
                     PED.CLEAR_PED_TASKS_IMMEDIATELY(jacker)
-                    local bone1 = GET_PED_BONE_COORDS(jacker, 36029, 0.0, 0.0, 0.0) 
+                    local bone1 = PED.GET_PED_BONE_COORDS(jacker, 36029, 0.0, 0.0, 0.0) 
                     FIRE.ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
                     GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('ent_sht_electrical_box', bone1.x, bone1.y, bone1.z, 90, 0, 0, 1, true, true, true)
                     PED.SET_PED_INTO_VEHICLE(players.user_ped(), player_cur_car, -1)
