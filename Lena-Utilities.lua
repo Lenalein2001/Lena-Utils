@@ -2410,7 +2410,9 @@ end)
     -------------------------------------  
 
     menu.action(ai_made, "Countdown", {"countdown"}, "Start the countdown.", function()
-        for i = 3, 1, -1 do
+        chat.send_message("Race Starting in: ", false, true, true)
+        wait(200)
+        for i = 5, 1, -1 do
             chat.send_message(i.."...", false, true, true)
             wait(1000)
         end
