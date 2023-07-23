@@ -2627,14 +2627,15 @@ if is_developer() then
             maxAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}),
             rangeAddress = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}),
         }
-            
-        modifiedRange[weaponHash].originalMin   = memory.read_float(modifiedRange[weaponHash].minAddress)
-        modifiedRange[weaponHash].originalMax   = memory.read_float(modifiedRange[weaponHash].maxAddress)
-        modifiedRange[weaponHash].originalRange = memory.read_float(modifiedRange[weaponHash].rangeAddress)
-    
-        memory.write_float(modifiedRange[weaponHash].minAddress,   10000)
-        memory.write_float(modifiedRange[weaponHash].maxAddress,   10000)
-        memory.write_float(modifiedRange[weaponHash].rangeAddress, 10000)
+
+        if modifiedRange[weaponHash].rangeAddress != 0 then
+            modifiedRange[weaponHash].originalMin   = memory.read_float(modifiedRange[weaponHash].minAddress)
+            modifiedRange[weaponHash].originalMax   = memory.read_float(modifiedRange[weaponHash].maxAddress)
+            modifiedRange[weaponHash].originalRange = memory.read_float(modifiedRange[weaponHash].rangeAddress)
+            memory.write_float(modifiedRange[weaponHash].minAddress,   10000)
+            memory.write_float(modifiedRange[weaponHash].maxAddress,   10000)
+            memory.write_float(modifiedRange[weaponHash].rangeAddress, 10000)
+        end
     end)
 
     menu.action(sdebug, "Host Kick", {"hk"}, "", function()
@@ -2739,7 +2740,7 @@ local function player(pid)
     menu.divider(menu.player_root(pid), "Lena Utilities")
     local lena = menu.list(menu.player_root(pid), "Lena Utilities", {"lenau"}, "")
 
-    menu.action(lena, "Mark As Modder", {"manual"}, "", function()
+    menu.action(lena, "Mark As Modder", {"manual"}, "Mark this Player manually as a Modder.", function()
         if not IsDetectionPresent(pid, "Manual") then
             players.add_detection(pid, "Manual", 7, 100)
         end
