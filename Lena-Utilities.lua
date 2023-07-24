@@ -2638,6 +2638,10 @@ if is_developer() then
         trigger_commands("kick"..players.get_name(players.get_host()))
     end)
 
+    menu.action(sdebug, "Set Global", {""}, "", function()
+        --SET_INT_GLOBAL(1894573 + 10, 0)
+    end)
+
     -------------------------------------
     -- Natives
     -------------------------------------
@@ -2809,8 +2813,8 @@ local function player(pid)
                 4,
                 10000, -- wage?
                 0, 0, 0, 0,
-                memory.read_int(memory.script_global(1924276 + 9)), -- .f_8
-                memory.read_int(memory.script_global(1924276 + 10)), -- .f_9
+                memory.read_int(memory.script_global(1924276 + 9)), -- 1924276.f_8
+                memory.read_int(memory.script_global(1924276 + 10)), -- 1924276.f_9
             })
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
