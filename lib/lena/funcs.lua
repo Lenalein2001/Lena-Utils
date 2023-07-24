@@ -202,6 +202,18 @@ function spawn_vehicle(model_name, pos, veh_godmode)
     end
 end
 
+function trapcage(pid, object, visible)
+    local objHash = util.joaat(object)
+    request_model(objHash)
+    local pos = players.get_position(pid)
+    local obj = entities.create_object(objHash, pos)
+    entities.set_can_migrate(entities.handle_to_pointer(obj), false)
+    spawned_cages[#spawned_cages + 1] = obj
+    ENTITY.SET_ENTITY_VISIBLE(obj, visible)
+    ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(objHash)
+end
+
 function pid_to_handle(pid)
     NETWORK.NETWORK_HANDLE_FROM_PLAYER(pid, handle_ptr, 13)
     return handle_ptr
@@ -243,18 +255,6 @@ function StandUser(pid) -- credit to sapphire for this
         end
     end
     return false
-end
-
-function trapcage(pid, object, visible)
-    local objHash = util.joaat(object)
-    request_model(objHash)
-    local pos = players.get_position(pid)
-    local obj = entities.create_object(objHash, pos)
-    entities.set_can_migrate(entities.handle_to_pointer(obj), false)
-    spawned_cages[#spawned_cages + 1] = obj
-    ENTITY.SET_ENTITY_VISIBLE(obj, visible)
-    ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(objHash)
 end
 
 function mod_uses(type, incr)
@@ -373,7 +373,7 @@ function request_animation(hash)
 end
 
 function BlockSyncs(pid, callback)
-    for _, i in players.list(false, true, true) do
+    for players.list(false, true, true) as i do
         if i ~= pid then
             local outSync = menu.ref_by_rel_path(menu.player_root(i), "Outgoing Syncs>Block")
             trigger_command(outSync, "on")
@@ -381,7 +381,7 @@ function BlockSyncs(pid, callback)
     end
     wait(10)
     callback()
-    for _, i in players.list(false, true, true) do
+    for players.list(false, true, true) as i do
         if i ~= pid then
             local outSync = menu.ref_by_rel_path(menu.player_root(i), "Outgoing Syncs>Block")
             trigger_command(outSync, "off")
@@ -428,9 +428,9 @@ end
 
 function is_developer()
     local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77}
-    local userRockstarID = players.get_rockstar_id(players.user())
+    local user = players.get_rockstar_id(players.user())
     for developer as id do
-        if userRockstarID == id then
+        if user == id then
             return true
         end
     end
@@ -463,16 +463,6 @@ function is_entity_a_projectile(hash)
         joaat("w_lr_40mm")
     }
     return table.contains(all_projectile_hashes, hash)
-end
-
-function get_condensed_player_name(player)
-	local condensed = "<C>" .. PLAYER.GET_PLAYER_NAME(player) .. "</C>"
-	if players.get_boss(player) ~= -1  then
-		local colour = players.get_org_colour(player)
-		local hudColour = get_hud_colour_from_org_colour(colour)
-		return string.format("~HC_%d~%s~s~", hudColour, condensed)
-	end
-	return condensed
 end
 
 function format_friends_list()
@@ -539,15 +529,15 @@ function on_math_message(sender, reserved, text, team_chat, networked, is_auto)
         return
     end
     local lowercase_text = string.lower(text)
-    local prefix = "@vel "
+    local prefix = "@bot "
     if string.sub(lowercase_text, 1, #prefix) == prefix then
         local expression = string.sub(lowercase_text, #prefix + 1)
         local result, error_message = load("return " .. expression)()
         if result then
-            chat.send_message("That expression evaluates to " .. tostring(result) .. ". :)", false, true, true)
+            chat.send_message("That expression evaluates to {tostring(result)} :)", false, true, true)
         else
             chat.send_message("Sorry, I couldn't evaluate that expression :/", false, true, true)
-            log("[Lena | Math] Error trying to evaluate an expression. Error: "..error_message)
+            log($"[Lena | Math] Error trying to evaluate an expression. Error: {error_message}")
         end
     end
 end
@@ -565,7 +555,7 @@ end
 function get_vehicles_in_player_range(player, radius)
 	local vehicles = {}
 	local pos = players.get_position(player)
-	for _, vehicle in entities.get_all_vehicles_as_handles() do
+	for entities.get_all_vehicles_as_handles() as vehicle do
 		local vehPos = ENTITY.GET_ENTITY_COORDS(vehicle, true)
 		if pos:distance(vehPos) <= radius then table.insert(vehicles, vehicle) end
 	end
