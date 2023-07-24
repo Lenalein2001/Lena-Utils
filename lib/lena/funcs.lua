@@ -2,40 +2,8 @@ json = require "pretty.json"
 notificationBits = 0
 nearbyNotificationBits = 0
 blips = {}
-
 local scriptdir = filesystem.scripts_dir()
 local lenaDir = scriptdir .. "Lena\\"
-
-HudColour =
-{
-	pureWhite = 0,
-	white = 1,
-	black = 2,
-	grey = 3,
-	greyLight = 4,
-	greyDrak = 5,
-	red = 6,
-	redLight = 7,
-	redDark = 8,
-	blue = 9,
-	blueLight = 10,
-	blueDark = 11,
-	yellow = 12,
-	yellowLight = 13,
-	yellowDark = 14,
-	orange = 15,
-	orangeLight = 16,
-	orangeDark = 17,
-	green = 18,
-	greenLight = 19,
-	greenDark = 20,
-	purple = 21,
-	purpleLight = 22,
-	purpleDark = 23,
-	radarHealth = 25,
-	radarArmour = 26,
-	friendly = 118,
-}
 
 function gen_fren_funcs(name)
     local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)
