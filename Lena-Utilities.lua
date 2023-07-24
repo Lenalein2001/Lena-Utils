@@ -759,8 +759,7 @@ end)
 
         menu.toggle(engine_control, "Stop Engine", {""}, "Disables and enables the engine on toggle.", function(toggled)
             VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, not toggled, toggled, toggled)
-        end)        
-
+        end)
         menu.action(engine_control, "Toggle Engine On", {"Engineoon", "Eon"}, "Starts the Engine of the current Vehicle.", function()
             VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, true, true, true)
         end)
@@ -787,11 +786,9 @@ end)
     menu.action(vehicle, "Enter Nearest Vehicle", {""}, "Enters the nearest Vehicle that can be found.", function()
         if not PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             local player_pos = players.get_position(players.user())
-            local veh = closestveh(player_pos)
-            PED.SET_PED_INTO_VEHICLE(players.user_ped(), veh, -1)
+            PED.SET_PED_INTO_VEHICLE(players.user_ped(), closestveh(player_pos), -1)
             wait(100)
-            local vehmodel = players.get_vehicle_model(players.user())
-            local vehname = util.get_label_text(vehmodel)
+            local vehname = util.get_label_text(players.get_vehicle_model(players.user()))
             notify($"Set Ped into the nearest Vehicle.\nVehicle: {vehname}.")
         end
     end)
@@ -2493,7 +2490,7 @@ if is_developer() then
     local nativec = menu.list(sdebug, "Native Feedback", {""}, "")
     local json = require("json")
 
-    menu.toggle(sdebug, "Math Bot", {"mathbot"}, "Enables the math bot to evaluate math expressions. Usage: @vel <expression>.", function(enabled)
+    menu.toggle(sdebug, "Math Bot", {"mathbot"}, "Enables the math bot to evaluate math expressions. Usage: @bot <expression>.", function(enabled)
         math_reply = enabled
     end)
     chat.on_message(on_math_message)
