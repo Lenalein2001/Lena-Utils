@@ -2720,7 +2720,7 @@ local function player(pid)
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
-
+        0x0D64813B, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3400,9 +3400,9 @@ local function player(pid)
                 wait(100)
                 trigger_commands($"historyblock{names} on")
                 if not is_developer() then
-                    log($"[Lena | Block Kick] Player {names} ({rids}) has been Kicked and Blocked.")
+                    log($"[Lena | Block Kick] {names} ({rids}) has been Kicked and Blocked.")
                 else
-                    log($"[Lena | Block Kick] Player {names} ({rids} / {hex}) has been Kicked and Blocked.")
+                    log($"[Lena | Block Kick] {names} ({rids} / {hex}) has been Kicked and Blocked.")
                 end
                 trigger_commands($"kick{names}")
             end
@@ -3414,13 +3414,13 @@ local function player(pid)
             else
                 hex = decimalToHex2s(rids, 32)
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep{names}")
                 end
-                trigger_commands("loveletter"..players.get_name(pid))
+                trigger_commands($"loveletter{names}")
                 if not is_developer() then
-                    log("[Lena | Rape] Player "..players.get_name(pid).." ("..rids..") has been Kicked.")
+                    log($"[Lena | Rape] {names} ({rids}) has been Kicked.")
                 else
-                    log("[Lena | Rape] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Kicked.")
+                    log($"[Lena | Rape] {names} ({rids} / {hex}) has been Kicked.")
                 end
             end
         end, nil, nil, COMMANDPERM_RUDE)
@@ -3429,8 +3429,8 @@ local function player(pid)
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
-                trigger_commands("kick"..players.get_name(pid))
-                log("[Lena | Host Kick] Player "..players.get_name(pid).." ("..rids..") has been Kicked.")
+                trigger_commands($"kick{names}")
+                log($"[Lena | Host Kick] {names} ({rids}) has been Kicked.")
             end
         end)
 
@@ -3444,25 +3444,24 @@ local function player(pid)
             else
                 hex = decimalToHex2s(rids, 32)
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep{names}")
                     wait(50)
                 end
-                local player = players.get_name(pid)
-                trigger_commands("ngcrash"..players.get_name(pid))
+                trigger_commands($"ngcrash{names}")
                 wait(500)
-                trigger_commands("crash"..players.get_name(pid))
+                trigger_commands($"crash{names}")
                 wait(500)
                 if not is_developer() then
-                    log("[Lena | Block Join Crash] Player "..players.get_name(pid).." ("..rids..") has been Crashed and Blocked.")
+                    log($"[Lena | Block Join Crash] {names} ({rids}) has been Crashed and Blocked.")
                 else
-                    log("[Lena | Block Join Crash] Player "..players.get_name(pid).." ("..rids.." / "..hex..") has been Crashed and Blocked.")
+                    log($"[Lena | Block Join Crash] {names} ({rids} / {hex}) has been Crashed and Blocked.")
                 end
-                trigger_commands("historyblock" ..players.get_name(pid).." on")
+                trigger_commands($"historyblock{names} on")
                 wait(10000)
-                if players.get_name(pid) == player then
-                    log("[Lena | Crash Backup] Player "..players.get_name(pid) .." ("..rids..") has not crashed, kicking the player instead.")
+                if players.get_name(pid) == names then
+                    log($"[Lena | Crash Backup] {names} ({rids}) has not crashed, kicking the player instead.")
                     wait(50)
-                    trigger_commands("kick"..players.get_name(pid))
+                    trigger_commands($"kick{names}")
                 end
             end
         end, nil, nil, COMMANDPERM_AGGRESSIVE)
@@ -3505,7 +3504,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep{names}")
                     wait(50)
                 end
                 local user = players.user()
@@ -3536,7 +3535,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep{names}")
                     wait(50)
                 end
                 BlockSyncs(pid, function()
@@ -3553,7 +3552,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep{names}")
                     wait(50)
                 end
                 BlockSyncs(pid, function()
@@ -3570,7 +3569,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep{names}")
                     wait(50)
                 end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3622,7 +3621,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep{names}")
                     wait(50)
                 end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3647,7 +3646,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands("savep"..players.get_name(pid))
+                    trigger_commands($"savep{names}")
                     wait(50)
                 end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
