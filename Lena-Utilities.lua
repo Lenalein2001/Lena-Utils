@@ -2853,6 +2853,15 @@ local function player(pid)
         end)
 
         -------------------------------------
+        -- Teleport to Player
+        -------------------------------------
+
+        menu.action(friendly, "Teleport to Player", {""}, $"Teleport to {players.get_name(pid)}", function()
+            local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player, 0.0, 2, 0), false, false, false)
+        end)
+
+        -------------------------------------
         -- Spectate
         -------------------------------------
 
