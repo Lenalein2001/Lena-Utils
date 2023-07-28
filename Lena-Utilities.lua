@@ -3374,15 +3374,6 @@ local function player(pid)
     -------------------------------------
     -------------------------------------
 
-        --[[local kick_root = menu.ref_by_rel_path(menu.player_root(pid), "Kick")
-        menu.action(kick_root, "Rape", {"rape"}, "A Unblockable kick that won't tell the target or non-hosts who did it.", function()
-            if savekicked then
-                trigger_commands("savep"..players.get_name(pid))
-                wait(500)
-            end
-            trigger_commands("breakup"..players.get_name(pid))
-        end, nil, nil, COMMANDPERM_RUDE)]]
-
         -------------------------------------
         -- Block Join Kick
         -------------------------------------
