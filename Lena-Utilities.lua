@@ -2857,7 +2857,7 @@ local function player(pid)
         -------------------------------------
 
         local spec = menu.ref_by_rel_path(menu.player_root(pid), "Spectate")
-        brv_six = menu.toggle(spec, "Bravo Six Method", {"bravo"}, "Bravo six, going dark. Blocks Outgoing Syncs with the Player.", function(toggled)
+        brv_six = menu.toggle(spec, "Bravo Six", {"bravo"}, "Bravo six, going dark. Blocks Outgoing Syncs with the Player.", function(toggled)
             local outgoingSyncs = menu.ref_by_rel_path(menu.player_root(pid), "Outgoing Syncs>Block")
             local nuts = menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Nuts Method")
             if pid == players.user() then 
@@ -2880,10 +2880,10 @@ local function player(pid)
         -- GOD MODE
         -------------------------------------
 
-        menu.toggle(mpvehicle, "God Mode", {"vgm"}, "Toggles Vehicle Godmode.", function(on)
+        menu.toggle(mpvehicle, "God Mode", {"vgm"}, "Toggles Vehicle Godmode.", function(toggled)
             local vehicle = get_vehicle_player_is_in(pid)
             if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle) then
-                if on then
+                if toggled then
                     VEHICLE.SET_VEHICLE_ENVEFF_SCALE(vehicle, 0.0)
                     VEHICLE.SET_VEHICLE_BODY_HEALTH(vehicle, 1000.0)
                     VEHICLE.SET_VEHICLE_ENGINE_HEALTH(vehicle, 1000.0)
@@ -3024,7 +3024,7 @@ local function player(pid)
                 TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                 wait(250)
                 trapcage(pid, "prop_gold_cont_01", true)
-            end)
+            end, nil, nil, COMMANDPERM_RUDE)
 
             -------------------------------------
             -- Small Invisible Cage
@@ -3034,7 +3034,7 @@ local function player(pid)
                 TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                 wait(250)
                 trapcage(pid, "prop_gold_cont_01", false)
-            end)
+            end, nil, nil, COMMANDPERM_RUDE)
 
             -------------------------------------
             -- Invisible Cage
@@ -3146,7 +3146,7 @@ local function player(pid)
             local int = memory.read_int(memory.script_global(1895156 + 1 + (pid * 609) + 511)) --Global_1895156[PLAYER::PLAYER_ID() /*609*/].f_511;
             sendse(1 << pid, {-366707054, players.user(), 20, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
             sendse(1 << pid, {1757622014, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-        end)
+        end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
         -- Force 1v1
@@ -3220,7 +3220,7 @@ local function player(pid)
                     end
                 end
             end
-        end)
+        end, nil, nil, COMMANDPERM_RUDE)
             
         -------------------------------------
         -- Kill Player Inside Interior
@@ -3247,7 +3247,7 @@ local function player(pid)
                 entities.delete(obj); entities.delete(veh)
                 wait(250)     
             end
-        end)
+        end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
         -- Bounty Loop
@@ -3261,7 +3261,7 @@ local function player(pid)
                 notify($"Bounty set on: {name}.")
                 wait(10000)
             end
-        end)
+        end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
         -- EXPLOSIONS
@@ -3269,7 +3269,7 @@ local function player(pid)
 
         menu.action(customExplosion, "Explode", {""}, "", function()
             FIRE.ADD_EXPLOSION(players.get_position(pid), 1, 1.0, false, true, 0.0, false)
-        end)
+        end, nil, nil, COMMANDPERM_RUDE)
         menu.action(customExplosion, "Owned Explode", {""}, "", function()
             FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 1, 1.0, false, true, 0.0)
         end)
@@ -3330,7 +3330,7 @@ local function player(pid)
             local victim = players.get_position(pid)
             FIRE.ADD_OWNED_EXPLOSION(killer, victim, 1, 1.0, false, true, 0.0)
             notify("Player "..players.get_name(player).." was blamed for killing "..players.get_name(pid).."!")
-        end)
+        end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
         -- Disable Passive
