@@ -2770,6 +2770,9 @@ local function player(pid)
     local kicks = menu.list(player_removals, "Kicks", {""}, "")
     local crashes = menu.list(player_removals, "Crashes", {""}, "")
 
+    local pname = players.get_name(pid)
+    local rids = players.get_rockstar_id(pid)
+
     -------------------------------------
     -------------------------------------
     -- Friendly
@@ -2794,7 +2797,7 @@ local function player(pid)
             local kills, deaths, kdratio = players.get_kills(pid), players.get_deaths(pid), string.format("%.2f", players.get_kd(pid))
             local name = players.get_name(pid)
             local language = language_string(players.get_language(pid))
-            notify($"Name: {name}\nLanguage: {language}\nRank: {rank}\nMoney: {money}M$\nKills/Deaths: {kills}/{deaths}\nRatio: {kdratio}")
+            notify($"Name: {pname}\nLanguage: {language}\nRank: {rank}\nMoney: {money}M$\nKills/Deaths: {kills}/{deaths}\nRatio: {kdratio}")
         end)
 
         -------------------------------------
@@ -2802,7 +2805,9 @@ local function player(pid)
         -------------------------------------        
 
         menu.action(friendly, "TP to Me", {"tptome"}, "Improved \"summon\" Command", function()
-            trigger_commands("givesh"..players.get_name(pid)); wait(100); trigger_commands("summon"..players.get_name(pid))
+            trigger_commands($"givesh{pname}")
+            wait(100)
+            trigger_commands($"summon{pname}")
         end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
