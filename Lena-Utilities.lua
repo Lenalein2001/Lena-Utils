@@ -2723,13 +2723,13 @@ local function player(pid)
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
-        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 
+        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
 
-    for idiots as rid do
-        if players.get_rockstar_id(pid) == rid and players.are_stats_ready(pid) and not util.is_session_transition_active() then
+    for idiots as id do
+        if players.get_rockstar_id(pid) == id and players.are_stats_ready(pid) and not util.is_session_transition_active() then
             if NETWORK.NETWORK_IS_HOST() then
                 trigger_commands("historyblock"..players.get_name(pid).." on")
                 wait(100)
@@ -2890,8 +2890,7 @@ local function player(pid)
         -------------------------------------
 
         menu.toggle(mpvehicle, "God Mode", {"vgm"}, "Toggles Vehicle Godmode.", function(toggled)
-            local vehicle = get_vehicle_player_is_in(pid)
-            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle) then
+            if players.get_vehicle_model(pid) then
                 if toggled then
                     VEHICLE.SET_VEHICLE_ENVEFF_SCALE(vehicle, 0.0)
                     VEHICLE.SET_VEHICLE_BODY_HEALTH(vehicle, 1000.0)
@@ -2922,8 +2921,7 @@ local function player(pid)
         -------------------------------------
 
         menu.action(mpvehicle, "Repair Vehicle", {"rpv"}, "Repais the current Vehicle.", function()
-            local vehicle = get_vehicle_player_is_in(pid)
-            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle) then
+            if players.get_vehicle_model(pid) then
                 VEHICLE.SET_VEHICLE_FIXED(vehicle)
                 VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
@@ -2935,8 +2933,7 @@ local function player(pid)
         -------------------------------------
 
         menu.action(mpvehicle, "Clean Vehicle", {"cleanv"}, "Cleans the current Vehicle.", function()
-            local vehicle = get_vehicle_player_is_in(pid)
-            if ENTITY.DOES_ENTITY_EXIST(vehicle) and request_control(vehicle) then
+            if players.get_vehicle_model(pid) then
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
