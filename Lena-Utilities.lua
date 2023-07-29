@@ -506,7 +506,7 @@ end)
     -- Unfair Triggerbot
     -------------------------------------  
 
-    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "Slightly worse than Stand's triggerbot.", function()
+    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "Slightly worse than Stand's triggerbot. Not including the Magic Bullets.", function()
         local wpn = WEAPON.GET_SELECTED_PED_WEAPON(players.user_ped())
         local dmg = SYSTEM.ROUND(WEAPON.GET_WEAPON_DAMAGE(wpn, 0))
         local delay = WEAPON.GET_WEAPON_TIME_BETWEEN_SHOTS(wpn)
@@ -527,13 +527,13 @@ end)
     -- Rocket Aimbot
     ------------------------------------- 
 
-    menu.toggle_loop(weap, "Rocket Aimbot", {""}, "", function()
+    menu.toggle_loop(weap, "Rocket Aimbot", {""}, "Distance is limited to 500 Meters.", function()
         for players.list(false, false, true, true, false) as pid do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local user = players.user_ped()
             local ped_dist = v3.distance(players.get_position(user), players.get_position(pid))
             local control = (PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 76))
-            if not PLAYER.IS_PLAYER_PLAYING(ped) and control and ped_dist < 500.0 and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
+            if not PLAYER.IS_PLAYER_PLAYING(ped) and control and ped_dist <= 500.0 and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
                 VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, players.get_position(pid))
             end
         end
@@ -3137,6 +3137,10 @@ local function player(pid)
             spawned_attackers[#spawned_attackers + 1] = ped; spawned_attackers[#spawned_attackers + 1] = vehicle
         end)
 
+        -------------------------------------
+        -- Delete all Attackers
+        -------------------------------------
+
         menu.action(vehattack, "Delete all Attackers", {""}, "", function()
             local entitycount = 0
             for i, object in spawned_attackers do
@@ -3201,14 +3205,14 @@ local function player(pid)
         -- Rocket Aimbot
         -------------------------------------
 
-        menu.toggle_loop(trolling, "Rocket Aimbot", {"rocketaimbot"}, "", function()
+        menu.toggle_loop(trolling, "Rocket Aimbot", {"rocketaimbot"}, "Distance is limited to 500 Meters.", function()
             if not players.exists(pid) then paimbor.value = false; util.stop_thread() end
-            local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-            local user = players.user_ped()
+            local ped, user = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), players.user_ped()
             local pos = players.get_position(pid)
+            local ped_dist = v3.distance(players.get_position(user), players.get_position(pid))
             local control = PAD.IS_CONTROL_PRESSED(0, 69) or PAD.IS_CONTROL_PRESSED(0, 70) or PAD.IS_CONTROL_PRESSED(0, 76)
-            if not PLAYER.IS_PLAYER_PLAYING(ped) and control and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
-                VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, pos.x, pos.y, pos.z)
+            if not PLAYER.IS_PLAYER_PLAYING(ped) and control and ped_dist <= 500.0 and ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(user, ped, 17) then
+                VEHICLE.SET_VEHICLE_SHOOT_AT_TARGET(user, ped, pos.x, pos.y, pos.z+1)
             end
         end)
 
