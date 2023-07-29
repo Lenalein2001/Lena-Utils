@@ -171,15 +171,15 @@ function spawn_vehicle(model_name, pos, veh_godmode)
 end
 
 function trapcage(pid, object, visible)
-    local objHash = util.joaat(object)
-    request_model(objHash)
+    local hash = util.joaat(object)
+    util.request_model(hash)
     local pos = players.get_position(pid)
-    local obj = entities.create_object(objHash, pos)
+    local obj = entities.create_object(hash, pos)
     entities.set_can_migrate(entities.handle_to_pointer(obj), false)
     spawned_cages[#spawned_cages + 1] = obj
     ENTITY.SET_ENTITY_VISIBLE(obj, visible)
     ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(objHash)
+    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
 end
 
 function pid_to_handle(pid)
