@@ -19,7 +19,7 @@ bm_safe_table = {
 MCLabels = {
     "CLBHBKRREG",
     "ARC_HT_1",
-    "ARC_HT_1B",
+    "ARC_HT_1B"
 }
 
 CEOLabels = {
@@ -89,7 +89,7 @@ numpadControls = {
     125,
     126,
     127,
-    128,
+    128
 }
 
 interiors = {
