@@ -2859,7 +2859,7 @@ local function player(pid)
             if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
                 wait(200)
                 chat.close()
-                menu.show_command_box($"pm{pname} ")
+                menu.show_command_box($"pm{pname:lower()} ")
             end
         end)
 
