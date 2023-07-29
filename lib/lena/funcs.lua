@@ -107,7 +107,9 @@ function request_control(vehicle, migrate)
         if ctr >= 250 then
             notify("Failed to get control of players vehicle. :/")
             ctr = 0
-            return
+            return false
+        else 
+            return true
         end
         NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vehicle)
         util.yield()
@@ -117,6 +119,16 @@ function request_control(vehicle, migrate)
         entities.set_can_migrate(vehicle, true)
     else
         entities.set_can_migrate(vehicle, false)
+    end
+end
+
+function get_vehicle_ped_is_in(player)
+    local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(player)
+    local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
+    if not PED.IS_PED_IN_ANY_VEHICLE(ped, false) then
+        return nil, notify("Player isn't in a vehicle. :/")
+    else
+        return veh
     end
 end
 
