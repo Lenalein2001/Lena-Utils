@@ -2854,7 +2854,6 @@ local function player(pid)
                 chat.send_message(on_command, false, true, false)
             end
         end)
-
         menu.toggle_loop(friendly, "Stealth Messages", {""}, "", function()
             if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
                 wait(200)
@@ -2901,7 +2900,8 @@ local function player(pid)
         -------------------------------------
 
         menu.toggle(mpvehicle, "God Mode", {"vgm"}, "Toggles Vehicle Godmode.", function(toggled)
-            if players.get_vehicle_model(pid) then
+            local veh = get_vehicle_ped_is_in(pid)
+            if veh and request_control(pid, true) then
                 if toggled then
                     VEHICLE.SET_VEHICLE_ENVEFF_SCALE(vehicle, 0.0)
                     VEHICLE.SET_VEHICLE_BODY_HEALTH(vehicle, 1000.0)
@@ -2932,7 +2932,8 @@ local function player(pid)
         -------------------------------------
 
         menu.action(mpvehicle, "Repair Vehicle", {"rpv"}, "Repais the current Vehicle.", function()
-            if players.get_vehicle_model(pid) then
+            local veh = get_vehicle_ped_is_in(pid)
+            if veh and request_control(pid, true) then
                 VEHICLE.SET_VEHICLE_FIXED(vehicle)
                 VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
@@ -2944,7 +2945,8 @@ local function player(pid)
         -------------------------------------
 
         menu.action(mpvehicle, "Clean Vehicle", {"cleanv"}, "Cleans the current Vehicle.", function()
-            if players.get_vehicle_model(pid) then
+            local veh = get_vehicle_ped_is_in(pid)
+            if veh and request_control(pid, true) then
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
@@ -2954,12 +2956,7 @@ local function player(pid)
         -------------------------------------
 
         menu.action_slider(mpvehicle, "Launch Player Vehicle", {"launch"}, "Launches the Player's Vehicle in the Selected direction.", launch_vehicle, function(index, value)
-            local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-            local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
-            if not PED.IS_PED_IN_ANY_VEHICLE(ped, false) then
-                notify("Player isn't in a vehicle. :/")
-                return
-            end
+            local veh = get_vehicle_ped_is_in(pid)
             request_control(veh)
             pluto_switch value do
                 case "Launch Up":
