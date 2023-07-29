@@ -188,7 +188,7 @@ if lang.get_current() != "en" then
     notify("This Lua is made using the english translation of Stand. If things break it's most likely because you are using a different language.\nTry to use: Stand>Settings>Language>English (UK).")
 end
 if not SCRIPT_SILENT_START then
-    notify("Hi, "..SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME().." <3.")
+    notify("Hi, "..SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()..". <3")
 end 
 
 -------------------------------------
@@ -413,7 +413,7 @@ end)
     -- Auto Become CEO/MC
     -------------------------------------
 
-    menu.toggle_loop(self, "Automatically Become a CEO/MC", {""}, "WIll start a CEO/MC if you need to be in one.", function()
+    menu.toggle_loop(self, "Automatically Become a CEO/MC", {""}, "Will start a CEO/MC if you need to be in one.", function()
         if not util.is_session_started() then return end
         for CEOLabels as label do
             if IS_HELP_MSG_DISPLAYED(label) then
@@ -2073,7 +2073,7 @@ end)
             count = 0
             wait(100)
             for entities.get_all_vehicles_as_handles() as vehicle do
-                if vehicle != entities.get_user_vehicle_as_handle(true) and entities.get_owner(vehicle) == players.user() and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 then
+                if vehicle != player_cur_car and entities.get_owner(vehicle) == players.user() and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 then
                     entities.delete(vehicle)
                     count += 1
                     wait(10)
@@ -2682,7 +2682,7 @@ if is_developer() then
         
         menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
             local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "FATE", "WHORE"}
-            VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(entities.get_user_vehicle_as_handle(), plate_texts[math.random(#plate_texts)])
+            VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(player_cur_car, plate_texts[math.random(#plate_texts)])
         end)
 
         -------------------------------------
@@ -2723,7 +2723,7 @@ local function player(pid)
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
-        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 
+        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -2795,7 +2795,6 @@ local function player(pid)
             local rank = players.get_rank(pid)
             local money = string.format("%.2f", players.get_money(pid)/1000000)
             local kills, deaths, kdratio = players.get_kills(pid), players.get_deaths(pid), string.format("%.2f", players.get_kd(pid))
-            local name = players.get_name(pid)
             local language = language_string(players.get_language(pid))
             notify($"Name: {pname}\nLanguage: {language}\nRank: {rank}\nMoney: {money}M$\nKills/Deaths: {kills}/{deaths}\nRatio: {kdratio}")
         end)
@@ -2830,9 +2829,8 @@ local function player(pid)
         -- Fix Blackscreen
         -------------------------------------         
 
-        menu.action(friendly, "Fix Blackscreen", {"fixblackscreen"}, "Tries to fix a stuck Blackscreen for the selected Player.", function()
-            local name = players.get_name(pid)
-            trigger_commands($"givesh {name}; aptme {name}")
+        menu.action(friendly, "Fix Blackscreen", {"fixblackscreen"}, $"Tries to fix a stuck Blackscreen for {pname}", function()
+            trigger_commands($"givesh {pname}; aptme {pname}")
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
         -------------------------------------
@@ -2848,12 +2846,20 @@ local function player(pid)
         -------------------------------------
 
         menu.action(friendly, "Stealth msg", {"pm"}, "Sends a Stealth Message.", function(click_type)
-            menu.show_command_box("pm"..players.get_name(pid).." "); end, function(on_command)
+            menu.show_command_box($"pm{pname} "); end, function(on_command)
             if #on_command > 140 then
                 notify("The message is to long.")
             else
                 chat.send_targeted_message(pid, players.user(), on_command, false)
-                log(players.get_name(players.user()).." [All] "..on_command)
+                chat.send_message(on_command, false, true, false)
+            end
+        end)
+
+        menu.toggle_loop(friendly, "Stealth Messages", {""}, "", function()
+            if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
+                wait(200)
+                chat.close()
+                menu.show_command_box($"pm{pname} ")
             end
         end)
 
@@ -2861,7 +2867,7 @@ local function player(pid)
         -- Teleport to Player
         -------------------------------------
 
-        menu.action(friendly, "Teleport to Player", {""}, $"Teleport to {players.get_name(pid)}", function()
+        menu.action(friendly, "Teleport to Player", {""}, $"Teleport to {players.get_name(pid)}.", function()
             local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player, 0.0, 2, 0), false, false, false)
         end)
@@ -3240,7 +3246,7 @@ local function player(pid)
             local glitch_hash, mdl = util.request_model("prop_windmill_01"), util.request_model("brickade2")
             for interior_stuff as id do
                 if GET_INTERIOR_FROM_PLAYER(pid) == id then
-                    notify(players.get_name(pid).." isn't in an Interior. :/")
+                    notify($"{pname} isn't in an Interior. :/")
                 return end
             end
             for i = 0, 3 do
@@ -3263,10 +3269,10 @@ local function player(pid)
 
         bounty_loop = menu.toggle_loop(trolling, "Bounty Loop", {"bountyloop", "bloop"}, "Will set the Players bounty always to 9000.", function(on)
             if not players.exists(pid) then bounty_loop.value = false; util.stop_thread() end
-            local bounty, name, interior = players.get_bounty(pid), players.get_name(pid), players.is_in_interior(pid)
+            local bounty, interior = players.get_bounty(pid), players.is_in_interior(pid)
             if not (bounty and interior) then
-                trigger_commands($"bounty {name} 9000")
-                notify($"Bounty set on: {name}.")
+                trigger_commands($"bounty {pname} 9000")
+                notify($"Bounty set on: {pname}.")
                 wait(10000)
             end
         end, nil, nil, COMMANDPERM_RUDE)
@@ -3386,24 +3392,22 @@ local function player(pid)
         -- Block Join Kick
         -------------------------------------
 
-        local rids = players.get_rockstar_id(pid)
-        local names = players.get_name(pid)
         menu.action(kicks, "Block Kick", {"emp", "block"}, "Will kick and block the player from joining you ever again.", function()
             if names == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
                 hex = decimalToHex2s(rids, 32)
                 if savekicked then
-                    trigger_commands($"savep {names}")
+                    trigger_commands($"savep {pname}")
                 end
                 wait(100)
-                trigger_commands($"historyblock{names} on")
+                trigger_commands($"historyblock{pname} on")
                 if not is_developer() then
-                    log($"[Lena | Block Kick] {names} ({rids}) has been Kicked and Blocked.")
+                    log($"[Lena | Block Kick] {pname} ({rids}) has been Kicked and Blocked.")
                 else
-                    log($"[Lena | Block Kick] {names} ({rids} / {hex}) has been Kicked and Blocked.")
+                    log($"[Lena | Block Kick] {pname} ({rids} / {hex}) has been Kicked and Blocked.")
                 end
-                trigger_commands($"kick{names}")
+                trigger_commands($"kick{pname}")
             end
         end, nil, nil, COMMANDPERM_RUDE)
 
@@ -3413,13 +3417,13 @@ local function player(pid)
             else
                 hex = decimalToHex2s(rids, 32)
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                 end
-                trigger_commands($"loveletter{names}")
+                trigger_commands($"loveletter{pname}")
                 if not is_developer() then
-                    log($"[Lena | Rape] {names} ({rids}) has been Kicked.")
+                    log($"[Lena | Rape] {pname} ({rids}) has been Kicked.")
                 else
-                    log($"[Lena | Rape] {names} ({rids} / {hex}) has been Kicked.")
+                    log($"[Lena | Rape] {pname} ({rids} / {hex}) has been Kicked.")
                 end
             end
         end, nil, nil, COMMANDPERM_RUDE)
@@ -3428,8 +3432,8 @@ local function player(pid)
             if names == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
-                trigger_commands($"kick{names}")
-                log($"[Lena | Host Kick] {names} ({rids}) has been Kicked.")
+                trigger_commands($"kick{pname}")
+                log($"[Lena | Host Kick] {pname} ({rids}) has been Kicked.")
             end
         end)
 
@@ -3443,24 +3447,24 @@ local function player(pid)
             else
                 hex = decimalToHex2s(rids, 32)
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                     wait(50)
                 end
-                trigger_commands($"ngcrash{names}")
+                trigger_commands($"ngcrash{pname}")
                 wait(500)
-                trigger_commands($"crash{names}")
+                trigger_commands($"crash{pname}")
                 wait(500)
                 if not is_developer() then
-                    log($"[Lena | Block Join Crash] {names} ({rids}) has been Crashed and Blocked.")
+                    log($"[Lena | Block Join Crash] {pname} ({rids}) has been Crashed and Blocked.")
                 else
-                    log($"[Lena | Block Join Crash] {names} ({rids} / {hex}) has been Crashed and Blocked.")
+                    log($"[Lena | Block Join Crash] {pname} ({rids} / {hex}) has been Crashed and Blocked.")
                 end
-                trigger_commands($"historyblock{names} on")
+                trigger_commands($"historyblock{pname} on")
                 wait(10000)
                 if players.get_name(pid) == names then
-                    log($"[Lena | Crash Backup] {names} ({rids}) has not crashed, kicking the player instead.")
+                    log($"[Lena | Crash Backup] {pname} ({rids}) has not crashed, kicking the player instead.")
                     wait(50)
-                    trigger_commands($"kick{names}")
+                    trigger_commands($"kick{pname}")
                 end
             end
         end, nil, nil, COMMANDPERM_AGGRESSIVE)
@@ -3471,7 +3475,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                     wait(50)
                 end
                 local user = players.user()
@@ -3503,7 +3507,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                     wait(50)
                 end
                 local user = players.user()
@@ -3534,7 +3538,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                     wait(50)
                 end
                 BlockSyncs(pid, function()
@@ -3551,7 +3555,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                     wait(50)
                 end
                 BlockSyncs(pid, function()
@@ -3568,7 +3572,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                     wait(50)
                 end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3620,7 +3624,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                     wait(50)
                 end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3645,7 +3649,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
-                    trigger_commands($"savep{names}")
+                    trigger_commands($"savep{pname}")
                     wait(50)
                 end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3756,7 +3760,7 @@ end
 -------------------------------------
 
 util.create_tick_handler(function()
-    local carCheck = entities.get_user_vehicle_as_handle()
+    local carCheck = entities.get_user_vehicle_as_handle(true)
     if player_cur_car != carCheck then
         player_cur_car = carCheck
     end
