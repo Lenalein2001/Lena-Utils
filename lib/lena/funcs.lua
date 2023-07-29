@@ -237,6 +237,7 @@ function mod_uses(type, incr)
     end
 end
 
+-- Stats
 function GET_INT_LOCAL(Script, Local)
     if memory.script_local(Script, Local) ~= 0 then
         local Value = memory.read_int(memory.script_local(Script, Local))
@@ -245,17 +246,14 @@ function GET_INT_LOCAL(Script, Local)
         end
     end
 end
-
 function getMPX()
     return 'MP'.. util.get_char_slot() ..'_'
 end
-
 function STAT_GET_INT(Stat)
     local Int_PTR = memory.alloc_int()
     STATS.STAT_GET_INT(joaat(getMPX() .. Stat), Int_PTR, -1)
     return memory.read_int(Int_PTR)
 end
- 
 function IS_MPPLY(Stat) 
     local Stats = { 
         "MP_PLAYING_TIME", 
@@ -271,36 +269,29 @@ function IS_MPPLY(Stat)
         return false
     end
 end
-
 function ADD_MP_INDEX(Stat)
     if not IS_MPPLY(Stat) then
         Stat = "MP" .. util.get_char_slot() .. "_" .. Stat
     end
     return Stat
 end
-
 function SET_INT_GLOBAL(Global, Value)
     memory.write_int(memory.script_global(Global), Value)
 end
-function SET_FLOAT_GLOBAL(Global, Value)
-    memory.write_float(memory.script_global(Global), Value)
-end
-
 function SET_PACKED_INT_GLOBAL(StartGlobal, EndGlobal, Value)
     for i = StartGlobal, EndGlobal do
         SET_INT_GLOBAL(262145 + i, Value)
     end
 end
-
 function SET_INT_LOCAL(Script, Local, Value)
     if memory.script_local(Script, Local) ~= 0 then
         memory.write_int(memory.script_local(Script, Local), Value)
     end
 end
-
 function STAT_SET_INT(Stat, Value)
     STATS.STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
 end
+-- Stats
 
 function get_seat_ped_is_in(ped)
     local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
@@ -384,7 +375,6 @@ function is_developer()
     end
     return false
 end
-
 
 function is_entity_a_projectile(hash)
     local all_projectile_hashes = {

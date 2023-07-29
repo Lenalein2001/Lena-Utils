@@ -61,7 +61,7 @@ local ai_made = menu.list(menu.my_root(), "AI Made", {"lenaai"}, "The following 
 
 -- Self
 local anims = menu.list(self, "Animations", {""}, "Some Animations.")
-local fast_stuff = menu.list(self, "Fast Stuff", {""}, "Skips certain Animations.")
+local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Animations. Lock Outfit breaks it.")
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
 local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam.")
 local vehicle_gun_list = menu.list(weap, "Shoot Vehicle", {""}, "")
@@ -328,17 +328,17 @@ end)
         -- Fast Vehicle Enter/Exit
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.\nLock Outfit seems to break it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.", function()
             if (TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 160) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 167) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 165)) and not TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 195) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
         end)
 
         -------------------------------------
-        -- Fast Weapon swap
+        -- Fast Weapon Switch
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Weapon Switch", {""}, "Swaps your weapons faster.\nLock Outfit breaks it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Weapon Switch", {""}, "Swaps your weapons faster.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 56) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -348,7 +348,7 @@ end)
         -- Fast Reload
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.\nLock Outfit breaks it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 298) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -358,7 +358,7 @@ end)
         -- Fast Mount
         -------------------------------------
 
-        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.\nLock Outfit breaks it.", function()
+        menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.", function()
             if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 50) or TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 51) then
                 PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
