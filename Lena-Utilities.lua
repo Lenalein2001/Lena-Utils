@@ -2700,6 +2700,8 @@ end
 --------------------------------------------------------------------------------
 
 local function player(pid)
+    local pname = players.get_name(pid)
+    local rids = players.get_rockstar_id(pid)
     local idiots = {
         0x0C6A8CD9, 0x0CAFF827, 0x04DCD691, 0x07E862F8, 0x096E22A3, 0x0967E1C2, 0x0ACF5EAB, 0x0BE13BA9,
         0x0B0236FA, 0x01585AB7, 0x09038DD9, 0x01394640, 0x0CB7CFF2, 0x0C666371, 0x04A5C95B, 0x0C76C9E2, 0x0B7EC980, 0x0C121CAD, 0x0919B57F, 0x0C682AB5, 0x03280B78, 0x0479C7D8,
@@ -2725,14 +2727,14 @@ local function player(pid)
     }
 
     for idiots as id do
-        if players.get_rockstar_id(pid) == id and players.are_stats_ready(pid) and not util.is_session_transition_active() then
+        if rids == id and players.are_stats_ready(pid) and not util.is_session_transition_active() then
             if NETWORK.NETWORK_IS_HOST() then
-                trigger_commands("historyblock"..players.get_name(pid).." on")
+                trigger_commands($"historyblock{pname} on")
                 wait(100)
-                trigger_commands("kick "..players.get_name(pid))
+                trigger_commands($"kick{pname}")
             else
-                trigger_commands("historyblock"..players.get_name(pid).." on")
-                trigger_commands("loveletter"..players.get_name(pid))
+                trigger_commands($"historyblock{pname} on")
+                trigger_commands($"loveletter{pname}")
             end
         end
     end
@@ -2758,9 +2760,6 @@ local function player(pid)
     local player_removals = menu.list(lena, "Player Removals", {""}, "")
     local kicks = menu.list(player_removals, "Kicks", {""}, "")
     local crashes = menu.list(player_removals, "Crashes", {""}, "")
-
-    local pname = players.get_name(pid)
-    local rids = players.get_rockstar_id(pid)
 
     -------------------------------------
     -------------------------------------
@@ -2888,31 +2887,29 @@ local function player(pid)
         -- GOD MODE
         -------------------------------------
 
-        menu.toggle(mpvehicle, "God Mode", {"vgm"}, "Toggles Vehicle Godmode.", function(toggled)
-            local veh = get_vehicle_ped_is_in(pid)
-            if veh and request_control(pid, true) then
-                if toggled then
-                    VEHICLE.SET_VEHICLE_ENVEFF_SCALE(vehicle, 0.0)
-                    VEHICLE.SET_VEHICLE_BODY_HEALTH(vehicle, 1000.0)
-                    VEHICLE.SET_VEHICLE_ENGINE_HEALTH(vehicle, 1000.0)
-                    VEHICLE.SET_VEHICLE_FIXED(vehicle)
-                    VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
-                    VEHICLE.SET_VEHICLE_PETROL_TANK_HEALTH(vehicle, 1000.0)
-                    VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
-                    for i = 0, 10 do 
-                        VEHICLE.SET_VEHICLE_TYRE_FIXED(vehicle, i)
-                    end
+        menu.toggle(mpvehicle, "God Mode", {"vgm"}, "Toggles Vehicle Godmode.", function(on)
+            local vehicle = get_vehicle_ped_is_in(pid)
+            if vehicle and request_control(pid, true) then
+                VEHICLE.SET_VEHICLE_ENVEFF_SCALE(vehicle, 0.0)
+                VEHICLE.SET_VEHICLE_BODY_HEALTH(vehicle, 1000.0)
+                VEHICLE.SET_VEHICLE_ENGINE_HEALTH(vehicle, 1000.0)
+                VEHICLE.SET_VEHICLE_FIXED(vehicle)
+                VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
+                VEHICLE.SET_VEHICLE_PETROL_TANK_HEALTH(vehicle, 1000.0)
+                VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
+                for i = 0, 10 do 
+                    VEHICLE.SET_VEHICLE_TYRE_FIXED(vehicle, i)
                 end
                 ENTITY.SET_ENTITY_INVINCIBLE(vehicle, on)
                 ENTITY.SET_ENTITY_PROOFS(vehicle, on, on, on, on, on, on, true, on)
                 VEHICLE.SET_DISABLE_VEHICLE_PETROL_TANK_DAMAGE(vehicle, on)
                 VEHICLE.SET_DISABLE_VEHICLE_PETROL_TANK_FIRES(vehicle, on)
-                VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(vehicle, off)
-                VEHICLE.SET_VEHICLE_CAN_BREAK(vehicle, off)
-                VEHICLE.SET_VEHICLE_ENGINE_CAN_DEGRADE(vehicle, off)
-                VEHICLE.SET_VEHICLE_EXPLODES_ON_HIGH_EXPLOSION_DAMAGE(vehicle, off)
-                VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(vehicle, off)
-                VEHICLE.SET_VEHICLE_WHEELS_CAN_BREAK(vehicle, off)
+                VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(vehicle, not on)
+                VEHICLE.SET_VEHICLE_CAN_BREAK(vehicle, not on)
+                VEHICLE.SET_VEHICLE_ENGINE_CAN_DEGRADE(vehicle, not on)
+                VEHICLE.SET_VEHICLE_EXPLODES_ON_HIGH_EXPLOSION_DAMAGE(vehicle, not on)
+                VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(vehicle, not on)
+                VEHICLE.SET_VEHICLE_WHEELS_CAN_BREAK(vehicle, not on)
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
@@ -2921,8 +2918,8 @@ local function player(pid)
         -------------------------------------
 
         menu.action(mpvehicle, "Repair Vehicle", {"rpv"}, "Repais the current Vehicle.", function()
-            local veh = get_vehicle_ped_is_in(pid)
-            if veh and request_control(pid, true) then
+            local vehicle = get_vehicle_ped_is_in(pid)
+            if vehicle and request_control(pid, true) then
                 VEHICLE.SET_VEHICLE_FIXED(vehicle)
                 VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
@@ -2934,8 +2931,8 @@ local function player(pid)
         -------------------------------------
 
         menu.action(mpvehicle, "Clean Vehicle", {"cleanv"}, "Cleans the current Vehicle.", function()
-            local veh = get_vehicle_ped_is_in(pid)
-            if veh and request_control(pid, true) then
+            local vehicle = get_vehicle_ped_is_in(pid)
+            if vehicle and request_control(pid, true) then
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
