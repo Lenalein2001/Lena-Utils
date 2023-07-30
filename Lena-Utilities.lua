@@ -39,12 +39,6 @@ handle_ptr = memory.alloc(13*8)
 natives_version = "natives-2944a.uno"
 
 -------------------------------------
--- Natives
--------------------------------------
-
-util.require_natives(natives_version)
-
--------------------------------------
 -- Tabs
 -------------------------------------
 
@@ -179,6 +173,7 @@ local auto_update_config = {
     }
 }
 
+util.require_natives(natives_version)
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
     local msg2 = "Please download the file and everything else again from my Github."
