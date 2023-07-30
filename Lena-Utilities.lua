@@ -173,20 +173,6 @@ local auto_update_config = {
     }
 }
 
-util.require_natives(natives_version)
-if PED == nil then
-    local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
-    local msg2 = "Please download the file and everything else again from my Github."
-    util.show_corner_help(msg1..""..natives_version.."\n"..msg2)
-    util.stop_script()
-end
-if lang.get_current() != "en" then
-    notify("This Lua is made using the english translation of Stand. If things break it's most likely because you are using a different language.\nTry to use: Stand>Settings>Language>English (UK).")
-end
-if not SCRIPT_SILENT_START then
-    notify("Hi, "..SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()..". <3")
-end 
-
 -------------------------------------
 -- Required Files
 -------------------------------------
@@ -213,6 +199,22 @@ end
 if not is_developer() then
     auto_updater.run_auto_update(auto_update_config)
 end
+
+util.ensure_package_is_installed(natives_version)
+util.require_natives(natives_version)
+
+if PED == nil then
+    local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
+    local msg2 = "Please download the file and everything else again from my Github."
+    util.show_corner_help(msg1..""..natives_version.."\n"..msg2)
+    util.stop_script()
+end
+if lang.get_current() != "en" then
+    notify("This Lua is made using the english translation of Stand. If things break it's most likely because you are using a different language.\nTry to use: Stand>Settings>Language>English (UK).")
+end
+if not SCRIPT_SILENT_START then
+    notify("Hi, "..SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()..". <3")
+end 
 
 objects_thread = util.create_thread(function(thr)
     local projectile_blips = {}
