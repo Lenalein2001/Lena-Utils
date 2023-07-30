@@ -64,11 +64,12 @@ local anims = menu.list(self, "Animations", {""}, "Some Animations.")
 local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Animations. Lock Outfit breaks it.")
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
 local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam.")
-local vehicle_gun_list = menu.list(weap, "Shoot Vehicle", {""}, "")
+local vehicle_gun_list = menu.list(weap, "Vehicle Gun", {""}, "Spawn a Vehicle at Impact Coords.")
 -- Vehicle
 local better_vehicles = menu.list(vehicle, "Better Vehicles", {""}, "")
 local doorcontrol = menu.list(vehicle, "Doors", {""}, "")
 local engine_control = menu.list(vehicle, "Engine Control", {""}, "")
+local vehicle_flares = menu.list(vehicle, "Countermeasures", {""}, "War Thunder-like Countermeasues")
 -- Online
 local mpsession = menu.list(online, "Session", {""}, "Features for the current Session.")
 local hosttools = menu.list(mpsession, "Host Tools", {""}, "Tools that can only be used as the Session Host or to force Session Host.")
@@ -779,6 +780,56 @@ end)
         end)
 
     -------------------------------------
+    -- Countermeasures
+    -------------------------------------
+
+        -------------------------------------
+        -- Force flares
+        -------------------------------------
+
+        local periodicforceflares = false
+        forceflares = menu.toggle(vehicle_flares, "Force Flares", {"forceflares"}, "Forces Flares on Airborn Vehicles.", function(toggled)
+            if periodicforceflares.value then forceflares.value = false end 
+            local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
+            local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
+            local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
+            trigger_command(count, "2"); trigger_command(how)
+            while PED.IS_PED_IN_ANY_PLANE(players.user_ped()) and toggled do
+                if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
+                    trigger_command(deploy)
+                    wait(3000)
+                end
+                wait()
+            end
+        end)
+
+        -------------------------------------
+        -- Periodic flares release
+        -------------------------------------
+
+        local flaredelay = 100
+        local flareamount = 1
+        flaredelay = menu.slider_float(vehicle_flares, "Flare Delay", {""}, "Delay is in Seconds. 0.5 would be half a Second.", 10, 1000, 100, 10, function(); end)
+        flareamount = menu.slider(vehicle_flares, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
+        
+        periodicforceflares = menu.toggle(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function(toggled)
+            if forceflares.value then periodicforceflares.value = false end 
+            local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
+            local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
+            local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
+            trigger_command(count, "1"); trigger_command(how)
+            while (PED.IS_PED_IN_ANY_PLANE(players.user_ped()) or PED.IS_PED_IN_ANY_HELI(players.user_ped())) and toggled do
+                if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
+                    for i = 1, menu.get_value(flareamount) do
+                        trigger_command(deploy)
+                        wait(menu.get_value(flaredelay) * 10)
+                    end
+                end
+                wait()
+            end
+        end)
+
+    -------------------------------------
     -- Enter Nearest Vehicle
     -------------------------------------        
     
@@ -833,52 +884,6 @@ end)
             VEHICLE.SET_VEHICLE_REDUCE_GRIP(player_cur_car, true)
         else
             VEHICLE.SET_VEHICLE_REDUCE_GRIP(player_cur_car, false)
-        end
-    end)
-
-    -------------------------------------
-    -- Force flares
-    -------------------------------------
-
-    local periodicforceflares = false
-    forceflares = menu.toggle(vehicle, "Force Flares", {"forceflares"}, "Forces Flares on Airborn Vehicles.", function(toggled)
-        if periodicforceflares.value then forceflares.value = false end 
-        local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
-        local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
-        local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
-        trigger_command(count, "2"); trigger_command(how)
-        while PED.IS_PED_IN_ANY_PLANE(players.user_ped()) and toggled do
-            if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
-                trigger_command(deploy)
-                wait(3000)
-            end
-            wait()
-        end
-    end)
-
-    -------------------------------------
-    -- Force flares
-    -------------------------------------
-
-    local flaredelay = 100
-    local flareamount = 1
-    flaredelay = menu.slider_float(vehicle, "Flare Delay", {""}, "Delay is in Seconds. 0.5 would be half a Second.", 10, 1000, 100, 10, function(); end)
-    flareamount = menu.slider(vehicle, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
-    
-    periodicforceflares = menu.toggle(vehicle, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function(toggled)
-        if forceflares.value then periodicforceflares.value = false end 
-        local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
-        local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
-        local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
-        trigger_command(count, "1"); trigger_command(how)
-        while (PED.IS_PED_IN_ANY_PLANE(players.user_ped()) or PED.IS_PED_IN_ANY_HELI(players.user_ped())) and toggled do
-            if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
-                for i = 1, menu.get_value(flareamount) do
-                    trigger_command(deploy)
-                    wait(menu.get_value(flaredelay) * 10)
-                end
-            end
-            wait()
         end
     end)
     
