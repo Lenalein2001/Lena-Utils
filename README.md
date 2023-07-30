@@ -11,6 +11,6 @@ So my thanks go out to everyone, especially:
 - Sapphire
 - Kodama
 - Jerry
-- aaronlink127
+- Aarroonn
 - Wiri
 - And everyone in the #programming Channel
