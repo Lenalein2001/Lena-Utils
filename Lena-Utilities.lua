@@ -2641,10 +2641,6 @@ if is_developer() then
         trigger_commands("kick"..players.get_name(players.get_host()))
     end)
 
-    menu.action(sdebug, "Test", {""}, "", function()
-        --SET_INT_GLOBAL(1894573 + 10, 0)
-    end)
-
     -------------------------------------
     -- Natives
     -------------------------------------
