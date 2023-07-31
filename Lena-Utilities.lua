@@ -2044,7 +2044,7 @@ end)
         -------------------------------------
 
         menu.list_action(clear_area, "Clear All", {""}, "", {"Vehicles", "Peds", "Objects"}, function(index, name)
-            notify("Clearing "..name:lower().."...")
+            notify($"Clearing {name}...")
             local clean_amount = 0
             switch index do
                 case 1:
@@ -2075,7 +2075,7 @@ end)
                     end
                 break
             end
-            notify("Cleared "..tostring(clean_amount).." "..name:lower()..".")
+            notify($"Cleared {tostring(clean_amount)} {name}.")
         end)
 
         -------------------------------------
@@ -2288,7 +2288,7 @@ end)
             wait(1000)
             trigger_command(thunder_on)
             wait(10000)
-            notify("Weather Set to Thunder") 
+            notify("Weather Set to Thunder.") 
         else
             trigger_command(thunder_off)
             wait(10000)
@@ -2660,7 +2660,7 @@ if is_developer() then
         end
     end)
 
-    menu.action(sdebug, "Host Kick", {"hk"}, "", function()
+    menu.action(sdebug, "Host Kick", {"hk"}, $"Kick {players.get_name(players.get_host())}", function()
         trigger_commands("kick"..players.get_name(players.get_host()))
     end)
 
