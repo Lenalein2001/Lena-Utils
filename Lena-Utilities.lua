@@ -3403,7 +3403,7 @@ local function player(pid)
         -------------------------------------
 
         menu.action(kicks, "Block Kick", {"emp", "block"}, "Will kick and block the player from joining you ever again.", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 hex = decimalToHex2s(rids, 32)
@@ -3422,7 +3422,7 @@ local function player(pid)
         end, nil, nil, COMMANDPERM_RUDE)
 
         menu.action(kicks, "Rape", {"rape"}, "A Unblockable kick that won't tell the target or non-hosts who did it.", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 hex = decimalToHex2s(rids, 32)
@@ -3439,7 +3439,7 @@ local function player(pid)
         end, nil, nil, COMMANDPERM_RUDE)
 
         menu.action(kicks, "Host Kick", {"hostkick", "hokick", "stealth"}, "Works on legits and free menus. ", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 trigger_commands($"kick{pname}")
@@ -3452,7 +3452,7 @@ local function player(pid)
         -------------------------------------
 
         menu.action(crashes, "Block Join Crash", {"gtfo", "netcrash"}, "Crashes the Player and Blocks them from joining you again.", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 hex = decimalToHex2s(rids, 32)
@@ -3481,7 +3481,7 @@ local function player(pid)
 
         local nature = menu.list(crashes, "Parachute Crash", {}, "")
         menu.action(nature, "Version 1", {"V1"}, "", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
@@ -3513,7 +3513,7 @@ local function player(pid)
         end)
 
         menu.action(nature, "Version 2", {"V2"}, "", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
@@ -3544,7 +3544,7 @@ local function player(pid)
         end, nil, nil, COMMANDPERM_RUDE)
 
         menu.action(crashes, "Fragment Crash", {""}, "2Shit1 Crash. Victim needs to look at it.", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
@@ -3561,7 +3561,7 @@ local function player(pid)
         end)
 
         menu.action(crashes, "Object Crash", {"objcrash"}, "", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
@@ -3578,7 +3578,7 @@ local function player(pid)
         end)
 
         menu.action(crashes, "MK2 Griefer", {"grief"}, "Should work one some menus, idk. Don't crash players.", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
@@ -3630,7 +3630,7 @@ local function player(pid)
         end)
 
         menu.action(crashes, "Invalid Animation", {"squish"}, "Blocked by some popular menus.", function()
-            if names == players.get_name(players.user()) then
+            if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
                 if savekicked then
