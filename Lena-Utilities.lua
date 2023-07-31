@@ -3689,10 +3689,10 @@ local function player(pid)
         for index, data in crash_models do
             local name = data[1]
             local spobject = data[2]
-            menu.action(objcrasheslist, name, {"objcrash"..name}, "", function()
+            menu.action(objcrasheslist, name, {$"objcrash{name}"}, "", function()
                 BlockSyncs(pid, function()
                     local coords = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                    local object = spawn2(spobject, coords)
+                    local object = spawn_obj(spobject, coords)
                     OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
                     wait(5000)
                     entities.delete_by_handle(object)
