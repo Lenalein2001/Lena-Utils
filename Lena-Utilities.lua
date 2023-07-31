@@ -63,7 +63,7 @@ local vehicle_gun_list = menu.list(weap, "Vehicle Gun", {""}, "Spawn a Vehicle a
 local better_vehicles = menu.list(vehicle, "Better Vehicles", {""}, "")
 local doorcontrol = menu.list(vehicle, "Doors", {""}, "")
 local engine_control = menu.list(vehicle, "Engine Control", {""}, "")
-local vehicle_flares = menu.list(vehicle, "Countermeasures", {""}, "War Thunder-like Countermeasues")
+local vehicle_flares = menu.list(vehicle, "Countermeasures", {""}, "War Thunder-like Countermeasues.")
 -- Online
 local mpsession = menu.list(online, "Session", {""}, "Features for the current Session.")
 local hosttools = menu.list(mpsession, "Host Tools", {""}, "Tools that can only be used as the Session Host or to force Session Host.")
@@ -971,7 +971,7 @@ end)
         -- Session Host Migration
         -------------------------------------
 
-        menu.toggle_loop(mpsession, "Session Host Migration", {""}, "Notifies you if the Host has changed.", function()
+        menu.toggle_loop(mpsession, "Session Host Migration", {""}, "Notifies you if the Session Host has changed.", function()
             local sh -- Session Host
             local sh_name -- Session Host Name
             if util.is_session_started() then
@@ -983,8 +983,8 @@ end)
                         local new_sh = players.get_host()
                         if sh != new_sh and new_sh != -1 and new_sh != nil then
                             if players.exists(new_sh) then
-                                notify($"Session Host migrated from {sh_name} to "..players.get_name(new_sh))
-                                log($"[Lena | Host Migration] Session Host migrated from {sh_name} to "..players.get_name(new_sh))
+                                notify($"Session Host migrated from {sh_name} to {players.get_name(new_sh)}.")
+                                log($"[Lena | Host Migration] Session Host migrated from {sh_name} to {players.get_name(new_sh)}.")
                             end
                         end
                     end
@@ -1008,8 +1008,8 @@ end)
                         local new_sh = players.get_script_host()
                         if sh != new_sh and new_sh != -1 and new_sh != nil then
                             if players.exists(new_sh) then
-                                notify($"Script Host migrated from {sh_name} to "..players.get_name(new_sh))
-                                log($"[Lena | Script Host Migration] Script Host migrated from {sh_name} to "..players.get_name(new_sh))
+                                notify($"Script Host migrated from {sh_name} to {players.get_name(new_sh)}.")
+                                log($"[Lena | Script Host Migration] Script Host migrated from {sh_name} to {players.get_name(new_sh)}.")
                             end
                         end
                     end
@@ -1027,7 +1027,7 @@ end)
                 NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(0, value)
                 notify($"Free Slots: {NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(0)}")
             else
-                notify("You are not the Host.")
+                notify("You are not the Session Host.")
             end
         end)
         menu.click_slider(hosttools, "Max Spectators", {"maxspectators"}, "Set the max Spectators for the lobby\nOnly works as the Host.", 0, 2, 0, 1, function (value)
@@ -1035,7 +1035,7 @@ end)
                 NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(4, value)
                 notify($"Free Slots: {NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(4)}")
             else
-                notify("You are not the Host.")
+                notify("You are not the Session Host.")
             end
         end)
 
@@ -1061,7 +1061,7 @@ end)
             local HostQueue = players.get_host_queue(false, false, true)
             for idx, pid in HostQueue do
                 if idx <= curPos then
-                    trigger_commands("kick"..players.get_name(pid))
+                    trigger_commands($"kick{players.get_name(pid)}")
                     wait(100)
                 end
             end
