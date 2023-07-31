@@ -1095,7 +1095,7 @@ end)
         local modder_amount = menu.readonly(hosttools, "Modders", "N/A")
 
         util.create_tick_handler(function()
-            menu.set_value(host_name,   players.get_name(players.get_host()))
+            menu.set_value(host_name, players.get_name(players.get_host()))
             menu.set_value(script_host_name, players.get_name(players.get_script_host()))
             menu.set_value(players_amount, #players.list())
             menu.set_value(modder_amount, tostring(get_modder_int()))
@@ -3306,7 +3306,6 @@ local function player(pid)
             local becomeorb = menu.ref_by_path("Online>Become The Orbital Cannon")
             becomeorb.value = true
                 wait(200)
-                local player_ped = players.user_ped()
                 while not STREAMING.HAS_NAMED_PTFX_ASSET_LOADED("scr_xm_orbital") do
                     STREAMING.REQUEST_NAMED_PTFX_ASSET("scr_xm_orbital")
                     wait(0)
@@ -3314,9 +3313,9 @@ local function player(pid)
                 GRAPHICS.USE_PARTICLE_FX_ASSET("scr_xm_orbital")
                 GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD("scr_xm_orbital_blast", players.get_position(pid), 0, 180, 0, 1.0, true, true, true)
                 for i = 1, 4 do
-                    AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "DLC_XM_Explosions_Orbital_Cannon", player_ped, 0, true, false)
+                    AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "DLC_XM_Explosions_Orbital_Cannon", players.user_ped(), 0, true, false)
                 end
-                FIRE.ADD_OWNED_EXPLOSION(player_ped, players.get_position(pid), 59, 1.0, true, false, 0.0)
+                FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 59, 1.0, true, false, 0.0)
                 wait(5000)
             becomeorb.value = false
         end)
@@ -3361,11 +3360,11 @@ local function player(pid)
         -------------------------------------
 
         menu.action(trolling, "Disable Passive Mode", {"pussive"}, "Disables passive mode for the selected player.", function()
-            trigger_commands("givesh "..players.get_name(players.user()))
+            trigger_commands($"givesh "..players.get_name(players.user()))
             wait(500)
-            trigger_commands("bounty "..players.get_name(pid).." 1000")
+            trigger_commands($"bounty {pname} 1000")
             wait(1000)
-            trigger_commands("mission"..players.get_name(pid))
+            trigger_commands($"mission {pname}")
             wait(3000)
             notify("Passive mode should be dissabled now.")
         end, nil, nil, COMMANDPERM_RUDE)
