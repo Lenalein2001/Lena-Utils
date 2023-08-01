@@ -199,14 +199,14 @@ util.require_natives(natives_version)
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
     local msg2 = "Please download the file and everything else again from my Github."
-    util.show_corner_help(msg1..""..natives_version.."\n"..msg2)
+    util.show_corner_help($"{msg1} {natives_version} {msg2}")
     util.stop_script()
 end
 if lang.get_current() != "en" then
     notify("This Lua is made using the english translation of Stand. If things break it's most likely because you are using a different language.\nTry to use: Stand>Settings>Language>English (UK).")
 end
 if not SCRIPT_SILENT_START then
-    notify("Hi, "..SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()..". <3")
+    notify($"Hi, {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}. <3")
 end 
 
 objects_thread = util.create_thread(function(thr)
@@ -559,6 +559,10 @@ end)
         thermal_command.value = false
         GRAPHICS.SEETHROUGH_RESET()
     end)
+
+    -------------------------------------
+    -- Spawn vehicle at Bullet Impact
+    -------------------------------------  
 
     vehicle_gun_ent = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
     vehicle_gun_gm = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
