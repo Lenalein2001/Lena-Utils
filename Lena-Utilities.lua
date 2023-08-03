@@ -1705,7 +1705,7 @@ end)
                 local ping = NETWORK.NETWORK_GET_AVERAGE_LATENCY(pid)
                 local pname = players.get_name(pid)
                 if ping >= 180 then 
-                    notify($"{pname} has a high ping!\nPing: "..ping)
+                    notify($"{pname} has a high ping!\nPing: {ping}")
                     log($"[Lena | Kick High-Ping] Player {pname} has a high ping! | Ping: {ping}")
                     trigger_commands($"kick {pname}")
                 end
