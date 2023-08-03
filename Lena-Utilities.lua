@@ -1368,6 +1368,29 @@ end)
             end
         end)
 
+
+        menu.toggle_loop(protex, "Counter Spoofed Host Token", {""}, "Works best if Host.", function()
+            for players.list() as pid do
+                local name, rid, hex = players.get_name(pid), players.get_rockstar_id(pid), decimalToHex2s(rid, 32)
+                for ht_counter_spoof as token do
+                    if IsDetectionPresent(pid, token) then
+                        if NETWORK.NETWORK_IS_HOST() then
+                            if is_developer then
+                                notify($"Kicking {name} for spoofing their Host Token.")
+                                log($"[Lena Utilities] {name} ({rid} / {hex}) is spoofing their Host Token. They will be kicked.")
+                                trigger_commands($"Kick{name}")
+                            else
+                                notify($"Kicking {name} for spoofing their Host Token.")
+                                log($"[Lena Utilities] {name} ({rid}) is spoofing their Host Token. They will be kicked.")
+                                trigger_commands($"Kick{name}")
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+
+
     -------------------------------------
     -- Orb Detections
     -------------------------------------
@@ -2665,7 +2688,7 @@ if is_developer() then
     end)
 
     menu.action(sdebug, "Host Kick", {"hk"}, $"Kick {players.get_name(players.get_host())}", function()
-        trigger_commands("kick"..players.get_name(players.get_host()))
+        trigger_commands($"kick{players.get_name(players.get_host())}")
     end)
 
     -------------------------------------
@@ -2683,7 +2706,7 @@ if is_developer() then
         menu.action(nativehud, "Get Warning Screen hash", {""}, "", function()
             local hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
             if hash != nil then
-                log($"[Lena | Debug] Warning Screen hash: {hash}")
+                log($"[Lena | Debug] Warning Screen hash: {hash}.")
             end
         end)
 
@@ -2700,7 +2723,7 @@ if is_developer() then
             local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
             local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
             notify($"Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
-            log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}|")
+            log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}.")
         end)
         
         menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
@@ -2769,7 +2792,7 @@ local function player(pid)
     menu.divider(menu.player_root(pid), "Lena Utilities")
     local lena = menu.list(menu.player_root(pid), "Lena Utilities", {"lenau"}, "")
 
-    menu.action(lena, "Mark As Modder", {"manual"}, "Mark this Player manually as a Modder.", function()
+    menu.action(lena, "Mark As Modder", {"manual"}, $"Mark {pname} manually as a Modder.", function()
         if not IsDetectionPresent(pid, "Manual") then
             players.add_detection(pid, "Manual", 7, 100)
         end
