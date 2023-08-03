@@ -1374,16 +1374,17 @@ end)
                 local name, rid, hex = players.get_name(pid), players.get_rockstar_id(pid), decimalToHex2s(rid, 32)
                 for ht_counter_spoof as token do
                     if IsDetectionPresent(pid, token) then
+                        if is_developer then
+                            notify($"Kicking {name} for spoofing their Host Token.")
+                            log($"[Lena Utilities] {name} ({rid} / {hex}) is spoofing their Host Token. They will be kicked.")
+                        else
+                            notify($"Kicking {name} for spoofing their Host Token.")
+                            log($"[Lena Utilities] {name} ({rid}) is spoofing their Host Token. They will be kicked.")
+                        end
                         if NETWORK.NETWORK_IS_HOST() then
-                            if is_developer then
-                                notify($"Kicking {name} for spoofing their Host Token.")
-                                log($"[Lena Utilities] {name} ({rid} / {hex}) is spoofing their Host Token. They will be kicked.")
-                                trigger_commands($"Kick{name}")
-                            else
-                                notify($"Kicking {name} for spoofing their Host Token.")
-                                log($"[Lena Utilities] {name} ({rid}) is spoofing their Host Token. They will be kicked.")
-                                trigger_commands($"Kick{name}")
-                            end
+                            trigger_commands($"Kick{name}")
+                        else
+                            trigger_commands($"loveletter{name}")
                         end
                     end
                 end
