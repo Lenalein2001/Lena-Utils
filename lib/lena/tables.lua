@@ -10,6 +10,12 @@ better_planes = {
     {0x0054, 1}
 }
 
+ht_counter_spoof = {
+    "Spoofed Host Token (Other)",
+    "Spoofed Host Token (Sweetspot)",
+    "Spoofed Host Token (Aggressive)",
+    "Spoofed Host Token (Handicap)"
+}
 bm_safe_table = {
     {"Nightclub Safe", "CLUB_SAFE_CASH_VALUE", "250000"},
     {"Arcade Safe", "ARCADE_SAFE_CASH_VALUE", "100000"},
