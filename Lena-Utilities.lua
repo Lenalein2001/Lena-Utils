@@ -1385,6 +1385,7 @@ end)
                             trigger_commands($"Kick{name}")
                         else
                             trigger_commands($"loveletter{name}")
+                            wait(30000)
                         end
                     end
                 end
