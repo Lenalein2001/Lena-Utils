@@ -144,7 +144,7 @@ function spawn_ped(model_name, pos, spawnped_gm)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return ped
     else
-        notify($"{model_name} is not a valid ped model name. :/")
+        notify($"{model_name} is not a valid ped. :/")
         return nil
     end
 end
@@ -156,10 +156,9 @@ function spawn_obj(model_name, pos)
         local obj = entities.create_object(hash, pos)
         local ptr = entities.handle_to_pointer(obj)
         entities.set_can_migrate(ptr, false)
-        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return obj
     else
-        notify($"{model_name} is not a valid object model name. :/")
+        notify($"{model_name} is not a valid object. :/")
         return nil
     end
 end
@@ -177,7 +176,7 @@ function spawn_vehicle(model_name, pos, veh_godmode)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return veh
     else
-        notify($"{model_name} is not a valid vehicle model name. :/")
+        notify($"{model_name} is not a valid vehicle. :/")
         return nil
     end
 end
