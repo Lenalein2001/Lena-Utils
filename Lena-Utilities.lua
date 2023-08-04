@@ -2728,7 +2728,7 @@ if is_developer() then
             log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}.")
         end)
         
-        menu.action(nativevehicle, "Set Number Plate", {""}, "Sets the Current Number Plate to a random Text.", function()
+        menu.action(nativevehicle, "Set Number Plate", {"randomplate"}, "Sets the Current Number Plate to a random Text.", function()
             local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "FATE", "WHORE"}
             VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(player_cur_car, plate_texts[math.random(#plate_texts)])
         end)
@@ -3466,12 +3466,11 @@ local function player(pid)
             end
         end, nil, nil, COMMANDPERM_RUDE)
 
-        menu.action(kicks, "Host Kick", {"hostkick", "hokick", "stealth"}, "Works on legits and free menus. ", function()
+        menu.action(kicks, "Host Kick", {"hostkick", "hokick"}, "Only works as Host.", function()
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                trigger_commands($"kick{pname}")
-                log($"[Lena | Host Kick] {pname} ({rids}) has been Kicked.")
+                NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
             end
         end)
 
