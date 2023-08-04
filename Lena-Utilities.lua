@@ -3588,23 +3588,6 @@ local function player(pid)
             end
         end)
 
-        menu.action(crashes, "Object Crash", {"objcrash"}, "", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-            else
-                if savekicked then
-                    trigger_commands($"savep{pname}")
-                    wait(50)
-                end
-                BlockSyncs(pid, function()
-                    local object = entities.create_object(joaat("h4_prop_tree_palm_trvlr_03"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
-                    OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
-                    wait(5000)
-                    entities.delete_by_handle(object)
-                end)
-            end
-        end)
-
         menu.action(crashes, "MK2 Griefer", {"grief"}, "Should work one some menus, idk. Don't crash players.", function()
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
