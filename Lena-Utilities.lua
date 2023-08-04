@@ -1368,31 +1368,6 @@ end)
             end
         end)
 
-
-        menu.toggle_loop(protex, "Counter Spoofed Host Token", {""}, "Works best if Host.", function()
-            for players.list() as pid do
-                local name, rid, hex = players.get_name(pid), players.get_rockstar_id(pid), decimalToHex2s(rid, 32)
-                for ht_counter_spoof as token do
-                    if IsDetectionPresent(pid, token) then
-                        if is_developer then
-                            notify($"Kicking {name} for spoofing their Host Token.")
-                            log($"[Lena Utilities] {name} ({rid} / {hex}) is spoofing their Host Token. They will be kicked.")
-                        else
-                            notify($"Kicking {name} for spoofing their Host Token.")
-                            log($"[Lena Utilities] {name} ({rid}) is spoofing their Host Token. They will be kicked.")
-                        end
-                        if NETWORK.NETWORK_IS_HOST() then
-                            trigger_commands($"Kick{name}")
-                        else
-                            trigger_commands($"loveletter{name}")
-                            wait(30000)
-                        end
-                    end
-                end
-            end
-        end)
-
-
     -------------------------------------
     -- Orb Detections
     -------------------------------------
