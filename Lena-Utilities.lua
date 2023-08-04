@@ -3704,29 +3704,6 @@ local function player(pid)
                 ENTITY.SET_ENTITY_ROTATION(crash1, 0.0, -90.0, 0.0, 1, true)
             end
         end)
-
-        local objcrasheslist = menu.list(crashes, "Object Crashes", {""}, "")
-        local crash_models = {
-            {"Positive", "prop_fragtest_cnst_04"},
-            {"Positive 2", "h4_prop_bush_buddleia_low_01"},
-            {"Positive 3", "h4_prop_bush_ear_ab"},
-            {"Positive 4", "h4_prop_bush_ear_aa"},
-            {"Positive 5", "h4_prop_bush_fern_low_01"},
-            {"1", "h4_prop_grass_med_01"}
-        }
-        for index, data in crash_models do
-            local name = data[1]
-            local spobject = data[2]
-            menu.action(objcrasheslist, name, {$"objcrash{name}"}, "", function()
-                BlockSyncs(pid, function()
-                    local coords = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-                    local object = spawn_obj(spobject, coords)
-                    OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
-                    wait(5000)
-                    entities.delete_by_handle(object)
-                end)
-            end)
-        end
 --  end
 end
 
