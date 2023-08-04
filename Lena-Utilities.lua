@@ -3420,6 +3420,17 @@ local function player(pid)
             --WEAPON.GIVE_WEAPON_TO_PED(clone, joaat("WEAPON_HOMINGLAUNCHER"), 20, false, true)
         end)
 
+        menu.toggle_loop(trolling, "Transaction Error", {""}, "", function()
+            for players.list(false, false, true, false, false) as p do
+                if not players.is_in_interior(p) and not players.is_godmode(p) and players.get_bounty(p) == nil then
+                    trigger_commands($"bounty {players.get_name(p)} 10000")
+                end
+                if players.get_bounty(p) != nil and PLAYER.IS_PLAYER_PLAYING(p) then
+                    trigger_commands($"as {players.get_name(pid)} explode {players.get_name(p)}")
+                end
+            end
+        end, nil, nil, COMMANDPERM_RUDE)
+
     -------------------------------------
     -------------------------------------
     -- Kicks & Crashes
