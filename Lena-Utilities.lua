@@ -1631,10 +1631,6 @@ end)
             trigger_commands($"extratoggle {toggled}")
         end)
 
-        menu.toggle(spoofing_opt, "Lena's Matchmaking", {""}, "Spoof Session Assets so you'll only be able to play with me.", function(toggled)
-            trigger_commands($"extratoggle {toggled}; resetassetchecksum; extravalue 20010224")
-        end)
-
         -------------------------------------
         -- Spoof Session
         -------------------------------------
@@ -1700,7 +1696,9 @@ end)
                     local pname = players.get_name(pid)
                     local rid = players.get_rockstar_id(pid)
                     local hex = decimalToHex2s(rid, 32)
-                    trigger_commands($"savep {pname}")
+                    if savekicked then
+                        trigger_commands($"savep {pname}")
+                    end
                     notify($"{pname} has been Kicked for attacking you.")
                     if is_developer() then
                         log($"[Lena | Kick Attackers] {pname} ({rid} / {hex}) has attacked you and got Kicked.")
