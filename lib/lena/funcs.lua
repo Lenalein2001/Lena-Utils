@@ -651,9 +651,7 @@ function AmmoSpeed:reset()
 end
 
 function urlEncode(input: string): string
-	-- Sprinkle some URL magic...
 	local output = input:gsub(">", "%%3E"):gsub("%s", "%%20")
-	-- And voila! Your URL is looking so good it could be on a magazine cover.
 	return output
 end
 
@@ -686,4 +684,25 @@ function getPathFromRef(ref: userdata, lang_code: ?string = nil, override_separa
         return ""
     end
     return path:sub(0, -(separator:len() + 1))
+end
+
+function DOES_VEHICLE_HAVE_IMANI_TECH(vehicle_model)
+    switch vehicle_model do
+        case joaat("deity"):
+        case joaat("granger2"):
+        case joaat("buffalo4"):
+        case joaat("jubilee"):
+        case joaat("patriot3"):
+        case joaat("champion"):
+        case joaat("greenwood"):
+        case joaat("omnisegt"):
+        case joaat("virtue"):
+        case joaat("r300"):
+        case joaat("stingertt"):
+        case joaat("buffalo5"):
+        case joaat("coureur"):
+        case joaat("monstrociti"):
+        return true
+    end
+    return false
 end
