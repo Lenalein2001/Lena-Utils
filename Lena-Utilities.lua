@@ -2420,6 +2420,18 @@ end)
         end
     end)
 
+    -------------------------------------
+    -- Russian Roulette
+    -------------------------------------
+
+    menu.action(misc, "Copy Address As Focus Link", {"copyfocuslink"}, "", function()
+        if (cmd := getFocusedCommand()) then
+            util.copy_to_clipboard("["..getPathFromRef(cmd, "en", ">", false).."]("..urlEncode("https://stand.gg/focus#" .. getPathFromRef(cmd, "en", ">", false))..")")
+        else
+            notify("You are not focusing any command. :/")
+        end
+    end)
+
 -------------------------------------
 -------------------------------------
 -- AI Made Actions
