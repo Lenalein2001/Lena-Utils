@@ -371,14 +371,6 @@ end)
     end)
 
     -------------------------------------
-    -- Change CEO/MC Type
-    -------------------------------------
-
-    menu.action(self, "Change CEO/MC Type", {""}, "Changes your CEO/MC type to the opposite.", function()
-        trigger_commands("ceotomc")
-    end)
-
-    -------------------------------------
     -- Godmode
     -------------------------------------
 
@@ -1338,6 +1330,40 @@ end)
                     end
                 end
             end 
+        end)
+
+        -------------------------------------
+        -- Anti-Lockon
+        -------------------------------------
+
+        local lockon = 0
+        menu.toggle_loop(detections, "Anti-Lockon", {}, "Detects players using anti-lockon.", function()
+            for players.list() as pid do
+                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local vehicle = PED.GET_VEHICLE_PED_IS_IN(ped)
+                local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
+                local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
+                local bitset_things = {3072, 10240, 11264, 11272, 33792} -- the game sets some vehicles not targetable that are parts of fm activities
+                for bitset_things as bitsets do
+                    if bitset == bitsets then
+                        return
+                    end
+                end
+                if not PED.IS_PED_IN_ANY_VEHICLE(ped) or (not DOES_VEHICLE_HAVE_IMANI_TECH(vehicle) and VEHICLE.GET_VEHICLE_MOD(vehicle, 44) == 1) then 
+                    continue
+                end
+                if memory.read_byte(entities.handle_to_pointer(vehicle) + 0xA9E) == 0 and not IsDetectionPresent(pid, "Anti-Lockon") and pid == driver then
+                    yield(1000) -- so using chaff doesnt calse a false pos 
+                    lockon +=1 
+                    if lockon >= 5 then
+                        players.add_detection(pid, "Anti-Lockon", 7, 75)
+                        lockon = 0
+                        break
+                    end
+                else
+                    lockon = 0
+                end
+            end
         end)
 
     -------------------------------------
@@ -2652,7 +2678,7 @@ if is_developer() then
         menu.action(nativeentity, "Clone Player", {""}, "Clones the Player Ped.", function()
             local whore = PED.CLONE_PED(players.user_ped(), true, true, true)
             local cords = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), -5.0, 0.0, 0.0)
-            ENTITY.SET_ENTITY_COORDS(whore, cords.x, cords.y, cords.z)
+            ENTITY.SET_ENTITY_COORDS(whore, cords)
             ENTITY.FREEZE_ENTITY_POSITION(whore, true)
             -- TASK.TASK_START_SCENARIO_IN_PLACE(whore, "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", 0, false) -- Shrugs
         end)
@@ -3156,7 +3182,7 @@ local function player(pid)
         -------------------------------------
 
         menu.toggle_loop(trolling, "Rocket Aimbot", {"rocketaimbot"}, "Distance is limited to 500 Meters.", function()
-            if not players.exists(pid) then paimbor.value = false; util.stop_thread() end
+            if not players.exists(pid) then util.stop_thread() end
             local ped, user = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), players.user_ped()
             local pos = players.get_position(pid)
             local ped_dist = v3.distance(players.get_position(user), players.get_position(pid))
