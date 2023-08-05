@@ -2421,10 +2421,10 @@ end)
     end)
 
     -------------------------------------
-    -- Russian Roulette
+    -- Copy As Focus Link
     -------------------------------------
 
-    menu.action(misc, "Copy Address As Focus Link", {"copyfocuslink"}, "", function()
+    menu.action(misc, "Copy As Focus Link", {"copyfocuslink"}, "Use with Hotkeys.", function()
         if (cmd := getFocusedCommand()) then
             util.copy_to_clipboard("["..getPathFromRef(cmd, "en", ">", false).."]("..urlEncode("https://stand.gg/focus#" .. getPathFromRef(cmd, "en", ">", false))..")")
         else
