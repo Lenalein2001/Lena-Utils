@@ -91,85 +91,87 @@ local teleport = menu.list(misc, "Teleport", {""}, "")
 -- Auto Updater
 -------------------------------------
 
-local status, auto_updater = pcall(require, "auto-updater")
-if not status then
-    local auto_update_complete = nil notify("Installing auto-updater...")
-    async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/senpai/auto-updater.lua",
-        function(result, headers, status_code)
-            local function parse_auto_update_result(result, headers, status_code)
-                local error_prefix = "Error downloading auto-updater: "
-                if status_code != 200 then notify(error_prefix..status_code) return false end
-                if not result or result == "" then notify(error_prefix.."Found empty file.") return false end
-                filesystem.mkdir(filesystem.scripts_dir().."lib")
-                local file = io.open(filesystem.scripts_dir().."lib\\auto-updater.lua", "wb")
-                if file == nil then notify(error_prefix.."Could not open file for writing.") return false end
-                file:write(result) file:close() notify("Successfully installed auto-updater lib") return true
-            end
-            auto_update_complete = parse_auto_update_result(result, headers, status_code)
-        end, function() notify("Error downloading auto-updater lib. Update failed to download.") end)
-    async_http.dispatch() local i = 1 while (auto_update_complete == nil and i < 40) do wait(250) i = i + 1 end
-    if auto_update_complete == nil then error("Error downloading auto-updater lib. HTTP Request timeout") end
-    auto_updater = require("auto-updater")
-end
-if auto_updater == true then error("Invalid auto-updater lib. Please delete your Stand/Lua Scripts/lib/auto-updater.lua and try again") end
+if async_http.have_access() then
+    local status, auto_updater = pcall(require, "auto-updater")
+    if not status then
+        local auto_update_complete = nil notify("Installing auto-updater...")
+        async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/senpai/auto-updater.lua",
+            function(result, headers, status_code)
+                local function parse_auto_update_result(result, headers, status_code)
+                    local error_prefix = "Error downloading auto-updater: "
+                    if status_code != 200 then notify(error_prefix..status_code) return false end
+                    if not result or result == "" then notify(error_prefix.."Found empty file.") return false end
+                    filesystem.mkdir(filesystem.scripts_dir().."lib")
+                    local file = io.open(filesystem.scripts_dir().."lib\\auto-updater.lua", "wb")
+                    if file == nil then notify(error_prefix.."Could not open file for writing.") return false end
+                    file:write(result) file:close() notify("Successfully installed auto-updater lib") return true
+                end
+                auto_update_complete = parse_auto_update_result(result, headers, status_code)
+            end, function() notify("Error downloading auto-updater lib. Update failed to download.") end)
+        async_http.dispatch() local i = 1 while (auto_update_complete == nil and i < 40) do wait(250) i = i + 1 end
+        if auto_update_complete == nil then error("Error downloading auto-updater lib. HTTP Request timeout") end
+        auto_updater = require("auto-updater")
+    end
+    if auto_updater == true then error("Invalid auto-updater lib. Please delete your Stand/Lua Scripts/lib/auto-updater.lua and try again") end
 
-local default_check_interval = 604800
-local auto_update_config = {
-    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/Lena-Utilities.lua",
-    script_relpath=SCRIPT_RELPATH,
-    switch_to_branch=selected_branch,
-    verify_file_begins_with="--",
-    check_interval=86400,
-    silent_updates=false,
-    dependencies={
-        {
-            name="Funcs",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/funcs.lua",
-            script_relpath="/lib/lena/funcs.lua",
-            check_interval=default_check_interval,
-        },
-        {
-            name="Natives",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/natives-2944a/uno.lua",
-            script_relpath="/lib/natives-2944a/uno.lua",
-            check_interval=default_check_interval,
-        },
-        {
-            name="Json",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json.lua",
-            script_relpath="/lib/pretty/json.lua",
-            check_interval=default_check_interval,
-        },
-        {
-            name="Constant",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/constant.lua",
-            script_relpath="/lib/pretty/json/constant.lua",
-            check_interval=default_check_interval,
-        },
-        {
-            name="Parser",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/parser.lua",
-            script_relpath="/lib/pretty/json/parser.lua",
-            check_interval=default_check_interval,
-        },
-        {
-            name="Serializer",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/serializer.lua",
-            script_relpath="/lib/pretty/json/serializer.lua",
-            check_interval=default_check_interval,
-        },
-        {
-            name="ScaleformLib",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/ScaleformLib.lua",
-            script_relpath="/lib/ScaleformLib.lua",
-            check_interval=default_check_interval,
-        },
-        {
-            name="Tables",
-            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/tables.lua",
-            script_relpath="/lib/lena/tables.lua",
-            check_interval=default_check_interval,
-        },
+    local default_check_interval = 604800
+    local auto_update_config = {
+        source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/Lena-Utilities.lua",
+        script_relpath=SCRIPT_RELPATH,
+        switch_to_branch=selected_branch,
+        verify_file_begins_with="--",
+        check_interval=86400,
+        silent_updates=false,
+        dependencies={
+            {
+                name="Funcs",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/funcs.lua",
+                script_relpath="/lib/lena/funcs.lua",
+                check_interval=default_check_interval,
+            },
+            {
+                name="Natives",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/natives-2944a/uno.lua",
+                script_relpath="/lib/natives-2944a/uno.lua",
+                check_interval=default_check_interval,
+            },
+            {
+                name="Json",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json.lua",
+                script_relpath="/lib/pretty/json.lua",
+                check_interval=default_check_interval,
+            },
+            {
+                name="Constant",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/constant.lua",
+                script_relpath="/lib/pretty/json/constant.lua",
+                check_interval=default_check_interval,
+            },
+            {
+                name="Parser",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/parser.lua",
+                script_relpath="/lib/pretty/json/parser.lua",
+                check_interval=default_check_interval,
+            },
+            {
+                name="Serializer",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/serializer.lua",
+                script_relpath="/lib/pretty/json/serializer.lua",
+                check_interval=default_check_interval,
+            },
+            {
+                name="ScaleformLib",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/ScaleformLib.lua",
+                script_relpath="/lib/ScaleformLib.lua",
+                check_interval=default_check_interval,
+            },
+            {
+                name="Tables",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/tables.lua",
+                script_relpath="/lib/lena/tables.lua",
+                check_interval=default_check_interval,
+            },
+        }
     }
 }
 
@@ -189,8 +191,12 @@ end
 if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
 end
-if not is_developer() then
-    auto_updater.run_auto_update(auto_update_config)
+if async_http.have_access() then 
+    if not is_developer() then
+        auto_updater.run_auto_update(auto_update_config)
+    end
+else
+    notify("This Script needs Internet Access for the Auto Updater to work!")
 end
 
 util.ensure_package_is_installed(natives_version)
