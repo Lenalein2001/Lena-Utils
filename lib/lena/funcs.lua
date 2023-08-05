@@ -657,3 +657,41 @@ end
 function AmmoSpeed:reset()
     memory.write_float(self.address, self.defaultValue)
 end
+
+function urlEncode(input: string): string
+	-- Sprinkle some URL magic...
+	local output = input:gsub(">", "%%3E"):gsub("%s", "%%20")
+	-- And voila! Your URL is looking so good it could be on a magazine cover.
+	return output
+end
+
+function getFocusedCommand(): ?userdata
+	for menu.get_current_ui_list():getChildren() as cmd do
+		if cmd:isFocused() then return cmd end
+	end
+end
+
+local tab_root = menu.ref_by_path("Self"):getParent()
+local version_info = menu.get_version()
+local root_name_ref = menu.ref_by_path("Stand>Settings>Appearance>Address Bar>Root Name")
+local address_separator_ref = menu.ref_by_path("Stand>Settings>Appearance>Address Bar>Address Separator")
+function getPathFromRef(ref: userdata, lang_code: ?string = nil, override_separator: ?string = nil, include_root_name: bool = true): string
+    local path = ""
+    local separator = override_separator ?? address_separator_ref:getState():gsub(version_info.brand, ""):gsub("Online", "")
+    local cmd = ref
+    while cmd:isValid() and (include_root_name or not cmd:equals(tab_root)) do
+        local name = cmd:equals(tab_root) ? (root_name_ref.value != 0 ? (root_name_ref:getState():gsub("{}", version_info.version)) : "") : cmd.menu_name
+        local hash = tonumber(name)
+        if hash then
+            name = lang.get_string(hash, lang_code ?? lang.get_current())
+        end
+        if #name > 0 then
+            path = name .. separator .. path
+        end
+        cmd = cmd:getParent()
+    end
+    if path == "" then
+        return ""
+    end
+    return path:sub(0, -(separator:len() + 1))
+end
