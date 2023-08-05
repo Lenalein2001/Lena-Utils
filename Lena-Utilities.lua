@@ -390,11 +390,11 @@ end)
     -- Auto Heal
     -------------------------------------
 
-    menu.toggle_loop(self, "Auto Heal", {""}, "Heals you on low health.", function()
+    menu.toggle_loop(self, "Auto Heal", {""}, "Heals you if the Ped has low health.", function()
         local ped = players.user_ped()
         local health = ENTITY.GET_ENTITY_HEALTH(ped)
         if health <= 140 and not PED.IS_PED_DEAD_OR_DYING(ped) then
-            trigger_commands("heal")
+            trigger_commands("refillhealth; refillarmour")
         end
     end)
 
@@ -441,7 +441,6 @@ end)
     LegitRapidMS = menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to grenade and back to the weapon.", 1, 1000, 100, 50, function (value); end)
 
     LegitRapidFire = false
-    LegitRapidMS = 100
     menu.toggle(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main Weapon.", function(toggled)
         local ped = players.user_ped()
         if toggled then
@@ -1101,13 +1100,6 @@ end)
         local script_host_name = menu.readonly(hosttools, "Script Host", "N/A")
         local players_amount = menu.readonly(hosttools, "Players", "N/A")
         local modder_amount = menu.readonly(hosttools, "Modders", "N/A")
-
-        util.create_tick_handler(function()
-            menu.set_value(host_name, players.get_name(players.get_host()))
-            menu.set_value(script_host_name, players.get_name(players.get_script_host()))
-            menu.set_value(players_amount, #players.list())
-            menu.set_value(modder_amount, tostring(get_modder_int()))
-        end)
 
         -------------------------------------
         -- Show Talking Players
@@ -2609,7 +2601,7 @@ if is_developer() then
         end
     end)
 
-    menu.action(sdebug, "Host Kick", {"hk"}, $"Kick {players.get_name(players.get_host())}", function()
+    debug_hk = menu.action(sdebug, "Host Kick", {"hk"}, $"Kick {players.get_name(players.get_host())}", function()
         trigger_commands($"kick{players.get_name(players.get_host())}")
     end)
 
@@ -2693,7 +2685,7 @@ local function player(pid)
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
-        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 
+        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3692,6 +3684,11 @@ util.create_tick_handler(function()
     if player_cur_car != carCheck then
         player_cur_car = carCheck
     end
+    menu.set_value(host_name, players.get_name(players.get_host()))
+    menu.set_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
+    menu.set_value(script_host_name, players.get_name(players.get_script_host()))
+    menu.set_value(players_amount, #players.list())
+    menu.set_value(modder_amount, tostring(get_modder_int()))
 end)
 
 util.on_stop(function()
