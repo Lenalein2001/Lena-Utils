@@ -173,7 +173,7 @@ if async_http.have_access() then
             },
         }
     }
-}
+end
 
 -------------------------------------
 -- Required Files
