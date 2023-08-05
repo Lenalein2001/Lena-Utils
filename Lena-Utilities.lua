@@ -2460,25 +2460,6 @@ end)
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
     -------------------------------------
-    -- Roulette Earnings
-    -------------------------------------  
-
-    menu.action(ai_made, "Roulette Earnings", {"roulette_earnings"}, "Displays earnings information for roulette.", function()
-        local win_amount = 330000 - 55000
-        local message = string.format("To maximize your earnings in roulette, you can bet MAX on both 7 and 1st 12. If you pay 55000 and win 330000, you will earn %d per game.", win_amount)
-        chat.send_message(message, false, true, true)
-    end)
-
-    -------------------------------------   
-    -- Money Drops Warning  
-    -------------------------------------   
-
-    menu.action(ai_made, "Money Drops Warning", {"money_drops_warning"}, "Warns players about the risks of money drops.", function()
-        local message = "Money drops are a waste of time and risky. They offer little reward and often result in lost progress. Even if I were to participate in money drops, I wouldn't because they are simply a waste of time. Stick to safer and more profitable options."
-        chat.send_message(message, false, true, true)
-    end)
-
-    -------------------------------------
     -- Remove Bounty
     -------------------------------------
 
