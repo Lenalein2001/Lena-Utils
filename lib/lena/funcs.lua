@@ -77,14 +77,6 @@ function start_fm_script(script)
     SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(script)
 end
 
-function restartsession()
-    local host = players.get_name(players.get_host())
-    local script_host = players.get_name(players.get_script_host())
-    trigger_commands("restartfm")
-    notify("Restarting Session Scripts...")
-    log("[Lena | Session Restart] Restating Session Scripts. Current Host and Script Host: "..host.." and "..script_host..".")
-end
-
 function closestveh(myPos)
     local closestDist = 999999999999
     local closestVeh = nil
