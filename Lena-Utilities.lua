@@ -205,7 +205,7 @@ util.require_natives(natives_version)
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
     local msg2 = "Please download the file and everything else again from my Github."
-    util.show_corner_help($"{msg1} {natives_version} {msg2}")
+    util.show_corner_help($"{msg1} {natives_version}. {msg2}")
     util.stop_script()
 end
 if lang.get_current() != "en" then
@@ -438,6 +438,8 @@ end)
     -- Legit rapid Fire
     -------------------------------------
 
+    LegitRapidMS = menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to grenade and back to the weapon.", 1, 1000, 100, 50, function (value); end)
+
     LegitRapidFire = false
     LegitRapidMS = 100
     menu.toggle(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main Weapon.", function(toggled)
@@ -452,7 +454,7 @@ end)
                         local currentWP = memory.read_int(currentWpMem)
                         memory.free(currentWpMem)
                         WEAPON.SET_CURRENT_PED_WEAPON(ped, 2481070269, true)
-                        wait(LegitRapidMS)
+                        wait(menu.get_value(LegitRapidMS))
                         WEAPON.SET_CURRENT_PED_WEAPON(ped, currentWP, true)
                     end
                     wait()
@@ -462,10 +464,6 @@ end)
         else
             LegitRapidFire = false
         end
-    end)
-
-    menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to grenade and back to the weapon.", 1, 1000, 100, 50, function (value)
-        LegitRapidMS = value
     end)
 
     -------------------------------------
