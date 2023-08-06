@@ -3690,15 +3690,14 @@ players.on_leave(function(pid)
     allplayers[pid] = nil
 end)
 
-menu.action(menu.my_root(), "Check for Updates", {""}, "", function()
-    auto_update_config.check_interval = 0
-    if auto_updater.run_auto_update(auto_update_config) then
-        notify("No updates have been found.")
-    end
-end)
-
-if not is_developer() then
+if not is_developer() and async_http.have_access() then
     log_failsafe()
+
+    menu.action(menu.my_root(), "Check for Updates", {""}, "", function()
+        auto_update_config.check_interval = 0
+        if auto_updater.run_auto_update(auto_update_config) then
+            notify("No updates have been found.")
+        end
 end
 
 -------------------------------------
