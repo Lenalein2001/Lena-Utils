@@ -703,3 +703,37 @@ function DOES_VEHICLE_HAVE_IMANI_TECH(vehicle_model)
     end
     return false
 end
+
+function get_current_money()
+    return players.get_money(players.user())
+end
+function calculate_difference(old_value, new_value)
+    return new_value - old_value
+end
+function format_money_value(value)
+    local formatted = string.format("%d", value)
+    local k
+    while true do
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+        if k == 0 then
+            break
+        end
+    end
+    return formatted
+end
+
+function check_and_write_money_change()
+    local current_money = get_current_money()
+    if current_money ~= initial_money then
+        local difference = calculate_difference(initial_money, current_money)
+        local file = io.open(filenametrans, "a")
+        if file then
+            local formatted_initial_money = format_money_value(initial_money)
+            local formatted_current_money = format_money_value(current_money)
+            local formatted_difference = format_money_value(math.abs(difference))
+            file:write(string.format("[%s] Old amount: %s. New amount: %s. Difference: %s \n", os.date("%m.%d.%Y %X"), formatted_initial_money, formatted_current_money, formatted_difference))
+            file:close()
+        end
+        initial_money = current_money
+    end
+end
