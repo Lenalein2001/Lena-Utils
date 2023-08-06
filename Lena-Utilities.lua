@@ -917,11 +917,17 @@ end)
     -- Auto-Performance Tuning
     -------------------------------------
 
+    auto_perf_ind = {11,12,13,16,18}
     menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) then
             local veh = players.get_vehicle_model(players.user())
             if VEHICLE.IS_THIS_MODEL_A_CAR(veh) or VEHICLE.IS_THIS_MODEL_A_BIKE(veh) then
-                trigger_commands("turbo on; armour 4; brakes 2; engine 3; transmission 3; bulletprooftyres on")
+                for auto_perf_ind as index do                
+                    if entities.get_upgrade_value(player_cur_car, index) != entities.get_upgrade_max_value(player_cur_car, index) then
+                        entities.set_upgrade_value(player_cur_car, index, entities.get_upgrade_max_value(player_cur_car, index))
+                        notify("Upgraded your Car :D")
+                    end
+                end
             end
         end
         wait(5000)
@@ -1301,7 +1307,7 @@ end)
                 if old_sh != new_sh then
                     if GET_SPAWN_STATE(pid) == 0 and players.get_script_host() == pid then
                         if not IsDetectionPresent(pid, "Thunder Join") then
-                            players.add_detection(pid, "Thunder Join", TOAST_DEFAULT, 100)
+                            players.add_detection(pid, "Thunder Join", 7, 100)
                             notify(players.get_name(pid) .. " just broke the session. :/")
                             break
                         end
