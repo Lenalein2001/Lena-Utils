@@ -1022,7 +1022,7 @@ end)
 
         menu.divider(hosttools, "Max Players")
         menu.click_slider(hosttools, "Max Players", {"maxplayers"}, "Set the max Players for the lobby\nOnly works as the Host.", 1, 32, 32, 1, function (value)
-            if players.get_host() == players.user() then
+            if NETWORK.NETWORK_IS_HOST() then
                 NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(0, value)
                 notify($"Free Slots: {NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(0)}")
             else
@@ -1030,7 +1030,7 @@ end)
             end
         end)
         menu.click_slider(hosttools, "Max Spectators", {"maxspectators"}, "Set the max Spectators for the lobby\nOnly works as the Host.", 0, 2, 0, 1, function (value)
-            if players.get_host() == players.user() then
+            if NETWORK.NETWORK_IS_HOST() then
                 NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(4, value)
                 notify($"Free Slots: {NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(4)}")
             else
@@ -1065,7 +1065,7 @@ end)
                 end
             end
             util.create_tick_handler(function()
-                if players.get_host() == players.user() then
+                if NETWORK.NETWORK_IS_HOST() then
                     notify("Success, you are now the Session Host.")
                     return false
                 end
@@ -1078,7 +1078,7 @@ end)
         -------------------------------------
 
         menu.toggle(hosttools, "Block Script Host Migration", {""}, "Only works when you are the Host. Doesn't work against Modders.", function(on)
-            if util.is_session_started() and players.get_host() == players.user() then
+            if util.is_session_started() and NETWORK.NETWORK_IS_HOST() then
                 NETWORK.NETWORK_PREVENT_SCRIPT_HOST_MIGRATION()
             end
         end)
@@ -3418,7 +3418,9 @@ local function player(pid)
         menu.action(kicks, "Host Kick", {"hostkick", "hokick"}, "Only works as Host.", function()
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
-            else
+                return
+            end
+            if NETWORK.NETWORK_IS_HOST() then
                 NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
             end
         end)
