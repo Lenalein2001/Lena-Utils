@@ -2430,8 +2430,7 @@ end)
 
     menu.action(misc, "Russian Roulette", {""}, "Feeling Lucky?", function()
         local is_bullet_in_my_head = math.random(6)
-        local user = players.user_ped()
-        trigger_commands("skiprepeatwar off; commandsskip off")
+        trigger_commands("skiprepeatwar on; commandsskip on")
         if is_bullet_in_my_head == 1 then
             notify("You have lost the Game.")
             log(os.date("On %A the %x at %X your game suffered a critical error and died. It will be remembered."))
