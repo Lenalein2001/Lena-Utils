@@ -10,12 +10,37 @@ better_planes = {
     {0x0054, 1}
 }
 
-ht_counter_spoof = {
-    "Spoofed Host Token (Other)",
-    "Spoofed Host Token (Sweetspot)",
-    "Spoofed Host Token (Aggressive)",
-    "Spoofed Host Token (Handicap)"
+HudColour =
+{
+	pureWhite = 0,
+	white = 1,
+	black = 2,
+	grey = 3,
+	greyLight = 4,
+	greyDrak = 5,
+	red = 6,
+	redLight = 7,
+	redDark = 8,
+	blue = 9,
+	blueLight = 10,
+	blueDark = 11,
+	yellow = 12,
+	yellowLight = 13,
+	yellowDark = 14,
+	orange = 15,
+	orangeLight = 16,
+	orangeDark = 17,
+	green = 18,
+	greenLight = 19,
+	greenDark = 20,
+	purple = 21,
+	purpleLight = 22,
+	purpleDark = 23,
+	radarHealth = 25,
+	radarArmour = 26,
+	friendly = 118,
 }
+
 bm_safe_table = {
     {"Nightclub Safe", "CLUB_SAFE_CASH_VALUE", "250000"},
     {"Arcade Safe", "ARCADE_SAFE_CASH_VALUE", "100000"},
