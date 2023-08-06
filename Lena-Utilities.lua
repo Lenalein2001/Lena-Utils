@@ -3698,6 +3698,7 @@ if not is_developer() and async_http.have_access() then
         if auto_updater.run_auto_update(auto_update_config) then
             notify("No updates have been found.")
         end
+    end)
 end
 
 -------------------------------------
