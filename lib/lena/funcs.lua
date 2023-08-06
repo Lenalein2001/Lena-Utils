@@ -707,9 +707,11 @@ end
 function get_current_money()
     return players.get_money(players.user())
 end
+
 function calculate_difference(old_value, new_value)
     return new_value - old_value
 end
+
 function format_money_value(value)
     local formatted = string.format("%d", value)
     local k
@@ -731,7 +733,8 @@ function check_and_write_money_change()
             local formatted_initial_money = format_money_value(initial_money)
             local formatted_current_money = format_money_value(current_money)
             local formatted_difference = format_money_value(math.abs(difference))
-            file:write(string.format("[%s] Old amount: %s. New amount: %s. Difference: %s \n", os.date("%m.%d.%Y %X"), formatted_initial_money, formatted_current_money, formatted_difference))
+            local sign = difference >= 0 and "+" or "-"
+            file:write(string.format("[%s] Old amount: %s. New amount: %s. Difference: %s%s \n", os.date("%m.%d.%Y %X"), formatted_initial_money, formatted_current_money, sign, formatted_difference))
             file:close()
         end
         initial_money = current_money
