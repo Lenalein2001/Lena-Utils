@@ -704,10 +704,17 @@ function DOES_VEHICLE_HAVE_IMANI_TECH(vehicle_model)
     return false
 end
 
-function get_current_money()
-    return players.get_money(players.user())
+function hud_notification(format, colour, ...)
+	assert(type(format) == "string", "msg must be a string, got " .. type(format))
+	local msg = string.format(format, ...)
+	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or 2)
+	util.BEGIN_TEXT_COMMAND_THEFEED_POST(msg)
+	HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)
 end
 
+function get_current_money()
+    return MONEY.NETWORK_GET_EVC_BALANCE()
+end
 function calculate_difference(old_value, new_value)
     return new_value - old_value
 end
