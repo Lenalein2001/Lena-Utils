@@ -737,13 +737,28 @@ function check_and_write_money_change()
         local difference = calculate_difference(initial_money, current_money)
         local file = io.open(filenametrans, "a")
         if file then
-            local formatted_initial_money = format_money_value(initial_money)
-            local formatted_current_money = format_money_value(current_money)
-            local formatted_difference = format_money_value(math.abs(difference))
-            local sign = difference >= 0 and "+" or "-"
+            local formatted_initial_money = "$"..format_money_value(initial_money)
+            local formatted_current_money = "$"..format_money_value(current_money)
+            local formatted_difference = "$"..format_money_value(math.abs(difference))
+            local sign = difference >= 0 and "Added " or "Removed "
             file:write(string.format("[%s] Old amount: %s. New amount: %s. Difference: %s%s \n", os.date("%m.%d.%Y %X"), formatted_initial_money, formatted_current_money, sign, formatted_difference))
             file:close()
+            hud_notification(sign..formatted_difference, 24)
         end
         initial_money = current_money
+    end
+end
+
+function replaceInDraft(search, replacement)
+    local draft = chat.get_draft()
+    
+    if draft != nil then
+        local modifiedDraft = draft:gsub(search, replacement)
+        
+        if modifiedDraft ~= draft then
+            local charactersToRemove = #draft - #modifiedDraft
+            chat.remove_from_draft(charactersToRemove)
+            chat.add_to_draft(modifiedDraft)
+        end
     end
 end
