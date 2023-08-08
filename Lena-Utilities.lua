@@ -2634,6 +2634,32 @@ if is_developer() then
     debug_hk = menu.action(sdebug, "Host Kick", {"hk"}, $"Kick {players.get_name(players.get_host())}", function()
         trigger_commands($"kick{players.get_name(players.get_host())}")
     end)
+    
+    initial_money = get_current_money()
+    filenametrans = $"{lenaDir}Transactions for {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}.txt"
+    menu.toggle(sdebug, "Transaction Log", {}, "", function(toggled)
+        if not util.is_session_started() then return end
+        if players.are_stats_ready(players.user()) then
+            while toggled do
+                if get_current_money() ~= initial_money then
+                    check_and_write_money_change()
+                end
+                wait(1000)
+                --print(get_current_money())
+            end
+        end
+    end)
+
+    menu.action(sdebug, "Test", {""}, "", function()
+        util.request_script_host("freemode")
+        wait(1000)
+        notify(players.get_name(NETWORK.NETWORK_GET_HOST_OF_SCRIPT("freemode", -1, 0)))
+    end)
+
+    menu.toggle_loop(sdebug, "Miss Marie", {""}, "", function()
+        replaceInDraft("Nav", "Miss Marie")
+        replaceInDraft("nav", "Miss Marie")
+    end)
 
     -------------------------------------
     -- Natives
@@ -2714,7 +2740,7 @@ local function player(pid)
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
-        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 
+        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
