@@ -2669,7 +2669,6 @@ if is_developer() then
             notify($"Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
             log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}.")
         end)
-        
         menu.action(nativevehicle, "Set Number Plate", {"randomplate"}, "Sets the Current Number Plate to a random Text.", function()
             local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "FATE", "WHORE"}
             VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(player_cur_car, plate_texts[math.random(#plate_texts)])
