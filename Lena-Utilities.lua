@@ -917,15 +917,19 @@ end)
     -- Auto-Performance Tuning
     -------------------------------------
 
-    auto_perf_ind = {11,12,13,16,18}
+    local auto_perf_ind = {11,12,13,16,18,22}
     menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) then
             local veh = players.get_vehicle_model(players.user())
             if VEHICLE.IS_THIS_MODEL_A_CAR(veh) or VEHICLE.IS_THIS_MODEL_A_BIKE(veh) then
-                for auto_perf_ind as index do                
-                    if entities.get_upgrade_value(player_cur_car, index) != entities.get_upgrade_max_value(player_cur_car, index) then
+                for auto_perf_ind as index do 
+                    local veh_mods = VEHICLE.GET_VEHICLE_WINDOW_TINT(player_cur_car) != 1 or VEHICLE.GET_VEHICLE_TYRES_CAN_BURST(player_cur_car)
+                    local upgrade = entities.get_upgrade_value(player_cur_car, index) != entities.get_upgrade_max_value(player_cur_car, index)               
+                    if veh_mods or upgrade then
                         entities.set_upgrade_value(player_cur_car, index, entities.get_upgrade_max_value(player_cur_car, index))
-                        notify("Upgraded your Car :D")
+                        VEHICLE.SET_VEHICLE_WINDOW_TINT(player_cur_car, 1)
+                        VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(player_cur_car, false)
+                        notify("Upgraded your Car. :D")
                     end
                 end
             end
