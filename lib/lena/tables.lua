@@ -88,7 +88,8 @@ CEOLabels = {
 script_start = {
     {"appsmuggler", "Open Air Cargo Screen"},
     {"appbusinesshub", "Open Nightclub Screen"},
-    {"apparcadebusinesshub", "Open Master Control Terminal"}
+    {"apparcadebusinesshub", "Open Master Control Terminal"},
+    {"apphackertruck", "Open Terrorbyte Screen"}
 }
 
 veh_things = {
