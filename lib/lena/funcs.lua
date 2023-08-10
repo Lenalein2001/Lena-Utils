@@ -762,3 +762,19 @@ function replaceInDraft(search, replacement)
         end
     end
 end
+
+local auto_perf_ind = {11,12,13,16,18,22}
+function tune_vehicle(v, performance, tell)
+    if performance then
+        for auto_perf_ind as index do 
+            local veh_mods = VEHICLE.GET_VEHICLE_WINDOW_TINT(v) != 1 or VEHICLE.GET_VEHICLE_TYRES_CAN_BURST(v)
+            local upgrade = entities.get_upgrade_value(v, index) != entities.get_upgrade_max_value(v, index)               
+            if veh_mods or upgrade then
+                entities.set_upgrade_value(v, index, entities.get_upgrade_max_value(v, index))
+                VEHICLE.SET_VEHICLE_WINDOW_TINT(v, 1)
+                VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(v, false)
+                if tell then notify("Upgraded your Car. :D") end
+            end
+        end
+    end
+end
