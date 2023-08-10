@@ -366,7 +366,7 @@ function decimalToHex2s(decimal, numBits)
 end
 
 function is_developer()
-    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77}
+    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D}
     local user = players.get_rockstar_id(players.user())
     for developer as id do
         if user == id then
@@ -713,7 +713,7 @@ function hud_notification(format, colour, ...)
 end
 
 function get_current_money()
-    return MONEY.NETWORK_GET_EVC_BALANCE()
+    return MONEY.NETWORK_GET_VC_BALANCE()
 end
 function calculate_difference(old_value, new_value)
     return new_value - old_value
