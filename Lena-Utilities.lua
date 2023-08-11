@@ -2473,16 +2473,31 @@ end)
     local is_team_chat = menu.ref_by_path("Online>Chat>Send Message>In Team Chat")
     local toggle_chat = menu.ref_by_path("Online>Chat>Always Open")
     menu.toggle_loop(misc, "Better Chat", {""}, "", function()
+        local color = to_rgb(255, 0, 0, 255)
         if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
             is_team_chat.value = false
             repeat chat.close() until not chat.is_open()
             menu.show_command_box("say ")
-            toggle_chat.value = true; toggle_chat.value = false
+            while menu.command_box_is_open() do
+                directx.draw_text(0.8680, 0.540, "Sending a Global Message", ALIGN_CENTRE, 0.45, color, true)
+                toggle_chat.value = true
+                HUD.SET_MP_GAMER_TAG_VISIBILITY(players.user(), 16, true, 0)
+                wait()
+            end
+            toggle_chat.value = false
+            HUD.SET_MP_GAMER_TAG_VISIBILITY(players.user(), 16, false, 0)
         elseif PAD.IS_CONTROL_JUST_PRESSED(1, 246) then
             is_team_chat.value = true
             repeat chat.close() until not chat.is_open()
             menu.show_command_box("say ")
-            toggle_chat.value = true; toggle_chat.value = false
+            while menu.command_box_is_open() do
+                directx.draw_text(0.8680, 0.540, "Sending a Team Message", ALIGN_CENTRE, 0.45, color, true)
+                toggle_chat.value = true
+                HUD.SET_MP_GAMER_TAG_VISIBILITY(players.user(), 16, true, 0)
+                wait()
+            end
+            toggle_chat.value = false
+            HUD.SET_MP_GAMER_TAG_VISIBILITY(players.user(), 16, false, 0)
         end
     end)
 
