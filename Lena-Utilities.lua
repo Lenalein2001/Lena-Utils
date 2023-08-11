@@ -562,14 +562,16 @@ end)
     -- Spawn vehicle at Bullet Impact
     -------------------------------------  
 
-    vehicle_gun_ent = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
-    vehicle_gun_gm = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
+    vehicle_gun_ent  = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
+    vehicle_gun_gm   = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
+    vehicle_gun_perf = menu.toggle(vehicle_gun_list, "Tune Perfomance", {""}, "", function(); end)
 
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn vehicle at Bullet Impact", {""}, "", function()
         if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
-            local veh, gm = menu.get_value(vehicle_gun_ent), menu.get_value(vehicle_gun_gm)
-            spawn_vehicle(veh, impactCords, gm)
+            local model, gm = menu.get_value(vehicle_gun_ent), menu.get_value(vehicle_gun_gm)
+            v = spawn_vehicle(model, impactCords, gm)
+            if menu.get_value(vehicle_gun_perf) then tune_vehicle(v, true, false) end
         end
     end)
 
