@@ -786,3 +786,12 @@ function DELETE_OBJECT_BY_HASH(hash)
         end
     end
 end
+
+function to_rgb(r, g, b, a)
+    local color = {}
+    color.r = r
+    color.g = g
+    color.b = b
+    color.a = a
+    return color
+end
