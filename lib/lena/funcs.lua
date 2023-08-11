@@ -778,3 +778,11 @@ function tune_vehicle(v, performance, tell)
         end
     end
 end
+
+function DELETE_OBJECT_BY_HASH(hash)
+    for entities.get_all_objects_as_handles() as ent do
+        if ENTITY.GET_ENTITY_MODEL(ent) == hash then
+            entities.delete_by_handle(ent)
+        end
+    end
+end
