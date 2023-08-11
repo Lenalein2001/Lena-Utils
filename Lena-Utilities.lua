@@ -2044,6 +2044,15 @@ end)
         end)
     end
 
+    -------------------------------------
+    -- Remove The Drainage Pipe
+    ------------------------------------- 
+
+    menu.action(tunables, "Remove The Drainage Pipe", {"hccprempipe"}, "", function()
+        local Object = util.joaat("prop_chem_grill_bit") -- Thanks for letting me know the object, Sapphire#6031
+        DELETE_OBJECT_BY_HASH(Object)
+    end)
+
 -------------------------------------
 -------------------------------------
 -- Misc
