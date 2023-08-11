@@ -2465,6 +2465,26 @@ end)
         end
     end)
 
+    -------------------------------------
+    -- Better Chat
+    -------------------------------------
+
+    local is_team_chat = menu.ref_by_path("Online>Chat>Send Message>In Team Chat")
+    local toggle_chat = menu.ref_by_path("Online>Chat>Always Open")
+    menu.toggle_loop(misc, "Better Chat", {""}, "", function()
+        if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
+            is_team_chat.value = false
+            repeat chat.close() until not chat.is_open()
+            menu.show_command_box("say ")
+            toggle_chat.value = true; toggle_chat.value = false
+        elseif PAD.IS_CONTROL_JUST_PRESSED(1, 246) then
+            is_team_chat.value = true
+            repeat chat.close() until not chat.is_open()
+            menu.show_command_box("say ")
+            toggle_chat.value = true; toggle_chat.value = false
+        end
+    end)
+
 -------------------------------------
 -------------------------------------
 -- AI Made Actions
@@ -2865,6 +2885,7 @@ local function player(pid)
                 chat.send_message(on_command, false, true, false)
             end
         end)
+
         menu.toggle_loop(friendly, "Stealth Messages", {""}, "", function()
             if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
                 wait(200)
