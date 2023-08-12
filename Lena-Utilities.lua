@@ -1139,15 +1139,15 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Super Drive", {""}, "Detects Players using Super Drive.", function()
-            for players.list(false) as pid do
+            for players.list() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local veh_speed = (ENTITY.GET_ENTITY_SPEED(vehicle)* 3.6)
                 local class = VEHICLE.GET_VEHICLE_CLASS(vehicle)
                 if class != 15 and class != 16 and veh_speed >= 320 and (players.get_vehicle_model(pid) != joaat("oppressor") or players.get_vehicle_model(pid) != joaat("oppressor2")) then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
-                    if not IsDetectionPresent(pid, "Super Drive") then
-                        players.add_detection(pid, "Super Drive", 7, 50)
+                    if not IsDetectionPresent(driver, "Super Drive") then
+                        players.add_detection(driver, "Super Drive", 7, 50)
                     end
                     break
                 end
@@ -1159,7 +1159,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Spectate", {""}, "Detects if someone is spectating you.", function()
-            for players.list(false, true, true) as pid do
+            for players.list(false) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local cam_dist = v3.distance(players.get_position(players.user()), players.get_cam_pos(pid))
                 local ped_dist = v3.distance(players.get_position(players.user()), players.get_position(pid))
@@ -1178,7 +1178,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Teleport", {""}, "Detects if the player has teleported.", function()
-            for players.list(false) as pid do
+            for players.list() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if not NETWORK.NETWORK_IS_PLAYER_FADING(pid) and ENTITY.IS_ENTITY_VISIBLE(ped) and not PED.IS_PED_DEAD_OR_DYING(ped) then
                     local oldpos = players.get_position(pid)
@@ -1206,7 +1206,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
-            for players.list(false) as pid do
+            for players.list() as pid do
                 local rank = players.get_rank(pid)
                 local money = players.get_money(pid)
                 local kills = players.get_kills(pid)
@@ -1239,7 +1239,7 @@ end)
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made. Mainly changed to Natives with Namespaces
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
-            for players.list(false) as pid do
+            for players.list() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local hash = players.get_vehicle_model(pid)
@@ -1280,7 +1280,7 @@ end)
                                 break
                             end
                         elseif bitset == 8 or plate_text == "46EEK572" then
-                            local used_vehicle = lang.get_localised(util.get_label_text(players.get_vehicle_model(pid)))
+                            local used_vehicle = util.get_label_text(players.get_vehicle_model(pid))
                             util.draw_debug_text(players.get_name(driver).." is using a spawned vehicle ".."("..used_vehicle..")")
                             if not IsDetectionPresent(pid, "Spawned Vehicle") then
                                 players.add_detection(pid, "Spawned Vehicle", 7, 50)
@@ -1297,7 +1297,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Thunder Join", {""}, "Detects if someone is using thunder join.", function()
-            for players.list_except(true) as pid do
+            for players.list_except() as pid do
                 if util.is_session_transition_active() then return end
                 local old_sh = players.get_script_host()
                 util.yield(100)
@@ -2385,8 +2385,8 @@ end)
     }
     local pop_multiplier_id
     
-    menu.toggle(misc, "No Traffic", {""}, "Deletes all Traffic from the Map. Works Session-Wide.", function(on)
-        if on then
+    menu.toggle(misc, "No Traffic", {""}, "Deletes all Traffic from the Map. Works Session-Wide.", function(toggled)
+        if toggled then
             local ped_sphere, traffic_sphere
             if config.disable_peds then ped_sphere = 0.0 else ped_sphere = 1.0 end
             if config.disable_traffic then traffic_sphere = 0.0 else traffic_sphere = 1.0 end
@@ -2398,23 +2398,7 @@ end)
     end)
 
     -------------------------------------
-    -- Enable/Disable ESP
-    -------------------------------------
-
-    menu.toggle(misc, "Enable/Disable ESP", {""}, "", function(toggled)
-        local bone_esp_on = menu.ref_by_path("World>Inhabitants>Player ESP>Bone ESP>Low Latency Rendering")
-        local bone_esp_off = menu.ref_by_path("World>Inhabitants>Player ESP>Bone ESP>Disabled")
-        local name_esp_on = menu.ref_by_path("World>Inhabitants>Player ESP>Name ESP>Name ESP>Low Latency Rendering")
-        local name_esp_off = menu.ref_by_path("World>Inhabitants>Player ESP>Name ESP>Name ESP>Disabled")
-        if toggled then
-            trigger_command(bone_esp_off); trigger_command(name_esp_off)
-        else
-            trigger_command(bone_esp_on); trigger_command(name_esp_on)
-        end
-    end)
-
-    -------------------------------------
-    -- Enable/Disable ESP
+    -- Show OS Date
     -------------------------------------
 
     menu.toggle_loop(misc, "Show OS Date", {""}, "Shows the current Day, Month and Time.", function()
@@ -2423,7 +2407,7 @@ end)
     end)
 
     -------------------------------------
-    -- Enable/Disable ESP
+    -- Disable Phone
     -------------------------------------
 
     menu.toggle_loop(misc, "Disable Phone", {""}, "Disables the Phone when certain conditions are met.", function()
@@ -2478,26 +2462,42 @@ end)
             is_team_chat.value = false
             repeat chat.close() until not chat.is_open()
             menu.show_command_box("say ")
+            trigger_commands("starttyping")
             while menu.command_box_is_open() do
                 directx.draw_text(0.8680, 0.540, "Sending a Global Message", ALIGN_CENTRE, 0.45, color, true)
                 toggle_chat.value = true
-                HUD.SET_MP_GAMER_TAG_VISIBILITY(players.user(), 16, true, 0)
                 wait()
             end
+            trigger_commands("stoptyping")
             toggle_chat.value = false
-            HUD.SET_MP_GAMER_TAG_VISIBILITY(players.user(), 16, false, 0)
         elseif PAD.IS_CONTROL_JUST_PRESSED(1, 246) then
             is_team_chat.value = true
             repeat chat.close() until not chat.is_open()
             menu.show_command_box("say ")
+            trigger_commands("starttyping")
             while menu.command_box_is_open() do
                 directx.draw_text(0.8680, 0.540, "Sending a Team Message", ALIGN_CENTRE, 0.45, color, true)
                 toggle_chat.value = true
-                HUD.SET_MP_GAMER_TAG_VISIBILITY(players.user(), 16, true, 0)
                 wait()
             end
             toggle_chat.value = false
-            HUD.SET_MP_GAMER_TAG_VISIBILITY(players.user(), 16, false, 0)
+            trigger_commands("stoptyping")
+        end
+    end)
+
+    menu.action(misc, "Start Typing", {"starttyping"}, "", function()
+        for players.list(false) as pid do
+            if players.exists(pid) then
+                send_script_event(-1760661233, pid, {players.user(), pid, 9412})
+            end
+        end
+    end)
+
+    menu.action(misc, "Stop Typing", {"stoptyping"}, "", function()
+        for players.list(false) as pid do
+            if players.exists(pid) then
+                send_script_event(476054205, pid, {players.user(), pid, 4491})
+            end
         end
     end)
 
@@ -2696,9 +2696,17 @@ if is_developer() then
         notify(players.get_name(NETWORK.NETWORK_GET_HOST_OF_SCRIPT("freemode", -1, 0)))
     end)
 
-    menu.toggle_loop(sdebug, "Miss Marie", {""}, "", function()
-        replaceInDraft("Nav", "Miss Marie")
-        replaceInDraft("nav", "Miss Marie")
+    menu.toggle_loop(sdebug, "on_flow_event_done", {""}, "", function()
+        players.on_flow_event_done(function(p, name, extra)
+            name = lang.get_localised(name)
+            if extra then
+                name ..= " ("
+                name ..= extra
+                name ..= ")"
+            end
+            print(players.get_name(p)..": "..name)
+            wait(100)
+        end)
     end)
 
     -------------------------------------
@@ -2780,7 +2788,7 @@ local function player(pid)
         0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
-        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 
+        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3783,7 +3791,11 @@ util.create_tick_handler(function()
         player_cur_car = carCheck
     end
     menu.set_value(host_name, players.get_name(players.get_host()))
-    menu.set_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
+
+    if is_developer() then
+        menu.set_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
+    end
+
     menu.set_value(script_host_name, players.get_name(players.get_script_host()))
     menu.set_value(players_amount, #players.list())
     menu.set_value(modder_amount, tostring(get_modder_int()))

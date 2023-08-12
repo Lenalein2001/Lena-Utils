@@ -795,3 +795,8 @@ function to_rgb(r, g, b, a)
     color.a = a
     return color
 end
+
+function send_script_event(first_arg, receiver, args)
+	table.insert(args, 1, first_arg)
+	util.trigger_script_event(1 << receiver, args)
+end
