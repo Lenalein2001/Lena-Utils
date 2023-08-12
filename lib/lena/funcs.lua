@@ -800,3 +800,10 @@ function send_script_event(first_arg, receiver, args)
 	table.insert(args, 1, first_arg)
 	util.trigger_script_event(1 << receiver, args)
 end
+
+function formatTime(seconds)
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local remainingSeconds = seconds % 60
+    return string.format("%d hour%s, %d minute%s, %d second%s", hours, hours == 1 and "" or "s", minutes, minutes == 1 and "" or "s", remainingSeconds, remainingSeconds == 1 and "" or "s")
+end
