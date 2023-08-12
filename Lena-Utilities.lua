@@ -3753,13 +3753,13 @@ players.on_leave(function(pid)
         end
     end
     if showleaveInfolog then
-        log("[Lena | Leave Reactions] "..names[pid].." left. (RID: "..rids[pid].." | Slot: "..allplayers[pid].." | Time in Session: "..math.floor(os.clock()-Jointimes[pid]+0.5).."s = "..math.floor((os.clock()-Jointimes[pid])/60).."m)")
+        log("[Lena | Leave Reactions] "..names[pid].." left. (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..")")
     end
     if showleaveInfoteam then
-        chat.send_message("> "..names[pid].." left. (RID: "..rids[pid].." | Slot: "..allplayers[pid].." | Time in Session: "..math.floor(os.clock()-Jointimes[pid]+0.5).."s = "..math.floor((os.clock()-Jointimes[pid])/60).."m)", true, true, true)
+        chat.send_message("> "..names[pid].." left. (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..")", true, true, true)
     end
     if showleaveInfoall then
-        chat.send_message("> "..names[pid].." left. (RID: "..rids[pid].." | Slot: "..allplayers[pid].." | Time in Session: "..math.floor(os.clock()-Jointimes[pid]+0.5).."s = "..math.floor((os.clock()-Jointimes[pid])/60).."m)", false, true, true)
+        chat.send_message("> "..names[pid].." left. (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..")", false, true, true)
     end
     wait(10)
     Jointimes[pid] = nil
@@ -3779,23 +3779,15 @@ if not is_developer() and async_http.have_access() then
     end)
 end
 
--------------------------------------
--------------------------------------
--- On-Stop
--------------------------------------
--------------------------------------
-
 util.create_tick_handler(function()
     local carCheck = entities.get_user_vehicle_as_handle(true)
     if player_cur_car != carCheck then
         player_cur_car = carCheck
     end
-    menu.set_value(host_name, players.get_name(players.get_host()))
-
     if is_developer() then
         menu.set_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
     end
-
+    menu.set_value(host_name, players.get_name(players.get_host()))
     menu.set_value(script_host_name, players.get_name(players.get_script_host()))
     menu.set_value(players_amount, #players.list())
     menu.set_value(modder_amount, tostring(get_modder_int()))
