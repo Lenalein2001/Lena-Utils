@@ -94,89 +94,88 @@ local fake_money = menu.list(misc, "Fake Money", {""}, "")
 -- Auto Updater
 -------------------------------------
 
-if async_http.have_access() then
-    status, auto_updater = pcall(require, "auto-updater")
-    if not status then
-        local auto_update_complete = nil notify("Installing auto-updater...")
-        async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/senpai/auto-updater.lua",
-            function(result, headers, status_code)
-                local function parse_auto_update_result(result, headers, status_code)
-                    local error_prefix = "Error downloading auto-updater: "
-                    if status_code != 200 then notify(error_prefix..status_code) return false end
-                    if not result or result == "" then notify(error_prefix.."Found empty file.") return false end
-                    filesystem.mkdir(filesystem.scripts_dir().."lib")
-                    local file = io.open(filesystem.scripts_dir().."lib\\auto-updater.lua", "wb")
-                    if file == nil then notify(error_prefix.."Could not open file for writing.") return false end
-                    file:write(result) file:close() notify("Successfully installed auto-updater lib") return true
-                end
-                auto_update_complete = parse_auto_update_result(result, headers, status_code)
-            end, function() notify("Error downloading auto-updater lib. Update failed to download.") end)
-        async_http.dispatch() local i = 1 while (auto_update_complete == nil and i < 40) do wait(250) i = i + 1 end
-        if auto_update_complete == nil then error("Error downloading auto-updater lib. HTTP Request timeout") end
-        auto_updater = require("auto-updater")
-    end
-    if auto_updater == true then error("Invalid auto-updater lib. Please delete your Stand/Lua Scripts/lib/auto-updater.lua and try again") end
-
-    local default_check_interval = 604800
-    auto_update_config = {
-        source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/Lena-Utilities.lua",
-        script_relpath=SCRIPT_RELPATH,
-        switch_to_branch=selected_branch,
-        verify_file_begins_with="--",
-        check_interval=86400,
-        silent_updates=false,
-        dependencies={
-            {
-                name="Funcs",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/funcs.lua",
-                script_relpath="/lib/lena/funcs.lua",
-                check_interval=default_check_interval,
-            },
-            {
-                name="Natives",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/natives-2944b/init.lua",
-                script_relpath="/lib/natives-2944b/init.lua",
-                check_interval=default_check_interval,
-            },
-            {
-                name="Json",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json.lua",
-                script_relpath="/lib/pretty/json.lua",
-                check_interval=default_check_interval,
-            },
-            {
-                name="Constant",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/constant.lua",
-                script_relpath="/lib/pretty/json/constant.lua",
-                check_interval=default_check_interval,
-            },
-            {
-                name="Parser",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/parser.lua",
-                script_relpath="/lib/pretty/json/parser.lua",
-                check_interval=default_check_interval,
-            },
-            {
-                name="Serializer",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/serializer.lua",
-                script_relpath="/lib/pretty/json/serializer.lua",
-                check_interval=default_check_interval,
-            },
-            {
-                name="ScaleformLib",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/ScaleformLib.lua",
-                script_relpath="/lib/ScaleformLib.lua",
-                check_interval=default_check_interval,
-            },
-            {
-                name="Tables",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/tables.lua",
-                script_relpath="/lib/lena/tables.lua",
-                check_interval=default_check_interval,
-            },
-        }
-    }
+-- Auto Updater from https://github.com/hexarobi/stand-lua-auto-updater
+local status, auto_updater = pcall(require, "auto-updater")
+if not status then
+    local auto_update_complete = nil util.toast("Installing auto-updater...", TOAST_ALL)
+    async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/main/auto-updater.lua",
+        function(result, headers, status_code)
+            local function parse_auto_update_result(result, headers, status_code)
+                local error_prefix = "Error downloading auto-updater: "
+                if status_code ~= 200 then util.toast(error_prefix..status_code, TOAST_ALL) return false end
+                if not result or result == "" then util.toast(error_prefix.."Found empty file.", TOAST_ALL) return false end
+                filesystem.mkdir(filesystem.scripts_dir() .. "lib")
+                local file = io.open(filesystem.scripts_dir() .. "lib\\auto-updater.lua", "wb")
+                if file == nil then util.toast(error_prefix.."Could not open file for writing.", TOAST_ALL) return false end
+                file:write(result) file:close() util.toast("Successfully installed auto-updater lib", TOAST_ALL) return true
+            end
+            auto_update_complete = parse_auto_update_result(result, headers, status_code)
+        end, function() util.toast("Error downloading auto-updater lib. Update failed to download.", TOAST_ALL) end)
+    async_http.dispatch() local i = 1 while (auto_update_complete == nil and i < 40) do util.yield(250) i = i + 1 end
+    if auto_update_complete == nil then error("Error downloading auto-updater lib. HTTP Request timeout") end
+    auto_updater = require("auto-updater")
 end
+if auto_updater == true then error("Invalid auto-updater lib. Please delete your Stand/Lua Scripts/lib/auto-updater.lua and try again") end
+
+local default_check_interval = 604800
+auto_update_config = {
+    source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/Lena-Utilities.lua",
+    script_relpath=SCRIPT_RELPATH,
+    switch_to_branch=selected_branch,
+    verify_file_begins_with="--",
+    check_interval=86400,
+    silent_updates=false,
+    dependencies={
+        {
+            name="Funcs",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/funcs.lua",
+            script_relpath="/lib/lena/funcs.lua",
+            check_interval=default_check_interval,
+        },
+        {
+            name="Natives",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/natives-2944b/init.lua",
+            script_relpath="/lib/natives-2944b/init.lua",
+            check_interval=default_check_interval,
+        },
+        {
+            name="Json",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json.lua",
+            script_relpath="/lib/pretty/json.lua",
+            check_interval=default_check_interval,
+        },
+        {
+            name="Constant",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/constant.lua",
+            script_relpath="/lib/pretty/json/constant.lua",
+            check_interval=default_check_interval,
+        },
+        {
+            name="Parser",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/parser.lua",
+            script_relpath="/lib/pretty/json/parser.lua",
+            check_interval=default_check_interval,
+        },
+        {
+            name="Serializer",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/serializer.lua",
+            script_relpath="/lib/pretty/json/serializer.lua",
+            check_interval=default_check_interval,
+        },
+        {
+            name="ScaleformLib",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/ScaleformLib.lua",
+            script_relpath="/lib/ScaleformLib.lua",
+            check_interval=default_check_interval,
+        },
+        {
+            name="Tables",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/tables.lua",
+            script_relpath="/lib/lena/tables.lua",
+            check_interval=default_check_interval,
+        },
+    }
+}
 
 -------------------------------------
 -- Required Files
@@ -500,7 +499,7 @@ end)
         local wpn = WEAPON.GET_SELECTED_PED_WEAPON(players.user_ped())
         local dmg = SYSTEM.ROUND(WEAPON.GET_WEAPON_DAMAGE(wpn, 0))
         local delay = WEAPON.GET_WEAPON_TIME_BETWEEN_SHOTS(wpn)
-        local wpnEnt = WEAPON.GET_CURRENT_PED_WEAPON_ENTITY_INDEX(PLAYER.PLAYER_PED_ID(), false)
+        local wpnEnt = WEAPON.GET_CURRENT_PED_WEAPON_ENTITY_INDEX(PLAYER.PLAYER_PED_ID(), -1)
         local wpnCoords = ENTITY.GET_ENTITY_BONE_POSTION(wpnEnt, ENTITY.GET_ENTITY_BONE_INDEX_BY_NAME(wpnEnt, "gun_muzzle"))
         for players.list(false, true, true) as pid do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3288,7 +3287,7 @@ local function player(pid)
             local wpn = WEAPON.GET_SELECTED_PED_WEAPON(players.user_ped())
             local dmg = SYSTEM.ROUND(WEAPON.GET_WEAPON_DAMAGE(wpn, 0))
             local delay = WEAPON.GET_WEAPON_TIME_BETWEEN_SHOTS(wpn)
-            local wpnEnt = WEAPON.GET_CURRENT_PED_WEAPON_ENTITY_INDEX(PLAYER.PLAYER_PED_ID(), false)
+            local wpnEnt = WEAPON.GET_CURRENT_PED_WEAPON_ENTITY_INDEX(PLAYER.PLAYER_PED_ID(), -1)
             local wpnCoords = ENTITY.GET_ENTITY_BONE_POSTION(wpnEnt, ENTITY.GET_ENTITY_BONE_INDEX_BY_NAME(wpnEnt, "gun_muzzle"))
             if ENTITY.GET_ENTITY_ALPHA(ped) < 255 then return end
             if PLAYER.IS_PLAYER_FREE_AIMING_AT_ENTITY(players.user(), ped) and not PED.IS_PED_RELOADING(players.user_ped()) then
@@ -3465,6 +3464,7 @@ local function player(pid)
         -------------------------------------
 
         menu.toggle(trolling, "Ghost Player", {"ghost", "g"}, "Makes you ghosted to that player.", function(toggled)
+            if pid == players.user() then notify(lang.get_localised(-1974706693)); trigger_commands($"ghost{pname} off") end
             NETWORK.SET_REMOTE_PLAYER_AS_GHOST(pid, toggled)
         end)
 
@@ -3507,10 +3507,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                hex = decimalToHex2s(rids, 32)
-                if savekicked then
-                    trigger_commands($"savep {pname}")
-                end
+                if savekicked then trigger_commands($"savep {pname}") end
                 wait(100)
                 trigger_commands($"historyblock{pname} on")
                 if not is_developer() then
@@ -3526,10 +3523,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                hex = decimalToHex2s(rids, 32)
-                if savekicked then
-                    trigger_commands($"savep{pname}")
-                end
+                if savekicked then trigger_commands($"savep {pname}") end
                 trigger_commands($"loveletter{pname}")
                 if not is_developer() then
                     log($"[Lena | Rape] {pname} ({rids}) has been Kicked.")
@@ -3557,10 +3551,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then
-                    trigger_commands($"savep{pname}")
-                    wait(50)
-                end
+                if savekicked then trigger_commands($"savep {pname}") end
                 trigger_commands($"ngcrash{pname}")
                 wait(500)
                 trigger_commands($"crash{pname}")
@@ -3585,10 +3576,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then
-                    trigger_commands($"savep{pname}")
-                    wait(50)
-                end
+                if savekicked then trigger_commands($"savep {pname}") end
                 local user = players.user()
                 local user_ped = players.user_ped()
                 local pos = players.get_position(user)
@@ -3617,10 +3605,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then
-                    trigger_commands($"savep{pname}")
-                    wait(50)
-                end
+                if savekicked then trigger_commands($"savep {pname}") end
                 local user = players.user()
                 local user_ped = players.user_ped()
                 local pos = players.get_position(user)
@@ -3648,10 +3633,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then
-                    trigger_commands($"savep{pname}")
-                    wait(50)
-                end
+                if savekicked then trigger_commands($"savep {pname}") end
                 BlockSyncs(pid, function()
                     local object = entities.create_object(joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
                     OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
@@ -3665,10 +3647,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then
-                    trigger_commands($"savep{pname}")
-                    wait(50)
-                end
+                if savekicked then trigger_commands($"savep {pname}") end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local pos = players.get_position(pid)
                 local mdl = joaat("u_m_m_jesus_01")
@@ -3696,6 +3675,7 @@ local function player(pid)
         menu.action(crashes, "Invalid Heli Task", {"task2"}, "Works on most menus. <3", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = players.get_position(pid)
+            if savekicked then trigger_commands($"savep {pname}") end
             BlockSyncs(pid, function()
                 for i = 1, 10 do
                     if not players.exists(pid) then
@@ -3717,10 +3697,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then
-                    trigger_commands($"savep{pname}")
-                    wait(50)
-                end
+                if savekicked then trigger_commands($"savep {pname}") end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local user = PLAYER.GET_PLAYER_PED(players.user())
                 local pos = ENTITY.GET_ENTITY_COORDS(ped)
