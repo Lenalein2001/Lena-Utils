@@ -3763,6 +3763,32 @@ local function player(pid)
                 ENTITY.SET_ENTITY_ROTATION(crash1, 0.0, -90.0, 0.0, 1, true)
             end
         end)
+
+        menu.action(crashes, "Invaild Model V3", {"crashv10"}, "", function()
+            local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            local hash = util.joaat("cs_taostranslator2")
+            while not STREAMING.HAS_MODEL_LOADED(hash) do
+                STREAMING.REQUEST_MODEL(hash)
+                util.yield(5)
+            end
+            local ped = {}
+            for i = 0, 10 do
+                local coord = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player, 0.0, 5.0, 0.0)
+                ped[i] = entities.create_ped(0, hash, coord, 0)
+                local pedcoord = ENTITY.GET_ENTITY_COORDS(ped[i], false)
+                WEAPON.GIVE_DELAYED_WEAPON_TO_PED(ped[i], 0xB1CA77B1, 0, true)
+                WEAPON.SET_PED_GADGET(ped[i], 0xB1CA77B1, true)
+                --FIRE.ADD_OWNED_EXPLOSION(PLAYER.PLAYER_PED_ID(), pedcoord.x, pedcoord.y, pedcoord.z, 5, 10, false, false, 0)
+                menu.trigger_commands("as ".. PLAYER.GET_PLAYER_NAME(pid) .. " explode " .. PLAYER.GET_PLAYER_NAME(pid) .. " ")
+                ENTITY.SET_ENTITY_VISIBLE(ped[i], false)
+                util.yield(25)
+            end
+            util.yield(2500)
+            for i = 0, 10 do
+                entities.delete_by_handle(ped[i])
+                util.yield(10)
+            end
+        end)
 --  end
 end
 
