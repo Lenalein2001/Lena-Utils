@@ -1226,12 +1226,11 @@ end)
                             players.add_detection(pid, "Unlegit Stats (Rank)", 7, 75)
                         end
                     end
-                    if money > 1500000000 then
+                    if money > 1600000000 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Money)") then
                             players.add_detection(pid, "Unlegit Stats (Money)", 7, 50)
                         end
                     end
-                    wait(1000)
                 end
             end
         end)
