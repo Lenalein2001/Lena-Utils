@@ -2686,6 +2686,30 @@ if is_developer() then
         end
     end)
 
+    local enhanced_vehs = {}
+    menu.toggle_loop(sdebug, "Enhanced Downforce", {""}, "", function()
+        if entities.get_user_vehicle_as_pointer(false) != 0 then
+            local vmodel = players.get_vehicle_model(players.user())
+            local vname = util.get_label_text(vmodel)
+            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+            if entities.get_user_vehicle_as_pointer(false) ~= 0 then
+                local isCarModel = VEHICLE.IS_THIS_MODEL_A_CAR(vmodel)
+                local notInTable = true
+                for enhanced_vehs as prev do
+                    if prev == vname then
+                        notInTable = false
+                        break
+                    end
+                end
+                if isCarModel and notInTable then
+                    table.insert(enhanced_vehs, vname)
+                    local d = memory.read_float(CHandlingData + 0x0014)
+                    memory.write_float(CHandlingData + 0x0014, math.floor(d + 10.00))
+                end
+            end
+        end
+    end)
+
     -------------------------------------
     -- Increase Weapon Range
     -------------------------------------
