@@ -121,7 +121,9 @@ numpadControls = {
     125,
     126,
     127,
-    128
+    128,
+    -- Ped
+    257,
 }
 
 interiors = {
