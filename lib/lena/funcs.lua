@@ -407,7 +407,7 @@ function format_friends_list()
     local friend_count = NETWORK.NETWORK_GET_FRIEND_COUNT()
     local friend_list = {}
     for i = 0, friend_count - 1 do
-        local friend_name = NETWORK.NETWORK_GET_FRIEND_DISPLAY_NAME(i)
+        local friend_name = tostring(NETWORK.NETWORK_GET_FRIEND_DISPLAY_NAME(i))
         local friend_url = "https://socialclub.rockstargames.com/member/" .. friend_name
         table.insert(friend_list, "[" .. friend_name .. "](" .. friend_url .. "), ")
 
@@ -806,4 +806,8 @@ function formatTime(seconds)
     local minutes = math.floor((seconds % 3600) / 60)
     local remainingSeconds = seconds % 60
     return string.format("%d hour%s, %d minute%s, %d second%s", hours, hours == 1 and "" or "s", minutes, minutes == 1 and "" or "s", remainingSeconds, remainingSeconds == 1 and "" or "s")
+end
+
+function update_help_text(commandref, text)
+    menu.set_help_text(commandref, text)
 end
