@@ -3394,8 +3394,8 @@ local function player(pid)
 
         menu.action(customExplosion, "Blame Random Player", {""}, "Mister//ModzZ requested it, so I made it.", function()
             local pids = players.list(false, false, true)
-            local player, killer = pids[math.random(#pids)], PLAYER.GET_PLAYER_PED(player)
-            local victim = players.get_position(pid)
+            local player = pids[math.random(#pids)]
+            local killer, victim = PLAYER.GET_PLAYER_PED(player), players.get_position(pid)
             FIRE.ADD_OWNED_EXPLOSION(killer, victim, 1, 1.0, false, true, 0.0)
             notify("Player "..players.get_name(player).." was blamed for killing "..players.get_name(pid).."!")
         end, nil, nil, COMMANDPERM_RUDE)
