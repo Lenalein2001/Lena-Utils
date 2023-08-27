@@ -2753,10 +2753,6 @@ if is_developer() then
         wait(1000)
     end)
 
-    menu.action(sdebug, "Test", {""}, "", function()
-        util.request_script_host("freemode")
-    end)
-
     -------------------------------------
     -- Natives
     -------------------------------------
@@ -2838,7 +2834,7 @@ local function player(pid)
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        0x0A14CDAF, 
+        0x0A14CDAF, 0x0C1FF830, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -2943,7 +2939,8 @@ local function player(pid)
         -------------------------------------
 
         menu.action(friendly, "Set Waypoint", {"setwp"}, "", function()
-            HUD.SET_NEW_WAYPOINT(players.get_position(pid))
+            local pos = players.get_position(pid)
+            HUD.SET_NEW_WAYPOINT(pos.x, pos.y)
         end)
 
         -------------------------------------
@@ -3506,7 +3503,7 @@ local function player(pid)
         -- Block Join Kick
         -------------------------------------
 
-        menu.action(kicks, "Block Kick", {"emp", "block"}, "Will kick and block the player from joining you ever again.", function()
+        menu.action(kicks, "Block Kick", {"emp", "block"}, $"Will kick and block {pname} from joining you ever again.", function()
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
@@ -3556,7 +3553,7 @@ local function player(pid)
         -- Cwashes | No Idea Why I did this
         -------------------------------------
 
-        menu.action(crashes, "Block Join Crash", {"gtfo", "netcrash"}, "Crashes the Player and Blocks them from joining you again.", function()
+        menu.action(crashes, "Block Join Crash", {"gtfo", "netcrash"}, $"Crashes and Blocks {pname} from joining you again.", function()
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
