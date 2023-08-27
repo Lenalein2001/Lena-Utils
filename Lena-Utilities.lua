@@ -95,7 +95,7 @@ local fake_money = menu.list(misc, "Fake Money", {""}, "")
 -------------------------------------
 
 if async_http.have_access() then
-    local status, auto_updater = pcall(require, "auto-updater")
+    status, auto_updater = pcall(require, "auto-updater")
     if not status then
         local auto_update_complete = nil notify("Installing auto-updater...")
         async_http.init("raw.githubusercontent.com", "/hexarobi/stand-lua-auto-updater/senpai/auto-updater.lua",
@@ -118,7 +118,7 @@ if async_http.have_access() then
     if auto_updater == true then error("Invalid auto-updater lib. Please delete your Stand/Lua Scripts/lib/auto-updater.lua and try again") end
 
     local default_check_interval = 604800
-    local auto_update_config = {
+    auto_update_config = {
         source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/Lena-Utilities.lua",
         script_relpath=SCRIPT_RELPATH,
         switch_to_branch=selected_branch,
