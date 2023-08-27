@@ -1679,6 +1679,69 @@ end)
         end)
 
     -------------------------------------
+    -- Enhanced Chat
+    ------------------------------------- 
+
+        -------------------------------------
+        -- Better Chat
+        -------------------------------------
+
+        local toggle_chat = menu.ref_by_path("Online>Chat>Always Open")
+        menu.toggle_loop(enhanced_chat, "Better Chat", {""}, "", function()
+            if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
+                repeat chat.close() until not chat.is_open()
+                menu.show_command_box("gmsg ")
+                while menu.command_box_is_open() do
+                    toggle_chat.value = true
+                    wait()
+                end
+                toggle_chat.value = false
+            elseif PAD.IS_CONTROL_JUST_PRESSED(1, 246) then
+                repeat chat.close() until not chat.is_open()
+                menu.show_command_box("tmsg ")
+                while menu.command_box_is_open() do
+                    toggle_chat.value = true
+                    wait()
+                end
+                toggle_chat.value = false
+            end
+        end)
+
+        menu.action(enhanced_chat, "Send a Global Message", {"globalmessag", "gmsg"}, "", function(click_type)
+            menu.show_command_box($"gmsg "); end, function(on_command)
+            if #on_command > 254 then
+                notify("The message is to long.")
+            else
+                chat.send_message(on_command, false, true, true)
+            end
+        end)
+
+        menu.action(enhanced_chat, "Send a Team Message", {"teammessag", "tmsg"}, "", function(click_type)
+            menu.show_command_box($"tmsg "); end, function(on_command)
+            if #on_command > 254 then
+                notify("The message is to long.")
+            else
+                chat.send_message(on_command, true, true, true)
+            end
+        end)
+
+        menu.action(enhanced_chat, "Start Typing", {"starttyping"}, "", function()
+            for players.list(false) as pid do
+                if players.exists(pid) then
+                    send_script_event(-1760661233, pid, {players.user(), pid, 9412})
+                end
+            end
+        end)
+
+        menu.action(enhanced_chat, "Stop Typing", {"stoptyping"}, "", function()
+            for players.list(false) as pid do
+                if players.exists(pid) then
+                    send_script_event(476054205, pid, {players.user(), pid, 4491})
+                end
+            end
+        end)
+
+    -------------------------------------
     -- Whitelist Session
     -------------------------------------
 
@@ -2450,57 +2513,6 @@ end)
             util.copy_to_clipboard("["..getPathFromRef(cmd, "en", ">", false).."]("..urlEncode("https://stand.gg/focus#" .. getPathFromRef(cmd, "en", ">", false))..")")
         else
             notify("You are not focusing any command. :/")
-        end
-    end)
-
-    -------------------------------------
-    -- Better Chat
-    -------------------------------------
-
-    local is_team_chat = menu.ref_by_path("Online>Chat>Send Message>In Team Chat")
-    local toggle_chat = menu.ref_by_path("Online>Chat>Always Open")
-    menu.toggle_loop(misc, "Better Chat", {""}, "", function()
-        local color = to_rgb(255, 0, 0, 255)
-        if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
-            is_team_chat.value = false
-            repeat chat.close() until not chat.is_open()
-            menu.show_command_box("say ")
-            trigger_commands("starttyping")
-            while menu.command_box_is_open() do
-                directx.draw_text(0.8680, 0.540, "Sending a Global Message", ALIGN_CENTRE, 0.45, color, true)
-                toggle_chat.value = true
-                wait()
-            end
-            trigger_commands("stoptyping")
-            toggle_chat.value = false
-        elseif PAD.IS_CONTROL_JUST_PRESSED(1, 246) then
-            is_team_chat.value = true
-            repeat chat.close() until not chat.is_open()
-            menu.show_command_box("say ")
-            trigger_commands("starttyping")
-            while menu.command_box_is_open() do
-                directx.draw_text(0.8680, 0.540, "Sending a Team Message", ALIGN_CENTRE, 0.45, color, true)
-                toggle_chat.value = true
-                wait()
-            end
-            toggle_chat.value = false
-            trigger_commands("stoptyping")
-        end
-    end)
-
-    menu.action(misc, "Start Typing", {"starttyping"}, "", function()
-        for players.list(false) as pid do
-            if players.exists(pid) then
-                send_script_event(-1760661233, pid, {players.user(), pid, 9412})
-            end
-        end
-    end)
-
-    menu.action(misc, "Stop Typing", {"stoptyping"}, "", function()
-        for players.list(false) as pid do
-            if players.exists(pid) then
-                send_script_event(476054205, pid, {players.user(), pid, 4491})
-            end
         end
     end)
 
