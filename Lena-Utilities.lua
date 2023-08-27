@@ -467,15 +467,13 @@ end)
     -- BULLET SPEED MULT
     -------------------------------------
 
-    local multiplier
     local modifiedSpeed
-    menu.slider_float(weap, "Bullet Speed Mult", {""}, "Changes the Speed of all weapons that are not Hitscan. Mainly Rockets.", 10, 100000, 100, 10, function(value)
-        multiplier = value / 100
+    bullet_multiplier = menu.slider_float(weap, "Bullet Speed Mult", {""}, "Changes the Speed of all weapons that are not Hitscan.", 10, 100000, 100, 10, function(value)
     end)
 
     util.create_tick_handler(function()
         local CPed = entities.handle_to_pointer(players.user_ped())
-        if CPed == 0 or not multiplier then return end
+        if CPed == 0 or not menu.get_value(bullet_multiplier) then return end
         local ammoSpeedAddress = addr_from_pointer_chain(CPed, {0x10B8, 0x20, 0x60, 0x58})
         if ammoSpeedAddress == 0 then
             if entities.get_user_vehicle_as_pointer() == 0 then return end
@@ -488,7 +486,7 @@ end)
             modifiedSpeed:reset()
             modifiedSpeed = ammoSpeed
         end
-        local newValue = modifiedSpeed.defaultValue * multiplier
+        local newValue = modifiedSpeed.defaultValue * menu.get_value(bullet_multiplier)
         if modifiedSpeed:getValue() != newValue then
             modifiedSpeed:setValue(newValue)
         end
