@@ -756,7 +756,7 @@ end)
             VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, not toggled, toggled, toggled)
         end)
         menu.action(engine_control, "Toggle Engine On", {"Engineoon", "Eon"}, "Starts the Engine of the current Vehicle.", function()
-            VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, true, true, true)
+            VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, true, false, false)
         end)
         menu.action(engine_control, "Toggle Engine Off", {"Engineoff", "Eoff"}, "Stops The Engine of the current Vehicle.", function()
             VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, false, true, true)
@@ -766,7 +766,6 @@ end)
         -- Disable Engine Fires
         -------------------------------------
 
-        local previous_car = nil
         menu.toggle_loop(engine_control, "Disable Engine Fires", {""}, "", function()
             if player_cur_car != previous_car then
                 VEHICLE.SET_DISABLE_VEHICLE_ENGINE_FIRES(player_cur_car, true)
@@ -924,7 +923,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) then
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() then
             local veh = players.get_vehicle_model(players.user())
             if VEHICLE.IS_THIS_MODEL_A_CAR(veh) or VEHICLE.IS_THIS_MODEL_A_BIKE(veh) then
                 tune_vehicle(player_cur_car, true, true)
@@ -2369,7 +2368,7 @@ end)
     -- Disable Numpad
     -------------------------------------
 
-    menu.toggle_loop(misc, "Disable Numpad", {"dn"}, "Disables the Numpad while Stand is open.", function()
+    menu.toggle_loop(misc, "Disable Control Keys", {"dn"}, "Disables certain Keys while Stand is open.", function()
         if not menu.is_open() then return end
         for numpadControls as control do
             PAD.DISABLE_CONTROL_ACTION(2, control, true)
@@ -2786,7 +2785,7 @@ local function player(pid)
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        
+        0x0A14CDAF, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -2807,12 +2806,6 @@ local function player(pid)
     menu.divider(menu.player_root(pid), "Lena Utilities")
     local lena = menu.list(menu.player_root(pid), "Lena Utilities", {"lenau"}, "")
 
-    menu.action(lena, "Mark As Modder", {"manual"}, $"Mark {pname} manually as a Modder.", function()
-        if not IsDetectionPresent(pid, "Manual") then
-            players.add_detection(pid, "Manual", 7, 100)
-        end
-    end)
-
     local friendly = menu.list(lena, "Friendly", {""}, "")
 
     local mpvehicle = menu.list(lena, "Vehicle", {""}, "")
@@ -2825,6 +2818,12 @@ local function player(pid)
     local player_removals = menu.list(lena, "Player Removals", {""}, "")
     local kicks = menu.list(player_removals, "Kicks", {""}, "")
     local crashes = menu.list(player_removals, "Crashes", {""}, "")
+
+    menu.action(lena, "Mark As Modder", {"manual"}, $"Mark {pname} manually as a Modder.", function()
+        if not IsDetectionPresent(pid, "Manual") then
+            players.add_detection(pid, "Manual", 7, 100)
+        end
+    end)
 
     -------------------------------------
     -------------------------------------
