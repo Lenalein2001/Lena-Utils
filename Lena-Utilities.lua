@@ -134,8 +134,8 @@ if async_http.have_access() then
             },
             {
                 name="Natives",
-                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/natives-2944a/uno.lua",
-                script_relpath="/lib/natives-2944a/uno.lua",
+                source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/natives-2944b/init.lua",
+                script_relpath="/lib/natives-2944b/init.lua",
                 check_interval=default_check_interval,
             },
             {
