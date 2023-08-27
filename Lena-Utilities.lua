@@ -2817,6 +2817,7 @@ end
 local function player(pid)
     local pname = players.get_name(pid)
     local rids = players.get_rockstar_id(pid)
+    local hex = decimalToHex2s(rids, 32)
     local idiots = {
         0x0C6A8CD9, 0x0CAFF827, 0x04DCD691, 0x07E862F8, 0x096E22A3, 0x0967E1C2, 0x0ACF5EAB, 0x0BE13BA9,
         0x0B0236FA, 0x01585AB7, 0x09038DD9, 0x01394640, 0x0CB7CFF2, 0x0C666371, 0x04A5C95B, 0x0C76C9E2, 0x0B7EC980, 0x0C121CAD, 0x0919B57F, 0x0C682AB5, 0x03280B78, 0x0479C7D8,
@@ -3559,7 +3560,6 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                hex = decimalToHex2s(rids, 32)
                 if savekicked then
                     trigger_commands($"savep{pname}")
                     wait(50)
