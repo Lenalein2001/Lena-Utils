@@ -1910,11 +1910,11 @@ end)
         menu.action(missions_tunables, "Finish Headhunter", {"finishheadhunter", "finishhh"}, "Tries to finish the Mission.", function()
             local Blip = HUD.GET_FIRST_BLIP_INFO_ID(432) -- https://docs.fivem.net/docs/game-references/blips/
             while HUD.DOES_BLIP_EXIST(Blip) do
-                request_control(Blip, false)
-                local Ped = HUD.GET_BLIP_INFO_ID_ENTITY_INDEX(Blip)
-                ENTITY.SET_ENTITY_HEALTH(Ped, 0)
+                local ped = HUD.GET_BLIP_INFO_ID_ENTITY_INDEX(Blip)
+                local pos = entities.get_position(entities.handle_to_pointer(ped))
+                ENTITY.FREEZE_ENTITY_POSITION(ped, true)
+                FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), pos, 59, 1.0, false, false, 1.0)
                 Blip = HUD.GET_NEXT_BLIP_INFO_ID(432)
-                wait(1000)
             end
             wait(1000)
         end)
@@ -2107,7 +2107,7 @@ end)
     ------------------------------------- 
 
     menu.action(tunables, "Remove The Drainage Pipe", {"hccprempipe"}, "", function()
-        local Object = util.joaat("prop_chem_grill_bit") -- Thanks for letting me know the object, Sapphire#6031
+        local Object = util.joaat("prop_chem_grill_bit")
         DELETE_OBJECT_BY_HASH(Object)
     end)
 
@@ -2723,7 +2723,7 @@ if is_developer() then
 
         menu.action(nativehud, "Get Warning Screen hash", {""}, "", function()
             local hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
-            if hash != nil then
+            if hash != (nil or 0) then
                 log($"[Lena | Debug] Warning Screen hash: {hash}.")
             end
         end)
@@ -2744,7 +2744,7 @@ if is_developer() then
             log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}.")
         end)
         menu.action(nativevehicle, "Set Number Plate", {"randomplate"}, "Sets the Current Number Plate to a random Text.", function()
-            local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "FATE", "WHORE"}
+            local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "WHORE"}
             VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(player_cur_car, plate_texts[math.random(#plate_texts)])
         end)
 
