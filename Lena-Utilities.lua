@@ -36,7 +36,8 @@ spawned_cages = {}
 spawned_attackers = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
-natives_version = "natives-2944a.uno"
+previous_car = nil
+natives_version = "natives-2944b"
 
 -------------------------------------
 -- Tabs
@@ -77,6 +78,7 @@ local join_reactions = menu.list(reactions, "Join Reactions", {""}, "")
 local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
 local weapon_reactions = menu.list(reactions, "Weapon Reactions", {""}, "")
 local spoofing_opt = menu.list(online, "Spoofing", {""}, "")
+local enhanced_chat = menu.list(online, "Enhanced Chat", {""}, "")
 -- Tunables
 local sell_stuff = menu.list(tunables, "Selling", {""}, "")
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
@@ -86,6 +88,7 @@ local bm_list = menu.list(tunables, "Safe Monitor", {""}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
 local clear_area = menu.list(misc, "Clear Area", {""}, "")
 local teleport = menu.list(misc, "Teleport", {""}, "")
+local fake_money = menu.list(misc, "Fake Money", {""}, "")
 
 -------------------------------------
 -- Auto Updater
@@ -2692,21 +2695,6 @@ if is_developer() then
 
     menu.action(sdebug, "Test", {""}, "", function()
         util.request_script_host("freemode")
-        wait(1000)
-        notify(players.get_name(NETWORK.NETWORK_GET_HOST_OF_SCRIPT("freemode", -1, 0)))
-    end)
-
-    menu.toggle_loop(sdebug, "on_flow_event_done", {""}, "", function()
-        players.on_flow_event_done(function(p, name, extra)
-            name = lang.get_localised(name)
-            if extra then
-                name ..= " ("
-                name ..= extra
-                name ..= ")"
-            end
-            print(players.get_name(p)..": "..name)
-            wait(100)
-        end)
     end)
 
     -------------------------------------
