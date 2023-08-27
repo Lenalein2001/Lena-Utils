@@ -2692,13 +2692,11 @@ if is_developer() then
     initial_money = get_current_money()
     filenametrans = $"{lenaDir}Transactions for {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}.txt"
     menu.toggle_loop(sdebug, "Transaction Log", {}, "", function(toggled)
-        if not util.is_session_started() and util.is_session_transition_active() then return end
-        --if players.are_stats_ready(players.user()) then
-            if get_current_money() ~= initial_money then
-                check_and_write_money_change()
-            end
-            wait(1000)
-        --end
+        if not util.is_session_started() and util.is_session_transition_active() or util.is_interaction_menu_open() then return end
+        if get_current_money() ~= initial_money then
+            check_and_write_money_change()
+        end
+        wait(1000)
     end)
 
     menu.action(sdebug, "Test", {""}, "", function()
