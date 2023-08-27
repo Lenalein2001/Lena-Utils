@@ -2364,6 +2364,36 @@ end)
             end
         end)
 
+        fakemoney_delay = 3000
+        menu.slider(fake_money, "Delay (MS)", {"faketime"}, "", 100, 10000, 3000, 1, function(s)
+            fakemoney_delay = s
+        end)
+        
+        fakemoney_amt = 30000000
+        menu.slider(fake_money, "Amount", {"fakeamount"}, "", 0, 1000000000, 30000000, 1, function(s)
+            fakemoney_amt = s
+        end)
+        
+        fakemoney_random = true
+        menu.toggle(fake_money, "Random Amount", {}, "", function(on)
+            fakemoney_random = on
+        end, true)
+        
+        menu.toggle_loop(fake_money, "Enable Loop", {}, "", function(on)
+            local amt
+            if fakemoney_random then 
+                amt = math.random(10000000, 30000000)
+            else
+                amt = fakemoney_amt
+            end
+            HUD.CHANGE_FAKE_MP_CASH(0, amt)
+            util.yield(fakemoney_delay)
+        end)
+
+        menu.toggle(fake_money, "Display Fake Money", {}, "", function(toggled)
+            HUD.USE_FAKE_MP_CASH(true)
+        end)
+
     -------------------------------------
     -- Disable Numpad
     -------------------------------------
