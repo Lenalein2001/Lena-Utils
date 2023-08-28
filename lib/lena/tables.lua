@@ -182,3 +182,15 @@ interiors = {
     {"Pharma Lab", {x=496.86224, y=-2560.0608, z=-58.921993}},
     {"Nightclub Safe", {x=-1615.6887, y=-3015.7354, z=-75.205086}}
 }
+
+animation_table = {
+    -- Sexy
+    {anim_sexy, "Car blowjob", "mini@prostitutes@sexlow_veh", "low_car_bj_loop_female"},
+    -- Sitting
+    {anim_sit, "Sit 1", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_sleeping-noworkfemale"},
+    {anim_sit, "Sit Sad", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_sleeping-noworkfemale"},
+    -- Romantic
+    {anim_romantic, "Romantic Hug", "misscarsteal2chad_goodbye", "chad_armsaround_girl"},
+    -- Idle
+    {anim_idle, "Idle 1", "amb@world_human_hang_out_street@female_hold_arm@idle_a", "idle_a"}
+}
