@@ -56,6 +56,11 @@ local ai_made = menu.list(menu.my_root(), "AI Made", {"lenaai"}, "The following 
 
 -- Self
 local anims = menu.list(self, "Animations", {""}, "Some Animations.")
+anim_idle = menu.list(anims, "Idle", {""}, "")
+anim_sit = menu.list(anims, "Sitting", {""}, "")
+anim_romantic = menu.list(anims, "Romantic", {""}, "")
+anim_sexy = menu.list(anims, "Sexy", {""}, "")
+
 local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Animations. Lock Outfit breaks it.")
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
 local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam.")
@@ -567,7 +572,7 @@ end)
     vehicle_gun_perf = menu.toggle(vehicle_gun_list, "Tune Perfomance", {""}, "", function(); end)
 
     local impactCords = v3()
-    menu.toggle_loop(vehicle_gun_list, "Spawn vehicle at Bullet Impact", {""}, "", function()
+    menu.toggle_loop(vehicle_gun_list, "Spawn Vehicle at Bullet Impact", {""}, "", function()
         if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
             local model, gm = menu.get_value(vehicle_gun_ent), menu.get_value(vehicle_gun_gm)
             v = spawn_vehicle(model, impactCords, gm)
