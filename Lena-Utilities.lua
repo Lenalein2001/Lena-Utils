@@ -262,7 +262,7 @@ end)
         -- Animations
         -------------------------------------
 
-        menu.action(anims, "Stop all Animations", {""}, "", function()
+        stopallanim = menu.action(menu.shadow_root(), "Stop all Animations", {""}, "", function()
             TASK.CLEAR_PED_TASKS(players.user_ped())
         end)
         menu.divider(anims, "Animations", {""}, "")
@@ -579,6 +579,18 @@ end)
             if menu.get_value(vehicle_gun_perf) then tune_vehicle(v, true, false) end
         end
     end)
+
+    -- local money_coords = v3()
+    -- menu.toggle_loop(vehicle_gun_list, "Money gun", {""}, "", function()
+    --     if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(money_coords)) then
+    --         local cash = joaat("PICKUP_VEHICLE_MONEY_VARIABLE")
+    --         STREAMING.REQUEST_MODEL(cash)
+    --         if STREAMING.HAS_MODEL_LOADED(cash) == false then  
+    --             STREAMING.REQUEST_MODEL(cash)
+    --         end
+    --         OBJECT.CREATE_AMBIENT_PICKUP(1704231442, money_coords, 0, 2500, cash, false, true)
+    --     end
+    -- end)
 
 -------------------------------------
 -------------------------------------
