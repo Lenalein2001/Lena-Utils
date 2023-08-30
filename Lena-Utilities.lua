@@ -2769,6 +2769,37 @@ if is_developer() then
         wait(1000)
     end)
 
+    local group_name = "Admin Gang"
+    local copy_from = nil
+    local function clearCopy()
+        copy_from:refByRelPath("Copy Session Info").value = false
+        copy_from = nil
+    end
+    menu.toggle_loop(sdebug, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
+        if copy_from ~= nil then
+            if copy_from:getState() ~= "Public" then
+                util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling copy session info.")
+                clearCopy()
+            end
+        else
+            for menu.ref_by_path("Online>Player History>Noted Players>"..group_name):getChildren() as link do
+                local hp = link.target
+                if hp:getState() == "Public" then
+                    util.toast($"{hp.name_for_config} is in a public session, copying their session info.")
+                    hp:refByRelPath("Copy Session Info").value = true
+                    copy_from = hp
+                    return
+                end
+            end
+        end
+    end)
+    menu.text_input(sdebug, "Group Name", {"groupname"}, "", function(value)
+        group_name = value
+        if copy_from ~= nil then
+            clearCopy()
+        end
+    end, group_name)
+
     -------------------------------------
     -- Natives
     -------------------------------------
