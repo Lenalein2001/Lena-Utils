@@ -501,15 +501,12 @@ function get_vehicles_in_player_range(player, radius)
 end
 
 function mode_manu_edition(edition)
-    if edition == 1 then
-        return "Basic"
-    elseif edition == 2 then
-        return "Regular"
-    elseif edition == 3 then
-        return "Ultimate"
-    else
-        return "Unknown"
-    end
+    local editions = {
+        [1] = "Basic",
+        [2] = "Regular",
+        [3] = "Ultimate"
+    }
+    return editions[edition] or "Unknown"
 end
 
 function log_failsafe()
@@ -544,9 +541,7 @@ function log_failsafe()
         }
     }
     local json_string = json.stringify(json_data)
-    async_http.init("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", function(body, header_fields, status_code)
-        -- success callback
-    end)
+    async_http.init("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", function(body, header_fields, status_code); end)
     async_http.add_header("Content-Type", "application/json")
     async_http.set_post("application/json", json_string)
     async_http.dispatch()
@@ -808,6 +803,18 @@ function formatTime(seconds)
     return string.format("%d hour%s, %d minute%s, %d second%s", hours, hours == 1 and "" or "s", minutes, minutes == 1 and "" or "s", remainingSeconds, remainingSeconds == 1 and "" or "s")
 end
 
+function update_value(commandref, text)
+    if text then
+        menu.set_value(commandref, text)
+    else
+        menu.set_value(commandref, "N/A")
+    end
+end
+
 function update_help_text(commandref, text)
-    menu.set_help_text(commandref, text)
+    if text then
+        menu.set_help_text(commandref, text)
+    else
+        menu.set_help_text(commandref, "N/A")
+    end
 end
