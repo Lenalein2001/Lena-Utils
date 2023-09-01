@@ -265,6 +265,18 @@ end)
         stopallanim = menu.action(menu.shadow_root(), "Stop all Animations", {""}, "", function()
             TASK.CLEAR_PED_TASKS(players.user_ped())
         end)
+
+        menu.attach_before(anim_idle, stopallanim)
+
+        for index, data in animation_table do
+            local ref = data[1]
+            local label = data[2]
+            local dict, name = data[3], data[4]
+            menu.action(ref, label, {$"anim{label}"}, "", function()
+                play_anim(dict, name, -1)
+            end)
+        end
+
         menu.divider(anims, "Animations", {""}, "")
         menu.action(anims, "Sit on the Ground", {""}, "", function()
             trigger_commands("scensitonground")
@@ -274,9 +286,6 @@ end)
         end)
         menu.action(anims, "Sunbathe", {""}, "", function()
             trigger_commands("scensunbathe")
-        end)
-        menu.action(anims, "Romantic Hug", {""}, "", function()
-            play_anim("misscarsteal2chad_goodbye", "chad_armsaround_girl", -1)
         end)
         menu.action(anims, "Faint", {""}, "", function()
             trigger_commands("animfaint")
@@ -308,17 +317,8 @@ end)
         menu.action(anims, "Bow", {""}, "", function()
             trigger_commands("animbow")
         end)    
-        menu.action(anims, "Car blowjob", {""}, "", function()
-            play_anim("mini@prostitutes@sexlow_veh", "low_car_bj_loop_female", -1)
-        end)
         menu.action(anims, "Execute", {""}, "", function()
             play_anim("guard_reactions", "1hand_aiming_cycle", -1)
-        end)
-        menu.action(anims, "Sit Sad", {""}, "", function()
-            play_anim("anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_sleeping-noworkfemale", -1)
-        end)
-        menu.action(anims, "Wait", {""}, "", function()
-            play_anim("amb@world_human_hang_out_street@female_hold_arm@idle_a", "idle_a", -1)
         end)
         menu.action(anims, "Dance", {""}, "", function()
             play_anim("anim@amb@casino@mini@dance@dance_solo@female@var_b@", "high_center", -1)
@@ -3879,12 +3879,12 @@ util.create_tick_handler(function()
         player_cur_car = carCheck
     end
     if is_developer() then
-        menu.set_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
+        update_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
     end
-    menu.set_value(host_name, players.get_name(players.get_host()))
-    menu.set_value(script_host_name, players.get_name(players.get_script_host()))
-    menu.set_value(players_amount, #players.list())
-    menu.set_value(modder_amount, tostring(get_modder_int()))
+    update_value(host_name, players.get_name(players.get_host()))
+    update_value(script_host_name, players.get_name(players.get_script_host()))
+    update_value(players_amount, #players.list())
+    update_value(modder_amount, tostring(get_modder_int()))
 end)
 
 util.on_stop(function()
