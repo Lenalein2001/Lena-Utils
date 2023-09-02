@@ -53,11 +53,14 @@ end
 
 function play_anim(dict, name, duration)
     local ped = PLAYER.PLAYER_PED_ID()
+    if not duration then
+        duration = -1
+    end
     while not STREAMING.HAS_ANIM_DICT_LOADED(dict) do
         STREAMING.REQUEST_ANIM_DICT(dict)
         wait()
     end
-    TASK.TASK_PLAY_ANIM(ped, dict, name, 1.0, 1.0, duration, 3, 0.5, false, false, false)
+    TASK.TASK_PLAY_ANIM(ped, dict, name, 1.0, 1.0, duration, 3, 0.0, false, false, false)
 end
 
 function IS_HELP_MSG_DISPLAYED(label)
