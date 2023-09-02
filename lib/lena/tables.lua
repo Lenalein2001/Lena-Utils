@@ -186,11 +186,18 @@ interiors = {
 animation_table = {
     -- Sexy
     {anim_sexy, "Car blowjob", "mini@prostitutes@sexlow_veh", "low_car_bj_loop_female"},
+    {anim_sexy, "Twerk", "switch@trevor@mocks_lapdance", "001443_01_trvs_28_idle_stripper"},
     -- Sitting
-    {anim_sit, "Sit 1", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_sleeping-noworkfemale"},
+    {anim_sit, "Sit Ground", "amb@world_human_picnic@female@idle_a", "idle_a"},
+    {anim_sit, "Sit Ground 2", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_idle_nowork"},
+    {anim_sit, "Sit Chair", "timetable@reunited@ig_10", "base_amanda"},
     {anim_sit, "Sit Sad", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_sleeping-noworkfemale"},
     -- Romantic
     {anim_romantic, "Romantic Hug", "misscarsteal2chad_goodbye", "chad_armsaround_girl"},
+    {anim_romantic, "Blow Kiss", "anim@mp_player_intcelebrationfemale@blow_kiss", "blow_kiss"},
+    {anim_romantic, "Blow Kiss 2", "anim@mp_player_intselfieblow_kiss", "exit", 2000},
     -- Idle
-    {anim_idle, "Idle 1", "amb@world_human_hang_out_street@female_hold_arm@idle_a", "idle_a"}
+    {anim_idle, "Idle 1", "amb@world_human_hang_out_street@female_hold_arm@idle_a", "idle_a"},
+    {anim_idle, "Sunbathe Back", "amb@world_human_sunbathe@male@back@base", "base"},
+    {anim_idle, "Sleep", "timetable@tracy@sleep@", "idle_c"},
 }
