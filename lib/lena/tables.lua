@@ -194,10 +194,13 @@ animation_table = {
     {anim_sit, "Sit Sad", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_sleeping-noworkfemale"},
     -- Romantic
     {anim_romantic, "Romantic Hug", "misscarsteal2chad_goodbye", "chad_armsaround_girl"},
-    {anim_romantic, "Blow Kiss", "anim@mp_player_intcelebrationfemale@blow_kiss", "blow_kiss"},
+    {anim_romantic, "Blow Kiss", "anim@mp_player_intcelebrationfemale@blow_kiss", "blow_kiss", 2000},
     {anim_romantic, "Blow Kiss 2", "anim@mp_player_intselfieblow_kiss", "exit", 2000},
     -- Idle
     {anim_idle, "Idle 1", "amb@world_human_hang_out_street@female_hold_arm@idle_a", "idle_a"},
     {anim_idle, "Sunbathe Back", "amb@world_human_sunbathe@male@back@base", "base"},
     {anim_idle, "Sleep", "timetable@tracy@sleep@", "idle_c"},
+    -- Misc
+    {anim_misc, "Sniper", "missfbi3_sniping", "prone_michael"},
+    {anim_misc, "Execute", "guard_reactions", "1hand_aiming_cycle"},
 }
