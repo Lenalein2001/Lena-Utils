@@ -38,6 +38,7 @@ object_uses = 0
 handle_ptr = memory.alloc(13*8)
 previous_car = nil
 natives_version = "natives-2944b"
+native_invoker.accept_bools_as_ints(true)
 
 -------------------------------------
 -- Tabs
