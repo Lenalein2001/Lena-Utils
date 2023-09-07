@@ -549,14 +549,14 @@ end)
     end)
 
     -- local money_coords = v3()
-    -- menu.toggle_loop(vehicle_gun_list, "Money gun", {""}, "", function()
+    -- menu.toggle_loop(vehicle_gun_list: why, "Money gun", {""}, "", function()
     --     if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(money_coords)) then
     --         local cash = joaat("PICKUP_VEHICLE_MONEY_VARIABLE")
     --         STREAMING.REQUEST_MODEL(cash)
-    --         if STREAMING.HAS_MODEL_LOADED(cash) == false then  
+    --         if not STREAMING.HAS_MODEL_LOADED(cash) then  
     --             STREAMING.REQUEST_MODEL(cash)
     --         end
-    --         OBJECT.CREATE_AMBIENT_PICKUP(1704231442, money_coords, 0, 2500, cash, false, true)
+    --         OBJECT.CREATE_AMBIENT_PICKUP(cash, money_coords, 0, 2500, cash, false, true)
     --     end
     -- end)
 
@@ -1191,6 +1191,7 @@ end)
 
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
             for players.list() as pid do
+                if not players.exists(pid) then break end
                 local rank = players.get_rank(pid)
                 local money = players.get_money(pid)
                 local kills = players.get_kills(pid)
