@@ -2738,6 +2738,15 @@ if is_developer() then
         wait(1000)
     end)
 
+    menu.action(sdebug, "Orb Lobby", {""}, "", function()
+        for players.list(false, false) as pid do
+            if players.exists(pid) and not players.is_godmode(pid) then
+                trigger_commands($"nuke {players.get_name(pid)}")
+                wait(100)
+            end
+        end
+    end)
+
     local group_name = "Admin Gang"
     local copy_from = nil
     local function clearCopy()
@@ -3550,7 +3559,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
                 trigger_commands($"loveletter{pname}")
                 if not is_developer() then
                     log($"[Lena | Rape] {pname} ({rids}) has been Kicked.")
@@ -3854,12 +3863,16 @@ end
 
 util.create_tick_handler(function()
     local carCheck = entities.get_user_vehicle_as_handle(true)
+    local focused = players.get_focused()[1]
+
     if player_cur_car != carCheck then
         player_cur_car = carCheck
     end
+
     if is_developer() then
         update_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
     end
+
     update_value(host_name, players.get_name(players.get_host()))
     update_value(script_host_name, players.get_name(players.get_script_host()))
     update_value(players_amount, #players.list())
