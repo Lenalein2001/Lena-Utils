@@ -1801,7 +1801,7 @@ end)
 
     savekicked = menu.toggle(online, "Save Players Information on Kick", {""}, "", function(); end)
 
-    draw_players = menu.toggle(online, "Prieview Players", {""}, "Draw their Ped onto the Screen if focused.", function(); end)
+    draw_players = menu.toggle(online, "Preview Players", {""}, "Draw their Ped onto the Screen if focused.", function(); end)
 
 -------------------------------------
 -------------------------------------
@@ -3877,6 +3877,16 @@ util.create_tick_handler(function()
     update_value(script_host_name, players.get_name(players.get_script_host()))
     update_value(players_amount, #players.list())
     update_value(modder_amount, tostring(get_modder_int()))
+
+    if focused != nil and menu.is_open() and menu.get_value(draw_players) then
+        local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(focused)
+        if GRAPHICS.UI3DSCENE_IS_AVAILABLE() then
+            if GRAPHICS.UI3DSCENE_PUSH_PRESET("CELEBRATION_WINNER") then
+                --[[ -Y = Push away, Z = Elevation ]]--
+                GRAPHICS.UI3DSCENE_ASSIGN_PED_TO_SLOT("CELEBRATION_WINNER", ped, 0, 0.0, 0.0, 0.0);
+            end
+        end
+    end
 end)
 
 util.on_stop(function()
