@@ -200,6 +200,10 @@ end
 if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
 end
+if not filesystem.exists(lenaDir.."Saved Players Webhook.txt") then
+    local file = io.open(lenaDir.."Saved Players Webhook.txt", "w")
+    file:close()
+end
 if async_http.have_access() then 
     if not is_developer() then
         auto_updater.run_auto_update(auto_update_config)
@@ -931,8 +935,10 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Keep Vehicle Clean", {""}, "", function()
-        if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1 and entities.get_owner(player_cur_car) == players.user() then
-            VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0)
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() then
+            if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1 and entities.get_owner(player_cur_car) == players.user() then
+                VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0)
+            end
         end
     end)
 
@@ -2729,7 +2735,6 @@ if is_developer() then
     end)
     
     initial_money = get_current_money()
-    filenametrans = $"{lenaDir}Transactions for {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}.txt"
     menu.toggle_loop(sdebug, "Transaction Log", {}, "", function(toggled)
         if not util.is_session_started() and util.is_session_transition_active() or util.is_interaction_menu_open() then return end
         if get_current_money() ~= initial_money then
@@ -2777,6 +2782,21 @@ if is_developer() then
             clearCopy()
         end
     end, group_name)
+
+
+    local web_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
+    local webhook_url = web_file:read("a")
+    web_file:close()
+
+    menu.action(sdebug, "Set Webhook Url", {"setwebhookurl"}, "", function()
+        menu.show_command_box("setwebhookurl "); end, function(webhook_url)
+        if string.startswith(webhook_url, "https://discord.com/api/webhooks") or string.startswith(webhook_url, "https://canary.discord.com/api/webhooks") then
+            webhook_url = string.sub(webhook_url, string.lfind(webhook_url, "/api"))
+            write_data_to_file(lenaDir.."Saved Players Webhook.txt", webhook_url)
+        else
+            util.toast("Invalid URL make sure it starts with: \"https://discord.com/api/webhooks\" or \"https://canary.discord.com/api/webhooks\".")
+        end
+    end)
 
     -------------------------------------
     -- Natives
