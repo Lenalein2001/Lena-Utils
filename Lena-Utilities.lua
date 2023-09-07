@@ -1769,7 +1769,7 @@ end)
                     local pname = players.get_name(pid)
                     local rid = players.get_rockstar_id(pid)
                     local hex = decimalToHex2s(rid, 32)
-                    if savekicked then
+                    if menu.get_value(menu.get_value(savekicked)) then
                         trigger_commands($"savep {pname}")
                     end
                     notify($"{pname} has been Kicked for attacking you.")
@@ -1799,9 +1799,9 @@ end)
     -- Save Players Information on Kick
     -------------------------------------
 
-    menu.toggle(online, "Save Players Information on Kick", {""}, "", function(toggled)
-        savekicked = toggled
-    end)
+    savekicked = menu.toggle(online, "Save Players Information on Kick", {""}, "", function(); end)
+
+    draw_players = menu.toggle(online, "Prieview Players", {""}, "Draw their Ped onto the Screen if focused.", function(); end)
 
 -------------------------------------
 -------------------------------------
@@ -3524,7 +3524,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
                 wait(100)
                 trigger_commands($"historyblock{pname} on")
                 if not is_developer() then
@@ -3568,7 +3568,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
                 trigger_commands($"ngcrash{pname}")
                 wait(500)
                 trigger_commands($"crash{pname}")
@@ -3593,7 +3593,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
                 local user = players.user()
                 local user_ped = players.user_ped()
                 local pos = players.get_position(user)
@@ -3622,7 +3622,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
                 local user = players.user()
                 local user_ped = players.user_ped()
                 local pos = players.get_position(user)
@@ -3650,7 +3650,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
                 BlockSyncs(pid, function()
                     local object = entities.create_object(joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
                     OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
@@ -3664,7 +3664,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local pos = players.get_position(pid)
                 local mdl = joaat("u_m_m_jesus_01")
@@ -3692,7 +3692,7 @@ local function player(pid)
         menu.action(crashes, "Invalid Heli Task", {"task2"}, "Works on most menus. <3", function()
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = players.get_position(pid)
-            if savekicked then trigger_commands($"savep {pname}") end
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
             BlockSyncs(pid, function()
                 for i = 1, 10 do
                     if not players.exists(pid) then
@@ -3714,7 +3714,7 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local user = PLAYER.GET_PLAYER_PED(players.user())
                 local pos = ENTITY.GET_ENTITY_COORDS(ped)
@@ -3736,7 +3736,7 @@ local function player(pid)
             if players.get_name(pid) == players.get_name(players.user()) then
                 notify(lang.get_localised(-1974706693))
             else
-                if savekicked then
+                if menu.get_value(savekicked) then
                     trigger_commands($"savep{pname}")
                     wait(50)
                 end
