@@ -2990,6 +2990,16 @@ local function player(pid)
         end)
 
         -------------------------------------
+        -- Save Outfit
+        -------------------------------------
+
+        menu.action(friendly, "Save Player Outfit", {"saveplayeroutfit", "spo"}, $"Save {pname}'s Outfit.", function(click_type)
+            menu.show_command_box($"saveplayeroutfit{pname} "); end, function(name)
+                local n = string.lstrip(name, $"saveplayeroutfit{pname} ")
+                save_player_outfit(pid, n)
+        end)
+
+        -------------------------------------
         -- Spectate
         -------------------------------------
 
