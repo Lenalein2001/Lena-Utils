@@ -821,3 +821,25 @@ function update_help_text(commandref, text)
         menu.set_help_text(commandref, "N/A")
     end
 end
+
+--
+function save_player_outfit(pid, name)
+    local f = filesystem.stand_dir().."Outfits/"..name
+    print(f)
+    if io.isdir(f) then 
+        return notify("File already exists!")
+    else
+        if pid == players.user() then
+            trigger_commands($"saveoutfit {name}")
+        else
+            local c = PED.CLONE_PED(players.user_ped(), false, false, true)
+            trigger_commands($"copyoutfit {players.get_name(pid)}")
+            wait(50)
+            trigger_commands($"saveoutfit {name}")
+            wait(50)
+            PED.CLONE_PED_TO_TARGET(c, players.user_ped())
+            wait(100)
+            entities.delete(c)
+        end
+    end 
+end
