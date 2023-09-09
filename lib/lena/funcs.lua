@@ -463,24 +463,6 @@ function language_string(language)
     return language_table[language] or "Unknown"
 end
 
-function on_math_message(sender, reserved, text, team_chat, networked, is_auto)
-    if not math_reply then
-        return
-    end
-    local lowercase_text = string.lower(text)
-    local prefix = "@bot "
-    if string.sub(lowercase_text, 1, #prefix) == prefix then
-        local expression = string.sub(lowercase_text, #prefix + 1)
-        local result, error_message = load("return " .. expression)()
-        if result then
-            chat.send_message("That expression evaluates to {tostring(result)} :)", false, true, true)
-        else
-            chat.send_message("Sorry, I couldn't evaluate that expression :/", false, true, true)
-            log($"[Lena | Math] Error trying to evaluate an expression. Error: {error_message}")
-        end
-    end
-end
-
 function get_modder_int()
     local modderCount = 0
     for players.list() as pid do

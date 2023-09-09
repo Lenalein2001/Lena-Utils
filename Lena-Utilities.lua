@@ -2619,30 +2619,7 @@ end)
 if is_developer() then
     local sdebug = menu.list(menu.my_root(), "[Debug]", {"lenadebug"}, "")
     local nativec = menu.list(sdebug, "Native Feedback", {""}, "")
-    local json = require("json")
-
-    menu.toggle(sdebug, "Math Bot", {"mathbot"}, "Enables the math bot to evaluate math expressions. Usage: @bot <expression>.", function(enabled)
-        math_reply = enabled
-    end)
-    chat.on_message(on_math_message)
-
-    --[[menu.toggle(sdebug, "Chat Relay", {"chatrelay"}, "Enable Discord Webhook", function(enabled)
-        webhook_enabled = enabled
-        -- Check if the webhook URL is valid
-        if webhook_url == "" or nil then
-            notify("Webhook URL is not set.")
-            util.open_folder(lenaDir)
-            trigger_commands("chatrelay off")
-        else
-            if webhook_enabled then
-                notify("Discord Webhook enabled.")
-            else
-                notify("Discord Webhook disabled.")
-            end
-        end
-    end)
-    chat.on_message(send_to_discord_webhook)]]
-
+    
     -------------------------------------
     -- Easier Better Vehicles
     -------------------------------------
@@ -2739,8 +2716,10 @@ if is_developer() then
         end
     end)
 
-    debug_hk = menu.action(sdebug, "Host Kick", {"hk"}, $"Kick {players.get_name(players.get_host())}", function()
-        trigger_commands($"kick{players.get_name(players.get_host())}")
+    debug_hk = menu.action(sdebug, "Kick Host", {"hk"}, $"Kick {players.get_name(players.get_host())}", function()
+        if not NETWORK.NETWORK_IS_HOST() then
+            trigger_commands($"kick{players.get_name(players.get_host())}")
+        end
     end)
     
     initial_money = get_current_money()
@@ -2750,15 +2729,6 @@ if is_developer() then
             check_and_write_money_change()
         end
         wait(1000)
-    end)
-
-    menu.action(sdebug, "Orb Lobby", {""}, "", function()
-        for players.list(false, false) as pid do
-            if players.exists(pid) and not players.is_godmode(pid) then
-                trigger_commands($"nuke {players.get_name(pid)}")
-                wait(100)
-            end
-        end
     end)
 
     local group_name = "Admin Gang"
