@@ -188,9 +188,7 @@ auto_update_config = {
 -- Required Files
 -------------------------------------
 
-local scaleForm = require("ScaleformLib")
-local funcs = require("lena.funcs")
-local tables= require("lena.tables")
+
 local scriptdir = filesystem.scripts_dir()
 local lenaDir = scriptdir.."Lena\\"
 
@@ -201,9 +199,13 @@ if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
 end
 if not filesystem.exists(lenaDir.."Saved Players Webhook.txt") then
-    local file = io.open(lenaDir.."Saved Players Webhook.txt", "w")
-    file:close()
+    local waddada = io.open(lenaDir.."Saved Players Webhook.txt", "w")
+    waddada:close()
 end
+local scaleForm = require("ScaleformLib")
+local funcs = require("lena.funcs")
+local tables = require("lena.tables")
+
 if async_http.have_access() then 
     if not is_developer() then
         auto_updater.run_auto_update(auto_update_config)
@@ -789,8 +791,6 @@ end)
         -- Periodic flares release
         -------------------------------------
 
-        local flaredelay = 100
-        local flareamount = 1
         flaredelay = menu.slider_float(vehicle_flares, "Flare Delay", {""}, "Delay is in Seconds. 0.5 would be half a Second.", 10, 1000, 100, 10, function(); end)
         flareamount = menu.slider(vehicle_flares, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
         
@@ -1547,7 +1547,7 @@ end)
     -- Friend List
     -------------------------------------
     
-    menu.divider(friend_lists, "frens:)")
+    menu.divider(friend_lists, "frens :)")
     for i = 0, NETWORK.NETWORK_GET_FRIEND_COUNT() do
         local name = NETWORK.NETWORK_GET_FRIEND_DISPLAY_NAME(i)
         if name == "*****" then goto skip end
@@ -1729,6 +1729,14 @@ end)
         end)
 
     -------------------------------------
+    -- Save Players Information on Kick
+    -------------------------------------
+
+    savekicked = menu.toggle(online, "Save Players Information on Kick", {""}, "", function(); end)
+
+    draw_players = menu.toggle(online, "Preview Players", {""}, "Draw their Ped onto the Screen if focused.", function(); end)
+
+    -------------------------------------
     -- Whitelist Session
     -------------------------------------
 
@@ -1770,14 +1778,14 @@ end)
 
     menu.toggle_loop(online, "Kick Attackers", {""}, "", function()
         if util.is_session_started() and not util.is_session_transition_active() then
-            for players.list(false, false, true) as pid do
+            for players.list(false, true, true) as pid do
                 if players.is_marked_as_attacker(pid) then
-                    local pname = players.get_name(pid)
-                    local rid = players.get_rockstar_id(pid)
+                    local pname, rid = players.get_name(pid), players.get_rockstar_id(pid)
                     local hex = decimalToHex2s(rid, 32)
-                    if menu.get_value(menu.get_value(savekicked)) then
+                    if menu.get_value(savekicked) then
                         trigger_commands($"savep {pname}")
                     end
+                    wait(500)
                     notify($"{pname} has been Kicked for attacking you.")
                     if is_developer() then
                         log($"[Lena | Kick Attackers] {pname} ({rid} / {hex}) has attacked you and got Kicked.")
@@ -1800,14 +1808,6 @@ end)
             NETWORK.NETWORK_END_TUTORIAL_SESSION()
         end
     end)
-
-    -------------------------------------
-    -- Save Players Information on Kick
-    -------------------------------------
-
-    savekicked = menu.toggle(online, "Save Players Information on Kick", {""}, "", function(); end)
-
-    draw_players = menu.toggle(online, "Preview Players", {""}, "Draw their Ped onto the Screen if focused.", function(); end)
 
 -------------------------------------
 -------------------------------------
@@ -2093,9 +2093,18 @@ end)
     -- Remove The Drainage Pipe
     ------------------------------------- 
 
-    menu.action(tunables, "Remove The Drainage Pipe", {"hccprempipe"}, "", function()
-        local Object = util.joaat("prop_chem_grill_bit")
-        DELETE_OBJECT_BY_HASH(Object)
+    menu.action(tunables, "Remove The Drainage Pipe", {""}, "", function()
+        DELETE_OBJECT_BY_HASH(joaat("prop_chem_grill_bit"))
+    end)
+
+    menu.toggle_loop(tunables, "Toggle Godmode for Vehicle Cargo", {""}, "", function()
+        if util.is_session_started() and players.get_boss(players.user()) == players.user() then
+            for entities.get_all_vehicles_as_handles() as veh do
+                if HUD.GET_BLIP_SPRITE(HUD.GET_BLIP_FROM_ENTITY(veh)) == 523 and ENTITY.GET_ENTITY_CAN_BE_DAMAGED(veh) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(veh) then
+                    ENTITY.SET_ENTITY_CAN_BE_DAMAGED(veh, false)
+                end
+            end
+        end
     end)
 
 -------------------------------------
