@@ -2835,11 +2835,12 @@ if is_developer() then
             local vname = lang.get_localised(util.get_label_text(players.get_vehicle_model(user)))
             local vmodel = players.get_vehicle_model(user)
             local modelname = util.reverse_joaat(vmodel)
-            local vehicle = PED.GET_VEHICLE_PED_IS_USING(players.user_ped())
+            local vehicle = entities.get_user_vehicle_as_handle()
             local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
             local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
+            local blip = HUD.GET_BLIP_SPRITE(HUD.GET_BLIP_FROM_ENTITY(vmodel))
             notify($"Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
-            log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Plate:{plate_text}.")
+            log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Blip: {blip} | Plate:{plate_text}.")
         end)
         menu.action(nativevehicle, "Set Number Plate", {"randomplate"}, "Sets the Current Number Plate to a random Text.", function()
             local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "WHORE"}
@@ -2888,7 +2889,7 @@ local function player(pid)
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 
+        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3573,7 +3574,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                wait(100)
+                wait(500)
                 trigger_commands($"historyblock{pname} on")
                 if not is_developer() then
                     log($"[Lena | Block Kick] {pname} ({rids}) has been Kicked and Blocked.")
@@ -3589,6 +3590,7 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+                wait(500)
                 trigger_commands($"loveletter{pname}")
                 if not is_developer() then
                     log($"[Lena | Rape] {pname} ({rids}) has been Kicked.")
@@ -3699,12 +3701,10 @@ local function player(pid)
                 notify(lang.get_localised(-1974706693))
             else
                 if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                BlockSyncs(pid, function()
-                    local object = entities.create_object(joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
-                    OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
-                    wait(5000)
-                    entities.delete_by_handle(object)
-                end)
+                local object = entities.create_object(joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
+                OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
+                wait(5000)
+                entities.delete_by_handle(object)
             end
         end)
 
