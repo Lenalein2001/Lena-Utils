@@ -446,8 +446,7 @@ end)
     -------------------------------------
 
     local modifiedSpeed
-    bullet_multiplier = menu.slider_float(weap, "Bullet Speed Mult", {""}, "Changes the Speed of all weapons that are not Hitscan.", 10, 100000, 100, 10, function(value)
-    end)
+    bullet_multiplier = menu.slider_float(weap, "Bullet Speed Mult", {""}, "Changes the Speed of all weapons that are not Hitscan.", 10, 100000, 100, 10, function(value); end)
 
     util.create_tick_handler(function()
         local CPed = entities.handle_to_pointer(players.user_ped())
@@ -3120,7 +3119,7 @@ local function player(pid)
         menu.toggle(mpvehicle, "Hurricane", {""}, "", function(toggled)
             local ram = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Ram")
             local speed = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Speed")
-            local veh = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Vehicle>Commercial>Terrorbyte")
+            local veh = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Vehicle>Military>TM-02 Khanjali")
             trigger_command(veh); speed.value = 200
             usinghurricane = toggled
             while usinghurricane and not PLAYER.IS_PLAYER_DEAD(pid) do
@@ -3137,7 +3136,7 @@ local function player(pid)
 
         -------------------------------------
         -- Cage
-        -------------------------------------   
+        -------------------------------------
 
             -------------------------------------
             -- AUTOMATIC
