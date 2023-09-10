@@ -64,11 +64,8 @@ function IA_MENU_ENTER(Num)
     end
 end
 
-function play_anim(dict, name, duration)
+function play_anim(dict, name, duration = -1)
     local ped = PLAYER.PLAYER_PED_ID()
-    if not duration then
-        duration = -1
-    end
     while not STREAMING.HAS_ANIM_DICT_LOADED(dict) do
         STREAMING.REQUEST_ANIM_DICT(dict)
         wait()
@@ -109,7 +106,8 @@ function closestveh(myPos)
     end
 end
 
-function request_control(vehicle, migrate)
+
+function request_control(vehicle, migrate = true)
     local ctr = 0
     while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) do
         if ctr >= 250 then
@@ -140,13 +138,12 @@ function get_vehicle_ped_is_in(player)
     end
 end
 
-local spawnped_gm = false
-function spawn_ped(model_name, pos, spawnped_gm)
+function spawn_ped(model_name, pos, gm = false)
     local hash = util.joaat(model_name)
     if STREAMING.IS_MODEL_A_PED(hash) then
         util.request_model(hash)
         local ped = entities.create_ped(2, hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
-        ENTITY.SET_ENTITY_INVINCIBLE(ped, spawnped_gm)
+        ENTITY.SET_ENTITY_INVINCIBLE(ped, gm)
         local ptr = entities.handle_to_pointer(ped)
         entities.set_can_migrate(ptr, false)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
@@ -169,14 +166,13 @@ function spawn_obj(model_name, pos)
     end
 end
 
-local veh_godmode = false
-function spawn_vehicle(model_name, pos, veh_godmode)
+function spawn_vehicle(model_name, pos, gm = false)
     local hash = joaat(model_name)
     if STREAMING.IS_MODEL_A_VEHICLE(hash) then
         util.request_model(hash)
         local veh = entities.create_vehicle(hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
         local ptr = entities.handle_to_pointer(veh)
-        ENTITY.SET_ENTITY_INVINCIBLE(veh, veh_godmode)
+        ENTITY.SET_ENTITY_INVINCIBLE(veh, gm)
         entities.set_can_migrate(ptr, false)
         ENTITY.SET_ENTITY_SHOULD_FREEZE_WAITING_ON_COLLISION(veh, true)
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
@@ -186,7 +182,7 @@ function spawn_vehicle(model_name, pos, veh_godmode)
     end
 end
 
-function trapcage(pid, object, visible)
+function trapcage(pid, object, visible = true)
     local hash = util.joaat(object)
     util.request_model(hash)
     local pos = players.get_position(pid)
@@ -221,6 +217,7 @@ end
 
 function IsDetectionPresent(pid, detection)
     if players.exists(pid) then
+        wait(100)
         for menu.player_root(pid):getChildren() as cmd do
             if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath(detection):isValid() and players.exists(pid) then
                 return true
@@ -277,14 +274,6 @@ function ADD_MP_INDEX(Stat)
     end
     return Stat
 end
-function SET_INT_GLOBAL(Global, Value)
-    memory.write_int(memory.script_global(Global), Value)
-end
-function SET_PACKED_INT_GLOBAL(StartGlobal, EndGlobal, Value)
-    for i = StartGlobal, EndGlobal do
-        SET_INT_GLOBAL(262145 + i, Value)
-    end
-end
 function SET_INT_LOCAL(Script, Local, Value)
     if memory.script_local(Script, Local) ~= 0 then
         memory.write_int(memory.script_local(Script, Local), Value)
@@ -293,7 +282,7 @@ end
 function STAT_SET_INT(Stat, Value)
     STATS.STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
 end
--- Stats
+-- Stats End
 
 function get_seat_ped_is_in(ped)
     local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
@@ -348,7 +337,7 @@ function getWeaponHash(ped)
     return WEAPON.GET_SELECTED_PED_WEAPON(ped), false
 end
 
-function decimalToHex2s(decimal, numBits)
+function decimalToHex2s(decimal, numBits = 32)
     local hex = ""
     local hexDigits = "0123456789ABCDEF"
     local maxValue = 2^(numBits - 1) - 1
@@ -746,7 +735,7 @@ function check_and_write_money_change()
 end
 
 local auto_perf_ind = {11,12,13,16,18,22}
-function tune_vehicle(v, p, tell)
+function tune_vehicle(v, p, tell = false)
     if p then
         for auto_perf_ind as index do 
             local veh_mods = VEHICLE.GET_VEHICLE_WINDOW_TINT(v) != 1 or VEHICLE.GET_VEHICLE_TYRES_CAN_BURST(v)
