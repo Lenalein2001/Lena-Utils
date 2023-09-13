@@ -37,7 +37,7 @@ spawned_attackers = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
 previous_car = nil
-natives_version = "natives-2944b"
+natives_version = "2944b"
 native_invoker.accept_bools_as_ints(true)
 
 -------------------------------------
@@ -1196,19 +1196,19 @@ end)
 
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
             for players.list() as pid do
-                if not players.exists(pid) then break end
-                local rank = players.get_rank(pid)
-                local money = players.get_money(pid)
-                local kills = players.get_kills(pid)
-                local deaths = players.get_deaths(pid)
-                local kdratio = players.get_kd(pid)
-                if players.are_stats_ready(pid) then
+                if players.are_stats_ready(pid) and players.exists(pid) then
+                    wait(100)
+                    local rank = players.get_rank(pid)
+                    local money = players.get_money(pid)
+                    local kills = players.get_kills(pid)
+                    local deaths = players.get_deaths(pid)
+                    local kdratio = players.get_kd(pid)
                     if kdratio < 0 or kdratio > 100 or kills < 0 or kills > 50000 or deaths < 0 or deaths > 50000 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (K/D)") then
                             players.add_detection(pid, "Unlegit Stats (K/D)", 7, 50)
                         end
                     end
-                    if rank > 1500 then
+                    if rank > 1500 or rank < 0 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Rank)") then
                             players.add_detection(pid, "Unlegit Stats (Rank)", 7, 75)
                         end
