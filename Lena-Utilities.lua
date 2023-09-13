@@ -3605,64 +3605,6 @@ local function player(pid)
             end
         end, nil, nil, COMMANDPERM_AGGRESSIVE)
 
-        local nature = menu.list(crashes, "Parachute Crash", {}, "")
-        menu.action(nature, "Version 1", {"V1"}, "", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-            else
-                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                local user = players.user()
-                local user_ped = players.user_ped()
-                local pos = players.get_position(user)
-                BlockSyncs(pid, function() 
-                    wait(100)
-                    trigger_commands("invisibility on")
-                    for i = 0, 110 do
-                        PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user, 0xFBF7D21F)
-                        PED.SET_PED_COMPONENT_VARIATION(user_ped, 5, i, 0, 0)
-                        wait(50)
-                        PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
-                    end
-                    wait(250)
-                    for i = 1, 5 do
-                        util.spoof_script("freemode", SYSTEM.wait) 
-                    end
-                    ENTITY.SET_ENTITY_HEALTH(user_ped, 0) 
-                    NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(pos, 0, false, false, 0)
-                    PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
-                    trigger_commands("invisibility off")
-                end)
-            end
-        end)
-
-        menu.action(nature, "Version 2", {"V2"}, "", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-            else
-                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                local user = players.user()
-                local user_ped = players.user_ped()
-                local pos = players.get_position(user)
-                BlockSyncs(pid, function()
-                    wait(100)
-                    PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user(), 0xFBF7D21F)
-                    WEAPON.GIVE_DELAYED_WEAPON_TO_PED(user_ped, 0xFBAB5776, 100, false)
-                    TASK.TASK_PARACHUTE_TO_TARGET(user_ped, pos.x, pos.y, pos.z)
-                    wait()
-                    TASK.CLEAR_PED_TASKS_IMMEDIATELY(user_ped)
-                    wait(250)
-                    WEAPON.GIVE_DELAYED_WEAPON_TO_PED(user_ped, 0xFBAB5776, 100, false)
-                    PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(user)
-                    wait(1000)
-                    for i = 1, 5 do
-                        util.spoof_script("freemode", SYSTEM.wait)
-                    end
-                    ENTITY.SET_ENTITY_HEALTH(user_ped, 0)
-                    NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(pos, 0, false, false, 0)
-                end)
-            end
-        end, nil, nil, COMMANDPERM_RUDE)
-
         menu.action(crashes, "Fragment Crash", {""}, "2Shit1 Crash. Victim needs to look at it.", function()
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
@@ -3744,29 +3686,6 @@ local function player(pid)
                 end)
                 TASK.CLEAR_PED_TASKS_IMMEDIATELY(user)
                 ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, my_pos, false, false, false)
-            end
-        end)
-
-        menu.action(crashes, "Bozo Crash", {""}, "", function()
-            if players.get_name(pid) == players.get_name(players.user()) then
-                notify(lang.get_localised(-1974706693))
-            else
-                if menu.get_value(savekicked) then
-                    trigger_commands($"savep{pname}")
-                    wait(50)
-                end
-                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                local coords = ENTITY.GET_ENTITY_COORDS(ped, true)
-                coords.x = coords['x']
-                coords.y = coords['y']
-                coords.z = coords['z']
-                local hash = 3613262246
-                local hash2 = 3613262246
-                util.request_model(hash2)
-                util.request_model(hash)
-                local crash2 = OBJECT.CREATE_OBJECT_NO_OFFSET(hash2, coords['x'], coords['y'], coords['z'], true, false, false)
-                local crash1 = OBJECT.CREATE_OBJECT_NO_OFFSET(hash, coords['x'], coords['y'], coords['z'], true, false, false)
-                ENTITY.SET_ENTITY_ROTATION(crash1, 0.0, -90.0, 0.0, 1, true)
             end
         end)
 
