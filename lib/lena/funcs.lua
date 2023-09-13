@@ -217,7 +217,6 @@ end
 
 function IsDetectionPresent(pid, detection)
     if players.exists(pid) then
-        wait(100)
         for menu.player_root(pid):getChildren() as cmd do
             if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath(detection):isValid() and players.exists(pid) then
                 return true
@@ -426,7 +425,7 @@ function player_ip(pid)
     math.floor(connectIP / 2^16) % 256,
     math.floor(connectIP / 2^8) % 256,
     connectIP % 256)
-    if ipStringplayer == "255.255.255.255" then
+    if ipStringplayer == ("255.255.255.255" or "0.0.0.0") then
         return "Connected via Relay", false
     else
         return ipStringplayer, true
@@ -516,6 +515,31 @@ function log_failsafe()
     send_to_hook("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", "application/json", json_string)
 end
 
+function get_player_crew(player)
+	local networkHandle = memory.alloc(104)
+	local clanDesc = memory.alloc(280)
+	NETWORK.NETWORK_HANDLE_FROM_PLAYER(player, networkHandle, 13)
+
+	if NETWORK.NETWORK_IS_HANDLE_VALID(networkHandle, 13) and NETWORK.NETWORK_CLAN_PLAYER_GET_DESC(clanDesc, 35, networkHandle) then
+		local icon = memory.read_int(clanDesc)
+		local name = memory.read_string(clanDesc + 0x08)
+		local tag = memory.read_string(clanDesc + 0x88)
+		local rank = memory.read_string(clanDesc + 0xB0)
+		local motto = players.clan_get_motto(player)
+		local alt_badge = memory.read_byte(clanDesc + 0xA0) ~= 0 and "On" or "Off"
+		-- local rank = memory.read_int(clanDesc + 30 * 8)
+        return {
+            icon     = icon,
+            name     = name,
+            tag      = tag,
+            motto    = motto,
+            alt_badge = alt_badge
+        }, true
+	else
+        return false
+    end
+end
+
 function save_player_info(pid)
     local name_with_tags = players.get_name_with_tags(pid)
     local name = players.get_name(pid)
@@ -531,6 +555,7 @@ function save_player_info(pid)
     local host_token = players.get_host_token_hex(pid)
     local is_using_controller = players.is_using_controller(pid)
     local clan_motto = players.clan_get_motto(pid)
+    local crew_info = get_player_crew(pid)
     local filename = name .. ".txt"
     local filepath = lenaDir .. "Players/" .. filename
 
@@ -550,21 +575,20 @@ function save_player_info(pid)
             "\n\nName with Tags: ", name_with_tags,
             "\nRID/SCID: ", rockstar_id,
             "\nIs Modder: ", is_modder and "Yes" or "No",
+            "\nIs Attacker: ", is_attacker and "Yes" or "No",
             "\nRank: ", rank,
             "\nMoney: ", money,
             "\nK/D: ", kd,
             "\nLanguage: ", language_int,
-            "\nIs Attacker: ", is_attacker and "Yes" or "No",
             "\nHost Token: ", host_token,
             "\nIs Using Controller: ", is_using_controller and "Yes" or "No",
-            "\nClan Motto: ", tostring(clan_motto),
             "\n",
             "\n**Net Intel**",
             "\nIs Using VPN: ", is_using_vpn and "Yes" or "No",
             "\nIPv4: ", player_ip
         }
 
-        if player_ip != false then
+        if player_ip then
             local as, dns = soup.netIntel.getAsByIp(player_ip), soup.IpAddr(player_ip)
             player_info[#player_info + 1] = "\nNetIntel addr: " .. tostring(dns) .. ", " .. dns:getReverseDns()
             player_info[#player_info + 1] = "\nNetIntel Number: " .. as.number
@@ -578,6 +602,17 @@ function save_player_info(pid)
             --player_info[#player_info + 1] = "\nNetIntel County Code: " .. loc.country_code
         else
             player_info[#player_info + 1] = "\nConnected to Rockstar's Server. Intel will not be shown."
+        end
+
+        if crew_info then 
+            player_info[#player_info + 1] = "\n\n**Crew Information**"
+            player_info[#player_info + 1] = "\nCrew Icon: " .. crew_info.icon
+            player_info[#player_info + 1] = "\nCrew Name: " .. crew_info.name
+            player_info[#player_info + 1] = "\nCrew Tag: " .. crew_info.tag
+            player_info[#player_info + 1] = "\nCrew Motto: " .. crew_info.motto
+            player_info[#player_info + 1] = "\nAlternate Badge: " .. crew_info.alt_badge
+        else
+            player_info[#player_info + 1] = "\n\nCannot save Crew Info."
         end
 
         file:write(table.concat(player_info))
@@ -609,8 +644,6 @@ function save_player_info(pid)
         end
     end 
 end
-
-
 
 -- Weapon Speed Modifier
 AmmoSpeed = {address = 0, defaultValue = 0}
@@ -756,15 +789,6 @@ function DELETE_OBJECT_BY_HASH(hash)
             entities.delete_by_handle(ent)
         end
     end
-end
-
-function to_rgb(r, g, b, a)
-    local color = {}
-    color.r = r
-    color.g = g
-    color.b = b
-    color.a = a
-    return color
 end
 
 function send_script_event(first_arg, receiver, args)
