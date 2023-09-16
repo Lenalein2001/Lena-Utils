@@ -223,9 +223,6 @@ if PED == nil then
     util.show_corner_help($"{msg1} {natives_version}. {msg2}")
     util.stop_script()
 end
-if lang.get_current() != "en" then
-    notify("This Lua is made using the english translation of Stand. If things break it's most likely because you are using a different language.\nTry to use: Stand>Settings>Language>English (UK).")
-end
 if not SCRIPT_SILENT_START then
     notify($"Hi, {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}. <3")
 end 
@@ -646,15 +643,18 @@ end)
         -------------------------------------  
 
         menu.toggle_loop(better_vehicles, "Better Explosive Weapons", {""}, "Higher Damage Output.", function()
-            local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade")
-            local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
-            local veh = 239897677 or 1692272545 or -1281684762 -- raiju, strikeforce, lazer
-            local hash = players.get_vehicle_model(players.user())
-            if hash == veh and toggle_ammo.value == false then
-                ammo:trigger()
-                toggle_ammo.value = true
-            elseif hash != veh and toggle_ammo.value == true then
-                toggle_ammo.value = false
+            if not in_session() then return end
+            if entities.get_user_vehicle_as_pointer(false) != 0 then
+                local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade")
+                local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
+                local veh = 239897677 or 1692272545 or -1281684762 -- raiju, strikeforce, lazer
+                local hash = players.get_vehicle_model(players.user())
+                if hash == veh and toggle_ammo.value == false then
+                    ammo:trigger()
+                    toggle_ammo.value = true
+                elseif hash != veh and toggle_ammo.value == true then
+                    toggle_ammo.value = false
+                end
             end
         end)
 
@@ -700,7 +700,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(doorcontrol, "Taze Players trying to Enter", {""}, "", function()
-            if util.is_session_transition_active() then return end
+            if not in_session() then return end
             if player_cur_car != -1 then
                 VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, true)
             else
@@ -892,6 +892,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Bypass Anti-Lockon", {""}, "Bypass No Lock-on features. Works great on Kiddions Users.", function()
+        if not in_session() then return end
         for players.list(false, true, true) as pid do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local veh = PED.GET_VEHICLE_PED_IS_USING(ped)
@@ -909,6 +910,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
+        if not in_session() then return end
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() then
             local veh = players.get_vehicle_model(players.user())
             if VEHICLE.IS_THIS_MODEL_A_CAR(veh) or VEHICLE.IS_THIS_MODEL_A_BIKE(veh) then
@@ -922,6 +924,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Limit RPM", {""}, "", function()
+        if not in_session() then return end
         if players.get_vehicle_model(players.user()) != 0 then
             entities.set_rpm(entities.get_user_vehicle_as_pointer(), 1.2)
             wait(100)
@@ -933,6 +936,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Keep Vehicle Clean", {""}, "", function()
+        if not in_session() then return end
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() then
             if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1 and entities.get_owner(player_cur_car) == players.user() then
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0)
@@ -1196,7 +1200,7 @@ end)
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
             for players.list() as pid do
                 if players.are_stats_ready(pid) and players.exists(pid) then
-                    wait(100)
+                    wait(50)
                     local rank = players.get_rank(pid)
                     local money = players.get_money(pid)
                     local kills = players.get_kills(pid)
@@ -1215,6 +1219,11 @@ end)
                     if money > 1600000000 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Money)") then
                             players.add_detection(pid, "Unlegit Stats (Money)", 7, 50)
+                        end
+                    end
+                    if rank > 1000 and money < 150000000 then
+                        if not IsDetectionPresent(pid, "Unlegit Stats (Rank/Money Mismatch)") then
+                            players.add_detection(pid, "Unlegit Stats (Rank/Money Mismatch)", 7, 50)
                         end
                     end
                 end
@@ -1861,14 +1870,14 @@ end)
         -- Headhunter
         -------------------------------------
 
-        menu.action(missions_tunables, "Headhunter", {"hh", "headhunter"}, "Starts the CEO mission \"Headhunter\".", function()
+        menu.action(missions_tunables, "Start Headhunter", {"hh", "headhunter"}, "Starts the CEO mission \"Headhunter\".", function()
             if players.get_boss(players.user()) == -1 then
                 trigger_commands("ceostart")
                 notify("Starting CEO... Please wait for a few seconds.")
                 wait(8000)
             end
             if players.get_boss(players.user()) == -1 then
-                return util.stop_thread()
+                return 
             end
             IA_MENU_OPEN_OR_CLOSE()
             IA_MENU_ENTER(1)
@@ -1965,7 +1974,7 @@ end)
             if counter == 0 then
                 notify("No Peds Found. :/")
             else
-                notify("Killed "..tostring(counter).." Mission Peds.")
+                notify($"Killed {counter} Mission Peds.")
             end
         end)
 
@@ -1987,7 +1996,7 @@ end)
             if counter == 0 then
                 notify("No Jammers Found. :/")
             else
-                notify("Destroyed "..tostring(counter).." Signal Jammers.")
+                notify($"Destroyed {counter} Signal Jammers.")
             end
         end)
     -------------------------------------
@@ -2362,36 +2371,6 @@ end)
             end
         end)
 
-        fakemoney_delay = 3000
-        menu.slider(fake_money, "Delay (MS)", {"faketime"}, "", 100, 10000, 3000, 1, function(s)
-            fakemoney_delay = s
-        end)
-        
-        fakemoney_amt = 30000000
-        menu.slider(fake_money, "Amount", {"fakeamount"}, "", 0, 1000000000, 30000000, 1, function(s)
-            fakemoney_amt = s
-        end)
-        
-        fakemoney_random = true
-        menu.toggle(fake_money, "Random Amount", {}, "", function(on)
-            fakemoney_random = on
-        end, true)
-        
-        menu.toggle_loop(fake_money, "Enable Loop", {}, "", function(on)
-            local amt
-            if fakemoney_random then 
-                amt = math.random(10000000, 30000000)
-            else
-                amt = fakemoney_amt
-            end
-            HUD.CHANGE_FAKE_MP_CASH(0, amt)
-            util.yield(fakemoney_delay)
-        end)
-
-        menu.toggle(fake_money, "Display Fake Money", {}, "", function(toggled)
-            HUD.USE_FAKE_MP_CASH(true)
-        end)
-
     -------------------------------------
     -- Disable Numpad
     -------------------------------------
@@ -2759,7 +2738,6 @@ if is_developer() then
             clearCopy()
         end
     end, group_name)
-
 
     local web_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
     local webhook_url = web_file:read("a")
@@ -3539,7 +3517,9 @@ local function player(pid)
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
             else
-                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+                if menu.get_value(savekicked) then
+                    trigger_commands($"savep {pname}")
+                end
                 wait(500)
                 trigger_commands($"historyblock{pname} on")
                 if not is_developer() then
