@@ -22,6 +22,14 @@ function gen_fren_funcs(name)
     end)
 end
 
+function in_session()
+    if util.is_session_started() and not util.is_session_transition_active() then
+        return true
+    else
+        return false
+    end
+end
+
 function write_data_to_file(file_path, data)
     local file = io.open(file_path, "w")
     file:write(data)
