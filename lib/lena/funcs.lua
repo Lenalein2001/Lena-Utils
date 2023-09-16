@@ -115,24 +115,24 @@ function closestveh(myPos)
 end
 
 
-function request_control(vehicle, migrate = true)
+function request_control(entity, migrate = true)
     local ctr = 0
-    while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) do
-        if ctr >= 250 then
-            notify("Failed to get control of players vehicle. :/")
-            ctr = 0
-            return false
-        else 
+    local migrate_ctr = 0
+    if entity != (0 or nil) then
+        while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entity) do
+            if ctr >= 250 then
+                notify("Failed to get control of entity. :/")
+                ctr = 0
+                return false
+            end
+            NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
+            wait()
+            ctr += 1
+        end
+        if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entity) then
+            entities.set_can_migrate(entity, migrate)
             return true
         end
-        NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vehicle)
-        util.yield()
-        ctr += 1
-    end
-    if migrate then
-        entities.set_can_migrate(vehicle, true)
-    else
-        entities.set_can_migrate(vehicle, false)
     end
 end
 
