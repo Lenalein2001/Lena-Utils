@@ -188,9 +188,7 @@ auto_update_config = {
 -- Required Files
 -------------------------------------
 
-
-local scriptdir = filesystem.scripts_dir()
-local lenaDir = scriptdir.."Lena\\"
+local lenaDir = filesystem.scripts_dir().."Lena\\"
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
@@ -355,8 +353,8 @@ end)
     -- Godmode
     -------------------------------------
 
-    menu.toggle(self, "Godmode", {"gm"}, "Toggles a few options to make you truly Invincible.", function(toggled)
-        trigger_commands($"godmode {toggled}; vehgodmode {toggled}; grace {toggled}; mint {toggled}")
+    menu.toggle(self, "Godmode", {"gm"}, "Toggles a few options to make you truly Invincible.", function(t)
+        trigger_commands($"godmode {t}; vehgodmode {t}; grace {t}; mint {t}")
     end)
     
     -------------------------------------
@@ -938,8 +936,8 @@ end)
     menu.toggle_loop(vehicle, "Keep Vehicle Clean", {""}, "", function()
         if not in_session() then return end
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() then
-            if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1 and entities.get_owner(player_cur_car) == players.user() then
-                VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0)
+            if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1.0 and entities.get_owner(player_cur_car) == players.user() then
+                VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0.0)
             end
         end
     end)
@@ -1200,7 +1198,8 @@ end)
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
             for players.list() as pid do
                 if players.are_stats_ready(pid) and players.exists(pid) then
-                    wait(50)
+                    if not players.are_stats_ready(pid) then return end
+                    wait(100)
                     local rank = players.get_rank(pid)
                     local money = players.get_money(pid)
                     local kills = players.get_kills(pid)
@@ -1221,7 +1220,7 @@ end)
                             players.add_detection(pid, "Unlegit Stats (Money)", 7, 50)
                         end
                     end
-                    if rank > 1000 and money < 150000000 then
+                    if (rank > 1000 and money < 150000000) or (rank < 100 and money > 150000000) then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Rank/Money Mismatch)") then
                             players.add_detection(pid, "Unlegit Stats (Rank/Money Mismatch)", 7, 50)
                         end
@@ -2104,7 +2103,11 @@ end)
         DELETE_OBJECT_BY_HASH(joaat("prop_chem_grill_bit"))
     end)
 
-    menu.toggle_loop(tunables, "Toggle Godmode for Vehicle Cargo", {""}, "", function()
+    -------------------------------------
+    -- Toggle Godmode for Vehicle Cargo
+    ------------------------------------- 
+
+    menu.toggle_loop(tunables, "Godmode for Vehicle Cargo", {""}, "Source Only. Relies on the Vehicle's blip.", function()
         if util.is_session_started() and players.get_boss(players.user()) == players.user() then
             for entities.get_all_vehicles_as_handles() as veh do
                 if HUD.GET_BLIP_SPRITE(HUD.GET_BLIP_FROM_ENTITY(veh)) == 523 and ENTITY.GET_ENTITY_CAN_BE_DAMAGED(veh) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(veh) then
@@ -2631,7 +2634,7 @@ if is_developer() then
                     notify($"Better Blimps have been enabled for: {vname}")
                     trigger_commands("gravitymult 1; helithrust 2.3; betterheli")
                 else
-                    trigger_commands("gravitymult 2; fovfpinveh -5; fovtpinveh -5")
+                    trigger_commands("gravitymult 1; fovfpinveh -5; fovtpinveh -5")
                 end
                 menu.set_value(modified_vehicle, vname)
             end
