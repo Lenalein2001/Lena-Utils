@@ -93,7 +93,7 @@ function start_fm_script(script)
     end
 
     SCRIPT.REQUEST_SCRIPT(script)
-    repeat util.yield_once() until SCRIPT.HAS_SCRIPT_LOADED(script)
+    repeat wait_once() until SCRIPT.HAS_SCRIPT_LOADED(script)
     SYSTEM.START_NEW_SCRIPT(script, 5000)
     SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(script)
 end
@@ -109,7 +109,7 @@ function closestveh(myPos)
             closestVeh = veh
         end
     end
-    if closestVeh ~= nil then
+    if closestVeh ~= (nil or 0) then
         return entities.pointer_to_handle(closestVeh)
     end
 end
@@ -215,6 +215,22 @@ function IS_PLAYER_USING_ORBITAL_CANNON(player)
     return BitTest(memory.read_int(memory.script_global((2657704 + (player * 463 + 1) + 424))), 0) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_424
 end
 
+function IS_PLAYER_ACTIVE(pid)
+	if pid == (-1 or nil) or not NETWORK.NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
+	if not PLAYER.IS_PLAYER_PLAYING(pid) then return false end
+	return true
+end
+
+handle_ptr = memory.alloc(13*8)
+local function pid_to_handle(pid)
+    NETWORK.NETWORK_HANDLE_FROM_PLAYER(pid, handle_ptr, 13)
+    return handle_ptr
+end
+
+function IS_PLAYER_FRIEND(pid)
+    if NETWORK.NETWORK_IS_FRIEND(pid_to_handle(pid)) then return true else return false end
+end
+
 function GET_SPAWN_STATE(pid)
     return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 232)) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_232
 end
@@ -232,6 +248,41 @@ function IsDetectionPresent(pid, detection)
         end
     end
     return false
+end
+
+function getDetections(pid)
+    if players.exists(pid) then
+        local detections = {}
+
+        for menu.player_root(pid):getChildren() as cmd do
+            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING then
+                if menu.get_menu_name(cmd) == "Classification: None" then
+                    return false
+                end
+                for cmd:getChildren() as c do
+                    local lang_string = lang.get_string(menu.get_menu_name(c))
+                    if lang_string and lang_string ~= "" and lang_string ~= "0" then
+                        table.insert(detections, lang_string)
+                    end
+                end
+            end
+        end
+        if #detections > 0 then
+            return detections  -- Return the table of detected values
+        else
+            return false
+        end
+    end
+end
+
+function getClassification(pid)
+    if players.exists(pid) then
+        for menu.player_root(pid):getChildren() as cmd do
+            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING then
+                return menu.get_menu_name(cmd)
+            end
+        end
+    end
 end
 
 function mod_uses(type, incr)
@@ -288,6 +339,17 @@ function SET_INT_LOCAL(Script, Local, Value)
 end
 function STAT_SET_INT(Stat, Value)
     STATS.STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
+end
+function STAT_SET_DATE(stat, year, month, day, hour, min)
+    local DatePTR = memory.alloc(8*7)
+    memory.write_int(DatePTR, year)
+    memory.write_int(DatePTR+8, month)
+    memory.write_int(DatePTR+16, day)
+    memory.write_int(DatePTR+24, hour)
+    memory.write_int(DatePTR+32, min)
+    memory.write_int(DatePTR+40, 0)
+    memory.write_int(DatePTR+48, 0)
+    STATS.STAT_SET_DATE(util.joaat(ADD_MP_INDEX(stat)), DatePTR, 7, true)
 end
 -- Stats End
 
@@ -364,7 +426,7 @@ function decimalToHex2s(decimal, numBits = 32)
 end
 
 function is_developer()
-    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D}
+    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92}
     local user = players.get_rockstar_id(players.user())
     for developer as id do
         if user == id then
@@ -433,10 +495,10 @@ function player_ip(pid)
     math.floor(connectIP / 2^16) % 256,
     math.floor(connectIP / 2^8) % 256,
     connectIP % 256)
-    if ipStringplayer == ("255.255.255.255" or "0.0.0.0") then
+    if ipStringplayer == "255.255.255.255" or pStringplayer == "0.0.0.0" then
         return "Connected via Relay", false
     else
-        return ipStringplayer, true
+        return tostring(ipStringplayer), true
     end
 end
 
@@ -564,6 +626,7 @@ function save_player_info(pid)
     local is_using_controller = players.is_using_controller(pid)
     local clan_motto = players.clan_get_motto(pid)
     local crew_info = get_player_crew(pid)
+    local detections = getDetections(pid)
     local filename = name .. ".txt"
     local filepath = lenaDir .. "Players/" .. filename
 
@@ -775,11 +838,11 @@ function check_and_write_money_change()
     end
 end
 
-local auto_perf_ind = {11,12,13,16,18,22}
 function tune_vehicle(v, p, tell = false)
+    local auto_perf_ind = {11,12,13,16,18,22}
     if p then
         for auto_perf_ind as index do 
-            local veh_mods = VEHICLE.GET_VEHICLE_WINDOW_TINT(v) != 1 or VEHICLE.GET_VEHICLE_TYRES_CAN_BURST(v)
+            local veh_mods = VEHICLE.GET_VEHICLE_TYRES_CAN_BURST(v)
             local upgrade = entities.get_upgrade_value(v, index) != entities.get_upgrade_max_value(v, index)               
             if veh_mods or upgrade then
                 entities.set_upgrade_value(v, index, entities.get_upgrade_max_value(v, index))
@@ -811,9 +874,9 @@ function formatTime(seconds)
     return string.format("%d hour%s, %d minute%s, %d second%s", hours, hours == 1 and "" or "s", minutes, minutes == 1 and "" or "s", remainingSeconds, remainingSeconds == 1 and "" or "s")
 end
 
-function update_value(commandref, text)
+function update_value(commandref, text, p = false)
     if text then
-        menu.set_value(commandref, text)
+        if p then menu.set_value(commandref, players.get_name(text)) else menu.set_value(commandref, tostring(text)) end
     else
         menu.set_value(commandref, "N/A")
     end
@@ -821,7 +884,7 @@ end
 
 function update_help_text(commandref, text)
     if text then
-        menu.set_help_text(commandref, text)
+        menu.set_help_text(commandref, tostring(text))
     else
         menu.set_help_text(commandref, "N/A")
     end
@@ -829,7 +892,6 @@ end
 
 function save_player_outfit(pid, name)
     local f = filesystem.stand_dir().."Outfits/"..name
-    print(f)
     if io.isdir(f) then 
         return notify("File already exists!")
     else
@@ -842,7 +904,7 @@ function save_player_outfit(pid, name)
             trigger_commands($"saveoutfit {name}")
             wait(50)
             PED.CLONE_PED_TO_TARGET(c, players.user_ped())
-            wait(100)
+            wait(50)
             entities.delete(c)
         end
     end 
