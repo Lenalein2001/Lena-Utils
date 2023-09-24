@@ -204,3 +204,11 @@ animation_table = {
     {anim_misc, "Sniper", "missfbi3_sniping", "prone_michael"},
     {anim_misc, "Execute", "guard_reactions", "1hand_aiming_cycle"},
 }
+
+PlaytimeStats = {
+    {"Total Playtime", "TOTAL_PLAYING_TIME"},
+    {"GTA Online Playtime", "MP_PLAYING_TIME"},
+    {"Deathmatches", "MPPLY_TOTAL_TIME_SPENT_DEATHMAT"},
+    {"Races", "MPPLY_TOTAL_TIME_SPENT_RACES"},
+    {"Creator", "MPPLY_TOTAL_TIME_MISSION_CREATO"}
+}
