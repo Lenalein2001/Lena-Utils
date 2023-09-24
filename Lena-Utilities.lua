@@ -2881,7 +2881,7 @@ end
 ------------------------------- PLAYER FEATURES --------------------------------
 --------------------------------------------------------------------------------
 
-local function player(pid)
+players.add_command_hook(function(pid, cmd)
     local pname = players.get_name(pid)
     local rids = players.get_rockstar_id(pid)
     local hex = decimalToHex2s(rids, 32)
@@ -2911,7 +2911,7 @@ local function player(pid)
     }
 
     for idiots as id do
-        if rids == id and players.are_stats_ready(pid) and not util.is_session_transition_active() then
+        if rids == id and players.are_stats_ready(pid) and in_session() then
             if NETWORK.NETWORK_IS_HOST() then
                 trigger_commands($"historyblock{pname} on")
                 wait(100)
@@ -2923,8 +2923,8 @@ local function player(pid)
         end
     end
 
-    menu.divider(menu.player_root(pid), "Lena Utilities")
-    local lena = menu.list(menu.player_root(pid), "Lena Utilities", {"lenau"}, "")
+    menu.divider(cmd, "Lena Utilities")
+    local lena = menu.list(cmd, "Lena Utilities", {"lenau"}, "")
 
     local friendly = menu.list(lena, "Friendly", {""}, "")
 
@@ -2969,6 +2969,10 @@ local function player(pid)
             local kills, deaths, kdratio = players.get_kills(pid), players.get_deaths(pid), string.format("%.2f", players.get_kd(pid))
             local language = language_string(players.get_language(pid))
             notify($"Name: {pname}\nLanguage: {language}\nRank: {rank}\nMoney: {money}M$\nKills/Deaths: {kills}/{deaths}\nRatio: {kdratio}")
+        end)
+
+        menu.action(friendly, "Get Detections", {""}, "[Debug]", function()
+            getDetections(pid)
         end)
 
         -------------------------------------
@@ -3584,43 +3588,37 @@ local function player(pid)
         -------------------------------------
 
         menu.action(kicks, "Block Kick", {"emp", "block"}, $"Will kick and block {pname} from joining you ever again.", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-            else
-                if menu.get_value(savekicked) then
-                    trigger_commands($"savep {pname}")
-                end
-                wait(500)
-                trigger_commands($"historyblock{pname} on")
-                if not is_developer() then
-                    log($"[Lena | Block Kick] {pname} ({rids}) has been Kicked and Blocked.")
-                else
-                    log($"[Lena | Block Kick] {pname} ({rids} / {hex}) has been Kicked and Blocked.")
-                end
-                trigger_commands($"kick{pname}")
+            if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
+
+            if menu.get_value(savekicked) then
+                trigger_commands($"savep {pname}")
             end
+            wait(500)
+            trigger_commands($"historyblock{pname} on")
+            if not is_developer() then
+                log($"[Lena | Block Kick] {pname} ({rids}) has been Kicked and Blocked.")
+            else
+                log($"[Lena | Block Kick] {pname} ({rids} / {hex}) has been Kicked and Blocked.")
+            end
+            trigger_commands($"kick{pname}")
         end, nil, nil, COMMANDPERM_RUDE)
 
         menu.action(kicks, "Rape", {"rape"}, "A Unblockable kick that won't tell the target or non-hosts who did it.", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
+            if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
+
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+            wait(500)
+            trigger_commands($"loveletter{pname}")
+            if not is_developer() then
+                log($"[Lena | Rape] {pname} ({rids}) has been Kicked.")
             else
-                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                wait(500)
-                trigger_commands($"loveletter{pname}")
-                if not is_developer() then
-                    log($"[Lena | Rape] {pname} ({rids}) has been Kicked.")
-                else
-                    log($"[Lena | Rape] {pname} ({rids} / {hex}) has been Kicked.")
-                end
+                log($"[Lena | Rape] {pname} ({rids} / {hex}) has been Kicked.")
             end
         end, nil, nil, COMMANDPERM_RUDE)
 
         menu.action(kicks, "Host Kick", {"hostkick", "hokick"}, "Only works as Host.", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-                return
-            end
+            if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
+
             if NETWORK.NETWORK_IS_HOST() then
                 NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
             end
@@ -3631,26 +3629,24 @@ local function player(pid)
         -------------------------------------
 
         menu.action(crashes, "Block Join Crash", {"gtfo", "netcrash"}, $"Crashes and Blocks {pname} from joining you again.", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
+            if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
+
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+            trigger_commands($"ngcrash{pname}")
+            wait(500)
+            trigger_commands($"crash{pname}")
+            wait(500)
+            if not is_developer() then
+                log($"[Lena | Block Join Crash] {pname} ({rids}) has been Crashed and Blocked.")
             else
-                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                trigger_commands($"ngcrash{pname}")
-                wait(500)
-                trigger_commands($"crash{pname}")
-                wait(500)
-                if not is_developer() then
-                    log($"[Lena | Block Join Crash] {pname} ({rids}) has been Crashed and Blocked.")
-                else
-                    log($"[Lena | Block Join Crash] {pname} ({rids} / {hex}) has been Crashed and Blocked.")
-                end
-                trigger_commands($"historyblock{pname} on")
-                wait(10000)
-                if players.get_name(pid) == names then
-                    log($"[Lena | Crash Backup] {pname} ({rids}) has not crashed, kicking the player instead.")
-                    wait(50)
-                    trigger_commands($"kick{pname}")
-                end
+                log($"[Lena | Block Join Crash] {pname} ({rids} / {hex}) has been Crashed and Blocked.")
+            end
+            trigger_commands($"historyblock{pname} on")
+            wait(10000)
+            if players.get_name(pid) == names then
+                log($"[Lena | Crash Backup] {pname} ({rids}) has not crashed, kicking the player instead.")
+                wait(50)
+                trigger_commands($"kick{pname}")
             end
         end, nil, nil, COMMANDPERM_AGGRESSIVE)
 
@@ -3738,7 +3734,7 @@ local function player(pid)
             end
         end)
 
-        menu.action(crashes, "Invaild Model V3", {"crashv10"}, "", function()
+        menu.action(crashes, "Draki Crash", {""}, "", function()
             local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local hash = util.joaat("cs_taostranslator2")
             while not STREAMING.HAS_MODEL_LOADED(hash) do
@@ -3764,15 +3760,10 @@ local function player(pid)
             end
         end)
 --  end
-end
+end)
 
-local Jointimes = {}
-local names = {}
-local rids = {}
-local hostq = {}
-local allplayers = {}
-local ips = {}
-players.on_join(function(pid)
+Jointimes, names, rids, hostq, allplayers, ips = {}, {}, {}, {}, {}, {}
+players.add_command_hook(function(pid, c)
     names[pid] = players.get_name(pid)
     rids[pid] = players.get_rockstar_id(pid)
     hostq[pid] = players.get_host_queue_position(pid)
@@ -3795,19 +3786,21 @@ players.on_join(function(pid)
 end)
 
 players.on_leave(function(pid)
+    local name = names[pid] or "Unknown Player"
+
     if showleaveInfomsg then
-        notify(names[pid].." left.")
+        notify(name.." left.")
     end
     if showleaveInfolog then
-        log("[Lena | Leave Reactions] "..names[pid].." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.")
+        log("[Lena | Leave Reactions] "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.")
     end
     if showleaveInfoteam then
-        chat.send_message("> "..names[pid].." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", true, true, true)
+        chat.send_message("> "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", true, true, true)
     end
     if showleaveInfoall then
-        chat.send_message("> "..names[pid].." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", false, true, true)
+        chat.send_message("> "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", false, true, true)
     end
-    wait(10)
+    wait(100)
     Jointimes[pid] = nil
     names[pid] = nil
     rids[pid] = nil
@@ -3829,16 +3822,17 @@ util.create_tick_handler(function()
     local carCheck = entities.get_user_vehicle_as_handle(true)
     local focused = players.get_focused()[1]
 
-    if player_cur_car != carCheck then
-        player_cur_car = carCheck
+    if user_vehicle != carCheck then
+        user_vehicle = carCheck
     end
 
     if is_developer() then
         update_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
     end
 
-    update_value(host_name, players.get_name(players.get_host()))
-    update_value(script_host_name, players.get_name(players.get_script_host()))
+    update_value(host_name, players.get_host(), true)
+    update_value(next_host_name, players.get_host_queue()[2], true)
+    update_value(script_host_name, players.get_script_host(), true)
     update_value(players_amount, #players.list())
     update_value(modder_amount, tostring(get_modder_int()))
 

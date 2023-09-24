@@ -202,11 +202,6 @@ function trapcage(pid, object, visible = true)
     STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
 end
 
-function pid_to_handle(pid)
-    NETWORK.NETWORK_HANDLE_FROM_PLAYER(pid, handle_ptr, 13)
-    return handle_ptr
-end
-
 function BitTest(bits, place)
     return (bits & (1 << place)) ~= 0
 end
@@ -846,7 +841,6 @@ function tune_vehicle(v, p, tell = false)
             local upgrade = entities.get_upgrade_value(v, index) != entities.get_upgrade_max_value(v, index)               
             if veh_mods or upgrade then
                 entities.set_upgrade_value(v, index, entities.get_upgrade_max_value(v, index))
-                VEHICLE.SET_VEHICLE_WINDOW_TINT(v, 1)
                 VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(v, false)
                 if tell then notify("Upgraded your Car. :D") end
             end
