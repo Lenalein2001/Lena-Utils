@@ -665,14 +665,14 @@ end)
         -------------------------------------
 
         menu.toggle(doorcontrol, "Lock doors", {"lock"}, "Locks your current Vehicle so randoms can't enter it.", function(toggled)
-            VEHICLE.SET_VEHICLE_RESPECTS_LOCKS_WHEN_HAS_DRIVER(player_cur_car, toggled)
-            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, toggled)
+            VEHICLE.SET_VEHICLE_RESPECTS_LOCKS_WHEN_HAS_DRIVER(user_vehicle, toggled)
+            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(user_vehicle, toggled)
         end)
 
         menu.toggle(doorcontrol, "Lock Doors for Randoms", {"lockrandoms"}, "Locks your current Vehicle so only friends can enter it.", function(toggled)
             for players.list(false, false, true) as pid do
-                VEHICLE.SET_VEHICLE_RESPECTS_LOCKS_WHEN_HAS_DRIVER(player_cur_car, toggled)
-                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(player_cur_car, pid, toggled)
+                VEHICLE.SET_VEHICLE_RESPECTS_LOCKS_WHEN_HAS_DRIVER(user_vehicle, toggled)
+                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(user_vehicle, pid, toggled)
             end
         end)
 
@@ -681,14 +681,14 @@ end)
         -------------------------------------
 
         menu.toggle(doorcontrol, "Unbreakable Doors", {""}, "", function(toggled)
-            local vehicleDoorCount = VEHICLE.GET_NUMBER_OF_VEHICLE_DOORS(player_cur_car)
+            local vehicleDoorCount = VEHICLE.GET_NUMBER_OF_VEHICLE_DOORS(user_vehicle)
             if toggled then
                 for i = -1, vehicleDoorCount do
-                    VEHICLE.SET_DOOR_ALLOWED_TO_BE_BROKEN_OFF(player_cur_car, i, false)
+                    VEHICLE.SET_DOOR_ALLOWED_TO_BE_BROKEN_OFF(user_vehicle, i, false)
                 end
             else
                 for i = -1, vehicleDoorCount do
-                    VEHICLE.SET_DOOR_ALLOWED_TO_BE_BROKEN_OFF(player_cur_car, i, true)
+                    VEHICLE.SET_DOOR_ALLOWED_TO_BE_BROKEN_OFF(user_vehicle, i, true)
                 end
             end
         end)
@@ -699,10 +699,10 @@ end)
 
         menu.toggle_loop(doorcontrol, "Taze Players trying to Enter", {""}, "", function()
             if not in_session() then return end
-            if player_cur_car != -1 then
-                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, true)
+            if user_vehicle != -1 then
+                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(user_vehicle, true)
             else
-                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(player_cur_car, false)
+                VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(user_vehicle, false)
             end
             local ped_point = entities.get_all_peds_as_pointers()
             local ped_point_tab = {}
@@ -719,13 +719,13 @@ end)
                     GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('ent_sht_electrical_box', bone1.x, bone1.y, bone1.z, 90, 0, 0, 1, true, true, true)
                     FIRE.ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
                 elseif PED.IS_PED_BEING_JACKED(players.user_ped()) then
-                    VEHICLE.SET_VEHICLE_DOOR_SHUT(player_cur_car, 0, true)
+                    VEHICLE.SET_VEHICLE_DOOR_SHUT(user_vehicle, 0, true)
                     local jacker = PED.GET_PEDS_JACKER(players.user_ped())
                     PED.CLEAR_PED_TASKS_IMMEDIATELY(jacker)
                     local bone1 = PED.GET_PED_BONE_COORDS(jacker, 36029, 0.0, 0.0, 0.0) 
                     FIRE.ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
                     GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('ent_sht_electrical_box', bone1.x, bone1.y, bone1.z, 90, 0, 0, 1, true, true, true)
-                    PED.SET_PED_INTO_VEHICLE(players.user_ped(), player_cur_car, -1)
+                    PED.SET_PED_INTO_VEHICLE(players.user_ped(), user_vehicle, -1)
                 end
             end
         end)
@@ -739,13 +739,13 @@ end)
         -------------------------------------
 
         menu.toggle(engine_control, "Stop Engine", {""}, "Disables and enables the engine on toggle.", function(toggled)
-            VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, not toggled, toggled, toggled)
+            VEHICLE.SET_VEHICLE_ENGINE_ON(user_vehicle, not toggled, toggled, toggled)
         end)
         menu.action(engine_control, "Toggle Engine On", {"Engineoon", "Eon"}, "Starts the Engine of the current Vehicle.", function()
-            VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, true, false, false)
+            VEHICLE.SET_VEHICLE_ENGINE_ON(user_vehicle, true, false, false)
         end)
         menu.action(engine_control, "Toggle Engine Off", {"Engineoff", "Eoff"}, "Stops The Engine of the current Vehicle.", function()
-            VEHICLE.SET_VEHICLE_ENGINE_ON(player_cur_car, false, true, true)
+            VEHICLE.SET_VEHICLE_ENGINE_ON(user_vehicle, false, true, true)
         end)
 
         -------------------------------------
@@ -753,8 +753,8 @@ end)
         -------------------------------------
 
         menu.toggle_loop(engine_control, "Disable Engine Fires", {""}, "", function()
-            if player_cur_car != previous_car then
-                VEHICLE.SET_DISABLE_VEHICLE_ENGINE_FIRES(player_cur_car, true)
+            if user_vehicle != previous_car then
+                VEHICLE.SET_DISABLE_VEHICLE_ENGINE_FIRES(user_vehicle, true)
                 previous_car = player_car
             end
         end)
@@ -826,7 +826,7 @@ end)
     -------------------------------------
 
     menu.action(vehicle, "Clean Vehicle", {"clv"}, "Cleans the current Vehicle.", function()
-        VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0.0)
+        VEHICLE.SET_VEHICLE_DIRT_LEVEL(user_vehicle, 0.0)
     end)
 
     -------------------------------------
@@ -850,7 +850,7 @@ end)
     -------------------------------------   
 
     menu.toggle(vehicle, "Unbreakable Lights", {""}, "Makes the Lights unbreakable on your current Vehicle.", function(toggled)
-        VEHICLE.SET_VEHICLE_HAS_UNBREAKABLE_LIGHTS(player_cur_car, toggled)
+        VEHICLE.SET_VEHICLE_HAS_UNBREAKABLE_LIGHTS(user_vehicle, toggled)
     end)
 
     -------------------------------------
@@ -859,9 +859,9 @@ end)
 
     menu.toggle_loop(vehicle, "Drift Mode", {"driftmode"}, "Hold shift to drift.", function()
         if PAD.IS_CONTROL_PRESSED(0, 21) then
-            VEHICLE.SET_VEHICLE_REDUCE_GRIP(player_cur_car, true)
+            VEHICLE.SET_VEHICLE_REDUCE_GRIP(user_vehicle, true)
         else
-            VEHICLE.SET_VEHICLE_REDUCE_GRIP(player_cur_car, false)
+            VEHICLE.SET_VEHICLE_REDUCE_GRIP(user_vehicle, false)
         end
     end)
     
@@ -909,10 +909,10 @@ end)
 
     menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
         if not in_session() then return end
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() then
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
             local veh = players.get_vehicle_model(players.user())
             if VEHICLE.IS_THIS_MODEL_A_CAR(veh) or VEHICLE.IS_THIS_MODEL_A_BIKE(veh) then
-                tune_vehicle(player_cur_car, true, true)
+                tune_vehicle(user_vehicle, true, true)
             end
         end
     end)
@@ -935,9 +935,9 @@ end)
 
     menu.toggle_loop(vehicle, "Keep Vehicle Clean", {""}, "", function()
         if not in_session() then return end
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(player_cur_car, -1, true) == players.user_ped() then
-            if VEHICLE.GET_VEHICLE_DIRT_LEVEL(player_cur_car) >= 1.0 and entities.get_owner(player_cur_car) == players.user() then
-                VEHICLE.SET_VEHICLE_DIRT_LEVEL(player_cur_car, 0.0)
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
+            if VEHICLE.GET_VEHICLE_DIRT_LEVEL(user_vehicle) >= 1.0 and entities.get_owner(user_vehicle) == players.user() then
+                VEHICLE.SET_VEHICLE_DIRT_LEVEL(user_vehicle, 0.0)
             end
         end
     end)
@@ -1082,7 +1082,8 @@ end)
         -------------------------------------
 
         menu.divider(hosttools, "Session Info")
-        local host_name = menu.readonly(hosttools, "Host", "N/A")
+        local host_name = menu.readonly(hosttools, "Session Host", "N/A")
+        local next_host_name = menu.readonly(hosttools, "Next Session Host", "N/A")
         local script_host_name = menu.readonly(hosttools, "Script Host", "N/A")
         local players_amount = menu.readonly(hosttools, "Players", "N/A")
         local modder_amount = menu.readonly(hosttools, "Modders", "N/A")
@@ -1643,12 +1644,12 @@ end)
 
     -------------------------------------
     -- Spoofing Options
-    -------------------------------------   
+    -------------------------------------
 
         -------------------------------------
         -- Spoof Assets
         -------------------------------------
-        
+
         menu.toggle(spoofing_opt, "Spoof Assets", {"spoofassets", "spoofass"}, "Spoof Session Assets.", function(toggled)
             trigger_commands($"extratoggle {toggled}")
         end)
@@ -1739,6 +1740,10 @@ end)
     -------------------------------------
 
     savekicked = menu.toggle(online, "Save Players Information on Kick", {""}, "", function(); end)
+
+    -------------------------------------
+    -- Preview Players
+    -------------------------------------
 
     draw_players = menu.toggle(online, "Preview Players", {""}, "Draw their Ped onto the Screen if focused.", function(); end)
 
@@ -1876,7 +1881,7 @@ end)
                 wait(8000)
             end
             if players.get_boss(players.user()) == -1 then
-                return 
+                return
             end
             IA_MENU_OPEN_OR_CLOSE()
             IA_MENU_ENTER(1)
@@ -1913,32 +1918,6 @@ end)
         end)
 
         -------------------------------------
-        -- Take over LSIA
-        -------------------------------------
-
-        menu.action(missions_tunables, "Take over LSIA", {"lsia"}, "Starts the CEO Mission \"Hostile Takeover\".", function()
-            if players.get_boss(players.user()) == -1 then
-                trigger_commands("ceostart")
-                notify("Starting CEO. Please wait for a few seconds.")
-                wait(5000)
-            end
-            wait(500)
-            IA_MENU_OPEN_OR_CLOSE()
-            IA_MENU_ENTER(1)
-            IA_MENU_DOWN(2)
-            IA_MENU_ENTER(1)
-            IA_MENU_UP(6)
-            wait(100)
-            IA_MENU_ENTER()
-            wait(100)
-            IA_MENU_LEFT(2)
-            wait(100)
-            IA_MENU_DOWN(1)
-            wait(100)
-            IA_MENU_ENTER()
-        end, nil, nil, COMMANDPERM_FRIENDLY)
-        
-        -------------------------------------
         -- Teleport Pickups To Me
         -------------------------------------
 
@@ -1953,7 +1932,31 @@ end)
             if counter == 0 then
                 notify("No Pickups Found. :/")
             else
-                notify("Teleported "..tostring(counter).." Pickups to you.")
+                notify($"Teleported {counter} Pickups to you.")
+            end
+        end)
+
+        -------------------------------------
+        -- TP Buisiness Battle Pickups to me
+        -------------------------------------
+
+        menu.action(missions_tunables, "TP Buisiness Battle Pickups to me", {""}, "", function()
+            local counter = 0
+            local pos = players.get_position(players.user())
+            local objects = {"ba_prop_battle_bag_01a", "ba_prop_battle_drug_package_02", "ba_prop_battle_bag_01b", "ba_prop_battle_case_sm_03"}
+            for entities.get_all_pickups_as_handles() as p do
+                for objects as obj do
+                    if ENTITY.GET_ENTITY_MODEL(p) == joaat(obj) and request_control(p, true) and ENTITY.DOES_ENTITY_EXIST(p) then
+                        ENTITY.SET_ENTITY_COORDS(p, pos.x, pos.y, pos.z + 0.5, false)
+                        counter =+ 1
+                        wait()
+                    end
+                    if counter != 0 then
+                        notify($"Teleported {counter} Entities to you.")
+                    else
+                        notify("No pickups found.")
+                    end
+                end
             end
         end)
 
@@ -2044,7 +2047,7 @@ end)
 
     local start_a_bb = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Freemode Activities>Business Battle 1")
     menu.action(tunables, "Start a Business Battle", {"bb"}, "Starts a 2 Crate Business Battle.", function()
-        if menu.get_edition() >= 3 then 
+        if menu.get_edition() >= 3 then
             trigger_command(start_a_bb)
         else
             notify("You need Ultimate to Start a Business Battle. Request denied.")
@@ -2117,6 +2120,19 @@ end)
         end
     end)
 
+
+
+    menu.action(tunables, "TP Inside Vehicle Cargo", {"vc"}, "Source Only. Relies on the Vehicle's blip.", function()
+        if util.is_session_started() and players.get_boss(players.user()) == players.user() then
+            for entities.get_all_vehicles_as_handles() as veh do
+                local bitset, owner = DECORATOR.DECOR_GET_INT(veh, "MPBitset"), DECORATOR.DECOR_GET_INT(veh, "ContrabandDeliveryType")
+                if bitset == 11264 and owner == -81613951 then
+                    PED.SET_PED_INTO_VEHICLE(players.user_ped(), veh, -1)
+                end
+            end
+        end
+    end)
+
 -------------------------------------
 -------------------------------------
 -- Misc
@@ -2126,7 +2142,7 @@ end)
     -------------------------------------
     -- Teleports
     -------------------------------------  
-    
+
         -------------------------------------
         -- Interiors TP's
         -------------------------------------
@@ -2157,29 +2173,35 @@ end)
             local clean_amount = 0
             switch index do
                 case 1:
-                    for entities.get_all_vehicles_as_pointers() as vehicle do
-                        if vehicle != entities.get_user_vehicle_as_pointer(true) and entities.get_owner(vehicle) == players.user() then
-                            entities.delete(vehicle)
-                            clean_amount += 1
-                            wait(50)
+                    for entities.get_all_vehicles_as_pointers() as ent do
+                        if ent != entities.get_user_vehicle_as_pointer(true) and entities.get_owner(ent) == players.user() then
+                            if ent != (nil or -1) then 
+                                entities.delete(ent)
+                                clean_amount += 1
+                                wait(50)
+                            end
                         end
                     end
                     break
                 case 2:
-                    for entities.get_all_peds_as_pointers() as ped do
-                        if not (NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ENTITY.IS_ENTITY_A_MISSION_ENTITY(ped)) and entities.get_owner(ped) == players.user() then
-                            entities.delete(ped)
-                            clean_amount += 1
-                            wait(50)
+                    for entities.get_all_peds_as_pointers() as ent do
+                        if not (NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ENTITY.IS_ENTITY_A_MISSION_ENTITY(ent)) and entities.get_owner(ent) == players.user() then
+                            if ent != (nil or -1) then 
+                                entities.delete(ent)
+                                clean_amount += 1
+                                wait(50)
+                            end
                         end
                     end
                 break
                 case 3:
-                    for entities.get_all_objects_as_handles() as object do
-                        if entities.get_owner(object) == players.user() then
-                            entities.delete(object)
-                            clean_amount += 1
-                            wait(50)
+                    for entities.get_all_objects_as_handles() as ent do
+                        if entities.get_owner(ent) == players.user() then
+                            if ent != (nil or -1) then 
+                                entities.delete(ent)
+                                clean_amount += 1
+                                wait(50)
+                            end
                         end
                     end
                 break
@@ -2205,7 +2227,7 @@ end)
             count = 0
             wait(100)
             for entities.get_all_vehicles_as_handles() as vehicle do
-                if vehicle != player_cur_car and entities.get_owner(vehicle) == players.user() and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 then
+                if vehicle != user_vehicle and entities.get_owner(vehicle) == players.user() and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 then
                     entities.delete(vehicle)
                     count += 1
                     wait(10)
@@ -2224,7 +2246,7 @@ end)
             notify($"Deleted {count} Objects!")
             count = 0
             wait(100)
-            for entities.get_all_pickups_as_handles() as pickup do
+            for entities.get_all_pickups_as_pointers() as pickup do
                 if entities.get_owner(pickup) == players.user() then
                     entities.delete(pickup)
                     count += 1
@@ -2279,17 +2301,17 @@ end)
 
         -------------------------------------
         -- Start a CEO
-        ------------------------------------- 
+        -------------------------------------
 
         if is_developer() then
             menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO.", function()
                 if players.get_boss(players.user()) == -1 then
                     trigger_commands("ceostart")
                     wait(3000)
-                    trigger_commands("ceoname ¦ Monarch")
+                    trigger_commands("ceoname ¦ Rockstar")
                 elseif players.get_boss(players.user()) == players.user() then
                     notify("You are already your own Boss.")
-                    trigger_commands("ceoname ¦ Monarch")
+                    trigger_commands("ceoname ¦ Rockstar")
                 else
                     notify("You are already working for someone else!")
                 end
@@ -2300,7 +2322,7 @@ end)
                 end
             end)
         else
-            menu.action(shortcuts, "Start CEO", {"ceo"}, "Starts a CEO.", function()
+            menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO.", function()
                 if players.get_boss(players.user()) == -1 then
                     trigger_commands("ceostart")
                     notify("Starting CEO... Please wait for a few secs.")
@@ -2314,7 +2336,7 @@ end)
 
         -------------------------------------
         -- Buy Ammo
-        -------------------------------------    
+        -------------------------------------
 
         menu.action(shortcuts, "Buy Ammo", {"buyammo"}, "Buys ammo the legit way.", function()
             wait(500)
@@ -2423,7 +2445,7 @@ end)
 
     -------------------------------------
     -- Skip Warning Messages
-    -------------------------------------    
+    -------------------------------------
 
     menu.toggle_loop(misc, "Skip Warning Messages", {""}, "Skips annoying Warning Messages.", function()
         local message_hash = HUD.GET_WARNING_SCREEN_MESSAGE_HASH()
@@ -2531,7 +2553,7 @@ end)
 
     -------------------------------------
     -- Countdown
-    -------------------------------------  
+    -------------------------------------
 
     menu.action(ai_made, "Race Countdown", {"countdown"}, "Start the countdown.", function()
         chat.send_message("Race Starting in: ", false, true, true)
@@ -2575,7 +2597,7 @@ end)
             notify("Cutscene skipped!")
         end
     end)
-    
+
     -------------------------------------
     -- Auto Skip Conversations
     -------------------------------------
@@ -2589,7 +2611,7 @@ end)
             notify("Conversation skipped!")
         end
     end)
-    
+
 -------------------------------------
 -------------------------------------
 -- [Debug]
@@ -2599,7 +2621,7 @@ end)
 if is_developer() then
     local sdebug = menu.list(menu.my_root(), "[Debug]", {"lenadebug"}, "")
     local nativec = menu.list(sdebug, "Native Feedback", {""}, "")
-    
+
     -------------------------------------
     -- Easier Better Vehicles
     -------------------------------------
@@ -2701,7 +2723,7 @@ if is_developer() then
             trigger_commands($"kick{players.get_name(players.get_host())}")
         end
     end)
-    
+
     initial_money = get_current_money()
     menu.toggle_loop(sdebug, "Transaction Log", {}, "", function(toggled)
         if not util.is_session_started() and util.is_session_transition_active() or util.is_interaction_menu_open() then return end
@@ -2791,9 +2813,46 @@ if is_developer() then
             notify($"Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
             log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Blip: {blip} | Plate:{plate_text}.")
         end)
+        menu.action(nativevehicle, "Get Decorator", {""}, "Get set decorators from Vehicle.", function()
+            local ints = {
+                "FMDeliverableID", 
+                "Not_Allow_As_Saved_Veh",
+                "MPBitset",
+                "Player_Vehicle",
+                "Player_Hacker_Truck",
+                "CreatedByPegasus",
+                "PYV_Owner",
+                "MC_EntityID",
+                "MatchId",
+                "MissionType",
+                "RespawnVeh",
+                "Player_Owned_Veh",
+                "GBMissionFire",
+                "Veh_Modded_By_Player",
+                "bombdec",
+                "bombowner",
+                "Previous_Owner",
+                "ExportVehicle",
+                "ContrabandOwner",
+                "ContrabandDeliveryType",
+                "VehicleList"
+            }
+            local bools = {
+                "UsingForTimeTrial"
+            }
+            local v = entities.get_user_vehicle_as_handle()
+            for ints as i do
+                print($"int {i} = {DECORATOR.DECOR_GET_INT(v, i)}")
+                wait(50)
+            end
+            for bools as i do
+                print($"bool {i} = {DECORATOR.DECOR_GET_BOOL(v, i)}")
+                wait(50)
+            end
+        end)
         menu.action(nativevehicle, "Set Number Plate", {"randomplate"}, "Sets the Current Number Plate to a random Text.", function()
             local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "WHORE"}
-            VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(player_cur_car, plate_texts[math.random(#plate_texts)])
+            VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(user_vehicle, plate_texts[math.random(#plate_texts)])
         end)
 
         -------------------------------------
@@ -2806,6 +2865,14 @@ if is_developer() then
             ENTITY.SET_ENTITY_COORDS(whore, cords)
             ENTITY.FREEZE_ENTITY_POSITION(whore, true)
             -- TASK.TASK_START_SCENARIO_IN_PLACE(whore, "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", 0, false) -- Shrugs
+        end)
+        menu.toggle_loop(nativeentity, "Get Entity", {""}, "", function()
+            if PLAYER.IS_PLAYER_FREE_AIMING(players.user()) then
+                local e = ENTITY._GET_LAST_ENTITY_HIT_BY_ENTITY(players.user_ped())
+                if e != (0 or nil or "") then
+                    print(e)
+                end
+            end
         end)
 --  end
 end
@@ -2838,7 +2905,7 @@ local function player(pid)
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 
+        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
