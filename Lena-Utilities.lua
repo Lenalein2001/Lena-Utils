@@ -1984,7 +1984,7 @@ end)
         -- Destroy Signal Jammers
         -------------------------------------
 
-        menu.action(missions_tunables, "Destroy Signal Jammers", {""}, "", function()
+        menu.action(missions_tunables, "Destroy Signal Jammers", {""}, "Good for Hangar Missions.", function()
             local counter = 0
             for entities.get_all_objects_as_handles() as obj do
                 local blip = HUD.GET_BLIP_FROM_ENTITY(obj)
@@ -2046,7 +2046,7 @@ end)
     -------------------------------------
 
     local start_a_bb = menu.ref_by_path("Online>Session>Session Scripts>Run Script>Freemode Activities>Business Battle 1")
-    menu.action(tunables, "Start a Business Battle", {"bb"}, "Starts a 2 Crate Business Battle.", function()
+    menu.action(tunables, "Start a Business Battle", {"bb"}, "Starts a 2 Crate Business Battle. Doesn't work when Co-loading.", function()
         if menu.get_edition() >= 3 then
             trigger_command(start_a_bb)
         else
@@ -2055,24 +2055,8 @@ end)
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
     -------------------------------------
-    -- Nightclub Popularity
-    -------------------------------------    
-
-    menu.toggle_loop(tunables, "Nightclub Popularity", {""}, "Keeps the Nightclub Popularity at 90%.", function()
-        if util.is_session_started() then
-            local ncpop = math.floor(STAT_GET_INT("CLUB_POPULARITY") / 10)
-            if ncpop < 90 then
-                notify("NC Popularity Maxed.")
-                log("[Lena | NC Popularity] NC Popularity Maxed.")
-                trigger_commands("clubpopularity 100")
-                wait(250)
-            end
-        end
-    end)
-
-    -------------------------------------
     -- Screen Opener
-    ------------------------------------- 
+    -------------------------------------
 
     for index, data in script_start do
         local script = data[1]
@@ -2084,7 +2068,7 @@ end)
 
     -------------------------------------
     -- Monitor Safes
-    ------------------------------------- 
+    -------------------------------------
 
     for index, data in bm_safe_table do
         local name = data[1]
@@ -2404,6 +2388,13 @@ end)
         if not menu.is_open() then return end
         for numpadControls as control do
             PAD.DISABLE_CONTROL_ACTION(2, control, true)
+        end
+    end)
+
+
+    menu.toggle_loop(misc, "Disable Scripted Music", {""}, "", function() -- Credits too err_net_array for the Audio Name <3
+        if AUDIO_IS_SCRIPTED_MUSIC_PLAYING() then
+            SET_RADIO_TO_STATION_NAME("RADIO_36_AUDIOPLAYER")
         end
     end)
 
@@ -2905,7 +2896,7 @@ players.add_command_hook(function(pid, cmd)
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 
+        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3853,8 +3844,5 @@ util.on_stop(function()
     end
     if modifiedSpeed then modifiedSpeed:reset() end
 end)
-
-players.on_join(player)
-players.dispatch_on_join()
 
 util.keep_running()
