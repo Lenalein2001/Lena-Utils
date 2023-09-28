@@ -206,9 +206,17 @@ animation_table = {
 }
 
 PlaytimeStats = {
-    {"Total Playtime", "TOTAL_PLAYING_TIME"},
+    {"Total Playtime", "TOTAL_PLAYING_TIME", "Total Playing time in milliseconds."},
     {"GTA Online Playtime", "MP_PLAYING_TIME"},
+    {"Longest Playing Time", "LONGEST_PLAYING_TIME", "Longest Playing time since last death."},
+    {"Average time spent on missions", "CHAR_TOTAL_TIME_MISSION", "Average time spent on missions (time on missions/number of missions completed"},
     {"Deathmatches", "MPPLY_TOTAL_TIME_SPENT_DEATHMAT"},
     {"Races", "MPPLY_TOTAL_TIME_SPENT_RACES"},
     {"Creator", "MPPLY_TOTAL_TIME_MISSION_CREATO"}
+}
+
+playtimeDates = {
+    {"Character Created", "CHAR_DATE_CREATED", "The Date the player created this character."},
+    {"Last Rankup", "CHAR_DATE_RANKUP", "The Date the player last ranked up."},
+    {"Started Playing", "MPPLY_STARTED_MP", "Date the player started playing MP"}
 }
