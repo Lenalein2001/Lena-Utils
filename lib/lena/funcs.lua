@@ -609,7 +609,6 @@ function save_player_info(pid)
     local name_with_tags = players.get_name_with_tags(pid)
     local name = players.get_name(pid)
     local rockstar_id = players.get_rockstar_id(pid)
-    local is_modder = players.is_marked_as_modder(pid)
     local rank = players.get_rank(pid)
     local money = "$" .. format_money_value(players.get_money(pid))
     local kd = players.get_kd(pid)
@@ -621,94 +620,99 @@ function save_player_info(pid)
     local is_using_controller = players.is_using_controller(pid)
     local clan_motto = players.clan_get_motto(pid)
     local crew_info = get_player_crew(pid)
+    local macAddress = players.get_host_token_hex(pid):gsub('(..)', '%1:'):sub(1, 11)
     local detections = getDetections(pid)
     local filename = name .. ".txt"
     local filepath = lenaDir .. "Players/" .. filename
 
-    if filesystem.exists(filepath) then
-        notify(string.format("Error: %s's information has already been saved to file.", name))
+    if not filesystem.exists(lenaDir .. "Players") then
+        filesystem.mkdir(lenaDir .. "Players")
+    end
+    local file = io.open(filepath, "w")
+    local hook_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
+    local hook = hook_file:read("a")
+
+    local player_info = {
+        os.date("%a, %d. %B %X"),
+        "\n\nName with Tags: ", name_with_tags,
+        "\nRID/SCID: ", rockstar_id,
+        "\nRank: ", rank,
+        "\nMoney: ", money,
+        "\nK/D: ", kd,
+        "\nLanguage: ", language_int,
+        "\nHost Token: ", host_token,
+        "\nIs Using Controller: ", is_using_controller and "Yes" or "No",
+        "\n",
+        "\n**Net Intel**",
+    }
+
+    if player_ip != "Connected via Relay" then
+        local as, dns = soup.netIntel.getAsByIp(player_ip), soup.IpAddr(player_ip)
+        player_info[#player_info + 1] = "\nIPv4: " .. player_ip
+        player_info[#player_info + 1] = "\nNetIntel addr: " .. tostring(dns) .. ", " .. dns:getReverseDns()
+        player_info[#player_info + 1] = "\nNetIntel Number: " .. as.number
+        player_info[#player_info + 1] = "\nNetIntel Handle: " .. as.handle
+        player_info[#player_info + 1] = "\nNetIntel Name: " .. as.name
+        player_info[#player_info + 1] = "\nIs Hosting: " .. tostring(as:isHosting() and "Yes" or "No")
+
+        local loc = soup.netIntel.getLocationByIp(player_ip)
+        player_info[#player_info + 1] = "\n\nNetIntel City: " .. loc.city
+        player_info[#player_info + 1] = "\nNetIntel State: " .. loc.state
+        player_info[#player_info + 1] = "\nNetIntel County Code: " .. loc.country_code
     else
-        if not filesystem.exists(lenaDir .. "Players") then
-            filesystem.mkdir(lenaDir .. "Players")
+        player_info[#player_info + 1] = "\nConnected to Rockstar's Server. Intel will not be shown."
+    end
+
+    if crew_info then 
+        player_info[#player_info + 1] = "\n\n**Crew Information**"
+        player_info[#player_info + 1] = "\nCrew Icon: " .. crew_info.icon
+        player_info[#player_info + 1] = "\nCrew Name: " .. crew_info.name
+        player_info[#player_info + 1] = "\nCrew Tag: " .. crew_info.tag
+        player_info[#player_info + 1] = "\nCrew Motto: " .. crew_info.motto
+        player_info[#player_info + 1] = "\nAlternate Badge: " .. crew_info.alt_badge
+    else
+        player_info[#player_info + 1] = "\n\nCannot save Crew Info. Most likely isn't in a crew."
+    end
+
+    if detections then
+        player_info[#player_info + 1] = "\n\n**Detections**"
+        for detections as detection do
+            player_info[#player_info + 1] = "\n" .. detection
         end
-        local file = io.open(filepath, "w")
-        local hook_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
-        local hook = hook_file:read("a")
+        player_info[#player_info + 1] = "\n\n" .. getClassification(pid)
+        player_info[#player_info + 1] = "\nIs Attacker: " .. tostring(is_attacker and "Yes" or "No")
+    else
+        player_info[#player_info + 1] = "\n\nNo detections triggered."
+        player_info[#player_info + 1] = "\n\n" .. getClassification(pid)
+    end
 
-        -- Initialize the player_info table
-        local player_info = {
-            os.date("%a, %d. %B %X"),
-            "\n\nName with Tags: ", name_with_tags,
-            "\nRID/SCID: ", rockstar_id,
-            "\nIs Modder: ", is_modder and "Yes" or "No",
-            "\nIs Attacker: ", is_attacker and "Yes" or "No",
-            "\nRank: ", rank,
-            "\nMoney: ", money,
-            "\nK/D: ", kd,
-            "\nLanguage: ", language_int,
-            "\nHost Token: ", host_token,
-            "\nIs Using Controller: ", is_using_controller and "Yes" or "No",
-            "\n",
-            "\n**Net Intel**",
-            "\nIs Using VPN: ", is_using_vpn and "Yes" or "No",
-            "\nIPv4: ", player_ip
-        }
+    file:write(table.concat(player_info))
+    file:close()
+    notify(string.format("%s's information has been saved to file.", name))
 
-        if player_ip then
-            local as, dns = soup.netIntel.getAsByIp(player_ip), soup.IpAddr(player_ip)
-            player_info[#player_info + 1] = "\nNetIntel addr: " .. tostring(dns) .. ", " .. dns:getReverseDns()
-            player_info[#player_info + 1] = "\nNetIntel Number: " .. as.number
-            player_info[#player_info + 1] = "\nNetIntel Handle: " .. as.handle
-            player_info[#player_info + 1] = "\nNetIntel Name: " .. as.name
-            player_info[#player_info + 1] = "\nIs Hosting: " .. tostring(as:isHosting() and "Yes" or "No")
-
-            --local loc = soup.netIntel.getLocationByIp("1.1.1.1")
-            --player_info[#player_info + 1] = "\n\nNetIntel City: " .. loc.city
-            --player_info[#player_info + 1] = "\nNetIntel State: " .. loc.state
-            --player_info[#player_info + 1] = "\nNetIntel County Code: " .. loc.country_code
-        else
-            player_info[#player_info + 1] = "\nConnected to Rockstar's Server. Intel will not be shown."
-        end
-
-        if crew_info then 
-            player_info[#player_info + 1] = "\n\n**Crew Information**"
-            player_info[#player_info + 1] = "\nCrew Icon: " .. crew_info.icon
-            player_info[#player_info + 1] = "\nCrew Name: " .. crew_info.name
-            player_info[#player_info + 1] = "\nCrew Tag: " .. crew_info.tag
-            player_info[#player_info + 1] = "\nCrew Motto: " .. crew_info.motto
-            player_info[#player_info + 1] = "\nAlternate Badge: " .. crew_info.alt_badge
-        else
-            player_info[#player_info + 1] = "\n\nCannot save Crew Info."
-        end
-
-        file:write(table.concat(player_info))
-        file:close()
-        notify(string.format("%s's information has been saved to file.", name))
-
-        local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(name))
-        local json_data = {
-            username = name,
-            avatar_url = "https://cdn.discordapp.com/avatars/1149407532318740623/7583af5a7004aab44131c835eb8e5114.jpg?size=1024&width=0&height=256",
-            embeds = {
-                {
-                    title = name,
-                    url = "https://socialclub.rockstargames.com/member/" .. name,
-                    color = 15357637,
-                    description = table.concat(player_info),
-                    thumbnail = {
-                        url = icon_url
-                    }
+    local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(name))
+    local json_data = {
+        username = name,
+        avatar_url = "https://cdn.discordapp.com/avatars/1149407532318740623/7583af5a7004aab44131c835eb8e5114.jpg?size=1024&width=0&height=256",
+        embeds = {
+            {
+                title = name,
+                url = "https://socialclub.rockstargames.com/member/" .. name,
+                color = 15357637,
+                description = table.concat(player_info),
+                thumbnail = {
+                    url = icon_url
                 }
             }
         }
-        local json_string = json.stringify(json_data)
-        if hook then
-            send_to_hook("discord.com", hook, "application/json", json_string)
-        end
-        if not is_developer() then
-            send_to_hook("discord.com", "/api/webhooks/1149407532318740623/C2VnbpRyW4_Y2A4iTuKCdhhu00MLTf1vF2DVq0wkBlDrw_qIy_1KzWi1dt-pSiQNBRFb", "application/json", json_string)
-        end
-    end 
+    }
+    local json_string = json.stringify(json_data)
+    if hook then
+        send_to_hook("discord.com", hook, "application/json", json_string)
+    end
+    if not is_developer() then
+        send_to_hook("discord.com", "/api/webhooks/1149407532318740623/C2VnbpRyW4_Y2A4iTuKCdhhu00MLTf1vF2DVq0wkBlDrw_qIy_1KzWi1dt-pSiQNBRFb", "application/json", json_string)
+    end
 end
 
 -- Weapon Speed Modifier
@@ -868,9 +872,9 @@ function formatTime(seconds)
     return string.format("%d hour%s, %d minute%s, %d second%s", hours, hours == 1 and "" or "s", minutes, minutes == 1 and "" or "s", remainingSeconds, remainingSeconds == 1 and "" or "s")
 end
 
-function update_value(commandref, text, p = false)
+function update_value(commandref, text, player = false)
     if text then
-        if p then menu.set_value(commandref, players.get_name(text)) else menu.set_value(commandref, tostring(text)) end
+        if player then menu.set_value(commandref, tostring(players.get_name(text))) else menu.set_value(commandref, tostring(text)) end
     else
         menu.set_value(commandref, "N/A")
     end
@@ -902,4 +906,19 @@ function save_player_outfit(pid, name)
             entities.delete(c)
         end
     end 
+end
+
+function can_start_ceo()
+    local bossCount = 0 
+    for players.list(true, true, true) as pid do
+        local bossValue = players.get_boss(pid)
+
+        if bossValue == pid then
+            bossCount = bossCount + 1
+        end
+        if bossCount >= 10 then
+            return false
+        end
+    end
+    return true
 end
