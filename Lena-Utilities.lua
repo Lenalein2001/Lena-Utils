@@ -181,6 +181,12 @@ auto_update_config = {
             script_relpath="/lib/lena/tables.lua",
             check_interval=default_check_interval,
         },
+        {
+            name="Handling",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/downforce_data.json",
+            script_relpath="/lib/lena/downforce_data.json",
+            check_interval=default_check_interval,
+        },
     }
 }
 
@@ -188,7 +194,11 @@ auto_update_config = {
 -- Required Files
 -------------------------------------
 
-local lenaDir = filesystem.scripts_dir().."Lena\\"
+lenaDir = filesystem.scripts_dir().."Lena\\"
+libDir = filesystem.scripts_dir().."lib\\lena\\"
+local scaleForm = require("ScaleformLib")
+local funcs = require("lena.funcs")
+local tables = require("lena.tables")
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
@@ -200,9 +210,6 @@ if not filesystem.exists(lenaDir.."Saved Players Webhook.txt") then
     local waddada = io.open(lenaDir.."Saved Players Webhook.txt", "w")
     waddada:close()
 end
-local scaleForm = require("ScaleformLib")
-local funcs = require("lena.funcs")
-local tables = require("lena.tables")
 
 if async_http.have_access() then 
     if not is_developer() then
@@ -249,7 +256,7 @@ objects_thread = util.create_thread(function(thr)
                         end
                     end
                 end
-            end    
+            end
         end
         wait()
     end
@@ -2896,13 +2903,16 @@ players.add_command_hook(function(pid, cmd)
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 
+        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77,
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
 
     for idiots as id do
         if rids == id and players.are_stats_ready(pid) and in_session() then
+            if is_developer() then
+                trigger_commands($"savep{pname}")
+            end
             if NETWORK.NETWORK_IS_HOST() then
                 trigger_commands($"historyblock{pname} on")
                 wait(100)

