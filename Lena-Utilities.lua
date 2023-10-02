@@ -1399,6 +1399,18 @@ end)
             end
         end)
 
+        -------------------------------------
+        -- Hide IP if not using VPN
+        -------------------------------------
+
+        menu.toggle_loop(protex, "VPN Fallback", {""}, "Hide your IP if you're not connected to a VPN.", function()
+            local relay = menu.ref_by_path("Online>Protections>Force Relay Connections")
+            if not players.is_using_vpn(players.user()) and relay.value == false then
+                relay.value = true
+                notify("You are not using a VPN! Using Relay Servers Instead.")
+            end
+        end)
+
     -------------------------------------
     -- Orb Detections
     -------------------------------------
