@@ -91,6 +91,7 @@ local sell_stuff = menu.list(tunables, "Selling", {""}, "")
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 local tune_screens = menu.list(tunables, "Open Screens", {""}, "")
 local bm_list = menu.list(tunables, "Safe Monitor", {""}, "")
+local stat_editing =  menu.list(tunables, "Stat Editing", {""}, "")
 -- Misc
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
 local clear_area = menu.list(misc, "Clear Area", {""}, "")
@@ -1882,14 +1883,7 @@ end)
         -------------------------------------
 
         menu.action(missions_tunables, "Start Headhunter", {"hh", "headhunter"}, "Starts the CEO mission \"Headhunter\".", function()
-            if players.get_boss(players.user()) == -1 then
-                trigger_commands("ceostart")
-                notify("Starting CEO... Please wait for a few seconds.")
-                wait(8000)
-            end
-            if players.get_boss(players.user()) == -1 then
-                return
-            end
+            if not start_ceo() then return end
             IA_MENU_OPEN_OR_CLOSE()
             IA_MENU_ENTER(1)
             IA_MENU_DOWN(2)
@@ -2086,6 +2080,43 @@ end)
                 local value = STAT_GET_INT(stat)
                 util.draw_debug_text($"{name} $: {value} | {max}")
             end
+        end)
+    end
+
+    -------------------------------------
+    -- Stat Editor
+    -------------------------------------
+
+    menu.divider(stat_editing, "Set Time")
+    add_playtime = menu.toggle(stat_editing, "Add Additional Playtime", {""}, "", function(); end)
+    local PLAYTIME_DAYS = menu.slider(stat_editing, "Days", {""}, "", 0, 50000, 0, 1, function(); end)
+    local PLAYTIME_HOURS = menu.slider(stat_editing,"Hours", {""}, "", 0, 50000, 0, 1, function(); end)
+    local PLAYTIME_MINS = menu.slider(stat_editing, "Minutes", {""}, "", 0, 50000, 0, 1, function(); end)
+    for index, this in PlaytimeStats do
+        local name = this[1]
+        local stat = this[2]
+        local helpText = this[3] or ""
+        menu.action(stat_editing, $"Edit {name}", {$"edit{name}"}, helpText, function()
+            if not menu.get_value(add_playtime) and not date then
+                STAT_SET_INT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
+            else
+                STAT_INCREMENT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
+            end
+            trigger_commands("forcecloudsave")
+        end)
+    end
+
+    menu.divider(stat_editing, "Set Dates")
+    local Stat_day = menu.slider(stat_editing, "Day", {""}, "", 0, 31, os.date("%d"), 1, function(); end)
+    local Stat_month = menu.slider(stat_editing,"Month", {""}, "", 0, 12, os.date("%m"), 1, function(); end)
+    local Stat_year = menu.slider(stat_editing, "Year", {""}, "", 2013, os.date("%Y"), os.date("%Y"), 1, function(); end)
+    for index, that in playtimeDates do
+        local name = that[1]
+        local stat = that[2]
+        local helpText = that[3] or ""
+        menu.action(stat_editing, $"Edit {name}", {$"edit{name}"}, helpText, function()
+            STAT_SET_DATE(stat, menu.get_value(Stat_year), menu.get_value(Stat_month), menu.get_value(Stat_day), 0, 59)
+            trigger_commands("forcecloudsave")
         end)
     end
 
@@ -2296,32 +2327,14 @@ end)
 
         if is_developer() then
             menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO.", function()
-                if players.get_boss(players.user()) == -1 then
-                    trigger_commands("ceostart")
-                    wait(3000)
+                if start_ceo() then
+                    wait(500)
                     trigger_commands("ceoname ¦ Rockstar")
-                elseif players.get_boss(players.user()) == players.user() then
-                    notify("You are already your own Boss.")
-                    trigger_commands("ceoname ¦ Rockstar")
-                else
-                    notify("You are already working for someone else!")
-                end
-                wait(10000)
-                if players.get_boss(players.user()) == -1 then
-                    trigger_commands("ceo")
-                    notify("CEO couldn't be started, trying again...")
                 end
             end)
         else
             menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO.", function()
-                if players.get_boss(players.user()) == -1 then
-                    trigger_commands("ceostart")
-                    notify("Starting CEO... Please wait for a few secs.")
-                elseif players.get_boss(players.user()) == players.user() then
-                    notify("You are already your own Boss!")
-                else
-                    notify("You are already working for someone else!")
-                end
+                start_ceo()
             end)
         end
 
@@ -2359,11 +2372,7 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Spawn Buzzard", {"requestbuzzard", "reqbuzzard", "b1"}, "Requests a CEO Buzzard.", function()
-            if players.get_boss(players.user()) == -1 then
-                trigger_commands("ceostart")
-                notify("Starting CEO... Please wait for a few Seconds.")
-                wait(5000)
-            end
+            if not start_ceo() then return end
             if players.get_boss(players.user()) != -1 then
                 if players.get_boss(players.user()) == players.user() then
                     wait(500)
