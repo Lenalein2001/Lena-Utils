@@ -3217,7 +3217,7 @@ players.add_command_hook(function(pid, cmd)
                         trapcage(pid, "prop_gold_cont_01", true)
                     end
                 end
-            end, nil, nil, COMMANDPERM_RUDE)
+            end)
 
             -------------------------------------
             -- Small Cage
@@ -3227,7 +3227,7 @@ players.add_command_hook(function(pid, cmd)
                 TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                 wait(250)
                 trapcage(pid, "prop_gold_cont_01", true)
-            end, nil, nil, COMMANDPERM_RUDE)
+            end)
 
             -------------------------------------
             -- Small Invisible Cage
@@ -3237,7 +3237,7 @@ players.add_command_hook(function(pid, cmd)
                 TASK.CLEAR_PED_TASKS_IMMEDIATELY(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
                 wait(250)
                 trapcage(pid, "prop_gold_cont_01", false)
-            end, nil, nil, COMMANDPERM_RUDE)
+            end)
 
             -------------------------------------
             -- Invisible Cage
@@ -3276,7 +3276,7 @@ players.add_command_hook(function(pid, cmd)
                     end
                 end
                 wait(1000)
-            end, nil, nil, COMMANDPERM_RUDE)
+            end)
 
             -------------------------------------
             -- Delete all Cages
