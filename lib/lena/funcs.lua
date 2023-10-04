@@ -905,27 +905,36 @@ function save_player_outfit(pid, name) -- A Cheaty way of doing this, but if it 
     end 
 end
 
-function start_ceo()
+function CanStartCEO()
+    if not in_session() then return false end
+    if players.get_boss(players.user()) ~= -1 then return true end
+
     local bossCount = 0
-    local boss = players.get_boss
-    local user = players.user()
-    for players.list(false, true, true) as pid do
-        if boss(pid) == pid then
-            bossCount = bossCount + 1
+
+    for pid in players.list(false, true, true) do
+        if players.get_boss(pid) == pid then
+            if players.get_org_type(pid) ~= 1 then
+                bossCount = bossCount + 1
+            end
         end
-        if boss(user) == players.user() or boss(user) != -1 then
-            return false, notify("You're already in a CEO.")
-        end
-        if bossCount >= 10 then
-            return false, notify("Cannot Start CEO due to reaching the MAX Boss count. :/")
+        if bossCount >= 6 then
+            return false, notify($"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}")
         end
     end
-    trigger_commands("ceostart")
-    wait(500)
-    if boss(user) == user then
-        return true
+    return true
+end
+function StartCEO()
+    if CanStartCEO() then
+        trigger_commands("ceostart")
+        wait(500)
+        local user = players.user()
+        if players.get_boss(user) == user then
+            return true
+        else
+            return false, "CEO couldn't be started."
+        end
     else
-        return false, "CEO couldn't be started."
+        return false, "Cannot start CEO."
     end
 end
 
