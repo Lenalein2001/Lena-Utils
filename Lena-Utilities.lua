@@ -866,6 +866,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(vehicle, "Drift Mode", {"driftmode"}, "Hold shift to drift.", function()
+        if not in_session() then return end
         if PAD.IS_CONTROL_PRESSED(0, 21) then
             VEHICLE.SET_VEHICLE_REDUCE_GRIP(user_vehicle, true)
         else
@@ -905,8 +906,8 @@ end)
             if not PED.IS_PED_IN_ANY_VEHICLE(ped) then 
                 continue 
             end
-            if memory.read_byte(entities.handle_to_pointer(vehicle) + 0xA9E) == 0 then
-                memory.write_byte((entities.handle_to_pointer(vehicle) + 0xA9E), 1) 
+            if memory.read_byte(entities.handle_to_pointer(vehicle) + 0x0A9E) == 0 then
+                memory.write_byte((entities.handle_to_pointer(vehicle) + 0x0A9E), 1) 
             end
         end
     end)
@@ -1208,7 +1209,7 @@ end)
             for players.list() as pid do
                 if players.are_stats_ready(pid) and players.exists(pid) then
                     if not players.are_stats_ready(pid) then return end
-                    wait(100)
+                    wait(1000)
                     local rank = players.get_rank(pid)
                     local money = players.get_money(pid)
                     local kills = players.get_kills(pid)
@@ -1219,17 +1220,17 @@ end)
                             players.add_detection(pid, "Unlegit Stats (K/D)", 7, 50)
                         end
                     end
-                    if rank > 1500 or rank < 0 then
+                    if rank >= 1500 or rank <= 0 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Rank)") then
                             players.add_detection(pid, "Unlegit Stats (Rank)", 7, 75)
                         end
                     end
-                    if money > 1600000000 then
+                    if money >= 1600000000 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Money)") then
                             players.add_detection(pid, "Unlegit Stats (Money)", 7, 50)
                         end
                     end
-                    if (rank > 1000 and money < 150000000) or (rank < 100 and money > 150000000) then
+                    if (rank > 1000 and money <= 150000000) or (rank <= 100 and money > 150000000) then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Rank/Money Mismatch)") then
                             players.add_detection(pid, "Unlegit Stats (Rank/Money Mismatch)", 7, 50)
                         end
@@ -1242,7 +1243,7 @@ end)
         -- Spawned Vehicle
         -------------------------------------
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
-        -- Small changes will be made. Mainly changed to Natives with Namespaces
+        -- Small changes will be made.
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
             for players.list() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -1250,46 +1251,38 @@ end)
                 local hash = players.get_vehicle_model(pid)
                 local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
                 local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
-                local plyveh = DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle")
                 local pegasusveh = DECORATOR.DECOR_GET_BOOL(vehicle, "CreatedByPegasus")
+
                 for veh_things as veh do
                     if hash == joaat(veh) and DECORATOR.DECOR_GET_INT(vehicle, "MPBitset") == 8 then
                         return 
                     end
                 end
+
                 if players.get_vehicle_model(pid) != 0 and not TASK.GET_IS_TASK_ACTIVE(ped, 160) and GET_SPAWN_STATE(players.user()) != 0 then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if players.get_name(driver) != "InvalidPlayer" and not pegasusveh and pid == driver and not players.is_in_interior(pid) then
                         if bitset == 1024 then
-                            util.draw_debug_text(players.get_name(driver).." Is a 2Take1 User")
                             if not IsDetectionPresent(pid, "2Take1 User") then
                                 players.add_detection(pid, "2Take1 User", 7)
-                                break
                             end
                         elseif plate_text == " TERROR " then
-                            util.draw_debug_text(players.get_name(driver).." Is a Terror User")
                             if not IsDetectionPresent(pid, "Terror User") then
                                 players.add_detection(pid, "Terror User", 7)
-                                break
                             end
                         elseif plate_text == " MXMENU " then
-                            util.draw_debug_text(players.get_name(driver).." Is a MXMenu User")
                             if not IsDetectionPresent(pid, "MXMenu User") then
                                 players.add_detection(pid, "MXMenu User", 7)
-                                break
                             end
                         elseif plate_text == "  FATE  " then
-                            util.draw_debug_text(players.get_name(driver).." Is a Fate User")
                             if not IsDetectionPresent(pid, "Fate User") then
                                 players.add_detection(pid, "Fate User", 7)
-                                break
                             end
-                        elseif bitset == 8 or plate_text == "46EEK572" then
-                            local used_vehicle = util.get_label_text(players.get_vehicle_model(pid))
-                            util.draw_debug_text(players.get_name(driver).." is using a spawned vehicle ".."("..used_vehicle..")")
+                        end
+
+                        if bitset == 8 or plate_text == "46EEK572" then
                             if not IsDetectionPresent(pid, "Spawned Vehicle") then
                                 players.add_detection(pid, "Spawned Vehicle", 7, 50)
-                                break
                             end
                         end
                     end
@@ -1447,7 +1440,6 @@ end)
 
         menu.toggle_loop(anti_orb, "Block Orbital Cannon", {"blockorb"}, "Spawns a prop that blocks the Orbital Cannon Room.", function()
             local md1 = joaat("xm_prop_cannon_room_door")
-            local md2 = joaat("xm_prop_cannon_room_door")
             util.request_model(md1)
             if orb_obj == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj) then
                 orb_obj = entities.create_object(md1, v3(336.56, 4833.00, -60.0))
@@ -1456,9 +1448,9 @@ end)
                 ENTITY.FREEZE_ENTITY_POSITION(orb_obj, true)
                 ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(players.user_ped(), orb_obj, false)
             end
-            util.request_model(md2)
+            util.request_model(md1)
             if orb_obj2 == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj2) then
-                orb_obj2 = entities.create_object(md2, v3(335.155, 4835.0, -60.0))
+                orb_obj2 = entities.create_object(md1, v3(335.155, 4835.0, -60.0))
                 entities.set_can_migrate(entities.handle_to_pointer(orb_obj2), false)
                 ENTITY.SET_ENTITY_HEADING(orb_obj2, -55.0)
                 ENTITY.FREEZE_ENTITY_POSITION(orb_obj2, true)
