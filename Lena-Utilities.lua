@@ -1885,7 +1885,8 @@ end)
         -------------------------------------
 
         menu.action(missions_tunables, "Start Headhunter", {"hh", "headhunter"}, "Starts the CEO mission \"Headhunter\".", function()
-            if not start_ceo() then return end
+            if not StartCEO() then return end
+            wait(1000)
             IA_MENU_OPEN_OR_CLOSE()
             IA_MENU_ENTER(1)
             IA_MENU_DOWN(2)
@@ -2074,11 +2075,9 @@ end)
     -------------------------------------
 
     for index, data in bm_safe_table do
-        local name = data[1]
-        local stat = data[2]
-        local max = data[3]
+        local name, stat, max = data[1], data[2], data[3]
         menu.toggle_loop(bm_list, $"Monitor {name}", {$"monitor{name}"}, "", function()
-            if util.is_session_started() then
+            if in_session() then
                 local value = STAT_GET_INT(stat)
                 util.draw_debug_text($"{name} $: {value} | {max}")
             end
@@ -2099,7 +2098,7 @@ end)
         local stat = this[2]
         local helpText = this[3] or ""
         menu.action(stat_editing, $"Edit {name}", {$"edit{name}"}, helpText, function()
-            if not menu.get_value(add_playtime) and not date then
+            if not menu.get_value(add_playtime) then
                 STAT_SET_INT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
             else
                 STAT_INCREMENT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
@@ -2329,14 +2328,14 @@ end)
 
         if is_developer() then
             menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO.", function()
-                if start_ceo() then
+                if StartCEO() then
                     wait(500)
                     trigger_commands("ceoname ¦ Rockstar")
                 end
             end)
         else
             menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO.", function()
-                start_ceo()
+                StartCEO()
             end)
         end
 
@@ -2374,7 +2373,7 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Spawn Buzzard", {"requestbuzzard", "reqbuzzard", "b1"}, "Requests a CEO Buzzard.", function()
-            if not start_ceo() then return end
+            if not StartCEO() then return end
             if players.get_boss(players.user()) != -1 then
                 if players.get_boss(players.user()) == players.user() then
                     wait(500)
@@ -2411,8 +2410,8 @@ end)
 
 
     menu.toggle_loop(misc, "Disable Scripted Music", {""}, "", function() -- Credits too err_net_array for the Audio Name <3
-        if AUDIO_IS_SCRIPTED_MUSIC_PLAYING() then
-            SET_RADIO_TO_STATION_NAME("RADIO_36_AUDIOPLAYER")
+        if AUDIO.AUDIO_IS_MUSIC_PLAYING() then
+            AUDIO.TRIGGER_MUSIC_EVENT("GLOBAL_KILL_MUSIC")
         end
     end)
 
@@ -2898,7 +2897,7 @@ players.add_command_hook(function(pid, cmd)
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77,
+        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -2992,8 +2991,8 @@ players.add_command_hook(function(pid, cmd)
                 4,
                 10000, -- wage?
                 0, 0, 0, 0,
-                memory.read_int(memory.script_global(1924276 + 9)), -- 1924276.f_8
-                memory.read_int(memory.script_global(1924276 + 10)), -- 1924276.f_9
+                memory.read_int(memory.script_global(1924276 + 9)), -- Global_1924276.f_9
+                memory.read_int(memory.script_global(1924276 + 10)), -- Global_1924276.f_10
             })
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
