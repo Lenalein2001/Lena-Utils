@@ -831,10 +831,10 @@ function check_and_write_money_change()
             local formatted_initial_money = "$"..format_money_value(initial_money)
             local formatted_current_money = "$"..format_money_value(current_money)
             local formatted_difference = "$"..format_money_value(math.abs(difference))
-            local sign = difference >= 0 and "Added " or "Removed "
+            local sign = difference >= 0 and "Added ~g~" or "Removed ~r~"
             file:write(string.format("[%s] Old amount: %s. New amount: %s. Difference: %s%s \n", os.date("%d.%m.%Y %X"), formatted_initial_money, formatted_current_money, sign, formatted_difference))
             file:close()
-            hud_notification(sign..formatted_difference, 24)
+            hud_notification(sign..formatted_difference)
         end
         initial_money = current_money
     end
@@ -923,8 +923,8 @@ function CanStartCEO()
                 bossCount = bossCount + 1
             end
         end
-        if bossCount >= 6 then
-            return false, notify($"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}")
+        if bossCount >= 11 then
+            return false--, notify($"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}")
         end
     end
     return true
