@@ -333,6 +333,9 @@ end
 function STAT_SET_INT(Stat, Value)
     STATS.STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
 end
+function GET_INT_GLOBAL(global)
+    return memory.read_int(memory.script_global(global))
+end
 function STAT_SET_DATE(stat, year, month, day, hour, min)
     local DatePTR = memory.alloc(8*7)
     memory.write_int(DatePTR, year)
@@ -610,6 +613,8 @@ function save_player_info(pid)
     local rank = players.get_rank(pid)
     local money = "$" .. format_money_value(players.get_money(pid))
     local kd = players.get_kd(pid)
+    local kills = players.get_kills(pid)
+    local deaths = players.get_deaths(pid)
     local is_using_vpn = players.is_using_vpn(pid)
     local player_ip = player_ip(pid)
     local language_int = language_string(players.get_language(pid))
@@ -636,11 +641,12 @@ function save_player_info(pid)
         "\nRank: ", rank,
         "\nMoney: ", money,
         "\nK/D: ", kd,
+        "\nKills: ", kills,
+        "\nDeaths: ", deaths,
         "\nLanguage: ", language_int,
         "\nHost Token: ", host_token,
         "\nIs Using Controller: ", is_using_controller and "Yes" or "No",
-        "\n",
-        "\n**Net Intel**",
+        "\n\n**Net Intel**",
     }
 
     if player_ip != "Connected via Relay" then
@@ -660,15 +666,15 @@ function save_player_info(pid)
         player_info[#player_info + 1] = "\nConnected to Rockstar's Server. Intel will not be shown."
     end
 
-    if crew_info then 
-        player_info[#player_info + 1] = "\n\n**Crew Information**"
+    player_info[#player_info + 1] = "\n\n**Crew Information**"
+    if crew_info then
         player_info[#player_info + 1] = "\nCrew Icon: " .. crew_info.icon
         player_info[#player_info + 1] = "\nCrew Name: " .. crew_info.name
         player_info[#player_info + 1] = "\nCrew Tag: " .. crew_info.tag
         player_info[#player_info + 1] = "\nCrew Motto: " .. crew_info.motto
         player_info[#player_info + 1] = "\nAlternate Badge: " .. crew_info.alt_badge
     else
-        player_info[#player_info + 1] = "\n\nCannot save Crew Info. Most likely isn't in a crew."
+        player_info[#player_info + 1] = "\nCannot save Crew Info. Most likely isn't in a crew."
     end
 
     if detections then
