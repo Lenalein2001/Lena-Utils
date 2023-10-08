@@ -96,7 +96,6 @@ local stat_editing =  menu.list(tunables, "Stat Editing", {""}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
 local clear_area = menu.list(misc, "Clear Area", {""}, "")
 local teleport = menu.list(misc, "Teleport", {""}, "")
-local fake_money = menu.list(misc, "Fake Money", {""}, "")
 
 -------------------------------------
 -- Auto Updater
@@ -775,14 +774,14 @@ end)
         -- Force flares
         -------------------------------------
 
-        local periodicforceflares = false
-        forceflares = menu.toggle(vehicle_flares, "Force Flares", {"forceflares"}, "Forces Flares on Airborn Vehicles.", function(toggled)
-            if periodicforceflares.value then forceflares.value = false end 
+        local periodicforceflares
+        forceflares = menu.toggle_loop(vehicle_flares, "Force Flares", {"forceflares"}, "Forces Flares on Airborn Vehicles.", function()
+            if periodicforceflares.value then forceflares.value = false end
             local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
             local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
             local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
             trigger_command(count, "2"); trigger_command(how)
-            while PED.IS_PED_IN_ANY_PLANE(players.user_ped()) and toggled do
+            if VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 15 or VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 16 then
                 if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
                     trigger_command(deploy)
                     wait(3000)
@@ -797,14 +796,13 @@ end)
 
         flaredelay = menu.slider_float(vehicle_flares, "Flare Delay", {""}, "Delay is in Seconds. 0.5 would be half a Second.", 10, 1000, 100, 10, function(); end)
         flareamount = menu.slider(vehicle_flares, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
-        
-        periodicforceflares = menu.toggle(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function(toggled)
-            if forceflares.value then periodicforceflares.value = false end 
+        periodicforceflares = menu.toggle_loop(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function()
+            if forceflares.value then periodicforceflares.value = false end
             local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
             local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
             local deploy = menu.ref_by_path("Vehicle>Countermeasures>Deploy Flares")
             trigger_command(count, "1"); trigger_command(how)
-            while (PED.IS_PED_IN_ANY_PLANE(players.user_ped()) or PED.IS_PED_IN_ANY_HELI(players.user_ped())) and toggled do
+            if VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 15 or VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 16 then
                 if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
                     for i = 1, menu.get_value(flareamount) do
                         trigger_command(deploy)
@@ -1209,7 +1207,7 @@ end)
             for players.list() as pid do
                 if players.are_stats_ready(pid) and players.exists(pid) then
                     if not players.are_stats_ready(pid) then return end
-                    wait(1000)
+                    wait(2000)
                     local rank = players.get_rank(pid)
                     local money = players.get_money(pid)
                     local kills = players.get_kills(pid)
