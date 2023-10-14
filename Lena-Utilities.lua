@@ -1366,6 +1366,72 @@ end)
             end
         end)
 
+        -------------------------------------
+        -- Modded Vehicle Upgrade
+        -------------------------------------
+
+        menu.toggle_loop(detections, "Modded Vehicle Upgrade", {""}, "Detects players who have modded their own or someone else's vehicles outside of a shop.", function()
+            for players.list() as pid do
+                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
+                util.create_thread(function()
+                    local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                    if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
+                    local veh = PED.GET_VEHICLE_PED_IS_IN(ped)
+                    local veh_ptr = entities.handle_to_pointer(veh)
+                    local pos = players.get_position(pid)
+                    local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(veh, -1))
+                    if not PED.IS_PED_IN_ANY_VEHICLE(ped, false) then return end
+                    local prev_vehicle_mods = {}
+                    local current_vehicle_mods = {}
+                    for i = 0, 49 do
+                        prev_vehicle_mods[i] = VEHICLE.GET_VEHICLE_MOD(veh, i)
+                    end
+                    wait(100)
+                    for i = 0, 49 do
+                        current_vehicle_mods[i] = VEHICLE.GET_VEHICLE_MOD(veh, i)
+                    end
+                    for i = 0, 49 do
+                        if prev_vehicle_mods[i] ~= current_vehicle_mods[i] and not players.is_in_interior(pid) and ENTITY.IS_ENTITY_VISIBLE(veh) and pos.z > 0.0 then
+                            local owner_pid = entities.get_owner(veh_ptr)
+                            if owner_pid == pid and not IsDetectionPresent(pid, "Modded Vehicle Upgrade") then
+                                players.add_detection(pid, "Modded Vehicle Upgrade", 7, 100)
+                                break
+                            elseif owner_pid ~= pid and not IsDetectionPresent(owner_pid, "Modded Vehicle Upgrade (Vehicle Takeover)") then
+                                players.add_detection(owner_pid, "Modded Vehicle Upgrade (Vehicle Takeover)", 7, 100)
+                            end
+                        end
+                    end
+                end)
+            end
+            wait(100)
+        end)
+
+        -------------------------------------
+        -- Vehicle Switch
+        -------------------------------------
+
+        menu.toggle_loop(detections, "Vehicle Switch", {""}, "", function()
+            for players.list(false) as pid do
+                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
+                util.create_thread(function()
+                    local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                    if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
+                    local old_veh = PED.GET_VEHICLE_PED_IS_IN(ped)
+                    wait(500)
+                    local new_veh = PED.GET_VEHICLE_PED_IS_IN(ped)
+                    if not PED.IS_PED_IN_ANY_VEHICLE(ped, false) then return end
+                    if old_veh != new_veh and not (old_veh or new_veh) == (0.0 or 0 or nil) then
+                        if not IsDetectionPresent(pid, "Vehicle Switch") then
+                            players.add_detection(pid, "Vehicle Switch", 7, 75)
+                        end
+                    end
+                end)
+            end
+            wait(100)
+        end)
+
     -------------------------------------
     -- Protections
     -------------------------------------
