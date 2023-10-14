@@ -1468,6 +1468,24 @@ end)
             end
         end)
 
+        -------------------------------------
+        -- Spoof Session
+        -------------------------------------
+
+        menu.toggle(protex, "Spoof Session", {"enablespoofing"}, "Enable Session Spoofing. No one will be able to Join, Track or Spectate you.", function(toggled)
+            local spoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Non-Existent Session")
+            local unspoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Disabled")
+            if menu.get_edition() == 3 then
+                if toggled then
+                    trigger_command(spoof_ses)
+                else
+                    trigger_command(unspoof_ses)
+                end
+            else
+                notify("You need Ultimate in order to do that!")
+            end
+        end)
+
     -------------------------------------
     -- Orb Detections
     -------------------------------------
@@ -1734,19 +1752,6 @@ end)
         -- Spoof Session
         -------------------------------------
 
-        menu.toggle(spoofing_opt, "Spoof Session", {"enablespoofing"}, "Enable Session Spoofing. No one will be able to Join, Track or Spectate you.", function(toggled)
-            local spoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Story Mode")
-            local unspoof_ses = menu.ref_by_path("Online>Spoofing>Session Spoofing>Hide Session>Disabled")
-            if menu.get_edition() == 3 then
-                if toggled then
-                    trigger_command(spoof_ses)
-                else
-                    trigger_command(unspoof_ses)
-                end
-            else
-                notify("You need Ultimate in order to do that!")
-            end
-        end)
 
     -------------------------------------
     -- Enhanced Chat
