@@ -1208,6 +1208,7 @@ end)
                 if players.are_stats_ready(pid) and players.exists(pid) then
                     if not players.are_stats_ready(pid) then return end
                     wait(2000)
+                    if not in_session() then return end
                     local rank = players.get_rank(pid)
                     local money = players.get_money(pid)
                     local kills = players.get_kills(pid)
@@ -1496,7 +1497,7 @@ end)
 
         menu.toggle_loop(anti_orb, "Ghost", {"ghostorb"}, "Automatically ghost Players that are using the Orbital Cannon.", function()
             if not util.is_session_transition_active() then
-                for players.list(false, true, true) as pid do
+                for players.list(false) as pid do
                     local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                     local cam_pos = players.get_cam_pos(pid)
                     if IS_PLAYER_USING_ORBITAL_CANNON(pid) and TASK.GET_IS_TASK_ACTIVE(ped, 135)
@@ -1521,18 +1522,18 @@ end)
         -------------------------------------
 
         menu.toggle_loop(anti_orb, "Block Orbital Cannon", {"blockorb"}, "Spawns a prop that blocks the Orbital Cannon Room.", function()
-            local md1 = joaat("xm_prop_cannon_room_door")
-            util.request_model(md1)
+            local model = joaat("xm_prop_cannon_room_door")
+            util.request_model(model)
             if orb_obj == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj) then
-                orb_obj = entities.create_object(md1, v3(336.56, 4833.00, -60.0))
+                orb_obj = entities.create_object(model, v3(336.56, 4833.00, -60.0))
                 entities.set_can_migrate(entities.handle_to_pointer(orb_obj), false)
                 ENTITY.SET_ENTITY_HEADING(orb_obj, 125.0)
                 ENTITY.FREEZE_ENTITY_POSITION(orb_obj, true)
                 ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(players.user_ped(), orb_obj, false)
             end
-            util.request_model(md1)
+            util.request_model(model)
             if orb_obj2 == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj2) then
-                orb_obj2 = entities.create_object(md1, v3(335.155, 4835.0, -60.0))
+                orb_obj2 = entities.create_object(model, v3(335.155, 4835.0, -60.0))
                 entities.set_can_migrate(entities.handle_to_pointer(orb_obj2), false)
                 ENTITY.SET_ENTITY_HEADING(orb_obj2, -55.0)
                 ENTITY.FREEZE_ENTITY_POSITION(orb_obj2, true)
@@ -1593,10 +1594,8 @@ end)
             end)
         end)
 
-        menu.toggle_loop(anti_orb, "Send to Team chat", {""}, "Notifies Players in your CEO/MC.", function()
-            announce_orb = true
-            end, function()
-            announce_orb = false
+        menu.toggle_loop(anti_orb, "Send to Team chat", {""}, "Notifies Players in your CEO/MC.", function(toggled)
+            announce_orb = toggled
         end)
 
         -------------------------------------
@@ -1606,7 +1605,7 @@ end)
         local orbital_blips = {}
         local draw_orbital_blips = false
         menu.toggle(anti_orb, "Show Orbital Cannon", {"showorb"}, "Shows you where the Player is aiming at.", function(on)
-            if not util.is_session_transition_active() then
+            if in_session() then
                 draw_orbital_blips = on
                 while true do
                     if not draw_orbital_blips then 
@@ -1708,6 +1707,7 @@ end)
             explo_reactions = index
         end)
         menu.toggle_loop(weapon_reactions, "Anti Explo Sniper", {""}, "", function()
+            if not in_session() then return end
             for players.list(false) as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if WEAPON.IS_PED_ARMED(ped, 4 | 2) then
@@ -1850,7 +1850,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(online, "Kick High-Ping Players", {""}, "Kicks Everyone with a high ping (180)\nNote that the average ping is quite high in most Sessions.", function()
-        if util.is_session_started() and not util.is_session_transition_active() then
+        if in_session() then
             for players.list(false, false, true) as pid do
                 local ping = NETWORK.NETWORK_GET_AVERAGE_LATENCY(pid)
                 local pname = players.get_name(pid)
@@ -1869,7 +1869,7 @@ end)
     -------------------------------------
 
     menu.toggle_loop(online, "Kick Attackers", {""}, "", function()
-        if util.is_session_started() and not util.is_session_transition_active() then
+        if in_session() then
             for players.list(false, true, true) as pid do
                 if players.is_marked_as_attacker(pid) then
                     local pname, rid = players.get_name(pid), players.get_rockstar_id(pid)
@@ -1916,6 +1916,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(sell_stuff, "Easy MC sell", {"easymc"}, "Toggle BEFORE Starting the Mission.", function()
+            if not in_session() then return end
             SET_INT_LOCAL("gb_biker_contraband_sell", 699 + 17, 0) --Local_699.f_17
         end)
 
@@ -1924,7 +1925,8 @@ end)
         -------------------------------------
 
         -- https://www.unknowncheats.me/forum/3521137-post39.html
-        menu.action(sell_stuff, "Instant Bunker Sell", {"bunker"}, "Selling Only.", function() 
+        menu.action(sell_stuff, "Instant Bunker Sell", {"bunker"}, "Selling Only.", function()
+            if not in_session() then return end
             SET_INT_LOCAL("gb_gunrunning", 1206 + 774, 0) -- Local_1206.f_774
         end)
 
@@ -1933,7 +1935,8 @@ end)
         -------------------------------------
 
         -- https://www.unknowncheats.me/forum/3513482-post37.html
-        menu.action(sell_stuff, "Instant Air Cargo", {"aircargo"}, "Selling Only.", function() 
+        menu.action(sell_stuff, "Instant Air Cargo", {"aircargo"}, "Selling Only.", function()
+            if not in_session() then return end
             SET_INT_LOCAL("gb_smuggler", 1929 + 1035, GET_INT_LOCAL("gb_smuggler", 1929 + 1078))
         end)
 
@@ -1956,7 +1959,7 @@ end)
         -------------------------------------
 
         menu.action(missions_tunables, "Start Headhunter", {"hh", "headhunter"}, "Starts the CEO mission \"Headhunter\".", function()
-            if not StartCEO() then return end
+            if not StartCEO() or not in_session() then return end
             wait(1000)
             IA_MENU_OPEN_OR_CLOSE()
             IA_MENU_ENTER(1)
@@ -3183,11 +3186,11 @@ players.add_command_hook(function(pid, cmd)
         -------------------------------------
 
         menu.action(mpvehicle, "Repair Vehicle", {"rpv"}, "Repais the current Vehicle.", function()
-            local vehicle = get_vehicle_ped_is_in(pid)
-            if vehicle and request_control(pid, true) then
-                VEHICLE.SET_VEHICLE_FIXED(vehicle)
-                VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
-                VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
+            local veh = get_vehicle_ped_is_in(pid)
+            if veh and request_control(veh, true) then
+                VEHICLE.SET_VEHICLE_FIXED(veh)
+                VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(veh)
+                VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
@@ -3196,9 +3199,9 @@ players.add_command_hook(function(pid, cmd)
         -------------------------------------
 
         menu.action(mpvehicle, "Clean Vehicle", {"cleanv"}, "Cleans the current Vehicle.", function()
-            local vehicle = get_vehicle_ped_is_in(pid)
-            if vehicle and request_control(pid, true) then
-                VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
+            local veh = get_vehicle_ped_is_in(pid)
+            if veh and request_control(veh, true) then
+                VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
 

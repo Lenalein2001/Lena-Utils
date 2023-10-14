@@ -115,20 +115,17 @@ end
 
 function request_control(entity, migrate = true)
     local ctr = 0
-    local migrate_ctr = 0
-    if entity != (0 or nil) then
+    if entity then
         while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entity) do
             if ctr >= 250 then
-                notify("Failed to get control of entity. :/")
                 ctr = 0
-                return false
+                return
             end
             NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
             wait()
             ctr += 1
         end
         if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entity) then
-            entities.set_can_migrate(entity, migrate)
             return true
         end
     end
