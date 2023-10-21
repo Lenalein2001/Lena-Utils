@@ -155,7 +155,6 @@ function spawn_ped(model_name, pos, gm = false)
         return nil, notify($"{model_name} is not a valid ped. :/")
     end
 end
-
 function spawn_obj(model_name, pos)
     local hash = joaat(model_name)
     if STREAMING.IS_MODEL_VALID(hash) then
@@ -168,7 +167,6 @@ function spawn_obj(model_name, pos)
         return nil, notify($"{model_name} is not a valid object. :/")
     end
 end
-
 function spawn_vehicle(model_name, pos, gm = false)
     local hash = joaat(model_name)
     if STREAMING.IS_MODEL_A_VEHICLE(hash) then
@@ -206,7 +204,7 @@ function IS_PLAYER_USING_ORBITAL_CANNON(player)
 end
 
 function IS_PLAYER_ACTIVE(pid)
-	if pid == (-1 or nil) or not NETWORK.NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
+	if pid or not NETWORK.NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
 	if not PLAYER.IS_PLAYER_PLAYING(pid) then return false end
 	return true
 end
@@ -270,6 +268,23 @@ function getClassification(pid)
         for menu.player_root(pid):getChildren() as cmd do
             if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING then
                 return menu.get_menu_name(cmd)
+            end
+        end
+    end
+end
+
+function is_stand_user(pid)
+    if players.exists(pid) then
+        if pid == players.user() then return true end
+        for menu.player_root(pid):getChildren() as cmd do
+            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING then
+                for cmd:getChildren() as c do
+                    if lang.get_string(menu.get_menu_name(c)) == "Stand User" or lang.get_string(menu.get_menu_name(c)) == "Stand User (Co-Loading)" then
+                        return true
+                    else
+                        return false
+                    end
+                end
             end
         end
     end
@@ -488,7 +503,7 @@ function player_ip(pid)
     math.floor(connectIP / 2^16) % 256,
     math.floor(connectIP / 2^8) % 256,
     connectIP % 256)
-    if ipStringplayer == "255.255.255.255" or pStringplayer == "0.0.0.0" then
+    if ipStringplayer == "255.255.255.255" then
         return "Connected via Relay", false
     else
         return tostring(ipStringplayer), true
@@ -592,11 +607,11 @@ function get_player_crew(player)
 		local alt_badge = memory.read_byte(clanDesc + 0xA0) ~= 0 and "On" or "Off"
 		-- local rank = memory.read_int(clanDesc + 30 * 8)
         return {
-            icon     = icon,
-            name     = name,
-            tag      = tag,
-            motto    = motto,
-            alt_badge = alt_badge
+            icon        = icon,
+            name        = name,
+            tag         = tag,
+            motto       = motto,
+            alt_badge   = alt_badge
         }, true
 	else
         return false
@@ -900,9 +915,9 @@ function save_player_outfit(pid, name) -- A Cheaty way of doing this, but if it 
             trigger_commands($"copyoutfit {players.get_name(pid)}")
             wait(50)
             trigger_commands($"saveoutfit {name}")
-            wait(50)
+            repeat wait() until not util.command_box_is_open()
             PED.CLONE_PED_TO_TARGET(c, players.user_ped())
-            wait(50)
+            wait(100)
             entities.delete(c)
         end
     end 
@@ -946,7 +961,13 @@ local jsonFilePath = libDir.."downforce_data.json"
 function loadJsonData()
     local file = io.open(jsonFilePath, "r")
     if file then
-        local jsonData = json.decode(file:read("*a"))
+        local jsonData = {}
+        for line in file:lines() do
+            local entry = json.decode(line)
+            if entry then
+                jsonData[entry.id] = entry.downforce
+            end
+        end
         file:close()
         return jsonData
     else
@@ -956,7 +977,10 @@ end
 function saveJsonData(data)
     local file = io.open(jsonFilePath, "w")
     if file then
-        file:write(json.encode(data))
+        for id, downforce in pairs(data) do
+            local entry = { id = id, downforce = downforce }
+            file:write(json.encode(entry) .. ",\n")
+        end
         file:close()
     end
 end
@@ -989,6 +1013,105 @@ function enhanceDownforce()
                 memory.write_float(CHandlingData + 0x0014, enhancedDownforce)
                 notify("Enhanced Downforce")
             end
+        end
+    end
+end
+
+function replaceInDraft(search, replacement)
+    local draft = chat.get_draft()
+
+    if draft != nil then
+        local modifiedDraft = draft:gsub(search, replacement)
+
+        if modifiedDraft ~= draft then
+            local charactersToRemove = #draft - #modifiedDraft
+            chat.remove_from_draft(charactersToRemove)
+            chat.add_to_draft(modifiedDraft)
+        end
+    end
+end
+
+playerData = {}
+function savePlayerData()
+    local file = io.open(lenaDir .. "player_data.json", "w")
+    if file then
+        local jsonData = json.encode(playerData, { pretty = true })
+        file:write(jsonData)
+        file:close()
+    else
+        print("Failed to open the file for writing.")
+    end
+end
+function loadPlayerData()
+    local file = io.open(lenaDir .. "player_data.json", "r")
+    if file then
+        local jsonData = file:read("*a")
+        file:close()
+        playerData = json.decode(jsonData) or {}
+    else
+        print("Failed to open the file for reading.")
+    end
+end
+function findPlayerByRockstarID(rockstarID)
+    for rid, playerInfo in pairs(playerData) do
+        if playerInfo.rockstar_id == rockstarID then
+            return rid
+        end
+    end
+    return nil
+end
+
+function createPlayerMenu(rid)
+    local playerInfo = playerData[rid]
+    local playerMenu = menu.list(player_history, playerInfo.name, {}, "")
+    menu.readonly(playerMenu, "Username:", playerInfo.name)
+    menu.readonly(playerMenu, "RID:", playerInfo.rockstar_id)
+    menu.readonly(playerMenu, "Last Seen:", playerInfo.date or "N/A")
+    menu.divider(playerMenu, "Connection")
+    menu.readonly(playerMenu, "IPv4:", playerInfo.ip)
+    menu.readonly(playerMenu, "VPN:", playerInfo.vpn)
+    menu.divider(playerMenu, "Rank")
+    menu.readonly(playerMenu, "Rank:", playerInfo.rank)
+    menu.readonly(playerMenu, "Global RP:", playerInfo.rp)
+    menu.divider(playerMenu, "Money")
+    menu.readonly(playerMenu, "Bank: ", playerInfo.bank)
+    menu.readonly(playerMenu, "Wallet: ", playerInfo.wallet)
+    menu.readonly(playerMenu, "Total: ", playerInfo.money)
+    menu.divider(playerMenu, "K/D")
+    menu.readonly(playerMenu, "Kills: ", playerInfo.kills)
+    menu.readonly(playerMenu, "Deaths: ", playerInfo.deaths)
+    menu.readonly(playerMenu, "K/D: ", playerInfo.kd)
+    menu.divider(playerMenu, "Modder Information")
+    menu.readonly(playerMenu, "Is Modding: ", playerInfo.is_modder)
+    menu.readonly(playerMenu, "Stand User: ", playerInfo.stand)
+    menu.divider(playerMenu, "Misc")
+    menu.readonly(playerMenu, "Language: ", playerInfo.lang)
+
+    local function removePlayerData()
+        playerData[rid] = nil
+        savePlayerData()
+        local this = menu.get_parent(that)
+        menu.delete(this)
+        refreshPlayerList()
+    end
+    that = menu.action(playerMenu, "Remove Data", {}, $"Remove {playerInfo.name}'s data.", function()
+        removePlayerData()
+    end)
+end
+function refreshPlayerList()
+    for menu.get_children(player_history) as child do
+        if (not menu.get_menu_name(child) == ("Refresh" or "Find Player")) then
+            menu.delete(child)
+        end
+    end
+    for rid, playerInfo in pairs(playerData) do
+        createPlayerMenu(rid)
+    end
+end
+function searchPlayersByName(query)
+    for menu.get_children(player_history) as child do
+        if menu.get_menu_name(child) == query then
+            menu.focus(child)
         end
     end
 end

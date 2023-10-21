@@ -1804,6 +1804,16 @@ end)
         end)
 
     -------------------------------------
+    -- Player History
+    -------------------------------------
+
+    menu.action(player_history, "Refresh", {"refresh"}, "Refresh the player list", refreshPlayerList)
+    menu.action(player_history, "Search", {"search"}, "Search for a player by name", function()
+        menu.show_command_box($"search "); end, function(on_command)
+        searchPlayersByName(on_command)
+    end)
+
+    -------------------------------------
     -- Save Players Information on Kick
     -------------------------------------
 
@@ -3834,7 +3844,42 @@ players.add_command_hook(function(pid, c)
     if showJoinInfoall then
         chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", false, true, true)
     end
+
+    repeat wait() until players.are_stats_ready(pid)
+    if not players.are_stats_ready(pid) then return end
+    playerInfo = {
+        date = os.date("%d.%m.%Y %H:%M:%S"),
+        name = players.get_name(pid),
+        rockstar_id = players.get_rockstar_id(pid),
+        rank = players.get_rank(pid),
+        rp = format_money_value(players.get_rp(pid)),
+        money = "$"..format_money_value(players.get_money(pid)),
+        wallet = "$"..format_money_value(players.get_wallet(pid)),
+        bank = "$"..format_money_value(players.get_bank(pid)),
+        kd = players.get_kd(pid),
+        kills = format_money_value(players.get_kills(pid)),
+        deaths = format_money_value(players.get_deaths(pid)),
+        lang = language_string(players.get_language(pid)),
+        ip = player_ip(pid),
+        vpn = tostring(players.is_using_vpn(pid) and "Yes" or "No"),
+        is_modder = tostring(players.is_marked_as_modder(pid) and "Yes" or "No"),
+        stand = tostring(is_stand_user(pid) and "Yes" or "No")
+    }
+
+    local existingRid = findPlayerByRockstarID(playerInfo.rockstar_id)
+    if existingRid then
+        playerData[existingRid] = playerInfo
+    else
+        local newRid = #playerData + 1
+        playerData[newRid] = playerInfo
+    end
+
+    savePlayerData()
+    refreshPlayerList()
 end)
+
+loadPlayerData()
+refreshPlayerList()
 
 players.on_leave(function(pid)
     local name = names[pid] or "Unknown Player"
