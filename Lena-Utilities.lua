@@ -1,6 +1,6 @@
 --[[
           Lua made by Lena. Have fun. <3
-          
+
     ⠄⠄⠄⣰⣿⠄⠄⠄⠄⠄⢠⠄⠄⢀⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄
     ⠄⠄⢰⣿⠿⠄⡀⠄⠄⠄⠘⣷⡀⠄⠢⣄⠄⠄⠄⠄⠄⠄⠄⣠⠖⠁⠄⠄⠄⠄
     ⠄⣤⢸⣿⣿⣆⠣⠄⠄⠄⠄⠸⣿⣦⡀⠙⢶⣦⣄⡀⠄⡠⠞⠁⢀⡴⠄⠄⠄⠄
@@ -544,7 +544,6 @@ end)
     vehicle_gun_ent  = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
     vehicle_gun_gm   = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
     vehicle_gun_perf = menu.toggle(vehicle_gun_list, "Tune Perfomance", {""}, "", function(); end)
-
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn Vehicle at Bullet Impact", {""}, "", function()
         if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
@@ -553,18 +552,6 @@ end)
             if menu.get_value(vehicle_gun_perf) then tune_vehicle(v, true, false) end
         end
     end)
-
-    -- local money_coords = v3()
-    -- menu.toggle_loop(vehicle_gun_list: why, "Money gun", {""}, "", function()
-    --     if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(money_coords)) then
-    --         local cash = joaat("PICKUP_VEHICLE_MONEY_VARIABLE")
-    --         STREAMING.REQUEST_MODEL(cash)
-    --         if not STREAMING.HAS_MODEL_LOADED(cash) then  
-    --             STREAMING.REQUEST_MODEL(cash)
-    --         end
-    --         OBJECT.CREATE_AMBIENT_PICKUP(cash, money_coords, 0, 2500, cash, false, true)
-    --     end
-    -- end)
 
 -------------------------------------
 -------------------------------------
@@ -2317,41 +2304,37 @@ end)
                 if ped != players.user_ped() and entities.get_owner(ped) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() then
                     entities.delete(ped)
                     count += 1
-                    wait(10)
+                    wait()
                 end
             end
             notify($"Deleted {count} Peds!")
             count = 0
-            wait(100)
             for entities.get_all_vehicles_as_handles() as vehicle do
                 if vehicle != user_vehicle and entities.get_owner(vehicle) == players.user() and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 then
                     entities.delete(vehicle)
                     count += 1
-                    wait(10)
+                    wait()
                 end
             end
             notify($"Deleted {count} Vehicles!")
             count = 0
-            wait(100)
             for entities.get_all_objects_as_handles() as object do
                 if entities.get_owner(object) == players.user() then
                     entities.delete(object)
                     count += 1
-                    wait(10)
+                    wait()
                 end
             end
             notify($"Deleted {count} Objects!")
             count = 0
-            wait(100)
             for entities.get_all_pickups_as_pointers() as pickup do
                 if entities.get_owner(pickup) == players.user() then
                     entities.delete(pickup)
                     count += 1
-                    wait(10)
+                    wait()
                 end
             end
             notify($"Deleted {count} Pickups!")
-            wait(100)
             clear_ropes:trigger()
         end)
 
@@ -2638,13 +2621,13 @@ end)
     -------------------------------------
 
     menu.action(ai_made, "Race Countdown", {"countdown"}, "Start the countdown.", function()
-        chat.send_message("Race Starting in: ", false, true, true)
+        chat.send_message("Race Starting in: ", true, true, true)
         wait(200)
         for i = 5, 1, -1 do
-            chat.send_message($"{i} . . .", false, true, true)
+            chat.send_message($"{i} . . .", true, true, true)
             wait(1000)
         end
-        chat.send_message("GO!!!", false, true, true)
+        chat.send_message("GO!!!", true, true, true)
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
     -------------------------------------
@@ -2822,7 +2805,7 @@ if is_developer() then
                 end
             end
         end
-    end)
+    end, function(); clearCopy(); end)
     menu.text_input(sdebug, "Group Name", {"groupname"}, "", function(value)
         group_name = value
         if copy_from ~= nil then
@@ -3386,8 +3369,7 @@ players.add_command_hook(function(pid, cmd)
             local blip = HUD.ADD_BLIP_FOR_ENTITY(vehicle)
             HUD.SET_BLIP_SPRITE(blip, 421)
             HUD.SET_BLIP_COLOUR(blip, 2)
-            local ptr = entities.handle_to_pointer(vehicle)
-            entities.set_can_migrate(ptr, false)
+            entities.set_can_migrate(entities.handle_to_pointer(vehicle), false)
             spawned_attackers[#spawned_attackers + 1] = ped; spawned_attackers[#spawned_attackers + 1] = vehicle
         end)
 
