@@ -76,6 +76,7 @@ local vehicle_flares = menu.list(vehicle, "Countermeasures", {""}, "War Thunder-
 local mpsession = menu.list(online, "Session", {""}, "Features for the current Session.")
 local hosttools = menu.list(mpsession, "Host Tools", {""}, "Tools that can only be used as the Session Host or to force Session Host.")
 local detects_protex = menu.list(online, "Detections&Protections", {""}, "")
+player_history = menu.list(online, "Player History", {""}, "")
 local detections = menu.list(detects_protex, "Detections", {""}, "")
 local protex = menu.list(detects_protex, "Protections", {""}, "")
 local anti_orb = menu.list(protex, "Anti Orb", {""}, "Protections against the Orbital Cannon.")
@@ -2826,7 +2827,6 @@ if is_developer() then
     local web_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
     local webhook_url = web_file:read("a")
     web_file:close()
-
     menu.action(sdebug, "Set Webhook Url", {"setwebhookurl"}, "", function()
         menu.show_command_box("setwebhookurl "); end, function(webhook_url)
         if string.startswith(webhook_url, "https://discord.com/api/webhooks") or string.startswith(webhook_url, "https://canary.discord.com/api/webhooks") then
