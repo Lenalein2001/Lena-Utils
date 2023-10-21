@@ -992,26 +992,29 @@ function getDownforceAndId()
 end
 function enhanceDownforce()
     if entities.get_user_vehicle_as_pointer(false) ~= 0 and players.is_visible(players.user()) then
-        local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
-        local vmodel = players.get_vehicle_model(players.user())
-        local isCarModel = VEHICLE.IS_THIS_MODEL_A_CAR(vmodel)
-        if isCarModel then
-            local jsonData = loadJsonData()
-            local downforce, id = getDownforceAndId()
-            local enhancedDownforce = downforce + 10.0
-            if jsonData[id] then
-                -- ID is present
-                local savedDownforce = jsonData[id]
-                if  memory.read_float(CHandlingData + 0x0014) == savedDownforce then
+        wait(1000)
+        if entities.get_user_vehicle_as_pointer(false) != 0 and players.is_visible(players.user()) then
+            local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer(false))
+            local vmodel = players.get_vehicle_model(players.user())
+            local isCarModel = VEHICLE.IS_THIS_MODEL_A_CAR(vmodel)
+            if isCarModel then
+                local jsonData = loadJsonData()
+                local downforce, id = getDownforceAndId()
+                local enhancedDownforce = downforce + 10.0
+                if jsonData[id] then
+                    -- ID is present
+                    local savedDownforce = jsonData[id]
+                    if memory.read_float(CHandlingData + 0x0014) == savedDownforce then
+                        memory.write_float(CHandlingData + 0x0014, enhancedDownforce)
+                        notify("Enhanced Downforce.")
+                    end
+                else
+                    -- ID is not present
+                    jsonData[id] = downforce
+                    saveJsonData(jsonData)
                     memory.write_float(CHandlingData + 0x0014, enhancedDownforce)
-                    notify("Enhanced Downforce")
+                    notify("Enhanced Downforce and added Vehicle to file.")
                 end
-            else
-                -- ID is not present
-                jsonData[id] = downforce
-                saveJsonData(jsonData)
-                memory.write_float(CHandlingData + 0x0014, enhancedDownforce)
-                notify("Enhanced Downforce")
             end
         end
     end
