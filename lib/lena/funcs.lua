@@ -433,6 +433,27 @@ function decimalToHex2s(decimal, numBits = 32)
     return "0x0"..hex
 end
 
+function hexToDecimal(hex)
+    -- Remove leading and trailing whitespace, remove 0x if present, make hex Uppercase
+    hex = hex:match("^%s*(.-)%s*$")
+    hex = hex:gsub("0x", "")
+    hex = hex:upper()
+
+    local hexDigits = "0123456789ABCDEF"
+    local decimal = 0
+    local hexLength = #hex
+    for i = 1, hexLength do
+        local char = hex:sub(i, i)
+        local digitValue = hexDigits:find(char, 1, true) - 1
+        if digitValue < 0 then
+            return nil, "Invalid character in the hex string."
+        end
+        decimal = decimal * 16 + digitValue
+    end
+    return decimal
+end
+
+
 function is_developer()
     local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92, 0x03DAF57D}
     local user = players.get_rockstar_id(players.user())
