@@ -2922,7 +2922,7 @@ if is_developer() then
             local whore = PED.CLONE_PED(players.user_ped(), true, true, true)
             local cords = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), -5.0, 0.0, 0.0)
             ENTITY.SET_ENTITY_COORDS(whore, cords)
-            ENTITY.FREEZE_ENTITY_POSITION(whore, true)
+            -- ENTITY.FREEZE_ENTITY_POSITION(whore, true)
             -- TASK.TASK_START_SCENARIO_IN_PLACE(whore, "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", 0, false) -- Shrugs
         end)
         menu.toggle_loop(nativeentity, "Get Entity", {""}, "", function()
@@ -3724,31 +3724,27 @@ players.add_command_hook(function(pid, cmd)
         end)
 
         menu.action(crashes, "MK2 Griefer", {"grief"}, "Should work one some menus, idk. Don't crash players.", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-            else
-                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                local pos = players.get_position(pid)
-                local mdl = joaat("u_m_m_jesus_01")
-                local veh_mdl = joaat("oppressor")
-                util.request_model(veh_mdl)
-                util.request_model(mdl)
-                    for i = 1, 10 do
-                        if not players.exists(pid) then
-                            return
-                        end
-                        local veh = entities.create_vehicle(veh_mdl, pos, 0)
-                        local jesus = entities.create_ped(2, mdl, pos, 0)
-                        PED.SET_PED_INTO_VEHICLE(jesus, veh, -1)
-                        wait(100)
-                        TASK.TASK_VEHICLE_HELI_PROTECT(jesus, veh, ped, 10.0, 0, 10, 0, 0)
-                        wait(1000)
-                        entities.delete_by_handle(jesus)
-                        entities.delete_by_handle(veh)
-                    end
-                STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(mdl)
-                STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(veh_mdl)
+            if pid == players.user() then return notify(lang.get_localised(-1974706693)) end
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+
+            local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            local pos = players.get_position(pid)
+            local mdl = joaat("u_m_m_jesus_01")
+            local veh_mdl = joaat("oppressor")
+            util.request_model(veh_mdl)
+            util.request_model(mdl)
+            for i = 1, 10 do
+                if not players.exists(pid) then
+                    return
+                end
+                local veh = entities.create_vehicle(veh_mdl, pos, 0)
+                local jesus = entities.create_ped(2, mdl, pos, 0)
+                PED.SET_PED_INTO_VEHICLE(jesus, veh, -1)
+                wait(100)
+                TASK.TASK_VEHICLE_HELI_PROTECT(jesus, veh, ped, 10.0, 0, 10, 0, 0)
+                wait(1000)
+                entities.delete_by_handle(jesus)
+                entities.delete_by_handle(veh)
             end
         end)
 
@@ -3765,7 +3761,7 @@ players.add_command_hook(function(pid, cmd)
                     local jesus = spawn_ped("mp_m_freemode_01", pos, true)
                     PED.SET_PED_INTO_VEHICLE(jesus, veh, -1)
                     wait(100)
-                    TASK.TASK_VEHICLE_HELI_PROTECT(jesus, veh, ped, 10.0, 0, 10, 0, 0)     
+                    TASK.TASK_VEHICLE_HELI_PROTECT(jesus, veh, ped, 10.0, 0, 10, 0, 0)
                     wait(1000)
                     entities.delete(jesus)
                     entities.delete(veh)
@@ -3809,7 +3805,6 @@ players.add_command_hook(function(pid, cmd)
                 local pedcoord = ENTITY.GET_ENTITY_COORDS(ped[i], false)
                 WEAPON.GIVE_DELAYED_WEAPON_TO_PED(ped[i], 0xB1CA77B1, 0, true)
                 WEAPON.SET_PED_GADGET(ped[i], 0xB1CA77B1, true)
-                --FIRE.ADD_OWNED_EXPLOSION(PLAYER.PLAYER_PED_ID(), pedcoord.x, pedcoord.y, pedcoord.z, 5, 10, false, false, 0)
                 menu.trigger_commands("as ".. PLAYER.GET_PLAYER_NAME(pid) .. " explode " .. PLAYER.GET_PLAYER_NAME(pid) .. " ")
                 ENTITY.SET_ENTITY_VISIBLE(ped[i], false)
                 util.yield(25)
@@ -3845,8 +3840,10 @@ players.add_command_hook(function(pid, c)
         chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", false, true, true)
     end
 
+    -- Wait for Stats to load
     repeat wait() until players.are_stats_ready(pid)
     if not players.are_stats_ready(pid) then return end
+    -- Player History
     playerInfo = {
         date = os.date("%d.%m.%Y %H:%M:%S"),
         name = players.get_name(pid),
