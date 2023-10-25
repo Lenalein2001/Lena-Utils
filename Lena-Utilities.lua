@@ -2828,6 +2828,12 @@ if is_developer() then
         end
     end)
 
+    local music_vol_memory_address = memory.scan("") + 0x1FE5E38
+    radio_volume_ref = menu.click_slider_float(sdebug, "Radio Volume", {}, "This might earrape you... have fun!", 0, 100000, memory.read_byte(music_vol_memory_address) * 100, 100, function()
+        local value = (menu.get_value(radio_volume_ref) / 100)
+        original_music_volume = value
+        memory.write_byte(music_vol_memory_address, value)
+    end)
     -------------------------------------
     -- Natives
     -------------------------------------
