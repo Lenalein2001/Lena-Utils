@@ -76,7 +76,6 @@ local vehicle_flares = menu.list(vehicle, "Countermeasures", {""}, "War Thunder-
 local mpsession = menu.list(online, "Session", {""}, "Features for the current Session.")
 local hosttools = menu.list(mpsession, "Host Tools", {""}, "Tools that can only be used as the Session Host or to force Session Host.")
 local detects_protex = menu.list(online, "Detections&Protections", {""}, "")
-player_history = menu.list(online, "Player History", {""}, "")
 local detections = menu.list(detects_protex, "Detections", {""}, "")
 local protex = menu.list(detects_protex, "Protections", {""}, "")
 local anti_orb = menu.list(protex, "Anti Orb", {""}, "Protections against the Orbital Cannon.")
