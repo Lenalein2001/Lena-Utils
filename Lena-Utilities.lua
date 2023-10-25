@@ -2785,8 +2785,10 @@ if is_developer() then
     local group_name = "Admin Gang"
     local copy_from = nil
     local function clearCopy()
-        copy_from:refByRelPath("Copy Session Info").value = false
-        copy_from = nil
+        if copy_from then
+            copy_from:refByRelPath("Copy Session Info").value = false
+            copy_from = nil
+        end
     end
     menu.toggle_loop(sdebug, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
         if copy_from ~= nil then
