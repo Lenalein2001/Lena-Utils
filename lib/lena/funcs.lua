@@ -279,7 +279,7 @@ function is_stand_user(pid)
         for menu.player_root(pid):getChildren() as cmd do
             if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING then
                 for cmd:getChildren() as c do
-                    if lang.get_string(menu.get_menu_name(c)) == "Stand User" or lang.get_string(menu.get_menu_name(c)) == "Stand User (Co-Loading)" then
+                    if lang.get_string(menu.get_menu_name(c)) == ("Stand User" or "Stand User (Co-Loading)") then
                         return true
                     else
                         return false
