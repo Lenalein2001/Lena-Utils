@@ -112,7 +112,6 @@ function closestveh(myPos)
     end
 end
 
-
 function request_control(entity, migrate = true)
     local ctr = 0
     if entity then
@@ -134,10 +133,10 @@ end
 function get_vehicle_ped_is_in(player)
     local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(player)
     local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
-    if not PED.IS_PED_IN_ANY_VEHICLE(ped, false) then
-        return nil, notify("Player isn't in a vehicle. :/")
-    else
+    if PED.IS_PED_IN_ANY_VEHICLE(ped, false) then
         return veh
+    else
+        return nil, notify("Player isn't in a vehicle. :/")
     end
 end
 
@@ -452,7 +451,6 @@ function hexToDecimal(hex)
     end
     return decimal
 end
-
 
 function is_developer()
     local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92, 0x03DAF57D}
@@ -946,7 +944,7 @@ end
 
 function CanStartCEO()
     if not in_session() then return false end
-    if players.get_boss(players.user()) ~= -1 then return true end
+    if players.get_boss(players.user()) ~= -1 then return false end
 
     local bossCount = 0
 
@@ -956,8 +954,8 @@ function CanStartCEO()
                 bossCount = bossCount + 1
             end
         end
-        if bossCount >= 11 then
-            return false--, notify($"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}")
+        if bossCount >= 10 then
+            return false, notify($"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}")
         end
     end
     return true
@@ -965,15 +963,15 @@ end
 function StartCEO()
     if CanStartCEO() then
         trigger_commands("ceostart")
-        wait(500)
+        wait(250)
         local user = players.user()
         if players.get_boss(user) == user then
             return true
         else
-            return false, "CEO couldn't be started."
+            return false, notify("CEO couldn't be started.")
         end
     else
-        return false, "Cannot start CEO."
+        return false, notify("Cannot start CEO.")
     end
 end
 
@@ -1043,7 +1041,6 @@ end
 
 function replaceInDraft(search, replacement)
     local draft = chat.get_draft()
-
     if draft != nil then
         local modifiedDraft = draft:gsub(search, replacement)
 
