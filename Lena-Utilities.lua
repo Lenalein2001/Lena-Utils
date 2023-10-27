@@ -39,6 +39,8 @@ handle_ptr = memory.alloc(13*8)
 previous_car = nil
 natives_version = "2944b"
 native_invoker.accept_bools_as_ints(true)
+local thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
+local thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
 
 -------------------------------------
 -- Tabs
@@ -1474,6 +1476,13 @@ end)
             end
         end)
 
+        menu.action(protex, "Disable Halloween Weather", {""}, "Yes, this is a Protection. I can't Stand this Weather.", function()
+            if not in_session() then return end
+            thunder_on:trigger()
+            wait(5000)
+            thunder_off:trigger()
+        end)
+
     -------------------------------------
     -- Orb Detections
     -------------------------------------
@@ -1544,7 +1553,7 @@ end)
         local IsNotAtOrbTable = {}
         announce_orb = false
         menu.toggle(anti_orb, "Notify on orb usage", {"notifyorb"}, "Notifies you if a Player has entered the Orbital Cannon Room.", function()
-            util.create_tick_handler(function()  
+            util.create_tick_handler(function()
                 for players.list(false, true, true) as pid do
                     if players.get_position(pid).x > 323 and players.get_position(pid).y < 4834 and players.get_position(pid).y > 4822 and players.get_position(pid).z <= -59.36 then
                         if IsOutOfOrbRoom[pid] and not IsInOrbRoom[pid] then
@@ -2477,8 +2486,6 @@ end)
     -------------------------------------
 
     menu.toggle(misc, "Toggle Thunder Weather", {"thunder"}, "Requests Thunder Weather Session-wide.", function(toggled) 
-        local thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
-        local thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
         if toggled then
             trigger_commands("weather normal")
             wait(1000)
