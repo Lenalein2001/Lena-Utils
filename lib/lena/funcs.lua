@@ -197,54 +197,54 @@ end
 function get_stand_model(model)
     local translated = model
     local translations = {
-        player_zero = 'Michael',
-        player_one = 'Franklin',
-        player_two = 'Trevor',
-        mp_f_freemode_01 = 'Online Female',
-        mp_m_freemode_01 = 'Online Male',
-        cs_orleans = 'Bigfoot',
-        ig_orleans = 'Bigfoot 2',
-        a_c_boar = 'Boar',
-        a_c_boar_02 = 'Boar 2',
-        a_c_cat_01 = 'Cat',
-        a_c_chimp = 'Chimp',
-        a_c_chimp_02 = 'Chimp 2',
-        a_c_chop = 'Chop',
-        a_c_chop_02 = 'Chop 2',
-        a_c_cow = 'Cow',
-        a_c_coyote = 'Coyote',
-        a_c_coyote_02 = 'Coyote 2',
-        a_c_deer = 'Deer',
-        a_c_deer_02 = 'Deer 2',
-        a_c_shepherd = 'German Shepherd',
-        a_c_hen = 'Hen',
-        a_c_husky = 'Husky',
-        a_c_mtlion = 'Mountain Lion',
-        a_c_mtlion_02 = 'Mountain Lion 2',
-        a_c_panther = 'Panther',
-        a_c_pig = 'Pig',
-        a_c_poodle = 'Poodle',
-        a_c_pug = 'Pug',
-        a_c_pug_02 = 'Pug 2',
-        a_c_rabbit = 'Rabbit',
-        a_c_rabbit_02 = 'Rabbit 2',
-        a_c_rat = 'Rat',
-        a_c_retriever = 'Golden Retriever',
-        a_c_rhesus = 'Rhesus',
-        a_c_rottweiler = 'Rottweiler',
-        a_c_westy = 'Westy',
-        a_c_dolphin = 'Dolphin',
-        a_c_fish = 'Fish',
-        a_c_sharkhammer = 'Hammer Shark',
-        a_c_humpback = 'Humpback',
-        a_c_killerwhale = 'Killer Whale',
-        a_c_stingray = 'Stingray',
-        a_c_sharktiger = 'Tiger Shark',
-        a_c_cormorant = 'Cormorant',
-        a_c_chickenhawk = 'Chicken Hawk',
-        a_c_crow = 'Crow', 
-        a_c_pigeon = 'Pigeon',
-        a_c_seagull = 'Seagull'
+        player_zero = "Michael",
+        player_one = "Franklin",
+        player_two = "Trevor",
+        mp_f_freemode_01 = "Online Female",
+        mp_m_freemode_01 = "Online Male",
+        cs_orleans = "Bigfoot",
+        ig_orleans = "Bigfoot 2",
+        a_c_boar = "Boar",
+        a_c_boar_02 = "Boar 2",
+        a_c_cat_01 = "Cat",
+        a_c_chimp = "Chimp",
+        a_c_chimp_02 = "Chimp 2",
+        a_c_chop = "Chop",
+        a_c_chop_02 = "Chop 2",
+        a_c_cow = "Cow",
+        a_c_coyote = "Coyote",
+        a_c_coyote_02 = "Coyote 2",
+        a_c_deer = "Deer",
+        a_c_deer_02 = "Deer 2",
+        a_c_shepherd = "German Shepherd",
+        a_c_hen = "Hen",
+        a_c_husky = "Husky",
+        a_c_mtlion = "Mountain Lion",
+        a_c_mtlion_02 = "Mountain Lion 2",
+        a_c_panther = "Panther",
+        a_c_pig = "Pig",
+        a_c_poodle = "Poodle",
+        a_c_pug = "Pug",
+        a_c_pug_02 = "Pug 2",
+        a_c_rabbit = "Rabbit",
+        a_c_rabbit_02 = "Rabbit 2",
+        a_c_rat = "Rat",
+        a_c_retriever = "Golden Retriever",
+        a_c_rhesus = "Rhesus",
+        a_c_rottweiler = "Rottweiler",
+        a_c_westy = "Westy",
+        a_c_dolphin = "Dolphin",
+        a_c_fish = "Fish",
+        a_c_sharkhammer = "Hammer Shark",
+        a_c_humpback = "Humpback",
+        a_c_killerwhale = "Killer Whale",
+        a_c_stingray = "Stingray",
+        a_c_sharktiger = "Tiger Shark",
+        a_c_cormorant = "Cormorant",
+        a_c_chickenhawk = "Chicken Hawk",
+        a_c_crow = "Crow",
+        a_c_pigeon = "Pigeon",
+        a_c_seagull = "Seagull"
     } 
     return translations[model]
 end
@@ -929,9 +929,9 @@ end
 function tune_vehicle(v, p, tell = false)
     local auto_perf_ind = {11,12,13,16,18,22}
     if p then
-        for auto_perf_ind as index do 
+        for auto_perf_ind as index do
             local veh_mods = VEHICLE.GET_VEHICLE_TYRES_CAN_BURST(v)
-            local upgrade = entities.get_upgrade_value(v, index) != entities.get_upgrade_max_value(v, index)               
+            local upgrade = entities.get_upgrade_value(v, index) != entities.get_upgrade_max_value(v, index)
             if veh_mods or upgrade then
                 entities.set_upgrade_value(v, index, entities.get_upgrade_max_value(v, index))
                 VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(v, false)
@@ -1000,7 +1000,6 @@ end
 function CanStartCEO()
     if not in_session() then return false end
     if players.get_boss(players.user()) ~= -1 then return false end
-
     local bossCount = 0
 
     for pid in players.list(false, true, true) do
