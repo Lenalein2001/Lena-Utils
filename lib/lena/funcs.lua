@@ -977,24 +977,94 @@ function update_help_text(commandref, text)
     end
 end
 
-function save_player_outfit(pid, name) -- A Cheaty way of doing this, but if it works, it works™
-    local f = filesystem.stand_dir().."Outfits/"..name
-    if io.isdir(f) then 
-        return notify("File already exists!")
+function get_outfit_components(model)
+    local t = {}
+    if model == "mp_m_freemode_01" or model == "mp_f_freemode_01" then
+        t[0] = "Head"
+        t[1] = "Mask"
+        -- t[2] = "Hair"
+        t[3] = "Torso"
+        t[11] = "Top"
+        t[8] = "Top 2"
+        t[9] = "Top 3"
+        t[5] = "Bag"
+        t[4] = "Pants"
+        t[6] = "Shoes"
+        t[7] = "Accessories"
+        t[10] = "Decals"
     else
-        if pid == players.user() then
-            trigger_commands($"saveoutfit {name}")
-        else
-            local c = PED.CLONE_PED(players.user_ped(), false, false, true)
-            trigger_commands($"copyoutfit {players.get_name(pid)}")
-            wait(50)
-            trigger_commands($"saveoutfit {name}")
-            repeat wait() until not util.command_box_is_open()
-            PED.CLONE_PED_TO_TARGET(c, players.user_ped())
-            wait(100)
-            entities.delete(c)
+        t[0] = "Head"
+        -- t[1] = "Facial Hair"
+        -- t[2] = "Hair"
+        t[3] = "Top"
+        t[11] = "Top 2"
+        t[8] = "Top 3"
+        t[9] = "Bag"
+        t[5] = "Gloves"
+        t[4] = "Pants"
+        t[6] = "Shoes"
+        t[7] = "Accessories"
+        t[10] = "Decals"
+    end
+    return t
+end
+function save_player_outfit(pid, name)
+    local props = {}
+    props[0] = "Hat"
+    props[1] = "Glasses"
+    props[2] = "Earwear"
+    props[3] = "Watch"
+    props[4] = "Bracelet"
+    local baseName = name
+    local outfitIndex = 0
+
+    local function generateOutfitName()
+        return outfitIndex == 0 and baseName or baseName .. " " .. outfitIndex
+    end
+
+    local Outfitdir = filesystem.stand_dir().."Outfits/"..generateOutfitName()..".txt"
+
+    while io.isfile(Outfitdir) do
+        outfitIndex = outfitIndex + 1
+        Outfitdir = filesystem.stand_dir().."Outfits/"..generateOutfitName()..".txt"
+    end
+
+    local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local final_components = {}
+    local final_props = {}
+    local model = ENTITY.GET_ENTITY_MODEL(ped)
+    while ENTITY.GET_ENTITY_MODEL(ped) == 0 do
+        util.yield()
+    end
+    model = util.reverse_joaat(model)
+    local stand_outfit = get_outfit_components(model)
+    for index, stand_name in stand_outfit do
+        final_components[stand_name] = PED.GET_PED_DRAWABLE_VARIATION(ped, index)
+        final_components[stand_name .. " Variation"] = PED.GET_PED_TEXTURE_VARIATION(ped, index)
+        if table.contains(final_props, props[index]) then
+            final_props[props[index]] = PED.GET_PED_PROP_INDEX(ped, index)
+            local variation = PED.GET_PED_PROP_TEXTURE_INDEX(ped, index)
+            if variation == -1 then
+                variation = 0
+            end
+            final_props[props[index] .. " Variation"] = variation
         end
-    end 
+    end
+
+    local file = io.open(Outfitdir, "w")
+    file:write("Model: " .. get_stand_model(model) .. "\n")
+    for thing, value in final_components do
+        file:write(thing .. ": " .. value .. "\n")
+    end
+    for thing, value in final_props do
+        file:write(thing .. ": " .. value .. "\n")
+    end
+    file:close()
+
+    local suggestedName = generateOutfitName()
+    if suggestedName ~= name then
+        return notify("File already exists!\nSaved as: " .. suggestedName)
+    end
 end
 
 function CanStartCEO()
