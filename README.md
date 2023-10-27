@@ -13,4 +13,4 @@ So my thanks go out to everyone, especially:
 - Jerry
 - Aarroonn
 - Wiri
-- And everyone in the [#programming](https://canary.discord.com/channels/956618713157763072/956618713581387806) Channel
+- And everyone in the [#programming](https://discord.com/channels/956618713157763072/956618713581387806) Channel
