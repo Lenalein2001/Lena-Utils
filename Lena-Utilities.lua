@@ -3825,6 +3825,7 @@ players.add_command_hook(function(pid, c)
     Jointimes[pid] = os.clock()
 
     if showJoinInfomsg then
+        if not in_session() then return end
         notify(names[pid].." has joined.\nSlot: "..pid.."\nRID/SCID: "..rids[pid].."\nIPv4: "..ips[pid])
     end
     if showJoinInfolog then
