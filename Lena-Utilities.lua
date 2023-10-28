@@ -39,8 +39,9 @@ handle_ptr = memory.alloc(13*8)
 previous_car = nil
 natives_version = "2944b"
 native_invoker.accept_bools_as_ints(true)
-local thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
-local thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
+thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
+thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
+group_name, copy_from = "Admin Gang", nil
 
 -------------------------------------
 -- Tabs
@@ -1250,7 +1251,7 @@ end)
                 if players.get_vehicle_model(pid) != 0 and not TASK.GET_IS_TASK_ACTIVE(ped, 160) and GET_SPAWN_STATE(players.user()) != 0 then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if players.get_name(driver) != "InvalidPlayer" and not pegasusveh and pid == driver and not players.is_in_interior(pid) then
-                        if bitset == 1024 then
+                        if bitset == 1024 and players.get_weapon_damage_modifier(pid) == 1 then
                             if not IsDetectionPresent(pid, "2Take1 User") then
                                 players.add_detection(pid, "2Take1 User", 7)
                             end
@@ -1475,6 +1476,42 @@ end)
                 notify("You need Ultimate in order to do that!")
             end
         end)
+
+        -------------------------------------
+        -- Group-Based Copy Session Info
+        -------------------------------------
+
+        menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
+            wait(100)
+            if copy_from ~= nil then
+                if copy_from:getState() ~= "Public" then
+                    util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling copy session info.")
+                    clearCopySession()
+                end
+            else
+                for menu.get_physical(menu.ref_by_path("Online>Player History>Noted Players>"..group_name)):getChildren() as link do
+                    local hp = link.target
+                    if hp:getState() == "Public" then
+                        util.toast($"{hp.name_for_config} is in a public session, copying their session info.")
+                        hp:refByRelPath("Copy Session Info").value = true
+                        copy_from = hp
+                        return
+                    end
+                end
+            end
+        end, function()
+            clearCopySession(on_stop)
+        end)
+        menu.text_input(protex, "Group Name", {"groupname"}, "", function(value)
+            group_name = value
+            if copy_from ~= nil then
+                clearCopySession()
+            end
+        end, group_name)
+
+        -------------------------------------
+        -- Disable Halloween Weather
+        -------------------------------------
 
         menu.action(protex, "Disable Halloween Weather", {""}, "Yes, this is a Protection. I can't Stand this Weather.", function()
             if not in_session() then return end
@@ -2788,39 +2825,6 @@ if is_developer() then
         end
         wait(1000)
     end)
-
-    local group_name = "Admin Gang"
-    local copy_from = nil
-    local function clearCopy()
-        if copy_from then
-            copy_from:refByRelPath("Copy Session Info").value = false
-            copy_from = nil
-        end
-    end
-    menu.toggle_loop(sdebug, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
-        if copy_from ~= nil then
-            if copy_from:getState() ~= "Public" then
-                util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling copy session info.")
-                clearCopy()
-            end
-        else
-            for menu.ref_by_path("Online>Player History>Noted Players>"..group_name):getChildren() as link do
-                local hp = link.target
-                if hp:getState() == "Public" then
-                    util.toast($"{hp.name_for_config} is in a public session, copying their session info.")
-                    hp:refByRelPath("Copy Session Info").value = true
-                    copy_from = hp
-                    return
-                end
-            end
-        end
-    end, function(); clearCopy(); end)
-    menu.text_input(sdebug, "Group Name", {"groupname"}, "", function(value)
-        group_name = value
-        if copy_from ~= nil then
-            clearCopy()
-        end
-    end, group_name)
 
     local web_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
     local webhook_url = web_file:read("a")
