@@ -2845,6 +2845,20 @@ if is_developer() then
         original_music_volume = value
         memory.write_byte(music_vol_memory_address, value)
     end)
+
+    menu.toggle_loop(sdebug, "Auto Inv Friends to CEO", {""}, "", function()
+        if not in_session() then return end
+        for players.list(true, true, false) as pid do
+            if (players.get_boss(players.user()) == players.user() and players.get_boss(pid) == -1) and IS_PLAYER_FRIEND(pid) and not players.is_in_interior(pid) then
+                wait(5000)
+                if not (players.get_boss(players.user()) == players.user() or players.get_boss(pid) == -1) then return end
+                trigger_commands($"ceoinv{players.get_name(pid)}")
+                log($"Invited {players.get_name(pid)}.")
+                wait(60*100)
+            end
+        end
+    end)
+
     -------------------------------------
     -- Natives
     -------------------------------------
