@@ -1175,3 +1175,10 @@ function replaceInDraft(search, replacement)
         end
     end
 end
+
+function clearCopySession()
+    if copy_from then
+        copy_from:refByRelPath("Copy Session Info").value = false
+        copy_from = nil
+    end
+end
