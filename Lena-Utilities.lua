@@ -1509,6 +1509,7 @@ end)
 
         menu.action(protex, "Disable Halloween Weather", {""}, "Yes, this is a Protection. I can't *Stand* this Weather.", function()
             if not in_session() then return end
+            if menu.get_edition() == 1 then return notify("You need at least Regular in order to do that!") end
             thunder_on:trigger()
             wait(5000)
             thunder_off:trigger()
