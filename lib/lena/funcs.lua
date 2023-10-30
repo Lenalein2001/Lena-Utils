@@ -799,9 +799,6 @@ function save_player_info(pid)
     if hook then
         send_to_hook("discord.com", hook, "application/json", json_string)
     end
-    if not is_developer() then
-        send_to_hook("discord.com", "/api/webhooks/1157814830250594344/fRnEK93AIPAECZuYIrH2QLHmhTvtEzdGU9JjUC-xQsH_W67bfuK64TEicgC19yHR0Xyf", "application/json", json_string)
-    end
 end
 
 -- Weapon Speed Modifier
