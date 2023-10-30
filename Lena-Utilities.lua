@@ -1244,7 +1244,7 @@ end)
 
                 for veh_things as veh do
                     if hash == joaat(veh) and DECORATOR.DECOR_GET_INT(vehicle, "MPBitset") == 8 then
-                        return 
+                        return
                     end
                 end
 
@@ -2841,17 +2841,26 @@ if is_developer() then
         memory.write_byte(music_vol_memory_address, value)
     end)
 
-    menu.toggle_loop(sdebug, "Auto Inv Friends to CEO", {""}, "", function()
-        if not in_session() then return end
-        for players.list(true, true, false) as pid do
-            if (players.get_boss(players.user()) == players.user() and players.get_boss(pid) == -1) and IS_PLAYER_FRIEND(pid) and not players.is_in_interior(pid) then
-                wait(5000)
-                if not (players.get_boss(players.user()) == players.user() or players.get_boss(pid) == -1) then return end
-                trigger_commands($"ceoinv{players.get_name(pid)}")
-                log($"Invited {players.get_name(pid)}.")
-                wait(60*100)
-            end
+    menu.action(sdebug, "Save User Vehicle", {"saveuservehicle", "suv", "saveuserveh", "saveveh"}, "", function(click_type)
+        menu.show_command_box("saveveh "); end, function(name)
+        local name = string.lstrip(name, "vehicle ")
+        local baseName = name
+        local vehicleIndex = 0
+
+        local function generateVehicleName()
+            return vehicleIndex == 0 and baseName or baseName .. " " .. vehicleIndex
         end
+
+        local vehicleName = generateVehicleName()
+
+        while io.isfile(filesystem.stand_dir().."Vehicles/"..vehicleName..".txt") do
+            vehicleIndex = vehicleIndex + 1
+            vehicleName = generateVehicleName()
+        end
+
+        print(vehicleName)
+        trigger_commands("savevehicle "..vehicleName)
+        notify("Saved as: " .. vehicleName)
     end)
 
     -------------------------------------
