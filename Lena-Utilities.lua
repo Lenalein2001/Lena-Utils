@@ -23,7 +23,7 @@
 -------------------------------------
 
 scriptname = "Lena-Utilities"
-log = util.log 
+log = util.log
 notify = util.toast
 wait = util.yield
 wait_once = util.yield_once
@@ -420,7 +420,6 @@ end)
     -------------------------------------
 
     LegitRapidMS = menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to grenade and back to the weapon.", 1, 1000, 100, 50, function (value); end)
-
     LegitRapidFire = false
     menu.toggle(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main Weapon.", function(toggled)
         local ped = players.user_ped()
@@ -1196,7 +1195,7 @@ end)
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
             for players.list() as pid do
                 if players.are_stats_ready(pid) and players.exists(pid) then
-                    if not players.are_stats_ready(pid) then return end
+                    while not players.are_stats_ready(pid) do return end
                     wait(2000)
                     if not in_session() then return end
                     local rank = players.get_rank(pid)
@@ -1204,7 +1203,7 @@ end)
                     local kills = players.get_kills(pid)
                     local deaths = players.get_deaths(pid)
                     local kdratio = players.get_kd(pid)
-                    if kdratio < 0 or kdratio > 100 or kills < 0 or kills > 50000 or deaths < 0 or deaths > 50000 then
+                    if kdratio < 0 or kdratio > 100 or kills < 0 or kills > 100000 or deaths < 0 or deaths > 70000 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (K/D)") then
                             players.add_detection(pid, "Unlegit Stats (K/D)", 7, 50)
                         end
