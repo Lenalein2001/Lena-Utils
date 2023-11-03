@@ -1481,8 +1481,7 @@ end)
         -------------------------------------
         group_name = menu.text_input(protex, "Group Name", {"groupname"}, "", function(); end, "Admins")
         group_copy = menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
-            if not menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value):isValid() then group_copy.value = false end
-            wait()
+            if not menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value):isValid() then group_copy.value = false return notify("Group not Valid!") end
             if copy_from ~= nil then
                 if string.lfind(copy_from:getPhysical().menu_name, "[Public]") == nil then
                     util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling copy session info.")
