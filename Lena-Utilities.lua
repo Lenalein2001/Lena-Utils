@@ -2665,6 +2665,14 @@ end)
         end
     end)
 
+    menu.action(misc, "Copy As Command Link", {"copycommandlink"}, "Use with Hotkeys.", function()
+        if (cmd := getCommandfromRef()) then
+            util.copy_to_clipboard("["..getCommandfromRef().."]("..urlEncode("https://stand.gg/commandbox#" .. getCommandfromRef()..")"))
+        else
+            notify("You are not focusing any command. :/")
+        end
+    end)
+
 -------------------------------------
 -------------------------------------
 -- AI Made Actions

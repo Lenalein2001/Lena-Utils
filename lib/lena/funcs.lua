@@ -858,6 +858,11 @@ function getPathFromRef(ref: userdata, lang_code: ?string = nil, override_separa
     end
     return path:sub(0, -(separator:len() + 1))
 end
+function getCommandfromRef()
+    for menu.get_command_names(getFocusedCommand()) as i do
+        return tostring(i)
+    end
+end
 
 function DOES_VEHICLE_HAVE_IMANI_TECH(vehicle_model)
     switch vehicle_model do
