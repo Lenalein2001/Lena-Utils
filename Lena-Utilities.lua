@@ -69,6 +69,7 @@ anim_misc = menu.list(anims, "Misc", {""}, "")
 local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Animations. Lock Outfit breaks it.")
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
 local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam.")
+local plane_wep_manager = menu.list(weap, "Cannon Manager", {""}, "Modify a Plane's on-board Cannons.")
 local vehicle_gun_list = menu.list(weap, "Vehicle Gun", {""}, "Spawn a Vehicle at Impact Coords.")
 -- Vehicle
 local better_vehicles = menu.list(vehicle, "Better Vehicles", {""}, "")
@@ -442,6 +443,25 @@ end)
         else
             LegitRapidFire = false
         end
+    end)
+
+    -------------------------------------
+    -- Cannon Manager
+    -------------------------------------
+
+    local cannon_type = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? B8")
+    menu.list_action(plane_wep_manager, "Explosion Type", {}, "", explosionTypes, function(index, value)
+       memory.write_int(cannon_type + 0x10, index - 1)
+    end)
+    local alternate_wait_time = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 50")
+    menu.click_slider_float(plane_wep_manager, "Alternate Wait Time", {}, "", 0, 100, 0, 1, function(value)
+       local ptr_value = memory.read_int(alternate_wait_time + 0x15);
+       memory.write_float(alternate_wait_time + ptr_value + 0x19, value / 100)
+    end)
+    local time_between_shots = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 3C")
+    menu.click_slider_float(plane_wep_manager, "Time Between Shots", {}, "", 0, 100, 0, 1, function(value)
+       local ptr_value = memory.read_int(time_between_shots + 0x15);
+       memory.write_float(alternate_wait_time + ptr_value + 0x19, value / 10000)
     end)
 
     -------------------------------------
