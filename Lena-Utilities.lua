@@ -198,6 +198,9 @@ auto_update_config = {
 -- Required Files
 -------------------------------------
 
+util.ensure_package_is_installed(natives_version)
+util.require_natives(natives_version)
+
 lenaDir = filesystem.scripts_dir().."Lena\\"
 libDir = filesystem.scripts_dir().."lib\\lena\\"
 local scaleForm = require("ScaleformLib")
@@ -222,9 +225,6 @@ if async_http.have_access() then
 else
     notify("This Script needs Internet Access for the Auto Updater to work!")
 end
-
-util.ensure_package_is_installed(natives_version)
-util.require_natives(natives_version)
 
 if PED == nil then
     local msg1 = "It looks like the required natives file was not loaded properly. This file should be downloaded along with my script and all other dependencies. Natives file required: "
@@ -469,8 +469,7 @@ end)
     -------------------------------------
 
     local modifiedSpeed
-    bullet_multiplier = menu.slider_float(weap, "Bullet Speed Mult", {""}, "Changes the Speed of all weapons that are not Hitscan.", 10, 100000, 100, 10, function(value); end)
-
+    local bullet_multiplier = menu.slider_float(weap, "Bullet Speed Mult", {""}, "Changes the Speed of all weapons that are not Hitscan.", 10, 100000, 100, 10, function(value); end)
     util.create_tick_handler(function()
         local CPed = entities.handle_to_pointer(players.user_ped())
         if CPed == 0 or not menu.get_value(bullet_multiplier) then return end
@@ -2853,7 +2852,7 @@ if is_developer() then
     end)
 
     local music_vol_memory_address = memory.scan("") + 0x1FE5E38
-    radio_volume_ref = menu.click_slider_float(sdebug, "Radio Volume", {}, "This might earrape you... have fun!", 0, 100000, memory.read_byte(music_vol_memory_address) * 100, 100, function()
+    radio_volume_ref = menu.click_slider_float(sdebug, "Radio Volume", {"modifyradiovolume"}, "This might earrape you... have fun!", 0, 100000, memory.read_byte(music_vol_memory_address) * 100, 100, function()
         local value = (menu.get_value(radio_volume_ref) / 100)
         original_music_volume = value
         memory.write_byte(music_vol_memory_address, value)
@@ -2861,22 +2860,19 @@ if is_developer() then
 
     menu.action(sdebug, "Save User Vehicle", {"saveuservehicle", "suv", "saveuserveh", "saveveh"}, "", function(click_type)
         menu.show_command_box("saveveh "); end, function(name)
-        local name = string.lstrip(name, "vehicle ")
+        local name = string.lstrip(name, "saveveh ")
         local baseName = name
         local vehicleIndex = 0
-
         local function generateVehicleName()
             return vehicleIndex == 0 and baseName or baseName .. " " .. vehicleIndex
         end
 
         local vehicleName = generateVehicleName()
-
         while io.isfile(filesystem.stand_dir().."Vehicles/"..vehicleName..".txt") do
             vehicleIndex = vehicleIndex + 1
             vehicleName = generateVehicleName()
         end
 
-        print(vehicleName)
         trigger_commands("savevehicle "..vehicleName)
         notify("Saved as: " .. vehicleName)
     end)
@@ -2916,7 +2912,7 @@ if is_developer() then
             notify($"Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
             log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Blip: {blip} | Plate:{plate_text}.")
         end)
-        menu.action(nativevehicle, "Get Decorator", {""}, "Get set decorators from Vehicle.", function()
+        menu.action(nativevehicle, "Get Decorators", {""}, "Get set decorators from Vehicle.", function()
             local ints = {
                 "FMDeliverableID", 
                 "Not_Allow_As_Saved_Veh",
@@ -3941,7 +3937,7 @@ util.create_tick_handler(function()
         local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(focused)
         if GRAPHICS.UI3DSCENE_IS_AVAILABLE() then
             if GRAPHICS.UI3DSCENE_PUSH_PRESET("CELEBRATION_WINNER") then
-                --[[ -Y = Push away, Z = Elevation ]]--
+                --[[ -Y = Push away, Z = Elevation ]]
                 GRAPHICS.UI3DSCENE_ASSIGN_PED_TO_SLOT("CELEBRATION_WINNER", ped, 0, 0.0, 0.0, 0.0);
             end
         end
