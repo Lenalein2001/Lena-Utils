@@ -2676,17 +2676,25 @@ end)
     -- Copy As Focus Link
     -------------------------------------
 
-    menu.action(misc, "Copy As Focus Link", {"copyfocuslink"}, "Use with Hotkeys.", function()
+    menu.action(misc, "Copy Link", {"copylinks"}, "Use with Hotkeys.", function()
+        local focusLink, commandLink
         if (cmd := getFocusedCommand()) then
-            util.copy_to_clipboard("["..getPathFromRef(cmd, "en", ">", false).."]("..urlEncode("https://stand.gg/focus#" .. getPathFromRef(cmd, "en", ">", false))..")")
-        else
-            notify("You are not focusing any command. :/")
+            focusLink = "["..getPathFromRef(cmd, "en", ">", false).."]("..urlEncode("https://stand.gg/focus#" .. getPathFromRef(cmd, "en", ">", false))..")"
         end
-    end)
+        if (cmd := getCommandFromRef()) then
+            if getCommandDefault() then
+                commandLink = "[U > " .. getCommandFromRef():gsub("%%20", " ") .. " > Enter](https://stand.gg/commandbox#" .. getCommandFromRef() .. ")\nDefault: [U > " .. getCommandFromRef(true):gsub("%%20", " ") .. " > Enter](https://stand.gg/commandbox#" .. getCommandFromRef(true)..")"
+            else
+                commandLink = "[U > " .. getCommandFromRef():gsub("%%20", " ") .. " > Enter](https://stand.gg/commandbox#" .. getCommandFromRef() .. ")"
+            end
+        end
 
-    menu.action(misc, "Copy As Command Link", {"copycommandlink"}, "Use with Hotkeys.", function()
-        if (cmd := getCommandfromRef()) then
-            util.copy_to_clipboard("["..getCommandfromRef().."]("..urlEncode("https://stand.gg/commandbox#" .. getCommandfromRef()..")"))
+        if focusLink and commandLink then
+            util.copy_to_clipboard("Focus Link: " .. focusLink .. "\n\nCommand Link: " .. commandLink)
+        elseif focusLink then
+            util.copy_to_clipboard("Focus Link: " .. focusLink)
+        elseif commandLink then
+            util.copy_to_clipboard("Command Link: " .. commandLink)
         else
             notify("You are not focusing any command. :/")
         end
