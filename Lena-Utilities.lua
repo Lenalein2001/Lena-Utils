@@ -3039,7 +3039,8 @@ players.add_command_hook(function(pid, cmd)
         0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 
+        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
+        0x0DA03FE9, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3106,10 +3107,6 @@ players.add_command_hook(function(pid, cmd)
             local kills, deaths, kdratio = players.get_kills(pid), players.get_deaths(pid), string.format("%.2f", players.get_kd(pid))
             local language = language_string(players.get_language(pid))
             notify($"Name: {pname}\nLanguage: {language}\nRank: {rank}\nMoney: {money}M$\nKills/Deaths: {kills}/{deaths}\nRatio: {kdratio}")
-        end)
-
-        menu.action(friendly, "Get Detections", {""}, "[Debug]", function()
-            getDetections(pid)
         end)
 
         -------------------------------------
@@ -3180,7 +3177,7 @@ players.add_command_hook(function(pid, cmd)
         -- Teleport to Player
         -------------------------------------
 
-        menu.action(friendly, "Teleport to Player", {""}, $"Teleport to {players.get_name(pid)}.", function()
+        menu.action(friendly, "Teleport to Player", {""}, $"Teleport to {pname}.", function()
             local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player, 0.0, 2, 0), false, false, false)
         end)
@@ -3200,7 +3197,7 @@ players.add_command_hook(function(pid, cmd)
         -------------------------------------
 
         local spec = menu.ref_by_rel_path(menu.player_root(pid), "Spectate")
-        brv_six = menu.toggle(spec, "Bravo Six", {"bravo"}, "Bravo six, going dark. Blocks Outgoing Syncs with the Player.", function(toggled)
+        brv_six = menu.toggle(spec, "Bravo Six", {"bravo"}, $"Bravo six, going dark. Blocks Outgoing Syncs with {pname}.", function(toggled)
             local outgoingSyncs = menu.ref_by_rel_path(menu.player_root(pid), "Outgoing Syncs>Block")
             local nuts = menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Nuts Method")
             if pid == players.user() then 
@@ -3224,28 +3221,28 @@ players.add_command_hook(function(pid, cmd)
         -------------------------------------
 
         menu.toggle(mpvehicle, "God Mode", {"vgm"}, "Toggles Vehicle Godmode.", function(on)
-            local vehicle = get_vehicle_ped_is_in(pid)
-            if vehicle and request_control(pid, true) then
-                VEHICLE.SET_VEHICLE_ENVEFF_SCALE(vehicle, 0.0)
-                VEHICLE.SET_VEHICLE_BODY_HEALTH(vehicle, 1000.0)
-                VEHICLE.SET_VEHICLE_ENGINE_HEALTH(vehicle, 1000.0)
-                VEHICLE.SET_VEHICLE_FIXED(vehicle)
-                VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
-                VEHICLE.SET_VEHICLE_PETROL_TANK_HEALTH(vehicle, 1000.0)
-                VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0)
+            local veh = get_vehicle_ped_is_in(pid)
+            if veh and request_control(veh, true) then
+                VEHICLE.SET_VEHICLE_ENVEFF_SCALE(veh, 0.0)
+                VEHICLE.SET_VEHICLE_BODY_HEALTH(veh, 1000.0)
+                VEHICLE.SET_VEHICLE_ENGINE_HEALTH(veh, 1000.0)
+                VEHICLE.SET_VEHICLE_FIXED(veh)
+                VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(veh)
+                VEHICLE.SET_VEHICLE_PETROL_TANK_HEALTH(veh, 1000.0)
+                VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
                 for i = 0, 10 do 
-                    VEHICLE.SET_VEHICLE_TYRE_FIXED(vehicle, i)
+                    VEHICLE.SET_VEHICLE_TYRE_FIXED(veh, i)
                 end
-                ENTITY.SET_ENTITY_INVINCIBLE(vehicle, on)
-                ENTITY.SET_ENTITY_PROOFS(vehicle, on, on, on, on, on, on, true, on)
-                VEHICLE.SET_DISABLE_VEHICLE_PETROL_TANK_DAMAGE(vehicle, on)
-                VEHICLE.SET_DISABLE_VEHICLE_PETROL_TANK_FIRES(vehicle, on)
-                VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(vehicle, not on)
-                VEHICLE.SET_VEHICLE_CAN_BREAK(vehicle, not on)
-                VEHICLE.SET_VEHICLE_ENGINE_CAN_DEGRADE(vehicle, not on)
-                VEHICLE.SET_VEHICLE_EXPLODES_ON_HIGH_EXPLOSION_DAMAGE(vehicle, not on)
-                VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(vehicle, not on)
-                VEHICLE.SET_VEHICLE_WHEELS_CAN_BREAK(vehicle, not on)
+                ENTITY.SET_ENTITY_INVINCIBLE(veh, on)
+                ENTITY.SET_ENTITY_PROOFS(veh, on, on, on, on, on, on, true, on)
+                VEHICLE.SET_DISABLE_VEHICLE_PETROL_TANK_DAMAGE(veh, on)
+                VEHICLE.SET_DISABLE_VEHICLE_PETROL_TANK_FIRES(veh, on)
+                VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(veh, not on)
+                VEHICLE.SET_VEHICLE_CAN_BREAK(veh, not on)
+                VEHICLE.SET_VEHICLE_ENGINE_CAN_DEGRADE(veh, not on)
+                VEHICLE.SET_VEHICLE_EXPLODES_ON_HIGH_EXPLOSION_DAMAGE(veh, not on)
+                VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(veh, not on)
+                VEHICLE.SET_VEHICLE_WHEELS_CAN_BREAK(veh, not on)
             end
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
@@ -3664,7 +3661,7 @@ players.add_command_hook(function(pid, cmd)
             local player = pids[math.random(#pids)]
             local killer, victim = PLAYER.GET_PLAYER_PED(player), players.get_position(pid)
             FIRE.ADD_OWNED_EXPLOSION(killer, victim, 1, 1.0, false, true, 0.0)
-            notify("Player "..players.get_name(player).." was blamed for killing "..players.get_name(pid).."!")
+            notify("Player "..players.get_name(player)..$" was blamed for killing {pname}!")
         end, nil, nil, COMMANDPERM_RUDE)
 
         -------------------------------------
@@ -3708,7 +3705,7 @@ players.add_command_hook(function(pid, cmd)
                     trigger_commands($"bounty {players.get_name(p)} 5000")
                 end
                 if players.get_bounty(p) != nil and PLAYER.IS_PLAYER_PLAYING(p) then
-                    trigger_commands($"as {players.get_name(pid)} explode {players.get_name(p)}")
+                    trigger_commands($"as {pname} explode {players.get_name(p)}")
                 end
             end
         end, nil, nil, COMMANDPERM_RUDE)
@@ -3726,9 +3723,8 @@ players.add_command_hook(function(pid, cmd)
         menu.action(kicks, "Block Kick", {"emp", "block"}, $"Will kick and block {pname} from joining you ever again.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
 
-            if menu.get_value(savekicked) then
-                trigger_commands($"savep {pname}")
-            end
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+
             wait(500)
             trigger_commands($"historyblock{pname} on")
             if not is_developer() then
@@ -3741,8 +3737,8 @@ players.add_command_hook(function(pid, cmd)
 
         menu.action(kicks, "Rape", {"rape"}, "A Unblockable kick that won't tell the target or non-hosts who did it.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
-
             if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+
             wait(500)
             trigger_commands($"loveletter{pname}")
             if not is_developer() then
@@ -3754,7 +3750,9 @@ players.add_command_hook(function(pid, cmd)
 
         menu.action(kicks, "Host Kick", {"hostkick", "hokick"}, "Only works as Host.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
 
+            wait(500)
             if NETWORK.NETWORK_IS_HOST() then
                 NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
             end
@@ -3766,8 +3764,8 @@ players.add_command_hook(function(pid, cmd)
 
         menu.action(crashes, "Block Join Crash", {"gtfo", "netcrash"}, $"Crashes and Blocks {pname} from joining you again.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
-
             if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+
             trigger_commands($"ngcrash{pname}")
             wait(500)
             trigger_commands($"crash{pname}")
@@ -3787,15 +3785,13 @@ players.add_command_hook(function(pid, cmd)
         end, nil, nil, COMMANDPERM_AGGRESSIVE)
 
         menu.action(crashes, "Fragment Crash", {""}, "2Shit1 Crash. Victim needs to look at it.", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-            else
-                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                local object = entities.create_object(joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
-                OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
-                wait(5000)
-                entities.delete_by_handle(object)
-            end
+            if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+
+            local object = entities.create_object(joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
+            OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
+            wait(5000)
+            entities.delete_by_handle(object)
         end)
 
         menu.action(crashes, "MK2 Griefer", {"grief"}, "Should work one some menus, idk. Don't crash players.", function()
@@ -3824,9 +3820,11 @@ players.add_command_hook(function(pid, cmd)
         end)
 
         menu.action(crashes, "Invalid Heli Task", {"task2"}, "Works on most menus. <3", function()
+            if pid == players.user() then return notify(lang.get_localised(-1974706693)) end
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local pos = players.get_position(pid)
-            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
             BlockSyncs(pid, function()
                 for i = 1, 10 do
                     if not players.exists(pid) then
@@ -3845,28 +3843,29 @@ players.add_command_hook(function(pid, cmd)
         end)
 
         menu.action(crashes, "Invalid Animation", {"squish"}, "Blocked by some popular menus.", function()
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-            else
-                if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                local user = PLAYER.GET_PLAYER_PED(players.user())
-                local pos = ENTITY.GET_ENTITY_COORDS(ped)
-                local my_pos = ENTITY.GET_ENTITY_COORDS(user)
-                local anim_dict = ("anim@mp_player_intupperstinker")
-                request_animation(anim_dict)
-                BlockSyncs(pid, function()
-                    ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, pos, false, false, false)
-                    wait(100)
-                    TASK.TASK_SWEEP_AIM_POSITION(user, anim_dict, "I", "Love", "You", -1, 0.0, 0.0, 0.0, 0.0, 0.0)
-                    wait(100)
-                end)
-                TASK.CLEAR_PED_TASKS_IMMEDIATELY(user)
-                ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, my_pos, false, false, false)
-            end
+            if pid == players.user() then return notify(lang.get_localised(-1974706693)) end
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+
+            local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            local user = PLAYER.GET_PLAYER_PED(players.user())
+            local pos = ENTITY.GET_ENTITY_COORDS(ped)
+            local my_pos = ENTITY.GET_ENTITY_COORDS(user)
+            local anim_dict = ("anim@mp_player_intupperstinker")
+            request_animation(anim_dict)
+            BlockSyncs(pid, function()
+                ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, pos, false, false, false)
+                wait(100)
+                TASK.TASK_SWEEP_AIM_POSITION(user, anim_dict, "I", "Love", "You", -1, 0.0, 0.0, 0.0, 0.0, 0.0)
+                wait(100)
+            end)
+            TASK.CLEAR_PED_TASKS_IMMEDIATELY(user)
+            ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, my_pos, false, false, false)
         end)
 
         menu.action(crashes, "Draki Crash", {""}, "", function()
+            if pid == players.user() then return notify(lang.get_localised(-1974706693)) end
+            if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+            
             local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local hash = util.joaat("cs_taostranslator2")
             while not STREAMING.HAS_MODEL_LOADED(hash) do

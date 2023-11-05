@@ -858,9 +858,19 @@ function getPathFromRef(ref: userdata, lang_code: ?string = nil, override_separa
     end
     return path:sub(0, -(separator:len() + 1))
 end
-function getCommandfromRef()
-    for menu.get_command_names(getFocusedCommand()) as i do
-        return tostring(i)
+function getCommandFromRef(default)
+    for menu.get_command_names(getFocusedCommand()) as input do
+        local state = getFocusedCommand():getState()
+        if default then input = input.." ".. getFocusedCommand():getDefaultState() else input = input.." ".. state end
+        local output = input:gsub("%s", "%%20")
+        return tostring(output)
+    end
+end
+function getCommandDefault()
+    local state = getFocusedCommand():getState()
+    local default_state = getFocusedCommand():getDefaultState()
+    if state != default_state then
+        return default_state
     end
 end
 
@@ -1010,6 +1020,7 @@ function get_outfit_components(model)
     end
     return t
 end
+
 function save_player_outfit(pid, name)
     local props = {}
     props[0] = "Hat"
