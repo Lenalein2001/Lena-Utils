@@ -1441,6 +1441,25 @@ end)
             wait(100)
         end)
 
+        -------------------------------------
+        -- Anti Cheat
+        -------------------------------------
+
+        menu.toggle(detections, "Anti Cheat", {""}, "", function(on, click_type)
+            if on then
+                players.on_flow_event_done(function(p, name, extra)
+                    name = lang.get_localised(name)
+                    if extra then
+                        name ..= " ("
+                        name ..= extra
+                        name ..= ")"
+                    end
+                    if string.lfind(name, "REPORT_MYSELF_EVENT") and not IsDetectionPresent(p, "REPORT_MYSELF_EVENT_V3") then
+                        players.add_detection(p, "REPORT_MYSELF_EVENT_V3")
+                    end
+                end)
+            end
+        end)
     -------------------------------------
     -- Protections
     -------------------------------------
