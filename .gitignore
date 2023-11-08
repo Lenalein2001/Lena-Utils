@@ -1,1 +1,5 @@
 *.xml
+*.ffs_db
+*._gs
+*.log
+*.gsl
