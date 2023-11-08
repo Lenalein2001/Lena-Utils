@@ -825,11 +825,11 @@ function AmmoSpeed:reset()
 end
 
 -- Copy As Focus Link
-function urlEncode(input: string): string
+function urlEncode(input)
 	local output = input:gsub(">", "%%3E"):gsub("%s", "%%20")
 	return output
 end
-function getFocusedCommand(): ?userdata
+function getFocusedCommand()
 	for menu.get_current_ui_list():getChildren() as cmd do
 		if cmd:isFocused() then return cmd end
 	end
