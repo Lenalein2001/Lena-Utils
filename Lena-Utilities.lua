@@ -71,12 +71,12 @@ local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Anima
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
 local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam.")
 local plane_wep_manager = menu.list(weap, "Cannon Manager", {""}, "Modify a Plane's on-board Cannons.")
-local vehicle_gun_list = menu.list(weap, "Vehicle Gun", {""}, "Spawn a Vehicle at Impact Coords.")
+local vehicle_gun_list = menu.list(weap, "Vehicle Gun", {"lenavehgun"}, "Spawn a Vehicle at Impact Coords.")
 -- Vehicle
 local better_vehicles = menu.list(vehicle, "Better Vehicles", {""}, "")
 local doorcontrol = menu.list(vehicle, "Doors", {""}, "")
 local engine_control = menu.list(vehicle, "Engine Control", {""}, "")
-local vehicle_flares = menu.list(vehicle, "Countermeasures", {""}, "War Thunder-like Countermeasues.")
+local vehicle_flares = menu.list(vehicle, "Countermeasures", {"lenacountermeasures"}, "War Thunder-like Countermeasues.")
 -- Online
 local mpsession = menu.list(online, "Session", {""}, "Features for the current Session.")
 local hosttools = menu.list(mpsession, "Host Tools", {""}, "Tools that can only be used as the Session Host or to force Session Host.")
@@ -2435,7 +2435,7 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Grab Script Host", {"sh"}, "Grabs Script Host in a less destructive way.", function()
-            trigger_commands("givesh"..players.get_name(players.user()))
+            trigger_commands($"givesh {players.get_name(players.user())}")
         end)
 
         -------------------------------------
@@ -2538,15 +2538,18 @@ end)
     -- Disable Numpad
     -------------------------------------
 
-    menu.toggle_loop(misc, "Disable Control Keys", {"dn"}, "Disables certain Keys while Stand is open.", function()
+    menu.toggle_loop(misc, "Disable Control Keys", {"disablecontrolkeys", "dn"}, "Disables certain Keys while Stand is open.", function()
         if not menu.is_open() then return end
         for numpadControls as control do
             PAD.DISABLE_CONTROL_ACTION(2, control, true)
         end
     end)
 
+    -------------------------------------
+    -- Disable Scripted Music
+    -------------------------------------
 
-    menu.toggle_loop(misc, "Disable Scripted Music", {""}, "", function() -- Credits too err_net_array for the Audio Name <3
+    menu.toggle_loop(misc, "Disable Scripted Music", {""}, "", function() -- Credits to err_net_array for the Audio Name <3
         if AUDIO.AUDIO_IS_MUSIC_PLAYING() then
             AUDIO.TRIGGER_MUSIC_EVENT("GLOBAL_KILL_MUSIC")
         end
@@ -3048,7 +3051,7 @@ players.add_command_hook(function(pid, cmd)
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
-        0x0DA03FE9, 0x0C0B7D18,
+        0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
