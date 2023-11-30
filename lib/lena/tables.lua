@@ -293,3 +293,18 @@ explosionTypes = {
     "VEHICLEMINE_TAR",
     "RAYGUN"
 }
+
+Modulepath = {
+    focuslink = {
+        name = "Focus Link",
+        giturl = "/Lenalein2001/Lena-Utils-Modules/main/focus_link.pluto",
+        absolute_path = lenaModules.."focus_link.pluto",
+        path = "lena.modules.focus_link"
+    },
+    nitro = {
+        name = "Nitro",
+        giturl = "/Lenalein2001/Lena-Utils-Modules/main/nitro.pluto",
+        absolute_path = lenaModules.."nitro.pluto",
+        path = "lena.modules.nitro"
+    }
+}
