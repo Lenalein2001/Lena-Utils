@@ -107,7 +107,7 @@ function closestveh(myPos)
             closestVeh = veh
         end
     end
-    if closestVeh ~= (nil or 0) then
+    if closestVeh != (nil or 0) then
         return entities.pointer_to_handle(closestVeh)
     end
 end
@@ -250,7 +250,7 @@ function get_stand_model(model)
 end
 
 function BitTest(bits, place)
-    return (bits & (1 << place)) ~= 0
+    return (bits & (1 << place)) != 0
 end
 
 function IS_PLAYER_USING_ORBITAL_CANNON(player)
@@ -303,7 +303,7 @@ function getDetections(pid)
                 end
                 for cmd:getChildren() as c do
                     local lang_string = lang.get_string(menu.get_menu_name(c))
-                    if lang_string and lang_string ~= "" and lang_string ~= "0" then
+                    if lang_string and lang_string != "" and lang_string != "0" then
                         table.insert(detections, lang_string)
                     end
                 end
@@ -360,7 +360,7 @@ end
 function GET_INT_LOCAL(Script, Local)
     if memory.script_local(Script, Local) ~= 0 then
         local Value = memory.read_int(memory.script_local(Script, Local))
-        if Value ~= nil then
+        if Value != nil then
             return Value
         end
     end
@@ -392,7 +392,7 @@ function ADD_MP_INDEX(Stat)
     return Stat
 end
 function SET_INT_LOCAL(Script, Local, Value)
-    if memory.script_local(Script, Local) ~= 0 then
+    if memory.script_local(Script, Local) != 0 then
         memory.write_int(memory.script_local(Script, Local), Value)
     end
 end
@@ -433,9 +433,17 @@ function request_animation(hash)
     end
 end
 
+function getWeaponHash(ped)
+    local wpn_ptr = memory.alloc_int()
+    if WEAPON.GET_CURRENT_PED_VEHICLE_WEAPON(ped, wpn_ptr) then -- only returns true if the weapon is a vehicle weapon
+        return memory.read_int(wpn_ptr), true
+    end
+    return WEAPON.GET_SELECTED_PED_WEAPON(ped), false
+end
+
 function BlockSyncs(pid, callback)
     for players.list(false, true, true) as i do
-        if i ~= pid then
+        if i != pid then
             local outSync = menu.ref_by_rel_path(menu.player_root(i), "Outgoing Syncs>Block")
             trigger_command(outSync, "on")
         end
@@ -443,7 +451,7 @@ function BlockSyncs(pid, callback)
     wait(10)
     callback()
     for players.list(false, true, true) as i do
-        if i ~= pid then
+        if i != pid then
             local outSync = menu.ref_by_rel_path(menu.player_root(i), "Outgoing Syncs>Block")
             trigger_command(outSync, "off")
         end
@@ -458,14 +466,6 @@ function addr_from_pointer_chain(addr, offsets)
 	end
 	addr = addr + offsets[#offsets]
 	return addr
-end
-
-function getWeaponHash(ped)
-    local wpn_ptr = memory.alloc_int()
-    if WEAPON.GET_CURRENT_PED_VEHICLE_WEAPON(ped, wpn_ptr) then -- only returns true if the weapon is a vehicle weapon
-        return memory.read_int(wpn_ptr), true
-    end
-    return WEAPON.GET_SELECTED_PED_WEAPON(ped), false
 end
 
 function decimalToHex2s(decimal, numBits = 32)
@@ -678,7 +678,7 @@ function get_player_crew(player)
 		local tag = memory.read_string(clanDesc + 0x88)
 		local rank = memory.read_string(clanDesc + 0xB0)
 		local motto = players.clan_get_motto(player)
-		local alt_badge = memory.read_byte(clanDesc + 0xA0) ~= 0 and "On" or "Off"
+		local alt_badge = memory.read_byte(clanDesc + 0xA0) != 0 and "On" or "Off"
 		-- local rank = memory.read_int(clanDesc + 30 * 8)
         return {
             icon        = icon,
@@ -808,7 +808,7 @@ AmmoSpeed.__eq = function (a, b)
     return a.address == b.address
 end
 function AmmoSpeed.new(address)
-    assert(address ~= 0, "got a nullpointer")
+    assert(address != 0, "got a nullpointer")
     local instance = setmetatable({}, AmmoSpeed)
     instance.address = address
     instance.defaultValue = memory.read_float(address)
@@ -922,7 +922,7 @@ function format_money_value(value)
 end
 function check_and_write_money_change()
     local current_money = get_current_money()
-    if current_money ~= initial_money then
+    if current_money != initial_money then
         local difference = calculate_difference(initial_money, current_money)
         local file = io.open($"{lenaDir}Transactions for {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}.txt", "a")
         if file then
@@ -1075,19 +1075,19 @@ function save_player_outfit(pid, name)
     file:close()
 
     local suggestedName = generateOutfitName()
-    if suggestedName ~= name then
+    if suggestedName != name then
         return notify("File already exists!\nSaved as: " .. suggestedName)
     end
 end
 
 function CanStartCEO()
     if not in_session() then return false end
-    if players.get_boss(players.user()) ~= -1 then return false end
+    if players.get_boss(players.user()) != -1 then return false end
     local bossCount = 0
 
     for pid in players.list(false, true, true) do
         if players.get_boss(pid) == pid then
-            if players.get_org_type(pid) ~= 1 then
+            if players.get_org_type(pid) != 1 then
                 bossCount = bossCount + 1
             end
         end
@@ -1099,13 +1099,17 @@ function CanStartCEO()
 end
 function StartCEO()
     if CanStartCEO() then
-        trigger_commands("ceostart")
-        wait(250)
         local user = players.user()
-        if players.get_boss(user) == user then
+        if players.get_boss(user) != user then
+            trigger_commands("ceostart")
+            wait(250)
+            if players.get_boss(user) == user then
+                return true
+            else
+                return false, notify("CEO couldn't be started.")
+            end
+        else 
             return true
-        else
-            return false, notify("CEO couldn't be started.")
         end
     else
         return false, notify("Cannot start CEO.")
@@ -1147,7 +1151,7 @@ function getDownforceAndId()
     return downforce, id
 end
 function enhanceDownforce()
-    if entities.get_user_vehicle_as_pointer(false) ~= 0 and players.is_visible(players.user()) then
+    if entities.get_user_vehicle_as_pointer(false) != 0 and players.is_visible(players.user()) then
         wait(1000)
         if entities.get_user_vehicle_as_pointer(false) != 0 and players.is_visible(players.user()) then
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer(false))
@@ -1181,7 +1185,7 @@ function replaceInDraft(search, replacement)
     if draft != nil then
         local modifiedDraft = draft:gsub(search, replacement)
 
-        if modifiedDraft ~= draft then
+        if modifiedDraft != draft then
             local charactersToRemove = #draft - #modifiedDraft
             chat.remove_from_draft(charactersToRemove)
             chat.add_to_draft(modifiedDraft)

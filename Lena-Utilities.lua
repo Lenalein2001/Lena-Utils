@@ -113,7 +113,7 @@ if not status then
         function(result, headers, status_code)
             local function parse_auto_update_result(result, headers, status_code)
                 local error_prefix = "Error downloading auto-updater: "
-                if status_code ~= 200 then util.toast(error_prefix..status_code, TOAST_ALL) return false end
+                if status_code != 200 then util.toast(error_prefix..status_code, TOAST_ALL) return false end
                 if not result or result == "" then util.toast(error_prefix.."Found empty file.", TOAST_ALL) return false end
                 filesystem.mkdir(filesystem.scripts_dir() .. "lib")
                 local file = io.open(filesystem.scripts_dir() .. "lib\\auto-updater.lua", "wb")
@@ -203,6 +203,7 @@ util.require_natives(natives_version)
 
 lenaDir = filesystem.scripts_dir().."Lena\\"
 libDir = filesystem.scripts_dir().."lib\\lena\\"
+lenaModules = filesystem.scripts_dir().."lib\\lena\\modules\\"
 local scaleForm = require("ScaleformLib")
 local funcs = require("lena.funcs")
 local tables = require("lena.tables")
@@ -280,7 +281,6 @@ end)
             TASK.CLEAR_PED_TASKS(players.user_ped())
         end)
         menu.attach_before(anim_idle, stopallanim)
-
         for index, data in animation_table do
             local ref, label, dict, name, duration = data[1], data[2], data[3], data[4], data[5]
             menu.action(ref, label, {$"anim{label}"}, "", function()
@@ -804,6 +804,7 @@ end)
 
         flaredelay = menu.slider_float(vehicle_flares, "Flare Delay", {""}, "Delay is in Seconds. 0.5 would be half a Second.", 10, 1000, 100, 10, function(); end)
         flareamount = menu.slider(vehicle_flares, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
+
         periodicforceflares = menu.toggle_loop(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function()
             if forceflares.value then periodicforceflares.value = false end
             local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
@@ -812,9 +813,9 @@ end)
             trigger_command(count, "1"); trigger_command(how)
             if VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 15 or VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 16 then
                 if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
-                    for i = 1, menu.get_value(flareamount) do
+                    for i = 1, flareamount.value do
                         trigger_command(deploy)
-                        wait(menu.get_value(flaredelay) * 10)
+                        wait(flaredelay.value * 10)
                     end
                 end
                 wait()
@@ -1401,12 +1402,12 @@ end)
                         current_vehicle_mods[i] = VEHICLE.GET_VEHICLE_MOD(veh, i)
                     end
                     for i = 0, 49 do
-                        if prev_vehicle_mods[i] ~= current_vehicle_mods[i] and not players.is_in_interior(pid) and ENTITY.IS_ENTITY_VISIBLE(veh) and pos.z > 0.0 then
+                        if prev_vehicle_mods[i] != current_vehicle_mods[i] and not players.is_in_interior(pid) and ENTITY.IS_ENTITY_VISIBLE(veh) and pos.z > 0.0 then
                             local owner_pid = entities.get_owner(veh_ptr)
                             if owner_pid == pid and not IsDetectionPresent(pid, "Modded Vehicle Upgrade") then
                                 players.add_detection(pid, "Modded Vehicle Upgrade", 7, 100)
                                 break
-                            elseif owner_pid ~= pid and not IsDetectionPresent(owner_pid, "Modded Vehicle Upgrade (Vehicle Takeover)") then
+                            elseif owner_pid != pid and not IsDetectionPresent(owner_pid, "Modded Vehicle Upgrade (Vehicle Takeover)") then
                                 players.add_detection(owner_pid, "Modded Vehicle Upgrade (Vehicle Takeover)", 7, 100)
                             end
                         end
@@ -1454,8 +1455,8 @@ end)
                         name ..= extra
                         name ..= ")"
                     end
-                    if string.lfind(name, "REPORT_MYSELF_EVENT") and not IsDetectionPresent(p, "REPORT_MYSELF_EVENT_V3") then
-                        players.add_detection(p, "REPORT_MYSELF_EVENT_V3")
+                    if string.lfind(name, "REPORT_MYSELF_EVENT") and not IsDetectionPresent(p, name) then
+                        players.add_detection(p, name, 7)
                     end
                 end)
             end
@@ -1517,10 +1518,11 @@ end)
         -------------------------------------
         -- Group-Based Copy Session Info
         -------------------------------------
+
         group_name = menu.text_input(protex, "Group Name", {"groupname"}, "", function(); end, "Admins")
         group_copy = menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
             if not menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value):isValid() then group_copy.value = false return notify("Group not Valid!") end
-            if copy_from ~= nil then
+            if copy_from != nil then
                 if string.lfind(copy_from:getPhysical().menu_name, "[Public]") == nil then
                     util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling copy session info.")
                     clearCopySession()
@@ -1529,7 +1531,7 @@ end)
                 local players = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
                 for players:getChildren() as link do
                     local hp = link:getPhysical()
-                    if hp:isValid() and string.lfind(hp.menu_name, "[Public]") ~= nil then
+                    if hp:isValid() and string.lfind(hp.menu_name, "[Public]") != nil or hp:state() "Public" then
                         util.toast($"{hp.name_for_config} is in a public session, copying their session info.")
                         hp:setState("Copy Session Info", true)
                         copy_from = hp
@@ -2148,10 +2150,10 @@ end)
     -------------------------------------
 
     menu.toggle_loop(missions_tunables, "Skip Casino Hacking Process", {""}, "Works on Fingerprint and Keypad.", function()
-        if GET_INT_LOCAL("fm_mission_controller", 52964) ~= 1 then -- func_13586(&Local_52962, &(Local_52897[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
+        if GET_INT_LOCAL("fm_mission_controller", 52964) != 1 then -- func_13586(&Local_52962, &(Local_52897[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
             SET_INT_LOCAL("fm_mission_controller", 52964, 5)
         end
-        if GET_INT_LOCAL("fm_mission_controller", 54026) ~= 1 then -- func_13588(&Local_54024, &(Local_53959[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
+        if GET_INT_LOCAL("fm_mission_controller", 54026) != 1 then -- func_13588(&Local_54024, &(Local_53959[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
             SET_INT_LOCAL("fm_mission_controller", 54026, 5)
         end
     end)
@@ -2867,7 +2869,7 @@ if is_developer() then
     initial_money = get_current_money()
     menu.toggle_loop(sdebug, "Transaction Log", {}, "", function(toggled)
         if not util.is_session_started() and util.is_session_transition_active() or util.is_interaction_menu_open() then return end
-        if get_current_money() ~= initial_money then
+        if get_current_money() != initial_money then
             check_and_write_money_change()
         end
         wait(1000)
@@ -3040,7 +3042,7 @@ players.add_command_hook(function(pid, cmd)
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
-        0x0DA03FE9, 
+        0x0DA03FE9, 0x0C0B7D18,
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3865,7 +3867,7 @@ players.add_command_hook(function(pid, cmd)
         menu.action(crashes, "Draki Crash", {""}, "", function()
             if pid == players.user() then return notify(lang.get_localised(-1974706693)) end
             if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-            
+
             local player = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local hash = util.joaat("cs_taostranslator2")
             while not STREAMING.HAS_MODEL_LOADED(hash) do
