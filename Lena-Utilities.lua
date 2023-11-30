@@ -53,6 +53,7 @@ local online = menu.list(menu.my_root(), "Online", {"lenaonline"}, "Online Optio
 local tunables = menu.list(menu.my_root(), "Tunables", {"lenatunables"}, "Tunables")
 local misc = menu.list(menu.my_root(), "Misc", {"lenamisc"}, "")
 local ai_made = menu.list(menu.my_root(), "AI Made", {"lenaai"}, "The following options have been generated using ChatGPT, a cutting-edge AI language model.\nI had to make some adjustments, but overall they work great.")
+local modules = menu.list(menu.my_root(), "Modules", {"lenamodules"}, "Here you'll be able to download Modules for this script to further enhance it's useability.")
 
 -------------------------------------
 -- Sub Tabs
@@ -2741,6 +2742,39 @@ end)
             notify("Conversation skipped!")
         end
     end)
+
+-------------------------------------
+-------------------------------------
+-- [Debug]
+-------------------------------------
+-------------------------------------
+
+for key, value in pairs(Modulepath) do
+    if not io.isfile(value.absolute_path) then
+        menu.action(modules, $"Download {value.name}", {""}, "", function()
+            async_http.init("raw.githubusercontent.com", value.giturl, function(body, headers, status_code)
+                if status_code != 404 then
+                    local file = io.open(value.absolute_path, "w+")
+                    file:write(body)
+                    file:close()
+
+                    notify("Instalation successful. Please restart the Script now!")
+                else
+                    notify($"Download failed. Status Code {status_code}.")
+                end
+            end, function(status_code)
+                notify($"Download failed. Status Code {status_code}.")
+            end)
+            async_http.dispatch()
+        end)
+    else
+        require(value.path)
+        menu.action(modules, $"Remove {value.name}", {""}, "", function()
+            os.remove(value.absolute_path)
+            notify($"Removed {value.name}. Please restart the Script now.")
+        end)
+    end
+end
 
 -------------------------------------
 -------------------------------------
