@@ -1149,3 +1149,37 @@ function clearCopySession()
         copy_from = nil
     end
 end
+
+function deleteEntities(entityType, total, typeName)
+    local entitiesList
+
+    -- Set entitiesList and deleteFunction based on the entityType
+    switch entityType do
+        case 1:
+            entitiesList = entities.get_all_vehicles_as_pointers()
+            break
+        case 2:
+            entitiesList = entities.get_all_peds_as_pointers()
+            break
+        case 3:
+            entitiesList = entities.get_all_objects_as_handles()
+            break
+        case 4:
+            entitiesList = entities.get_all_pickups_as_pointers()
+            break
+    end
+
+    local count = 0
+    for entitiesList as entity do
+        if entities.get_owner(entity) == players.user() and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION()) then
+            if entity == (nil or -1 or 0) then return end
+
+            entities.delete(entity)
+            count = count + 1
+            util.draw_debug_text($"Deleting {count}/{total} {typeName}s...")
+            wait()
+        end
+    end
+
+    return count
+end
