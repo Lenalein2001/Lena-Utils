@@ -19,7 +19,7 @@
 ]]
 
 -------------------------------------
--- Globals
+-- Globals & Locals
 -------------------------------------
 
 scriptname = "Lena-Utilities"
@@ -42,6 +42,7 @@ native_invoker.accept_bools_as_ints(true)
 thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
 thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
 copy_from = nil
+local clearRopes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
 
 -------------------------------------
 -- Tabs
@@ -1360,12 +1361,12 @@ end)
                         return
                     end
                 end
-                if not PED.IS_PED_IN_ANY_VEHICLE(ped) or (not DOES_VEHICLE_HAVE_IMANI_TECH(vehicle) and VEHICLE.GET_VEHICLE_MOD(vehicle, 44) == 1) then 
+                if not PED.IS_PED_IN_ANY_VEHICLE(ped) or (not DOES_VEHICLE_HAVE_IMANI_TECH(vehicle) and VEHICLE.GET_VEHICLE_MOD(vehicle, 44) == 1) then
                     continue
                 end
                 if memory.read_byte(entities.handle_to_pointer(vehicle) + 0xA9E) == 0 and not IsDetectionPresent(pid, "Anti-Lockon") and pid == driver then
-                    wait(1000) -- so using chaff doesnt calse a false pos 
-                    lockon +=1 
+                    wait(1000) -- so using chaff doesnt causes a false pos
+                    lockon +=1
                     if lockon >= 5 then
                         players.add_detection(pid, "Anti-Lockon", 7, 75)
                         lockon = 0
@@ -1457,7 +1458,7 @@ end)
                         name ..= ")"
                     end
                     if string.lfind(name, "REPORT_MYSELF_EVENT") and not IsDetectionPresent(p, name) then
-                        players.add_detection(p, name, 7)
+                        players.add_detection(p, name, 7, 50)
                     end
                 end)
             end
@@ -2506,18 +2507,18 @@ end)
     -- Toggle Thunder Weather
     -------------------------------------
 
-    menu.toggle(misc, "Toggle Thunder Weather", {"thunder"}, "Requests Thunder Weather Session-wide.", function(toggled) 
+    menu.toggle(misc, "Toggle Thunder Weather", {"thunder"}, "Requests Thunder Weather Session-wide.", function(toggled)
         if toggled then
             trigger_commands("weather normal")
             wait(1000)
             trigger_command(thunder_on)
             wait(10000)
-            notify("Weather Set to Thunder.") 
+            notify("Weather Set to Thunder.")
         else
             trigger_command(thunder_off)
             wait(10000)
             trigger_commands("weather extrasunny")
-            notify("Weather set back to Normal.") 
+            notify("Weather set back to Normal.")
         end
     end)
 
@@ -2558,7 +2559,7 @@ end)
     menu.toggle_loop(misc, "Rockstar Verified All", {""}, "You will always be Rockstar Verified with this.", function()
         if PAD.IS_CONTROL_JUST_PRESSED(1, 245) then
             chat.ensure_open_with_empty_draft(false)
-            chat.add_to_draft("¦ | ")
+            chat.add_to_draft("¦ ")
         end
     end)
 
@@ -2571,7 +2572,7 @@ end)
         disable_peds = false,
     }
     local pop_multiplier_id
-    
+
     menu.toggle(misc, "No Traffic", {""}, "Deletes all Traffic from the Map. Works Session-Wide.", function(toggled)
         if toggled then
             local ped_sphere, traffic_sphere
@@ -2998,7 +2999,7 @@ players.add_command_hook(function(pid, cmd)
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
-        0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 
+        0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3158,8 +3159,8 @@ players.add_command_hook(function(pid, cmd)
         brv_six = menu.toggle(spec, "Bravo Six", {"bravo"}, $"Bravo six, going dark. Blocks Outgoing Syncs with {pname}.", function(toggled)
             local outgoingSyncs = menu.ref_by_rel_path(menu.player_root(pid), "Outgoing Syncs>Block")
             local nuts = menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Nuts Method")
-            if pid == players.user() then 
-                notify(lang.get_localised(-1974706693)) 
+            if pid == players.user() then
+                notify(lang.get_localised(-1974706693))
                 brv_six.value = false
                 util.stop_thread()
             end
@@ -3188,7 +3189,7 @@ players.add_command_hook(function(pid, cmd)
                 VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(veh)
                 VEHICLE.SET_VEHICLE_PETROL_TANK_HEALTH(veh, 1000.0)
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
-                for i = 0, 10 do 
+                for i = 0, 10 do
                     VEHICLE.SET_VEHICLE_TYRE_FIXED(veh, i)
                 end
                 ENTITY.SET_ENTITY_INVINCIBLE(veh, on)
@@ -3235,7 +3236,7 @@ players.add_command_hook(function(pid, cmd)
         menu.textslider_stateful(mpvehicle, "Launch Player Vehicle", {"launch"}, "Launches the Player's Vehicle in the Selected direction.", launch_vehicle, function(index, value)
             local veh = get_vehicle_ped_is_in(pid)
             request_control(veh)
-            pluto_switch value do
+            switch value do
                 case "Launch Up":
                     ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 0.0, 100000.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
                     break
@@ -3455,8 +3456,8 @@ players.add_command_hook(function(pid, cmd)
 
         paimbor = menu.toggle_loop(trolling, "Unfair Triggerbot", {"triggerbot"}, "It tries to Aim for the head, but chances are low if they are moving.", function()
             if not players.exists(pid) then paimbor.value = false; util.stop_thread() end
-            if pid == players.user() then 
-                notify(lang.get_localised(-1974706693)) 
+            if pid == players.user() then
+                notify(lang.get_localised(-1974706693))
                 paimbor.value = false
                 util.stop_thread()
             end
@@ -3930,7 +3931,7 @@ util.create_tick_handler(function()
         if GRAPHICS.UI3DSCENE_IS_AVAILABLE() then
             if GRAPHICS.UI3DSCENE_PUSH_PRESET("CELEBRATION_WINNER") then
                 --[[ -Y = Push away, Z = Elevation ]]
-                GRAPHICS.UI3DSCENE_ASSIGN_PED_TO_SLOT("CELEBRATION_WINNER", ped, 0, 0.0, 0.0, 0.0);
+                GRAPHICS.UI3DSCENE_ASSIGN_PED_TO_SLOT("CELEBRATION_WINNER", ped, 0, 0.0, 0.0, 0.0)
             end
         end
     end
