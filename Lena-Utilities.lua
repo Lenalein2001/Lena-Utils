@@ -2328,94 +2328,41 @@ end)
     -- Clear Area
     -------------------------------------
 
-        -------------------------------------
-        -- Clear Vehicles
-        -------------------------------------
-
-        menu.list_action(clear_area, "Clear All", {""}, "", {"Vehicles", "Peds", "Objects"}, function(index, name)
+        menu.list_action(clear_area, "Clear All...", {""}, "", {{1, "Vehicles"}, {2, "Peds"}, {3, "Objects"}, {4, "Ropes"}}, function(index, name)
             notify($"Clearing {name}...")
-            local clean_amount = 0
+
+            local total = 0
             switch index do
                 case 1:
-                    for entities.get_all_vehicles_as_pointers() as ent do
-                        if ent != entities.get_user_vehicle_as_pointer(true) and entities.get_owner(ent) == players.user() then
-                            if ent != (nil or -1) then 
-                                entities.delete(ent)
-                                clean_amount += 1
-                                wait(50)
-                            end
-                        end
-                    end
+                    total = deleteEntities(1, #entities.get_all_vehicles_as_pointers(), "Vehicle")
                     break
                 case 2:
-                    for entities.get_all_peds_as_pointers() as ent do
-                        if not (NETWORK.NETWORK_IS_ACTIVITY_SESSION() and ENTITY.IS_ENTITY_A_MISSION_ENTITY(ent)) and entities.get_owner(ent) == players.user() then
-                            if ent != (nil or -1) then 
-                                entities.delete(ent)
-                                clean_amount += 1
-                                wait(50)
-                            end
-                        end
-                    end
-                break
+                    total = deleteEntities(2, #entities.get_all_peds_as_pointers(), "Ped")
+                    break
                 case 3:
-                    for entities.get_all_objects_as_handles() as ent do
-                        if entities.get_owner(ent) == players.user() then
-                            if ent != (nil or -1) then 
-                                entities.delete(ent)
-                                clean_amount += 1
-                                wait(50)
-                            end
-                        end
-                    end
-                break
+                    total = deleteEntities(3, #entities.get_all_objects_as_pointers(), "Object")
+                    break
+                case 4:
+                    clearRopes:trigger()
+                    break
             end
-            notify($"Cleared {tostring(clean_amount)} {name}.")
+
+            notify($"Cleared {tostring(total)} {name}.")
         end)
 
-        -------------------------------------
         -- Clear Area All
-        -------------------------------------
-
         menu.action(clear_area, "Clear Area", {"ca"}, "Clears the Area around you without sending Freeze events.", function()
-            local clear_ropes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
-            local count = 0
-            for entities.get_all_peds_as_handles() as ped do
-                if ped != players.user_ped() and entities.get_owner(ped) == players.user() and not NETWORK.NETWORK_IS_ACTIVITY_SESSION() then
-                    entities.delete(ped)
-                    count += 1
-                    wait()
-                end
+            local totalVehicles = deleteEntities(1, #entities.get_all_vehicles_as_pointers(), "Vehicle")
+            local totalPeds = deleteEntities(2, #entities.get_all_peds_as_pointers(), "Ped")
+            local totalObjects = deleteEntities(3, #entities.get_all_objects_as_pointers(), "Object")
+            local totalPickups = deleteEntities(4, #entities.get_all_pickups_as_pointers(), "Pickup")
+
+            clearRopes:trigger()
+
+            local totalCount = totalPeds + totalVehicles + totalObjects + totalPickups
+            if totalCount > 0 then
+                notify($"Deleted {totalCount} entities!")
             end
-            notify($"Deleted {count} Peds!")
-            count = 0
-            for entities.get_all_vehicles_as_handles() as vehicle do
-                if vehicle != user_vehicle and entities.get_owner(vehicle) == players.user() and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 then
-                    entities.delete(vehicle)
-                    count += 1
-                    wait()
-                end
-            end
-            notify($"Deleted {count} Vehicles!")
-            count = 0
-            for entities.get_all_objects_as_handles() as object do
-                if entities.get_owner(object) == players.user() then
-                    entities.delete(object)
-                    count += 1
-                    wait()
-                end
-            end
-            notify($"Deleted {count} Objects!")
-            count = 0
-            for entities.get_all_pickups_as_pointers() as pickup do
-                if entities.get_owner(pickup) == players.user() then
-                    entities.delete(pickup)
-                    count += 1
-                    wait()
-                end
-            end
-            notify($"Deleted {count} Pickups!")
-            clear_ropes:trigger()
         end)
 
     -------------------------------------
