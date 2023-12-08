@@ -26,7 +26,6 @@ scriptname = "Lena-Utilities"
 log = util.log
 notify = util.toast
 wait = util.yield
-wait_once = util.yield_once
 trigger_commands = menu.trigger_commands
 trigger_command = menu.trigger_command
 sendse = util.trigger_script_event
@@ -41,7 +40,6 @@ natives_version = "2944b"
 native_invoker.accept_bools_as_ints(true)
 thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
 thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
-copy_from = nil
 local clearRopes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
 
 -------------------------------------
@@ -1581,23 +1579,33 @@ end)
         -- Group-Based Copy Session Info
         -------------------------------------
 
+        copy_from = nil
+
         group_name = menu.text_input(protex, "Group Name", {"groupname"}, "", function(); end, "Admins")
-        group_copy = menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
-            if not menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value):isValid() then group_copy.value = false return notify("Group not Valid!") end
-            if copy_from != nil then
-                if string.lfind(copy_from:getPhysical().menu_name, "[Public]") == nil then
-                    util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling copy session info.")
+        group_copy_ref = menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
+            local copying = menu.ref_by_path("Online>Player History>Meta>Copying Session Info From").value
+
+            if not menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value):isValid() then
+                group_copy_ref.value = false
+                return notify("Group not Valid!")
+            end
+
+            if copy_from != nil or copying == "N/A" then
+                if copy_from:getPhysical():getState() != "Public" then
+                    notify($"{copy_from.name_for_config} is no longer in a public session, disabling Copy Session Info.")
                     clearCopySession()
                 end
             else
                 local players = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
                 for players:getChildren() as link do
-                    local hp = link:getPhysical()
-                    if hp:isValid() and string.lfind(hp.menu_name, "[Public]") != nil or hp:state() "Public" then
-                        util.toast($"{hp.name_for_config} is in a public session, copying their session info.")
-                        hp:setState("Copy Session Info", true)
-                        copy_from = hp
-                        return
+                    local ref = link:getPhysical()
+                    if ref:isValid() and ref:getType() == COMMAND_LIST_HISTORICPLAYER then
+                        if ref:getState() == "Public" then
+                            toast($"{ref.name_for_config} is in a Public Session, copying their Session Info.")
+                            menu.ref_by_rel_path(ref, "Copy Session Info").value = true
+                            copy_from = ref
+                            return
+                        end
                     end
                 end
             end
