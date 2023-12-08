@@ -3,6 +3,23 @@ notificationBits = 0
 nearbyNotificationBits = 0
 blips = {}
 
+function toast(text, bit)
+    local toast_bitfields = {
+        Default = TOAST_ABOVE_MAP,
+        Console = TOAST_CONSOLE,
+        File = TOAST_FILE,
+        Chat = TOAST_CHAT,
+        TeamChat = TOAST_CHAT_TEAM,
+        Log = TOAST_LOGGER,
+        All = TOAST_ALL
+    }
+
+    local flags = toast_bitfields[bit] or TOAST_ABOVE_MAP
+
+    util.toast(text, flags)
+end
+
+
 function gen_fren_funcs(name)
     local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)
     menu.divider(friend_player_function, name)
