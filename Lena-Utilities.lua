@@ -2002,15 +2002,9 @@ end)
                 if players.is_marked_as_attacker(pid) then
                     local pname, rid = players.get_name(pid), players.get_rockstar_id(pid)
                     local hex = decimalToHex2s(rid, 32)
-                    if menu.get_value(savekicked) then
-                        trigger_commands($"savep {pname}")
-                    end
-                    wait(500)
                     notify($"{pname} has been Kicked for attacking you.")
-                    if is_developer() then
-                        log($"[Lena | Kick Attackers] {pname} ({rid} / {hex}) has attacked you and got Kicked.")
-                    end
-                    trigger_commands($"kick {pname}")
+
+                    trigger_commands($"rape {pname}")
                     wait(30000)
                 end
             end
