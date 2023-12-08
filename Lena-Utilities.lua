@@ -1463,6 +1463,66 @@ end)
                 end)
             end
         end)
+
+        -------------------------------------
+        -- Modified Vehicle Speed
+        -------------------------------------
+
+        local ignored_vehs = {}
+        local speed_ctr = 0
+        menu.toggle_loop(detections, "Modified Vehicle Speed", {}, "Detects people who have modified their engine power or top speed.", function()
+            if NETWORK.NETWORK_IS_ACTIVITY_SESSION(true) or not in_session() then return end
+            for pid in players.list_except() do
+                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                if not PED.IS_PED_IN_ANY_VEHICLE(ped) then
+                    goto continue
+                end
+
+                local vehicle = PED.GET_VEHICLE_PED_IS_IN(ped)
+                local veh_model = players.get_vehicle_model(pid)
+                local veh_brand = util.get_label_text(VEHICLE.GET_MAKE_NAME_FROM_VEHICLE_MODEL(veh_model))
+                local veh_mdl = util.get_label_text(VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(veh_model))
+                local veh_class = VEHICLE.GET_VEHICLE_CLASS(vehicle)
+                local est_speed = VEHICLE.GET_VEHICLE_ESTIMATED_MAX_SPEED(vehicle)
+                local est_model_speed = VEHICLE.GET_VEHICLE_MODEL_ESTIMATED_MAX_SPEED(players.get_vehicle_model(pid))
+                local mdl_accel = VEHICLE.GET_VEHICLE_MODEL_ACCELERATION(players.get_vehicle_model(pid))
+                local veh_accel = VEHICLE.GET_VEHICLE_ACCELERATION(vehicle)
+                local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(PED.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
+                local veh_ptr = entities.handle_to_pointer(vehicle)
+                local owner = entities.get_owner(veh_ptr)
+                local ignored = ignored_vehs[vehicle]
+                local class = vehicle_classes[veh_class + 1]
+
+                if not ignored and owner != pid and driver == pid and est_speed > (est_model_speed + 6) then
+                    ignored_vehs[vehicle] = true
+                    goto continue
+                end
+
+                if ignored and est_speed < (est_model_speed + 6) then
+                    ignored_vehs[vehicle] = false
+                    goto continue
+                end
+
+                local veh_name = veh_mdl
+                if veh_brand != "" then
+                    veh_name = veh_brand .. " " .. veh_name
+                end
+                if not IsDetectionPresent(pid, "Modified Vehicle Speed") and est_model_speed > 1.0 and not ignored and est_speed > (est_model_speed + 11) and veh_accel > (mdl_accel * 1.2) and pid == driver then
+                    speed_ctr = speed_ctr + 1
+                    repeat
+                        wait(100)
+                    until speed_ctr >= 15
+                    players.add_detection(pid, "Modified Vehicle Speed", TOAST_ALL, 75)
+                    ignored_vehs[vehicle] = true
+                    speed_ctr = 0
+                end
+                ::continue::
+            end
+
+            yield(250)
+        end)
+
+
     -------------------------------------
     -- Protections
     -------------------------------------
