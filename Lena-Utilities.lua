@@ -36,6 +36,7 @@ spawned_attackers = {}
 object_uses = 0
 handle_ptr = memory.alloc(13*8)
 previous_car = nil
+copy_from = nil
 natives_version = "2944b"
 native_invoker.accept_bools_as_ints(true)
 thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
@@ -1579,36 +1580,37 @@ end)
         -- Group-Based Copy Session Info
         -------------------------------------
 
-        copy_from = nil
-
         group_name = menu.text_input(protex, "Group Name", {"groupname"}, "", function(); end, "Admins")
-        group_copy_ref = menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
-            local copying = menu.ref_by_path("Online>Player History>Meta>Copying Session Info From").value
 
-            if not menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value):isValid() then
+        group_copy_ref = menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
+
+            local players = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
+
+            if not players:isValid() then
                 group_copy_ref.value = false
-                return notify("Group not Valid!")
+                print("Group not Valid!")
             end
 
-            if copy_from != nil or copying == "N/A" then
-                if copy_from:getPhysical():getState() != "Public" then
-                    notify($"{copy_from.name_for_config} is no longer in a public session, disabling Copy Session Info.")
+            if copy_from != nil then
+                if copy_from.menu_name:sub(-8) != "[Public]" then
+                    util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling Copy Session Info.")
                     clearCopySession()
                 end
+
             else
-                local players = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
                 for players:getChildren() as link do
                     local ref = link:getPhysical()
-                    if ref:isValid() and ref:getType() == COMMAND_LIST_HISTORICPLAYER then
-                        if ref:getState() == "Public" then
-                            toast($"{ref.name_for_config} is in a Public Session, copying their Session Info.")
-                            menu.ref_by_rel_path(ref, "Copy Session Info").value = true
-                            copy_from = ref
-                            return
-                        end
+                    --print(ref.menu_name)
+                    if ref.menu_name:sub(-8) == "[Public]" then
+                        util.toast($"{ref.name_for_config} is in a Public Session, copying their Session Info.")
+                        ref:refByRelPath("Copy Session Info").value = true
+                        copy_from = ref
                     end
+
                 end
             end
+            wait(500)
+
         end, clearCopySession)
 
         -------------------------------------
