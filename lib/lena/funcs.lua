@@ -1202,3 +1202,24 @@ function deleteEntities(entityType, total, typeName)
 
     return count
 end
+
+local advertisedPlayers = {}
+function handleAdvertisement(p, name)
+    if not in_session() then return end
+
+    local n = players.get_name(p)
+    local rid = players.get_rockstar_id(p)
+
+    if string.lfind(name, "Advertisement") then
+
+        if (table.contains(advertisedPlayers, rid) == nil) then
+            trigger_commands($"loveletterkick {n}")
+            trigger_commands($"historyblock {n} true")
+            trigger_commands($"historynote {n} Advertiser")
+            table.insert(advertisedPlayers, rid)
+            print($"{n} ({rid}) has been detected Advertising. Blocking Player now.")
+        end
+
+    end
+end
+

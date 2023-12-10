@@ -1621,6 +1621,21 @@ end)
             thunder_off:trigger()
         end)
 
+        menu.toggle(protex, "Advertise Detection", {"ad_toggle"}, "Toggle advertisement detection.", function(toggled)
+            if toggled then
+                players.on_flow_event_done(function(p, name, extra)
+                    name = lang.get_localised(name)
+                    if extra then
+                        name ..= " ("
+                        name ..= extra
+                        name ..= ")"
+                    end
+                    handleAdvertisement(p, name)
+                end)
+                wait()
+            end
+        end)
+
     -------------------------------------
     -- Orb Detections
     -------------------------------------
