@@ -100,7 +100,7 @@ local stat_editing =  menu.list(tunables, "Stat Editing", {""}, "")
 -- Misc
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
 local clear_area = menu.list(misc, "Clear Area", {""}, "")
-local teleport = menu.list(misc, "Teleport", {""}, "")
+local teleport = menu.list(misc, "Teleport", {"lenatp"}, "")
 
 -------------------------------------
 -- Auto Updater
@@ -1581,14 +1581,12 @@ end)
         -------------------------------------
 
         group_name = menu.text_input(protex, "Group Name", {"groupname"}, "", function(); end, "Admins")
-
         group_copy_ref = menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
-
             local players = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
 
             if not players:isValid() then
                 group_copy_ref.value = false
-                print("Group not Valid!")
+                return print("Group not Valid!")
             end
 
             if copy_from != nil then
@@ -1596,7 +1594,6 @@ end)
                     util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling Copy Session Info.")
                     clearCopySession()
                 end
-
             else
                 for players:getChildren() as link do
                     local ref = link:getPhysical()
@@ -1610,7 +1607,6 @@ end)
                 end
             end
             wait(500)
-
         end, clearCopySession)
 
         -------------------------------------

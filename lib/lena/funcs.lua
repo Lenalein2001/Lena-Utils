@@ -1188,6 +1188,7 @@ function deleteEntities(entityType, total, typeName)
 
     local count = 0
     for entitiesList as entity do
+
         if entities.get_owner(entity) == players.user() and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION()) then
             if entity == (nil or -1 or 0) then return end
 
@@ -1196,6 +1197,7 @@ function deleteEntities(entityType, total, typeName)
             util.draw_debug_text($"Deleting {count}/{total} {typeName}s...")
             wait()
         end
+
     end
 
     return count
