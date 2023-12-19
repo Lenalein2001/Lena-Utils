@@ -270,8 +270,16 @@ function BitTest(bits, place)
     return (bits & (1 << place)) != 0
 end
 
-function IS_PLAYER_USING_ORBITAL_CANNON(player)
-    return BitTest(memory.read_int(memory.script_global((2657704 + (player * 463 + 1) + 424))), 0) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_424
+function IS_PLAYER_USING_ORBITAL_CANNON(pid)
+    return BitTest(memory.read_int(memory.script_global((2657921 + (pid * 463 + 1) + 424))), 0) -- Global_2657921[PLAYER::PLAYER_ID() /*463*/].f_424
+end
+
+function GET_SPAWN_STATE(pid)
+    return memory.read_int(memory.script_global(((2657921 + 1) + (pid * 463)) + 232)) -- Global_2657921[PLAYER::PLAYER_ID() /*463*/].f_232
+end
+
+function GET_INTERIOR_FROM_PLAYER(pid)
+    return memory.read_int(memory.script_global(((2657921 + 1) + (pid * 463)) + 245)) -- Global_2657921[bVar0 /*463*/].f_245)
 end
 
 function IS_PLAYER_ACTIVE(pid)
@@ -288,14 +296,6 @@ end
 
 function IS_PLAYER_FRIEND(pid)
     if NETWORK.NETWORK_IS_FRIEND(pid_to_handle(pid)) then return true else return false end
-end
-
-function GET_SPAWN_STATE(pid)
-    return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 232)) -- Global_2657704[PLAYER::PLAYER_ID() /*463*/].f_232
-end
-
-function GET_INTERIOR_FROM_PLAYER(pid)
-    return memory.read_int(memory.script_global(((2657704 + 1) + (pid * 463)) + 245)) -- Global_2657704[bVar0 /*463*/].f_245
 end
 
 function IsDetectionPresent(pid, detection)
@@ -387,17 +387,17 @@ function STAT_GET_INT(Stat)
     STATS.STAT_GET_INT(joaat("MP"..util.get_char_slot().."_".. Stat), Int_PTR, -1)
     return memory.read_int(Int_PTR)
 end
-function IS_MPPLY(Stat) 
-    local Stats = { 
-        "MP_PLAYING_TIME", 
-    } 
-    for i = 1, #Stats do 
-        if Stat == Stats[i] then 
-            return true 
-        end 
-    end 
-    if string.find(Stat, "MPPLY_") then 
-        return true 
+function IS_MPPLY(Stat)
+    local Stats = {
+        "MP_PLAYING_TIME",
+    }
+    for i = 1, #Stats do
+        if Stat == Stats[i] then
+            return true
+        end
+    end
+    if string.find(Stat, "MPPLY_") then
+        return true
     else
         return false
     end
@@ -756,7 +756,7 @@ function save_player_info(pid)
         local as, dns = soup.netIntel.getAsByIp(player_ip), soup.IpAddr(player_ip)
         player_info[#player_info + 1] = "\nIPv4: " .. player_ip
         player_info[#player_info + 1] = "\nNetIntel addr: " .. tostring(dns) .. ", " .. dns:getReverseDns()
-        player_info[#player_info + 1] = "\nNetIntel Number: " .. as.number
+        player_info[#player_info + 1] = "\nNetIntel Number: AS" .. as.number
         player_info[#player_info + 1] = "\nNetIntel Handle: " .. as.handle
         player_info[#player_info + 1] = "\nNetIntel Name: " .. as.name
         player_info[#player_info + 1] = "\nIs Hosting: " .. tostring(as:isHosting() and "Yes" or "No")
@@ -1173,10 +1173,10 @@ function deleteEntities(entityType, total, typeName)
     -- Set entitiesList and deleteFunction based on the entityType
     switch entityType do
         case 1:
-            entitiesList = entities.get_all_vehicles_as_pointers()
+            entitiesList = entities.get_all_vehicles_as_handles()
             break
         case 2:
-            entitiesList = entities.get_all_peds_as_pointers()
+            entitiesList = entities.get_all_peds_as_handles()
             break
         case 3:
             entitiesList = entities.get_all_objects_as_handles()
@@ -1190,12 +1190,12 @@ function deleteEntities(entityType, total, typeName)
     for entitiesList as entity do
 
         if entities.get_owner(entity) == players.user() and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION()) then
-            if entity == (nil or -1 or 0) then return end
+            if not entity then return end
 
             entities.delete(entity)
             count = count + 1
             util.draw_debug_text($"Deleting {count}/{total} {typeName}s...")
-            wait()
+            wait(5)
         end
 
     end
