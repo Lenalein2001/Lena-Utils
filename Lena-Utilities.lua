@@ -220,7 +220,7 @@ if not filesystem.exists(lenaDir.."Saved Players Webhook.txt") then
     waddada:close()
 end
 
-if async_http.have_access() then 
+if async_http.have_access() then
     if not is_developer() then
         auto_updater.run_auto_update(auto_update_config)
     end
@@ -234,16 +234,17 @@ if PED == nil then
     util.show_corner_help($"{msg1} {natives_version}. {msg2}")
     util.stop_script()
 end
+
 if not SCRIPT_SILENT_START then
     notify($"Hi, {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}. <3")
-end 
+end
 
-objects_thread = util.create_thread(function(thr)
+util.create_thread(function()
     local projectile_blips = {}
     while true do
         for k,b in projectile_blips do
             if HUD.GET_BLIP_INFO_ID_ENTITY_INDEX(b) == 0 then 
-                util.remove_blip(b) 
+                util.remove_blip(b)
                 projectile_blips[k] = nil
             end
         end
@@ -566,6 +567,7 @@ end)
     vehicle_gun_ent  = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
     vehicle_gun_gm   = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
     vehicle_gun_perf = menu.toggle(vehicle_gun_list, "Tune Perfomance", {""}, "", function(); end)
+
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn Vehicle at Bullet Impact", {""}, "", function()
         if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
@@ -574,6 +576,16 @@ end)
             if menu.get_value(vehicle_gun_perf) then tune_vehicle(v, true, false) end
         end
     end)
+
+    --local moneyimpactCords = v3()
+    --menu.toggle_loop(menu.my_root(), "Spawn Money at Bullet Impact", {""}, "", function()
+    --    if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(moneyimpactCords)) then
+    --        local cash = joaat("prop_cash_pile_01")
+    --        STREAMING.REQUEST_MODEL(cash)
+    --        util.request_model(cash, 50)
+    --        OBJECT.CREATE_AMBIENT_PICKUP(1704231442, moneyimpactCords.x, moneyimpactCords.y, moneyimpactCords.z+ 1, 0, 1000, cash, false, true)
+    --    end
+    --end)
 
 -------------------------------------
 -------------------------------------
@@ -1530,20 +1542,8 @@ end)
         -- Anti Crash
         -------------------------------------
 
-        menu.toggle(protex, "Render GTA uncrashable", {"panic"}, "Will render GTA:O uncrashable, but the Gameplay will become unplayable.", function(toggled)
-            local BlockNetEvents = menu.ref_by_path("Online>Protections>Events>Raw Network Events>Any Event>Block>Enabled")
-            local UnblockNetEvents = menu.ref_by_path("Online>Protections>Events>Raw Network Events>Any Event>Block>Disabled")
-            local BlockIncSyncs = menu.ref_by_path("Online>Protections>Syncs>Incoming>Any Incoming Sync>Block>Enabled")
-            local UnblockIncSyncs = menu.ref_by_path("Online>Protections>Syncs>Incoming>Any Incoming Sync>Block>Disabled")
-            if toggled then
-                trigger_commands("desyncall on; anticrashcamera on")
-                trigger_command(BlockIncSyncs)
-                trigger_command(BlockNetEvents)
-            else
-                trigger_commands("desyncall off; anticrashcamera off")
-                trigger_command(UnblockIncSyncs)
-                trigger_command(UnblockNetEvents)
-            end
+        menu.toggle(protex, "Render GTA uncrashable", {"panic"}, "Will render GTA:O uncrashable, but the Gameplay will become unplayable.", function(t)
+            trigger_commands($"desyncall {t}; anticrashcamera {t}; norender {t}; potatomode {t}")
         end)
 
         -------------------------------------
@@ -2085,7 +2085,7 @@ end)
 
     -------------------------------------
     -- Missions
-    -------------------------------------        
+    -------------------------------------
 
         -------------------------------------
         -- Mission friendly
@@ -2823,7 +2823,7 @@ if is_developer() then
             local vname = util.get_label_text(vmodel)
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
             local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
-            if menu.get_value(modified_vehicle, vname) != vname and PLAYER.IS_PLAYER_PLAYING(players.user()) then
+            if menu.get_value(modified_vehicle, vname) != vname and PLAYER.IS_PLAYER_PLAYING(players.user()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
                 if VEHICLE.IS_THIS_MODEL_A_PLANE(vmodel) then
                     if vmodel == -1700874274 then
                         trigger_commands("vhengineoffglidemulti 10; vhgeardownliftmult 1")
@@ -3164,8 +3164,8 @@ players.add_command_hook(function(pid, cmd)
                 4,
                 10000, -- wage?
                 0, 0, 0, 0,
-                memory.read_int(memory.script_global(1924276 + 9)), -- Global_1924276.f_9
-                memory.read_int(memory.script_global(1924276 + 10)), -- Global_1924276.f_10
+                memory.read_int(memory.script_global(1916087 + 9)), -- *uParam0 = Global_1916087.f_9;
+                memory.read_int(memory.script_global(1916087 + 10)), -- *uParam1 = Global_1916087.f_10;
             })
         end, nil, nil, COMMANDPERM_FRIENDLY)
 
@@ -3956,15 +3956,19 @@ players.on_leave(function(pid)
     if showleaveInfomsg then
         notify(name.." left.")
     end
+
     if showleaveInfolog then
         log("[Lena | Leave Reactions] "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.")
     end
+
     if showleaveInfoteam then
         chat.send_message("> "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", true, true, true)
     end
+
     if showleaveInfoall then
         chat.send_message("> "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", false, true, true)
     end
+
     wait(100)
     Jointimes[pid] = nil
     names[pid] = nil
@@ -3977,6 +3981,7 @@ if not is_developer() and async_http.have_access() then
 
     menu.action(menu.my_root(), "Check for Updates", {""}, "", function()
         auto_update_config.check_interval = 0
+
         if auto_updater.run_auto_update(auto_update_config) then
             notify("No updates have been found.")
         end
@@ -4003,12 +4008,15 @@ util.create_tick_handler(function()
 
     if focused != nil and menu.is_open() and menu.get_value(draw_players) then
         local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(focused)
+
         if GRAPHICS.UI3DSCENE_IS_AVAILABLE() then
+
             if GRAPHICS.UI3DSCENE_PUSH_PRESET("CELEBRATION_WINNER") then
-                --[[ -Y = Push away, Z = Elevation ]]
                 GRAPHICS.UI3DSCENE_ASSIGN_PED_TO_SLOT("CELEBRATION_WINNER", ped, 0, 0.0, 0.0, 0.0)
             end
+
         end
+
     end
 end)
 
