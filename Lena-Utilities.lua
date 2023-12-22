@@ -3159,10 +3159,10 @@ players.add_command_hook(function(pid, cmd)
 
         menu.action(friendly, "Invite to CEO/MC", {"ceoinv"}, "Invites the Player to your CEO/MC.", function()
             sendse(1 << pid, {
-                -245642440,
+                -245642440, -- am_pi_menu.c
                 players.user(),
                 4,
-                10000, -- wage?
+                10000,
                 0, 0, 0, 0,
                 memory.read_int(memory.script_global(1916087 + 9)), -- *uParam0 = Global_1916087.f_9;
                 memory.read_int(memory.script_global(1916087 + 10)), -- *uParam1 = Global_1916087.f_10;
