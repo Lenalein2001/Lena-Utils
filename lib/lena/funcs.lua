@@ -19,6 +19,25 @@ function toast(text, bit)
     util.toast(text, flags)
 end
 
+function wait(time, unit = ms)
+    local milliseconds
+
+    switch unit do
+        case ms:
+            milliseconds = time
+            break
+        case s:
+            milliseconds = time * 1000
+            break
+        case m:
+            milliseconds = time * 60 * 1000
+            break
+        default:
+            error("Invalid time unit. Supported units are 'ms', 's', and 'm'.")
+    end
+
+    util.yield(milliseconds)
+end
 
 function gen_fren_funcs(name)
     local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)

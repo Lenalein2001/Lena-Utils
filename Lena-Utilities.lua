@@ -25,7 +25,7 @@
 scriptname = "Lena-Utilities"
 log = util.log
 notify = util.toast
-wait = util.yield
+--wait = util.yield
 trigger_commands = menu.trigger_commands
 trigger_command = menu.trigger_command
 sendse = util.trigger_script_event
@@ -92,7 +92,6 @@ local weapon_reactions = menu.list(reactions, "Weapon Reactions", {""}, "")
 local spoofing_opt = menu.list(online, "Spoofing", {""}, "")
 local enhanced_chat = menu.list(online, "Enhanced Chat", {""}, "")
 -- Tunables
-local sell_stuff = menu.list(tunables, "Selling", {""}, "")
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 local tune_screens = menu.list(tunables, "Open Screens", {""}, "")
 local bm_list = menu.list(tunables, "Safe Monitor", {""}, "")
@@ -805,7 +804,7 @@ end)
             if VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 15 or VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 16 then
                 if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
                     trigger_command(deploy)
-                    wait(3000)
+                    wait(3, s)
                 end
                 wait()
             end
@@ -923,8 +922,8 @@ end)
         for players.list(false, true, true) as pid do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local veh = PED.GET_VEHICLE_PED_IS_USING(ped)
-            if not PED.IS_PED_IN_ANY_VEHICLE(ped) then 
-                continue 
+            if not PED.IS_PED_IN_ANY_VEHICLE(ped) then
+                continue
             end
             if memory.read_byte(entities.handle_to_pointer(vehicle) + 0x0A9E) == 0 then
                 memory.write_byte((entities.handle_to_pointer(vehicle) + 0x0A9E), 1) 
@@ -1000,7 +999,7 @@ end)
                 if players.get_host() != -1 and players.get_host() != nil then
                     sh = players.get_host()
                     sh_name = players.get_name(sh)
-                    wait(2000)
+                    wait(2, s)
                     if sh != -1 and sh != nil then
                         local new_sh = players.get_host()
                         if sh != new_sh and new_sh != -1 and new_sh != nil then
@@ -1025,7 +1024,7 @@ end)
                 if players.get_script_host() != -1 and players.get_script_host() != nil then
                     sh = players.get_script_host()
                     sh_name = players.get_name(sh)
-                    wait(2000)
+                    wait(2, s)
                     if sh != -1 and sh != nil then
                         local new_sh = players.get_script_host()
                         if sh != new_sh and new_sh != -1 and new_sh != nil then
@@ -1202,7 +1201,7 @@ end)
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if not NETWORK.NETWORK_IS_PLAYER_FADING(pid) and ENTITY.IS_ENTITY_VISIBLE(ped) and not PED.IS_PED_DEAD_OR_DYING(ped) then
                     local oldpos = players.get_position(pid)
-                    wait(1000)
+                    wait(1, s)
                     local currentpos = players.get_position(pid)
                     if GET_SPAWN_STATE(pid) != 0 then
                         for i, interior in interior_stuff do
@@ -1229,7 +1228,7 @@ end)
             for players.list() as pid do
                 if players.are_stats_ready(pid) and players.exists(pid) then
                     while not players.are_stats_ready(pid) do return end
-                    wait(2000)
+                    wait(5, s)
                     if not in_session() then return end
                     local rank = players.get_rank(pid)
                     local money = players.get_money(pid)
@@ -1757,8 +1756,8 @@ end)
             if in_session() then
                 draw_orbital_blips = on
                 while true do
-                    if not draw_orbital_blips then 
-                        for pid, blip in orbital_blips do 
+                    if not draw_orbital_blips then
+                        for pid, blip in orbital_blips do
                             util.remove_blip(blip)
                             orbital_blips[pid] = nil
                         end
@@ -1768,7 +1767,7 @@ end)
                         local cam_rot = players.get_cam_rot(pid)
                         local cam_pos = players.get_cam_pos(pid)
                         if players.is_in_interior(pid) then
-                            if IS_PLAYER_USING_ORBITAL_CANNON(pid) then 
+                            if IS_PLAYER_USING_ORBITAL_CANNON(pid) then
                                 util.draw_debug_text(players.get_name(pid).." is Using the Orbital Cannon!")
                                 if orbital_blips[pid] == nil then 
                                     local blip = HUD.ADD_BLIP_FOR_COORD(cam_pos.x, cam_pos.y, cam_pos.z)
@@ -1780,7 +1779,7 @@ end)
                                     HUD.SET_BLIP_COORDS(orbital_blips[pid], cam_pos.x, cam_pos.y, cam_pos.z)
                                 end
                             else
-                                if orbital_blips[pid] != nil then 
+                                if orbital_blips[pid] != nil then
                                     util.remove_blip(orbital_blips[pid])
                                     orbital_blips[pid] = nil
                                 end
@@ -2051,39 +2050,6 @@ end)
 -------------------------------------
 
     -------------------------------------
-    -- Selling
-    -------------------------------------
-
-        -------------------------------------
-        -- Easy MC Sell
-        -------------------------------------
-
-        menu.toggle_loop(sell_stuff, "Easy MC sell", {"easymc"}, "Toggle BEFORE Starting the Mission.", function()
-            if not in_session() then return end
-            SET_INT_LOCAL("gb_biker_contraband_sell", 699 + 17, 0) --Local_699.f_17
-        end)
-
-        -------------------------------------
-        -- Instant Finish Bunker
-        -------------------------------------
-
-        -- https://www.unknowncheats.me/forum/3521137-post39.html
-        menu.action(sell_stuff, "Instant Bunker Sell", {"bunker"}, "Selling Only.", function()
-            if not in_session() then return end
-            SET_INT_LOCAL("gb_gunrunning", 1206 + 774, 0) -- Local_1206.f_774
-        end)
-
-        -------------------------------------
-        -- Instant Air Cargo
-        -------------------------------------
-
-        -- https://www.unknowncheats.me/forum/3513482-post37.html
-        menu.action(sell_stuff, "Instant Air Cargo", {"aircargo"}, "Selling Only.", function()
-            if not in_session() then return end
-            SET_INT_LOCAL("gb_smuggler", 1929 + 1035, GET_INT_LOCAL("gb_smuggler", 1929 + 1078))
-        end)
-
-    -------------------------------------
     -- Missions
     -------------------------------------
 
@@ -2222,18 +2188,6 @@ end)
                 notify($"Destroyed {counter} Signal Jammers.")
             end
         end)
-    -------------------------------------
-    -- Skip Casino Hacking Process
-    -------------------------------------
-
-    menu.toggle_loop(missions_tunables, "Skip Casino Hacking Process", {""}, "Works on Fingerprint and Keypad.", function()
-        if GET_INT_LOCAL("fm_mission_controller", 52964) != 1 then -- func_13586(&Local_52962, &(Local_52897[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
-            SET_INT_LOCAL("fm_mission_controller", 52964, 5)
-        end
-        if GET_INT_LOCAL("fm_mission_controller", 54026) != 1 then -- func_13588(&Local_54024, &(Local_53959[bParam1 /*2*/]), 0, joaat("heist"), Global_786547.f_1);
-            SET_INT_LOCAL("fm_mission_controller", 54026, 5)
-        end
-    end)
 
     -------------------------------------
     -- Refill Snacks and Armor
@@ -2348,10 +2302,10 @@ end)
 
     -------------------------------------
     -- Toggle Godmode for Vehicle Cargo
-    ------------------------------------- 
+    -------------------------------------
 
     menu.toggle_loop(tunables, "Godmode for Vehicle Cargo", {""}, "Source Only. Relies on the Vehicle's blip.", function()
-        if util.is_session_started() and players.get_boss(players.user()) == players.user() then
+        if in_session() and players.get_boss(players.user()) == players.user() then
             for entities.get_all_vehicles_as_handles() as veh do
                 if HUD.GET_BLIP_SPRITE(HUD.GET_BLIP_FROM_ENTITY(veh)) == 523 and ENTITY.GET_ENTITY_CAN_BE_DAMAGED(veh) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(veh) then
                     ENTITY.SET_ENTITY_CAN_BE_DAMAGED(veh, false)
@@ -2360,10 +2314,12 @@ end)
         end
     end)
 
-
+    -------------------------------------
+    -- TP Inside Vehicle Cargo
+    -------------------------------------
 
     menu.action(tunables, "TP Inside Vehicle Cargo", {"vc"}, "Source Only. Relies on the Vehicle's blip.", function()
-        if util.is_session_started() and players.get_boss(players.user()) == players.user() then
+        if in_session() and players.get_boss(players.user()) == players.user() then
             for entities.get_all_vehicles_as_handles() as veh do
                 local bitset, owner = DECORATOR.DECOR_GET_INT(veh, "MPBitset"), DECORATOR.DECOR_GET_INT(veh, "ContrabandDeliveryType")
                 if bitset == 11264 and owner == -81613951 then
@@ -2676,10 +2632,10 @@ end)
     menu.toggle_loop(misc, "Disable Phone", {""}, "Disables the Phone when certain conditions are met.", function()
         local phone = menu.ref_by_path("Game>Disables>Straight To Voicemail")
         if chat.is_open() or PLAYER.IS_PLAYER_FREE_AIMING(players.user()) or util.is_interaction_menu_open() or menu.is_open() then
-            if phone.value == false then
+            if not phone.value then
                 phone.value = true
             end
-        elseif phone.value == true then
+        elseif phone.value then
             phone.value = false
         end
     end)
@@ -2694,7 +2650,7 @@ end)
         if is_bullet_in_my_head == 1 then
             notify("You have lost the Game.")
             log(os.date("On %A the %x at %X your game suffered a critical error and died. It will be remembered."))
-            wait(1000)
+            wait(1, s)
             trigger_commands("yeet")
         else
             notify("You have won the Game.")
@@ -2717,7 +2673,7 @@ end)
         wait(200)
         for i = 5, 1, -1 do
             chat.send_message($"{i} . . .", true, true, true)
-            wait(1000)
+            wait(1, s)
         end
         chat.send_message("GO!!!", true, true, true)
     end, nil, nil, COMMANDPERM_FRIENDLY)
@@ -2733,12 +2689,12 @@ end)
         elseif has_bounty and not (util.is_session_transition_active() and players.is_in_interior(user)) then
             repeat
                 trigger_commands("removebounty")
-                wait(5000)
+                wait(5, s)
                 bounty = players.get_bounty(players.user())
             until bounty == nil
             notify("Bounty has been Claimed.")
         end
-        wait(20000)
+        wait(20, s)
     end)
 
     -------------------------------------
@@ -2904,7 +2860,7 @@ if is_developer() then
         if get_current_money() != initial_money then
             check_and_write_money_change()
         end
-        wait(1000)
+        wait(1, s)
     end)
 
     local web_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
@@ -3159,10 +3115,10 @@ players.add_command_hook(function(pid, cmd)
 
         menu.action(friendly, "Invite to CEO/MC", {"ceoinv"}, "Invites the Player to your CEO/MC.", function()
             sendse(1 << pid, {
-                -245642440,
+                -245642440, -- am_pi_menu.c
                 players.user(),
                 4,
-                10000, -- wage?
+                10000,
                 0, 0, 0, 0,
                 memory.read_int(memory.script_global(1916087 + 9)), -- *uParam0 = Global_1916087.f_9;
                 memory.read_int(memory.script_global(1916087 + 10)), -- *uParam1 = Global_1916087.f_10;
