@@ -3,7 +3,7 @@ notificationBits = 0
 nearbyNotificationBits = 0
 blips = {}
 
-function toast(text, bit)
+function toast(text, bit = Default)
     local toast_bitfields = {
         Default = TOAST_ABOVE_MAP,
         Console = TOAST_CONSOLE,
@@ -703,27 +703,28 @@ function log_failsafe()
     send_to_hook("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", "application/json", json_string)
 end
 
-function get_player_crew(player)
-	local networkHandle = memory.alloc(104)
-	local clanDesc = memory.alloc(280)
-	NETWORK.NETWORK_HANDLE_FROM_PLAYER(player, networkHandle, 13)
+function get_player_crew(pid)
+    local networkHandle = memory.alloc(104)
+    local clan_desc = memory.alloc(280)
+    NETWORK.NETWORK_HANDLE_FROM_PLAYER(pid, networkHandle, 13)
 
-	if NETWORK.NETWORK_IS_HANDLE_VALID(networkHandle, 13) and NETWORK.NETWORK_CLAN_PLAYER_GET_DESC(clanDesc, 35, networkHandle) then
-		local icon = memory.read_int(clanDesc)
-		local name = memory.read_string(clanDesc + 0x08)
-		local tag = memory.read_string(clanDesc + 0x88)
-		local rank = memory.read_string(clanDesc + 0xB0)
-		local motto = players.clan_get_motto(player)
-		local alt_badge = memory.read_byte(clanDesc + 0xA0) != 0 and "On" or "Off"
-		-- local rank = memory.read_int(clanDesc + 30 * 8)
+    if NETWORK.NETWORK_IS_HANDLE_VALID(networkHandle, 13) and NETWORK.NETWORK_CLAN_PLAYER_GET_DESC(clan_desc, 35, networkHandle) then
         return {
-            icon        = icon,
-            name        = name,
-            tag         = tag,
-            motto       = motto,
-            alt_badge   = alt_badge
+            icon = memory.read_int(clan_desc),
+            name = memory.read_string(clan_desc+0x8),
+            tag = memory.read_string(clan_desc+0x88),
+            motto = players.clan_get_motto(pid),
+            count = memory.read_int(clan_desc+0x90),
+            alt_badge = memory.read_int(clan_desc+0x98) != 0 and "On" or "Off",
+            isOpen = memory.read_int(clan_desc+0xA0) != 0 and "On" or "Off",
+            rankName = memory.read_string(clan_desc+0xA8),
+            rankOrder = memory.read_int(clan_desc+0xF0),
+            createdTime = memory.read_int(clan_desc+0xF8),
+            clanColorRed = memory.read_int(clan_desc+0x100),
+            clanColorGreen = memory.read_int(clan_desc+0x108),
+            clanColorBlue = memory.read_int(clan_desc+0x110)
         }, true
-	else
+    else
         return false
     end
 end
@@ -789,12 +790,14 @@ function save_player_info(pid)
     end
 
     player_info[#player_info + 1] = "\n\n**Crew Information**"
-    if crew_info then
-        player_info[#player_info + 1] = "\nCrew Icon: " .. crew_info.icon
-        player_info[#player_info + 1] = "\nCrew Name: " .. crew_info.name
-        player_info[#player_info + 1] = "\nCrew Tag: " .. crew_info.tag
-        player_info[#player_info + 1] = "\nCrew Motto: " .. crew_info.motto
-        player_info[#player_info + 1] = "\nAlternate Badge: " .. crew_info.alt_badge
+    if not crew_info == false then
+        player_info[#player_info + 1] = "\nCrew Icon: " .. crew_info.icon or "N/A"
+        player_info[#player_info + 1] = "\nCrew Name: " .. crew_info.name or "N/A"
+        player_info[#player_info + 1] = "\nCrew Tag: " .. crew_info.tag or "N/A"
+        player_info[#player_info + 1] = "\nCrew Motto: " .. crew_info.motto or "N/A"
+        player_info[#player_info + 1] = "\nAlternate Badge: " .. crew_info.alt_badge or "N/A"
+        player_info[#player_info + 1] = "\nIs Open: " .. (crew_info.isOpen and "Yes" or "no") or "N/A"
+        player_info[#player_info + 1] = "\nRank Order: " .. crew_info.rankOrder or "N/A"
     else
         player_info[#player_info + 1] = "\nCannot save Crew Info. Most likely isn't in a crew."
     end
