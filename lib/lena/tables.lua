@@ -318,5 +318,11 @@ Modulepath = {
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/Remove_weapons.pluto",
         absolute_path = lenaModules.."Remove_weapons.pluto",
         path = "lena.modules.Remove_weapons"
+    },
+    Friend_list = {
+        name = "Friend List",
+        giturl = "/Lenalein2001/Lena-Utils-Modules/main/friend_list.pluto",
+        absolute_path = lenaModules.."friend_list.pluto",
+        path = "lena.modules.friend_list"
     }
 }
