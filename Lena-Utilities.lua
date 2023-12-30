@@ -69,7 +69,7 @@ anim_misc = menu.list(anims, "Misc", {""}, "")
 
 local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Animations. Lock Outfit breaks it.")
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
-local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "Basically a macro for Rocket Spam.")
+local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "A macro for Rocket Spam.")
 local plane_wep_manager = menu.list(weap, "Cannon Manager", {""}, "Modify a Plane's on-board Cannons.")
 local vehicle_gun_list = menu.list(weap, "Vehicle Gun", {"lenavehgun"}, "Spawn a Vehicle at Impact Coords.")
 -- Vehicle
@@ -84,13 +84,13 @@ local detects_protex = menu.list(online, "Detections&Protections", {""}, "")
 local detections = menu.list(detects_protex, "Detections", {""}, "")
 local protex = menu.list(detects_protex, "Protections", {""}, "")
 local anti_orb = menu.list(protex, "Anti Orb", {""}, "Protections against the Orbital Cannon.")
-friend_lists = menu.list(online, "Friend List", {""}, "")
 local reactions = menu.list(online, "Reactions", {""}, "")
 local join_reactions = menu.list(reactions, "Join Reactions", {""}, "")
 local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
 local weapon_reactions = menu.list(reactions, "Weapon Reactions", {""}, "")
 local spoofing_opt = menu.list(online, "Spoofing", {""}, "")
 local enhanced_chat = menu.list(online, "Enhanced Chat", {""}, "")
+local session_veh = menu.list(online, "Session Vehicles")
 -- Tunables
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 local tune_screens = menu.list(tunables, "Open Screens", {""}, "")
@@ -421,7 +421,7 @@ end)
     -- Legit rapid Fire
     -------------------------------------
 
-    LegitRapidMS = menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to grenade and back to the weapon.", 1, 1000, 100, 50, function (value); end)
+    LegitRapidMS = menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to the grenade and back to the weapon.", 1, 1000, 100, 50, function (value); end)
     LegitRapidFire = false
     menu.toggle(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main Weapon.", function(toggled)
         local ped = players.user_ped()
@@ -565,7 +565,7 @@ end)
 
     vehicle_gun_ent  = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
     vehicle_gun_gm   = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
-    vehicle_gun_perf = menu.toggle(vehicle_gun_list, "Tune Perfomance", {""}, "", function(); end)
+    vehicle_gun_perf = menu.toggle(vehicle_gun_list, "Tune Performance", {""}, "", function(); end)
 
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn Vehicle at Bullet Impact", {""}, "", function()
@@ -804,7 +804,7 @@ end)
             if VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 15 or VEHICLE.GET_VEHICLE_CLASS(user_vehicle) == 16 then
                 if util.is_key_down("E") and not chat.is_open() and not menu.command_box_is_open() and not menu.is_open() and not HUD.IS_PAUSE_MENU_ACTIVE() then
                     trigger_command(deploy)
-                    wait(3, s)
+                    wait(3, "s")
                 end
                 wait()
             end
@@ -999,7 +999,7 @@ end)
                 if players.get_host() != -1 and players.get_host() != nil then
                     sh = players.get_host()
                     sh_name = players.get_name(sh)
-                    wait(2, s)
+                    wait(2, "s")
                     if sh != -1 and sh != nil then
                         local new_sh = players.get_host()
                         if sh != new_sh and new_sh != -1 and new_sh != nil then
@@ -1024,7 +1024,7 @@ end)
                 if players.get_script_host() != -1 and players.get_script_host() != nil then
                     sh = players.get_script_host()
                     sh_name = players.get_name(sh)
-                    wait(2, s)
+                    wait(2, "s")
                     if sh != -1 and sh != nil then
                         local new_sh = players.get_script_host()
                         if sh != new_sh and new_sh != -1 and new_sh != nil then
@@ -1139,7 +1139,7 @@ end)
         -------------------------------------
 
         blip_projectiles = false
-        menu.toggle(detections, "Detect Rockets", {""}, "Detects incomming Rockets and Mines.", function(on)
+        menu.toggle(detections, "Detect Rockets", {""}, "Detects incoming Rockets and Mines.", function(on)
             blip_projectiles = on
             mod_uses("object", if on then 1 else -1)
         end)
@@ -1201,7 +1201,7 @@ end)
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if not NETWORK.NETWORK_IS_PLAYER_FADING(pid) and ENTITY.IS_ENTITY_VISIBLE(ped) and not PED.IS_PED_DEAD_OR_DYING(ped) then
                     local oldpos = players.get_position(pid)
-                    wait(1, s)
+                    wait(1, "s")
                     local currentpos = players.get_position(pid)
                     if GET_SPAWN_STATE(pid) != 0 then
                         for i, interior in interior_stuff do
@@ -1228,7 +1228,7 @@ end)
             for players.list() as pid do
                 if players.are_stats_ready(pid) and players.exists(pid) then
                     while not players.are_stats_ready(pid) do return end
-                    wait(5, s)
+                    wait(5, "s")
                     if not in_session() then return end
                     local rank = players.get_rank(pid)
                     local money = players.get_money(pid)
@@ -1282,7 +1282,7 @@ end)
                 if players.get_vehicle_model(pid) != 0 and not TASK.GET_IS_TASK_ACTIVE(ped, 160) and GET_SPAWN_STATE(players.user()) != 0 then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if players.get_name(driver) != "InvalidPlayer" and not pegasusveh and pid == driver and not players.is_in_interior(pid) then
-                        if bitset == 1024 and players.get_weapon_damage_modifier(pid) == 1 then
+                        if bitset == 1024 and players.get_weapon_damage_modifier(pid) == 1 and not players.is_godmode(pid) then
                             if not IsDetectionPresent(pid, "2Take1 User") then
                                 players.add_detection(pid, "2Take1 User", 7)
                             end
@@ -1314,7 +1314,7 @@ end)
         -- Thunder Join
         -------------------------------------
 
-        menu.toggle_loop(detections, "Thunder Join", {""}, "Detects if someone is using thunder join.", function()
+        menu.toggle_loop(detections, "Thunder Join", {""}, "Detects if someone is using Thunder Join.", function()
             for players.list_except() as pid do
                 if util.is_session_transition_active() then return end
                 local old_sh = players.get_script_host()
@@ -1679,7 +1679,7 @@ end)
                 ENTITY.FREEZE_ENTITY_POSITION(orb_obj, true)
                 ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(players.user_ped(), orb_obj, false)
             end
-            util.request_model(model)
+
             if orb_obj2 == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj2) then
                 orb_obj2 = entities.create_object(model, v3(335.155, 4835.0, -60.0))
                 entities.set_can_migrate(entities.handle_to_pointer(orb_obj2), false)
@@ -1792,21 +1792,9 @@ end)
         end)
 
     -------------------------------------
-    -- Friend List
-    -------------------------------------
-    
-    menu.divider(friend_lists, "frens :)")
-    for i = 0, NETWORK.NETWORK_GET_FRIEND_COUNT() do
-        local name = NETWORK.NETWORK_GET_FRIEND_DISPLAY_NAME(i)
-        if name == "*****" then goto skip end
-        gen_fren_funcs(name)
-        ::skip::
-    end
-
-    -------------------------------------
     -- Show Join Info
     -------------------------------------
-    
+
     menu.divider(join_reactions, "Join Reactions")
     menu.toggle(join_reactions, "Notification", {""}, "", function(toggle)
         showJoinInfomsg = toggle
@@ -1994,25 +1982,6 @@ end)
     end)
 
     -------------------------------------
-    -- Kick High-Ping
-    -------------------------------------
-
-    menu.toggle_loop(online, "Kick High-Ping Players", {""}, "Kicks Everyone with a high ping (180)\nNote that the average ping is quite high in most Sessions.", function()
-        if in_session() then
-            for players.list(false, false, true) as pid do
-                local ping = NETWORK.NETWORK_GET_AVERAGE_LATENCY(pid)
-                local pname = players.get_name(pid)
-                if ping >= 180 then 
-                    notify($"{pname} has a high ping!\nPing: {ping}")
-                    log($"[Lena | Kick High-Ping] Player {pname} has a high ping! | Ping: {ping}")
-                    trigger_commands($"kick {pname}")
-                end
-                wait(5000)
-            end
-        end
-    end)
-
-    -------------------------------------
     -- Kick Attackers
     -------------------------------------
 
@@ -2031,11 +2000,13 @@ end)
         end
     end)
 
+
+
     -------------------------------------
     -- Ghost Session
     -------------------------------------
 
-    menu.toggle(online, "Ghost Session", {"ghostsession"}, "Creates a session within your session where you will not recieve other players syncs, and they will not recieve yours.", function(toggled)
+    menu.toggle(online, "Ghost Session", {"ghostsession"}, "Creates a session within your session where you will not receive other player's syncs, and they will not receive yours.", function(toggled)
         if toggled then
             NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
         else
@@ -2413,7 +2384,7 @@ end)
         -- Grab Scrip Host
         -------------------------------------
 
-        menu.action(shortcuts, "Grab Script Host", {"sh"}, "Grabs Script Host in a less destructive way.", function()
+        menu.action(shortcuts, "Grab Script Host", {"sh"}, "Grabs Script Host less destructively.", function()
             trigger_commands($"givesh {players.get_name(players.user())}")
         end)
 
@@ -2650,7 +2621,7 @@ end)
         if is_bullet_in_my_head == 1 then
             notify("You have lost the Game.")
             log(os.date("On %A the %x at %X your game suffered a critical error and died. It will be remembered."))
-            wait(1, s)
+            wait(1, "s")
             trigger_commands("yeet")
         else
             notify("You have won the Game.")
@@ -2673,7 +2644,7 @@ end)
         wait(200)
         for i = 5, 1, -1 do
             chat.send_message($"{i} . . .", true, true, true)
-            wait(1, s)
+            wait(1, "s")
         end
         chat.send_message("GO!!!", true, true, true)
     end, nil, nil, COMMANDPERM_FRIENDLY)
@@ -2689,12 +2660,12 @@ end)
         elseif has_bounty and not (util.is_session_transition_active() and players.is_in_interior(user)) then
             repeat
                 trigger_commands("removebounty")
-                wait(5, s)
+                wait(5, "s")
                 bounty = players.get_bounty(players.user())
             until bounty == nil
             notify("Bounty has been Claimed.")
         end
-        wait(20, s)
+        wait(20, "s")
     end)
 
     -------------------------------------
@@ -2860,7 +2831,7 @@ if is_developer() then
         if get_current_money() != initial_money then
             check_and_write_money_change()
         end
-        wait(1, s)
+        wait(1, "s")
     end)
 
     local web_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
@@ -3568,7 +3539,7 @@ players.add_command_hook(function(pid, cmd)
                 ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
                 wait(250)
                 entities.delete(obj); entities.delete(veh)
-                wait(250)     
+                wait(250)
             end
         end, nil, nil, COMMANDPERM_RUDE)
 
@@ -3781,7 +3752,7 @@ players.add_command_hook(function(pid, cmd)
             local object = entities.create_object(joaat("prop_fragtest_cnst_04"), ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)))
             OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object, 1, false)
             wait(5000)
-            entities.delete_by_handle(object)
+            entities.delete(object)
         end)
 
         menu.action(crashes, "MK2 Griefer", {"grief"}, "Should work one some menus, idk. Don't crash players.", function()
@@ -3977,7 +3948,7 @@ util.create_tick_handler(function()
 end)
 
 util.on_stop(function()
-    for pid, blip in orbital_blips do 
+    for pid, blip in orbital_blips do
         util.remove_blip(blip)
     end
     if modifiedSpeed then modifiedSpeed:reset() end
