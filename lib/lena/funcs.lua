@@ -3,41 +3,23 @@ notificationBits = 0
 nearbyNotificationBits = 0
 blips = {}
 
-function toast(text, bit = Default)
-    local toast_bitfields = {
-        Default = TOAST_ABOVE_MAP,
-        Console = TOAST_CONSOLE,
-        File = TOAST_FILE,
-        Chat = TOAST_CHAT,
-        TeamChat = TOAST_CHAT_TEAM,
-        Log = TOAST_LOGGER,
-        All = TOAST_ALL
-    }
+function wait(duration, unit)
+    unit = unit or "ms"  -- Default to milliseconds if no unit is provided
 
-    local flags = toast_bitfields[bit] or TOAST_ABOVE_MAP
-
-    util.toast(text, flags)
-end
-
-function wait(time, unit = ms)
     local milliseconds
-
-    switch unit do
-        case ms:
-            milliseconds = time
-            break
-        case s:
-            milliseconds = time * 1000
-            break
-        case m:
-            milliseconds = time * 60 * 1000
-            break
-        default:
-            error("Invalid time unit. Supported units are 'ms', 's', and 'm'.")
+    if unit == "ms" then
+        milliseconds = duration
+    elseif unit == "s" then
+        milliseconds = duration * 1000
+    elseif unit == "m" then
+        milliseconds = duration * 60 * 1000
+    else
+        error("Invalid unit. Supported units are 'ms', 's', and 'm'.")
     end
 
     util.yield(milliseconds)
 end
+
 
 function gen_fren_funcs(name)
     local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)
@@ -122,7 +104,7 @@ end
 
 function start_fm_script(script)
     if not players.get_boss(players.user()) == players.user() then
-        repeat trigger_commands("ceo")  until players.get_boss(players.user()) == players.user()
+        repeat trigger_commands("ceo") until players.get_boss(players.user()) == players.user()
         notify("Starting CEO...")
     end
 
@@ -203,7 +185,9 @@ function spawn_obj(model_name, pos)
     end
 end
 function spawn_vehicle(model_name, pos, gm = false)
-    local hash = joaat(model_name)
+
+    local hash = util.joaat(model_name)
+
     if STREAMING.IS_MODEL_A_VEHICLE(hash) then
         util.request_model(hash)
         local veh = entities.create_vehicle(hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
@@ -211,6 +195,7 @@ function spawn_vehicle(model_name, pos, gm = false)
         ENTITY.SET_ENTITY_INVINCIBLE(veh, gm)
         entities.set_can_migrate(ptr, false)
         ENTITY.SET_ENTITY_SHOULD_FREEZE_WAITING_ON_COLLISION(veh, true)
+
         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return veh
     else
@@ -1107,42 +1092,42 @@ end
 
 local json = require("json")
 local jsonFilePath = libDir.."downforce_data.json"
+
 function loadJsonData()
     local file = io.open(jsonFilePath, "r")
     if file then
-        local jsonData = {}
-        for line in file:lines() do
-            local entry = json.decode(line)
-            if entry then
-                jsonData[entry.id] = entry.downforce
-            end
-        end
+        local content = file:read("*all")
         file:close()
-        return jsonData
+
+        if content and content ~= "" then
+            return json.decode(content)
+        else
+            return {}
+        end
     else
         return {}
     end
 end
+
 function saveJsonData(data)
     local file = io.open(jsonFilePath, "w")
     if file then
-        for id, downforce in pairs(data) do
-            local entry = { id = id, downforce = downforce }
-            file:write(json.encode(entry) .. ",\n")
-        end
+        file:write(json.encode(data, { indent = true }) .. "\n")
         file:close()
     end
 end
+
 function getDownforceAndId()
     local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
     local downforce = memory.read_float(CHandlingData + 0x0014)
     local id = string.upper(util.reverse_joaat(entities.get_model_hash(entities.get_user_vehicle_as_handle())))
     return downforce, id
 end
+
 function enhanceDownforce()
-    if entities.get_user_vehicle_as_pointer(false) != 0 and players.is_visible(players.user()) then
+    if entities.get_user_vehicle_as_pointer(false) ~= 0 and players.is_visible(players.user()) then
         wait(1000)
-        if entities.get_user_vehicle_as_pointer(false) != 0 and players.is_visible(players.user()) then
+        if entities.get_user_vehicle_as_pointer(false) ~= 0 and players.is_visible(players.user()) then
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer(false))
             local vmodel = players.get_vehicle_model(players.user())
             local isCarModel = VEHICLE.IS_THIS_MODEL_A_CAR(vmodel)
