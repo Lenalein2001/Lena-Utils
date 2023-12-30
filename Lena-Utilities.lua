@@ -1952,6 +1952,60 @@ end)
             end
         end)
 
+
+-- Define the vehicle data table with joaat, initial pos, and heading/yaw
+local vehicleData = {
+    {joaat = joaat("savage"),   pos = v3.new(-724.3226, -1443.5978, 5.000525),   yaw = 139,  sprite = 64},
+    {joaat = joaat("lazer"),    pos = v3.new(-1821.0751, 2971.0571, 32.809982),  yaw = 60,   sprite = 424},
+    {joaat = joaat("hunter"),   pos = v3.new(-1339.9257, -2385.0227, 13.947248), yaw = -91,  sprite = 576},
+    {joaat = joaat("rhino"),    pos = v3.new(-693.11395, -1403.4215, 5.000521),  yaw = 141,  sprite = 421},
+    {joaat = joaat("caracara"), pos = v3.new(940.9654, 151.945, 80.83033),      yaw = -98,  sprite = 560},
+}
+
+for _, vehicle in vehicleData do
+    local veh_hdl
+    local veh_name = util.get_label_text(vehicle.joaat)
+
+    menu.toggle_loop(session_veh, "Spawn " .. veh_name, {""}, "", function()
+        if not in_session() then
+            veh_hdl = nil
+            return
+        end
+        if #players.list() <= 2 then return end
+        util.request_model(vehicle.joaat)
+
+        if veh_hdl == nil then
+            veh_hdl = entities.create_vehicle(vehicle.joaat, vehicle.pos, vehicle.yaw)
+            notify("Spawning a new Vehicle.")
+
+            local blip = HUD.ADD_BLIP_FOR_ENTITY(veh_hdl)
+            HUD.SET_BLIP_SPRITE(blip, vehicle.sprite)
+            HUD.SET_BLIP_COLOUR(blip, 9)
+        elseif veh_hdl and VEHICLE.GET_VEHICLE_ENGINE_HEALTH(veh_hdl) <= -3000 or not ENTITY.DOES_ENTITY_EXIST(veh_hdl) then
+            entities.delete(veh_hdl)
+            wait(30, "s")
+            veh_hdl = entities.create_vehicle(vehicle.joaat, vehicle.pos, vehicle.yaw)
+            notify(veh_name .. " was destroyed. Spawning a new one.")
+
+            local blip = HUD.ADD_BLIP_FOR_ENTITY(veh_hdl)
+            HUD.SET_BLIP_SPRITE(blip, vehicle.sprite)
+            HUD.SET_BLIP_COLOUR(blip, 9)
+        end
+
+        if veh_hdl then
+            ENTITY.SET_ENTITY_LOAD_COLLISION_FLAG(veh_hdl, true, false)
+            -- util.draw_debug_text(veh_name.. "'s status: 1000.0/"..VEHICLE.GET_VEHICLE_ENGINE_HEALTH(veh_hdl)) -- Monitor Health
+            if not VEHICLE.IS_VEHICLE_SEAT_FREE(veh_hdl, -1) and not get_seat_ped_is_in(players.user_ped()) then
+                HUD.SET_BLIP_COLOUR(blip, 6)
+            end
+        end
+    end, function()
+        if veh_hdl then
+            entities.delete(veh_hdl)
+        end
+    end)
+end
+
     -------------------------------------
     -- Save Players Information on Kick
     -------------------------------------
