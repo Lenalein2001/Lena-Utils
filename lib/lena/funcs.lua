@@ -102,15 +102,17 @@ function IS_HELP_MSG_DISPLAYED(label)
     return HUD.END_TEXT_COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED(0)
 end
 
-function start_fm_script(script)
+function start_fm_script(script, stack)
+    stack = stack or 5000
+
     if not players.get_boss(players.user()) == players.user() then
         repeat trigger_commands("ceo") until players.get_boss(players.user()) == players.user()
         notify("Starting CEO...")
     end
 
     SCRIPT.REQUEST_SCRIPT(script)
-    repeat wait_once() until SCRIPT.HAS_SCRIPT_LOADED(script)
-    SYSTEM.START_NEW_SCRIPT(script, 5000)
+    repeat wait() until SCRIPT.HAS_SCRIPT_LOADED(script)
+    SYSTEM.START_NEW_SCRIPT(script, stack)
     SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(script)
 end
 
