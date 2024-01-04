@@ -90,7 +90,7 @@ local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
 local weapon_reactions = menu.list(reactions, "Weapon Reactions", {""}, "")
 local spoofing_opt = menu.list(online, "Spoofing", {""}, "")
 local enhanced_chat = menu.list(online, "Enhanced Chat", {""}, "")
-local session_veh = menu.list(online, "Session Vehicles")
+local session_veh = menu.list(online, "Session Vehicles", {"sessionvehicles"}, "")
 -- Tunables
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 local tune_screens = menu.list(tunables, "Open Screens", {""}, "")
@@ -368,7 +368,7 @@ end)
     menu.toggle(self, "Godmode", {"gm"}, "Toggles a few options to make you truly Invincible.", function(t)
         trigger_commands($"godmode {t}; vehgodmode {t}; grace {t}; mint {t}")
     end)
-    
+
     -------------------------------------
     -- Auto Heal
     -------------------------------------
@@ -1952,60 +1952,6 @@ end)
             end
         end)
 
-
--- Define the vehicle data table with joaat, initial pos, and heading/yaw
-local vehicleData = {
-    {joaat = joaat("savage"),   pos = v3.new(-724.3226, -1443.5978, 5.000525),   yaw = 139,  sprite = 64},
-    {joaat = joaat("lazer"),    pos = v3.new(-1821.0751, 2971.0571, 32.809982),  yaw = 60,   sprite = 424},
-    {joaat = joaat("hunter"),   pos = v3.new(-1339.9257, -2385.0227, 13.947248), yaw = -91,  sprite = 576},
-    {joaat = joaat("rhino"),    pos = v3.new(-693.11395, -1403.4215, 5.000521),  yaw = 141,  sprite = 421},
-    {joaat = joaat("caracara"), pos = v3.new(940.9654, 151.945, 80.83033),      yaw = -98,  sprite = 560},
-}
-
-for _, vehicle in vehicleData do
-    local veh_hdl
-    local veh_name = util.get_label_text(vehicle.joaat)
-
-    menu.toggle_loop(session_veh, "Spawn " .. veh_name, {""}, "", function()
-        if not in_session() then
-            veh_hdl = nil
-            return
-        end
-        if #players.list() <= 2 then return end
-        util.request_model(vehicle.joaat)
-
-        if veh_hdl == nil then
-            veh_hdl = entities.create_vehicle(vehicle.joaat, vehicle.pos, vehicle.yaw)
-            notify("Spawning a new Vehicle.")
-
-            local blip = HUD.ADD_BLIP_FOR_ENTITY(veh_hdl)
-            HUD.SET_BLIP_SPRITE(blip, vehicle.sprite)
-            HUD.SET_BLIP_COLOUR(blip, 9)
-        elseif veh_hdl and VEHICLE.GET_VEHICLE_ENGINE_HEALTH(veh_hdl) <= -3000 or not ENTITY.DOES_ENTITY_EXIST(veh_hdl) then
-            entities.delete(veh_hdl)
-            wait(30, "s")
-            veh_hdl = entities.create_vehicle(vehicle.joaat, vehicle.pos, vehicle.yaw)
-            notify(veh_name .. " was destroyed. Spawning a new one.")
-
-            local blip = HUD.ADD_BLIP_FOR_ENTITY(veh_hdl)
-            HUD.SET_BLIP_SPRITE(blip, vehicle.sprite)
-            HUD.SET_BLIP_COLOUR(blip, 9)
-        end
-
-        if veh_hdl then
-            ENTITY.SET_ENTITY_LOAD_COLLISION_FLAG(veh_hdl, true, false)
-            -- util.draw_debug_text(veh_name.. "'s status: 1000.0/"..VEHICLE.GET_VEHICLE_ENGINE_HEALTH(veh_hdl)) -- Monitor Health
-            if not VEHICLE.IS_VEHICLE_SEAT_FREE(veh_hdl, -1) and not get_seat_ped_is_in(players.user_ped()) then
-                HUD.SET_BLIP_COLOUR(blip, 6)
-            end
-        end
-    end, function()
-        if veh_hdl then
-            entities.delete(veh_hdl)
-        end
-    end)
-end
-
     -------------------------------------
     -- Save Players Information on Kick
     -------------------------------------
@@ -2710,8 +2656,8 @@ end
     menu.toggle_loop(ai_made, "Remove Bounty", {"remove_bounty"}, "Automatically remove bounties.", function()
         local user = players.user()
         local has_bounty = players.get_bounty(user)
-        if has_bounty and players.is_in_interior(user) then
-        elseif has_bounty and not (util.is_session_transition_active() and players.is_in_interior(user)) then
+
+        if has_bounty and in_session() and not players.is_in_interior(user) then
             repeat
                 trigger_commands("removebounty")
                 wait(5, "s")
@@ -3055,7 +3001,7 @@ players.add_command_hook(function(pid, cmd)
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
-        0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 
+        0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 0x0AFC4BF9, 0x0D44D097, 0x07FBE4BE, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
