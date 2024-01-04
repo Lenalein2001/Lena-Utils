@@ -827,29 +827,6 @@ function save_player_info(pid)
     end
 end
 
--- Weapon Speed Modifier
-AmmoSpeed = {address = 0, defaultValue = 0}
-AmmoSpeed.__index = AmmoSpeed
-AmmoSpeed.__eq = function (a, b)
-    return a.address == b.address
-end
-function AmmoSpeed.new(address)
-    assert(address != 0, "got a nullpointer")
-    local instance = setmetatable({}, AmmoSpeed)
-    instance.address = address
-    instance.defaultValue = memory.read_float(address)
-    return instance
-end
-function AmmoSpeed:getValue()
-    return memory.read_float(self.address)
-end
-function AmmoSpeed:setValue(value)
-    memory.write_float(self.address, value)
-end
-function AmmoSpeed:reset()
-    memory.write_float(self.address, self.defaultValue)
-end
-
 function DOES_VEHICLE_HAVE_IMANI_TECH(vehicle_model)
     switch vehicle_model do
         case joaat("deity"):
