@@ -324,5 +324,11 @@ Modulepath = {
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/friend_list.pluto",
         absolute_path = lenaModules.."friend_list.pluto",
         path = "lena.modules.friend_list"
+    },
+    session_vehicles = {
+        name = "Session Vehicles",
+        giturl = "/Lenalein2001/Lena-Utils-Modules/main/session_vehicles.pluto",
+        absolute_path = lenaModules.."session_vehicles.pluto",
+        path = "lena.modules.session_vehicles"
     }
 }
