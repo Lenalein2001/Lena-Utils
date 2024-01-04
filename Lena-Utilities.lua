@@ -3008,9 +3008,6 @@ players.add_command_hook(function(pid, cmd)
 
     for idiots as id do
         if rids == id and players.are_stats_ready(pid) and in_session() then
-            if is_developer() then
-                trigger_commands($"savep{pname}")
-            end
             if NETWORK.NETWORK_IS_HOST() then
                 trigger_commands($"historyblock{pname} on")
                 wait(100)
