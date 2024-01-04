@@ -466,33 +466,6 @@ end)
     end)
 
     -------------------------------------
-    -- BULLET SPEED MULT
-    -------------------------------------
-
-    local modifiedSpeed
-    local bullet_multiplier = menu.slider_float(weap, "Bullet Speed Mult", {""}, "Changes the Speed of all weapons that are not Hitscan.", 10, 100000, 100, 10, function(value); end)
-    util.create_tick_handler(function()
-        local CPed = entities.handle_to_pointer(players.user_ped())
-        if CPed == 0 or not menu.get_value(bullet_multiplier) then return end
-        local ammoSpeedAddress = addr_from_pointer_chain(CPed, {0x10B8, 0x20, 0x60, 0x58})
-        if ammoSpeedAddress == 0 then
-            if entities.get_user_vehicle_as_pointer() == 0 then return end
-            ammoSpeedAddress = addr_from_pointer_chain(CPed, {0x10B8, 0x70, 0x60, 0x58})
-            if ammoSpeedAddress == 0 then return end
-        end
-        local ammoSpeed = AmmoSpeed.new(ammoSpeedAddress)
-        modifiedSpeed = modifiedSpeed or ammoSpeed
-        if ammoSpeed != modifiedSpeed then
-            modifiedSpeed:reset()
-            modifiedSpeed = ammoSpeed
-        end
-        local newValue = modifiedSpeed.defaultValue * menu.get_value(bullet_multiplier)
-        if modifiedSpeed:getValue() != newValue then
-            modifiedSpeed:setValue(newValue)
-        end
-    end)
-
-    -------------------------------------
     -- Unfair Triggerbot
     -------------------------------------  
 
@@ -2805,15 +2778,13 @@ if is_developer() then
         local PedPointer = entities.handle_to_pointer(user)
         modifiedRange[weaponHash] = {
             minAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x178}),
-            maxAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}),
-            rangeAddress = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}),
+            maxAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}), -- m_weapon_range
+            rangeAddress = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}), -- m_lock_on_range
         }
 
         if modifiedRange[weaponHash].rangeAddress != 0 then
-            modifiedRange[weaponHash].originalMin   = memory.read_float(modifiedRange[weaponHash].minAddress)
             modifiedRange[weaponHash].originalMax   = memory.read_float(modifiedRange[weaponHash].maxAddress)
             modifiedRange[weaponHash].originalRange = memory.read_float(modifiedRange[weaponHash].rangeAddress)
-            memory.write_float(modifiedRange[weaponHash].minAddress,   10000)
             memory.write_float(modifiedRange[weaponHash].maxAddress,   10000)
             memory.write_float(modifiedRange[weaponHash].rangeAddress, 10000)
         end
@@ -3948,7 +3919,6 @@ util.on_stop(function()
     for pid, blip in orbital_blips do
         util.remove_blip(blip)
     end
-    if modifiedSpeed then modifiedSpeed:reset() end
 end)
 
 util.keep_running()
