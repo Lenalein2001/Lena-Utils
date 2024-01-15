@@ -48,7 +48,7 @@ local clearRopes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
 -------------------------------------
 
 local self = menu.list(menu.my_root(), "Self", {"lenaself"}, "Self Options")
-local vehicle = menu.list(menu.my_root(), "Vehicle", {"lenavehicle"}, "Vehicle Options")
+local vehicle_root = menu.list(menu.my_root(), "Vehicle", {"lenavehicle"}, "Vehicle Options")
 local online = menu.list(menu.my_root(), "Online", {"lenaonline"}, "Online Options")
 local tunables = menu.list(menu.my_root(), "Tunables", {"lenatunables"}, "Tunables")
 local misc = menu.list(menu.my_root(), "Misc", {"lenamisc"}, "")
@@ -73,10 +73,10 @@ local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "A macro for Rocket Spam."
 local plane_wep_manager = menu.list(weap, "Cannon Manager", {""}, "Modify a Plane's on-board Cannons.")
 local vehicle_gun_list = menu.list(weap, "Vehicle Gun", {"lenavehgun"}, "Spawn a Vehicle at Impact Coords.")
 -- Vehicle
-local better_vehicles = menu.list(vehicle, "Better Vehicles", {""}, "")
-local doorcontrol = menu.list(vehicle, "Doors", {""}, "")
-local engine_control = menu.list(vehicle, "Engine Control", {""}, "")
-local vehicle_flares = menu.list(vehicle, "Countermeasures", {"lenacountermeasures"}, "War Thunder-like Countermeasues.")
+local better_vehicles = menu.list(vehicle_root, "Better Vehicles", {""}, "")
+local doorcontrol = menu.list(vehicle_root, "Doors", {""}, "")
+local engine_control = menu.list(vehicle_root, "Engine Control", {""}, "")
+local vehicle_flares = menu.list(vehicle_root, "Countermeasures", {"lenacountermeasures"}, "War Thunder-like Countermeasues.")
 -- Online
 local mpsession = menu.list(online, "Session", {""}, "Features for the current Session.")
 local hosttools = menu.list(mpsession, "Host Tools", {""}, "Tools that can only be used as the Session Host or to force Session Host.")
@@ -198,7 +198,6 @@ auto_update_config = {
 -- Required Files
 -------------------------------------
 
-util.ensure_package_is_installed(natives_version)
 util.require_natives(natives_version)
 
 lenaDir = filesystem.scripts_dir().."Lena\\"
@@ -480,7 +479,8 @@ end)
             local pos = PED.GET_PED_BONE_COORDS(ped, 31086, 0.0, 0.0, 0.0)
             if PLAYER.IS_PLAYER_FREE_AIMING_AT_ENTITY(players.user(), ped) and not PED.IS_PED_RELOADING(players.user_ped()) then
                 MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(wpnCoords, pos, dmg, true, wpn, players.user_ped(), true, false, 10000)
-                PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 24, 1.0)
+                print(wpn)
+                --PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 24, 1.0)
                 wait(delay * 1000)
             end
         end
@@ -811,7 +811,7 @@ end)
     -- Enter Nearest Vehicle
     -------------------------------------        
     
-    menu.action(vehicle, "Enter Nearest Vehicle", {""}, "Enters the nearest Vehicle that can be found.", function()
+    menu.action(vehicle_root, "Enter Nearest Vehicle", {""}, "Enters the nearest Vehicle that can be found.", function()
         if not PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             local player_pos = players.get_position(players.user())
             PED.SET_PED_INTO_VEHICLE(players.user_ped(), closestveh(player_pos), -1)
@@ -825,7 +825,7 @@ end)
     -- Clean vehicle
     -------------------------------------
 
-    menu.action(vehicle, "Clean Vehicle", {"clv"}, "Cleans the current Vehicle.", function()
+    menu.action(vehicle_root, "Clean Vehicle", {"clv"}, "Cleans the current Vehicle.", function()
         VEHICLE.SET_VEHICLE_DIRT_LEVEL(user_vehicle, 0.0)
     end)
 
@@ -833,7 +833,7 @@ end)
     -- Disable Crash Damage
     -------------------------------------
 
-    menu.toggle(vehicle, "Disable Crash Damage", {""}, "Vehicle will not take crash damage, but is still susceptible to damage from bullets and explosives.", function(toggled)
+    menu.toggle(vehicle_root, "Disable Crash Damage", {""}, "Vehicle will not take crash damage, but is still susceptible to damage from bullets and explosives.", function(toggled)
         VEHICLE.SET_VEHICLE_STRONG(toggled)
     end)
 
@@ -841,7 +841,7 @@ end)
     -- Disable Visible Damage
     -------------------------------------
 
-    menu.toggle(vehicle, "Disable Visible Damage", {""}, "Vehicle will not take any visible damage.", function(toggled)
+    menu.toggle(vehicle_root, "Disable Visible Damage", {""}, "Vehicle will not take any visible damage.", function(toggled)
         VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(toggled)
     end)
         
@@ -849,7 +849,7 @@ end)
     -- Unbreakable Lights
     -------------------------------------   
 
-    menu.toggle(vehicle, "Unbreakable Lights", {""}, "Makes the Lights unbreakable on your current Vehicle.", function(toggled)
+    menu.toggle(vehicle_root, "Unbreakable Lights", {""}, "Makes the Lights unbreakable on your current Vehicle.", function(toggled)
         VEHICLE.SET_VEHICLE_HAS_UNBREAKABLE_LIGHTS(user_vehicle, toggled)
     end)
 
@@ -857,7 +857,7 @@ end)
     -- Drift Mode
     -------------------------------------
 
-    menu.toggle_loop(vehicle, "Drift Mode", {"driftmode"}, "Hold shift to drift.", function()
+    menu.toggle_loop(vehicle_root, "Drift Mode", {"driftmode"}, "Hold shift to drift.", function()
         if not in_session() then return end
         if PAD.IS_CONTROL_PRESSED(0, 21) then
             VEHICLE.SET_VEHICLE_REDUCE_GRIP(user_vehicle, true)
@@ -870,7 +870,7 @@ end)
     -- Control Passenger Weapons
     -------------------------------------
 
-    menu.action(vehicle, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current vehicle.", function()
+    menu.action(vehicle_root, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current vehicle.", function()
         local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
         local CVehicleWeaponHandlingDataAddress = entities.handling_get_subhandling(CHandlingData, 9)
         local WeaponSeats = CVehicleWeaponHandlingDataAddress + 0x0020
@@ -890,7 +890,7 @@ end)
     -- Bypass Anti-Lockon
     -------------------------------------
 
-    menu.toggle_loop(vehicle, "Bypass Anti-Lockon", {""}, "Bypass No Lock-on features. Works great on Kiddions Users.", function()
+    menu.toggle_loop(vehicle_root, "Bypass Anti-Lockon", {""}, "Bypass No Lock-on features. Works great on Kiddions Users.", function()
         if not in_session() then return end
         for players.list(false, true, true) as pid do
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -908,7 +908,7 @@ end)
     -- Auto-Performance Tuning
     -------------------------------------
 
-    menu.toggle_loop(vehicle, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
+    menu.toggle_loop(vehicle_root, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
         if not in_session() then return end
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
             local veh = players.get_vehicle_model(players.user())
@@ -922,7 +922,7 @@ end)
     -- Shot Flames
     -------------------------------------
 
-    menu.toggle_loop(vehicle, "Limit RPM", {""}, "", function()
+    menu.toggle_loop(vehicle_root, "Limit RPM", {""}, "", function()
         if not in_session() then return end
         if players.get_vehicle_model(players.user()) != 0 then
             entities.set_rpm(entities.get_user_vehicle_as_pointer(), 1.2)
@@ -934,21 +934,13 @@ end)
     -- Keep Vehicle Clean
     -------------------------------------
 
-    menu.toggle_loop(vehicle, "Keep Vehicle Clean", {""}, "", function()
+    menu.toggle_loop(vehicle_root, "Keep Vehicle Clean", {""}, "", function()
         if not in_session() then return end
         if PED.IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and VEHICLE.GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
             if VEHICLE.GET_VEHICLE_DIRT_LEVEL(user_vehicle) >= 1.0 and entities.get_owner(user_vehicle) == players.user() then
                 VEHICLE.SET_VEHICLE_DIRT_LEVEL(user_vehicle, 0.0)
             end
         end
-    end)
-
-    -------------------------------------
-    -- Race Mode
-    -------------------------------------
-
-    menu.action(vehicle, "Race Mode", {"racemode"}, "Changes some settings that makes races more fair.", function()
-        trigger_commands("perf; gravitymult 1; enginepowermult 1")
     end)
 
 -------------------------------------
@@ -1135,8 +1127,8 @@ end)
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = PED.GET_VEHICLE_PED_IS_USING(ped)
                 local veh_speed = (ENTITY.GET_ENTITY_SPEED(vehicle)* 3.6)
-                local class = VEHICLE.GET_VEHICLE_CLASS(vehicle)
-                if class != 15 and class != 16 and veh_speed >= 320 and (players.get_vehicle_model(pid) != joaat("oppressor") or players.get_vehicle_model(pid) != joaat("oppressor2")) then
+                local veh_class = VEHICLE.GET_VEHICLE_CLASS(vehicle)
+                if veh_class != 15 and veh_class != 16 and veh_speed >= 320 and (players.get_vehicle_model(pid) != joaat("oppressor") or players.get_vehicle_model(pid) != joaat("oppressor2")) then
                     local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if not IsDetectionPresent(driver, "Super Drive") then
                         players.add_detection(driver, "Super Drive", 7, 50)
@@ -1367,8 +1359,7 @@ end)
 
         menu.toggle_loop(detections, "Modded Vehicle Upgrade", {""}, "Detects players who have modded their own or someone else's vehicles outside of a shop.", function()
             for players.list() as pid do
-                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
+                if not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)) then return end
                 util.create_thread(function()
                     local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                     if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
@@ -1408,8 +1399,7 @@ end)
 
         menu.toggle_loop(detections, "Vehicle Switch", {""}, "", function()
             for players.list(false) as pid do
-                local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
+                if not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)) then return end
                 util.create_thread(function()
                     local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
                     if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
@@ -1440,7 +1430,7 @@ end)
                         name ..= extra
                         name ..= ")"
                     end
-                    if string.lfind(name, "REPORT_MYSELF_EVENT") and not IsDetectionPresent(p, name) then
+                    if string.find(name, "REPORT_MYSELF_EVENT") and not IsDetectionPresent(p, name) then
                         players.add_detection(p, name, 7, 50)
                     end
                 end)
@@ -1474,7 +1464,7 @@ end)
                 local veh_ptr = entities.handle_to_pointer(vehicle)
                 local owner = entities.get_owner(veh_ptr)
                 local ignored = ignored_vehs[vehicle]
-                local class = vehicle_classes[veh_class + 1]
+                local classes = vehicle_classes[veh_class + 1]
 
                 if not ignored and owner != pid and driver == pid and est_speed > (est_model_speed + 6) then
                     ignored_vehs[vehicle] = true
@@ -2358,7 +2348,7 @@ end)
         -------------------------------------
 
         menu.action(shortcuts, "Grab Script Host", {"sh"}, "Grabs Script Host less destructively.", function()
-            trigger_commands($"givesh {players.get_name(players.user())}")
+            util.request_script_host("freemode")
         end)
 
         -------------------------------------
@@ -2805,18 +2795,18 @@ if is_developer() then
         wait(1, "s")
     end)
 
-    local web_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
-    local webhook_url = web_file:read("a")
-    web_file:close()
     menu.action(sdebug, "Set Webhook Url", {"setwebhookurl"}, "", function()
         menu.show_command_box("setwebhookurl "); end, function(webhook_url)
         if string.startswith(webhook_url, "https://discord.com/api/webhooks") or string.startswith(webhook_url, "https://canary.discord.com/api/webhooks") then
-            webhook_url = string.sub(webhook_url, string.lfind(webhook_url, "/api"))
+            webhook_url = string.sub(webhook_url, string.find(webhook_url, "/api"))
             write_data_to_file(lenaDir.."Saved Players Webhook.txt", webhook_url)
         else
             util.toast("Invalid URL make sure it starts with: \"https://discord.com/api/webhooks\" or \"https://canary.discord.com/api/webhooks\".")
         end
     end)
+    local web_file = io.open(lenaDir.."Saved Players Webhook.txt", "r")
+    local webhook_url = web_file:read("a")
+    web_file:close()
 
     local music_vol_memory_address = memory.scan("") + 0x1FE5E38
     radio_volume_ref = menu.click_slider_float(sdebug, "Radio Volume", {"modifyradiovolume"}, "This might earrape you... have fun!", 0, 100000, memory.read_byte(music_vol_memory_address) * 100, 100, function()
@@ -2826,8 +2816,8 @@ if is_developer() then
     end)
 
     menu.action(sdebug, "Save User Vehicle", {"saveuservehicle", "suv", "saveuserveh", "saveveh"}, "", function(click_type)
-        menu.show_command_box("saveveh "); end, function(name)
-        local name = string.lstrip(name, "saveveh ")
+        menu.show_command_box("saveveh "); end, function(input)
+        local name = string.lstrip(input, "saveveh ")
         local baseName = name
         local vehicleIndex = 0
         local function generateVehicleName()
@@ -2872,9 +2862,8 @@ if is_developer() then
             local vname = lang.get_localised(util.get_label_text(players.get_vehicle_model(user)))
             local vmodel = players.get_vehicle_model(user)
             local modelname = util.reverse_joaat(vmodel)
-            local vehicle = entities.get_user_vehicle_as_handle()
-            local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
-            local bitset = DECORATOR.DECOR_GET_INT(vehicle, "MPBitset")
+            local plate_text = VEHICLE.GET_VEHICLE_NUMBER_PLATE_TEXT(user_vehicle)
+            local bitset = DECORATOR.DECOR_GET_INT(user_vehicle, "MPBitset")
             local blip = HUD.GET_BLIP_SPRITE(HUD.GET_BLIP_FROM_ENTITY(vmodel))
             notify($"Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
             log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Blip: {blip} | Plate:{plate_text}.")
@@ -2906,7 +2895,7 @@ if is_developer() then
             local bools = {
                 "UsingForTimeTrial"
             }
-            local v = entities.get_user_vehicle_as_handle()
+            local v = user_vehicle
             for ints as i do
                 print($"int {i} = {DECORATOR.DECOR_GET_INT(v, i)}")
                 wait(50)
@@ -2972,7 +2961,8 @@ players.add_command_hook(function(pid, cmd)
         0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
-        0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 0x0AFC4BF9, 0x0D44D097, 0x07FBE4BE, 0x0D44D097, 0x000A196C, 0x0541D9C3, 0x0E7EA79A, 
+        0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 0x0AFC4BF9, 0x0D44D097, 0x07FBE4BE, 0x0D44D097, 0x000A196C, 0x0541D9C3, 0x0E7EA79A, 0x096D4D22, 0x04B10C32, 0x0E96E4A3,
+        0x0E72C6BA, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3338,7 +3328,7 @@ players.add_command_hook(function(pid, cmd)
             -------------------------------------
             -- Delete all Cages
             -------------------------------------
-                            
+
             menu.action(mpcage, "Delete all Cages", {""}, "", function()
                 local entitycount = 0
                 for i, object in spawned_cages do

@@ -1196,7 +1196,7 @@ function handleAdvertisement(p, name)
     local n = players.get_name(p)
     local rid = players.get_rockstar_id(p)
 
-    if string.lfind(name, "Advertisement") then
+    if string.find(name, "Advertisement") then
 
         if (table.contains(advertisedPlayers, rid) == nil) then
             trigger_commands($"loveletterkick {n}")
