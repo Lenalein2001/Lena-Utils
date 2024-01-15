@@ -330,5 +330,11 @@ Modulepath = {
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/session_vehicles.pluto",
         absolute_path = lenaModules.."session_vehicles.pluto",
         path = "lena.modules.session_vehicles"
+    },
+    maze_bank = {
+        name = "Maze Bank",
+        giturl = "/Lenalein2001/Lena-Utils-Modules/main/maze_bank.pluto",
+        absolute_path = lenaModules.."maze_bank.pluto",
+        path = "lena.modules.maze_bank"
     }
 }
