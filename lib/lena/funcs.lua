@@ -1209,3 +1209,17 @@ function handleAdvertisement(p, name)
     end
 end
 
+function isNetPlayerOk(pid, assert_playing = false, assert_done_transition = true) -- Won't change func much. It's from Jinx.
+	if not NETWORK.NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
+	if assert_playing and not PLAYER.IS_PLAYER_PLAYING(pid) then return false end
+
+	if assert_done_transition then
+		if pid == memory.read_int(memory.script_global(2672741 + 3)) then
+			return memory.read_int(memory.script_global(2672741 + 2)) != 0
+		elseif memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 463))) != 4 then -- Global_2657921[iVar0 /*463*/] != 4
+			return false
+		end
+	end
+
+	return true
+end

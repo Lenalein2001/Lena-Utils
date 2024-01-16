@@ -1279,18 +1279,41 @@ end)
         -- Thunder Join
         -------------------------------------
 
-        menu.toggle_loop(detections, "Thunder Join", {""}, "Detects if someone is using Thunder Join.", function()
-            for players.list_except() as pid do
-                if util.is_session_transition_active() then return end
-                local old_sh = players.get_script_host()
-                util.yield(100)
-                local new_sh = players.get_script_host()
-                if old_sh != new_sh then
-                    if GET_SPAWN_STATE(pid) == 0 and players.get_script_host() == pid then
-                        if not IsDetectionPresent(pid, "Thunder Join") then
-                            players.add_detection(pid, "Thunder Join", 7, 100)
-                            notify(players.get_name(pid) .. " just broke the session. :/")
+        menu.toggle_loop(detections, "Modded Script Host Migration", {""}, "Detects people who give script host to another player or took script host while still in a transition.", function()
+            if not isNetPlayerOk(players.user()) then return end
+            local data = memory.alloc(56 * 8)
+            for queue = 0, 2 do
+                for index = 0, SCRIPT.GET_NUMBER_OF_EVENTS(queue) - 1 do
+                    local event = SCRIPT.GET_EVENT_AT_INDEX(queue, index)
+                    if event == 180 then
+                        if not SCRIPT.GET_EVENT_DATA(queue, index, data, 2) then
                             break
+                        end
+                        if memory.read_int(data) == SCRIPT.GET_ID_OF_THIS_THREAD() and memory.read_int(data + 8) != players.user() then
+                            if not isDetectionPresent(memory.read_int(data + 8), "Modded Script Host Migration") then
+                                local modded_sh = memory.read_int(data + 8)
+                                wait(500)
+                                local current_sh = players.get_script_host()
+                                wait(500)
+                                local new_new_sh = players.get_script_host()
+                                if new_new_sh != current_sh and current_sh != modded_sh then continue end -- to prevent people from getting false flagged if a retard spams script host on everyone
+                                if not isNetPlayerOk(current_sh) then
+                                    if modded_sh != current_sh and modded_sh != -1 then
+                                        if not isNetPlayerOk(modded_sh) then
+                                            players.add_detection(modded_sh, "Modded Script Host Migration", 7, 100)
+                                            notify($"{players.get_name(modded_sh)} just broke the session. :/")
+                                            break
+                                        end
+                                    else
+                                        players.add_detection(current_sh, "Modded Script Host Migration", 7, 100)
+                                        notify($"{players.get_name(current_sh)} just broke the session. :/")
+                                    end
+                                else
+                                    if modded_sh != current_sh then
+                                        players.add_detection(modded_sh, "Modded Script Host Migration", 7, 100)
+                                    end
+                                end
+                            end
                         end
                     end
                 end
@@ -1460,7 +1483,7 @@ end)
                 local est_model_speed = VEHICLE.GET_VEHICLE_MODEL_ESTIMATED_MAX_SPEED(players.get_vehicle_model(pid))
                 local mdl_accel = VEHICLE.GET_VEHICLE_MODEL_ACCELERATION(players.get_vehicle_model(pid))
                 local veh_accel = VEHICLE.GET_VEHICLE_ACCELERATION(vehicle)
-                local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(PED.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
+                local driver = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(VEHICLE.GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                 local veh_ptr = entities.handle_to_pointer(vehicle)
                 local owner = entities.get_owner(veh_ptr)
                 local ignored = ignored_vehs[vehicle]
@@ -1492,7 +1515,7 @@ end)
                 ::continue::
             end
 
-            yield(250)
+            wait(250)
         end)
 
 
