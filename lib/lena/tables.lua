@@ -338,3 +338,29 @@ Modulepath = {
         path = "lena.modules.maze_bank"
     }
 }
+
+vehicle_classes = {
+	"Compacts",
+	"Sedans",
+	"SUVs",
+	"Coupes",
+	"Muscle",
+	"Sports Classics",
+	"Sports",
+	"Super",
+	"Motorcycles",
+	"Off-road",
+	"Industrial",
+	"Utility",
+	"Vans",
+	"Cycles",
+	"Boats",
+	"Helicopters",
+	"Planes",
+	"Service",
+	"Emergency",
+	"Military",
+	"Commercial",
+	"Trains",
+	"Openwheel"
+}
