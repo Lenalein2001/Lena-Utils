@@ -838,6 +838,26 @@ end)
         menu.ref_by_path("Self>Weapons>Explosive Hits").value = false
     end)
 
+    local wpn_ptrw = memory.alloc()
+    local explo_mass_slider = menu.slider(veh_weapons, "Explosive Mass", {"Explosivermass"}, "", 1, 100, 10, 5, function(); end)
+    menu.toggle_loop(veh_weapons, "Better Explosive AOE", {""}, "Higher Damage Output for certain Vehicle Cannons.", function()
+        if not in_session() then return end
+        local user_vehicle_ptr = entities.get_user_vehicle_as_pointer(false)
+
+        if user_vehicle_ptr ~= 0 then
+            local success = WEAPON.GET_CURRENT_PED_VEHICLE_WEAPON(players.user_ped(), wpn_ptrw)
+            if success then
+                local selected_weapon_hash = util.reverse_joaat(memory.read_int(wpn_ptrw))
+                if selected_weapon_hash == "vehicle_weapon_akula_barrage" then
+                    WEAPON.SET_WEAPON_AOE_MODIFIER(memory.read_int(wpn_ptrw), explo_mass_slider.value / 10)
+                    wait(10)
+                end
+            end
+        end
+    end, function()
+        WEAPON.SET_WEAPON_AOE_MODIFIER(WEAPON.GET_SELECTED_PED_WEAPON(players.user_ped()), 1.0)
+    end)
+
     -------------------------------------
     -- Enter Nearest Vehicle
     -------------------------------------
