@@ -1595,14 +1595,6 @@ end)
         -- Disable Halloween Weather
         -------------------------------------
 
-        menu.action(protex, "Disable Halloween Weather", {""}, "Yes, this is a Protection. I can't *Stand* this Weather.", function()
-            if not in_session() then return end
-            if menu.get_edition() == 1 then return notify("You need at least Regular in order to do that!") end
-            thunder_on:trigger()
-            wait(5000)
-            thunder_off:trigger()
-        end)
-
         menu.toggle(protex, "Advertise Detection", {"ad_toggle"}, "Toggle advertisement detection.", function(toggled)
             if toggled then
                 players.on_flow_event_done(function(p, name, extra)
@@ -3029,18 +3021,6 @@ players.add_command_hook(function(pid, cmd)
         end)
 
         -------------------------------------
-        -- Check Stats
-        -------------------------------------
-
-        menu.action(friendly, "Check Stats", {"checkstats"}, "Checks the stats of the Player.", function()
-            local rank = players.get_rank(pid)
-            local money = string.format("%.2f", players.get_money(pid)/1000000)
-            local kills, deaths, kdratio = players.get_kills(pid), players.get_deaths(pid), string.format("%.2f", players.get_kd(pid))
-            local language = language_string(players.get_language(pid))
-            notify($"Name: {pname}\nLanguage: {language}\nRank: {rank}\nMoney: {money}M$\nKills/Deaths: {kills}/{deaths}\nRatio: {kdratio}")
-        end)
-
-        -------------------------------------
         -- Summon
         -------------------------------------        
 
@@ -3584,18 +3564,6 @@ players.add_command_hook(function(pid, cmd)
         end)
 
         -------------------------------------
-        -- Blame Random Player
-        -------------------------------------
-
-        menu.action(customExplosion, "Blame Random Player", {""}, "Mister//ModzZ requested it, so I made it.", function()
-            local pids = players.list(false, false, true)
-            local player = pids[math.random(#pids)]
-            local killer, victim = PLAYER.GET_PLAYER_PED(player), players.get_position(pid)
-            FIRE.ADD_OWNED_EXPLOSION(killer, victim, 1, 1.0, false, true, 0.0)
-            notify("Player "..players.get_name(player)..$" was blamed for killing {pname}!")
-        end, nil, nil, COMMANDPERM_RUDE)
-
-        -------------------------------------
         -- Disable Passive
         -------------------------------------
 
@@ -3629,17 +3597,6 @@ players.add_command_hook(function(pid, cmd)
             ENTITY.SET_ENTITY_COORDS(clone, cords)
             entities.set_can_migrate(clone, false)
         end)
-
-        menu.toggle_loop(trolling, "Transaction Error", {""}, "", function()
-            for players.list(false, false, true) as p do
-                if not players.is_in_interior(p) and not players.is_godmode(p) and players.get_bounty(p) == nil then
-                    trigger_commands($"bounty {players.get_name(p)} 5000")
-                end
-                if players.get_bounty(p) != nil and PLAYER.IS_PLAYER_PLAYING(p) then
-                    trigger_commands($"as {pname} explode {players.get_name(p)}")
-                end
-            end
-        end, nil, nil, COMMANDPERM_RUDE)
 
     -------------------------------------
     -------------------------------------
