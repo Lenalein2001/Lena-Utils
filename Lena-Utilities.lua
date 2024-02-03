@@ -394,6 +394,32 @@ end)
         trigger_commands("refillhealth; refillarmour")
     end)
 
+    menu.toggle_loop(self, "Regenerative Killing", {""}, "Will regenerate health of your Ped and Vehicle if you get a kill.", function()
+        local temp = memory.alloc()
+        local heal_factor = 1.10 -- aka 10%
+
+        for pid in players.list_except(true) do
+            if NETWORK.NETWORK_IS_PLAYER_ACTIVE(pid) and players.user() == NETWORK.NETWORK_GET_KILLER_OF_PLAYER(pid, temp) then
+                user_vehicle = user_vehicle or entities.get_user_vehicle_as_pointer(false)
+
+                if user_vehicle then
+                    local current_vehicle_health = ENTITY.GET_ENTITY_HEALTH(user_vehicle)
+                    local new_vehicle_health = math.min(math.floor(current_vehicle_health * heal_factor), 1000)
+                    ENTITY.SET_ENTITY_HEALTH(user_vehicle, new_vehicle_health, 0, 0)
+                end
+
+                local user_ped = players.user_ped()
+                local current_ped_health = ENTITY.GET_ENTITY_HEALTH(user_ped)
+                local new_ped_health = math.min(math.floor(current_ped_health * heal_factor), 1000)
+                ENTITY.SET_ENTITY_HEALTH(user_ped, new_ped_health, 0, 0)
+            end
+        end
+
+        if user_vehicle then
+            util.draw_debug_text("Vehicle Health: "..ENTITY.GET_ENTITY_HEALTH(user_vehicle))
+        end
+    end)
+
     -------------------------------------
     -- Auto Become CEO/MC
     -------------------------------------
