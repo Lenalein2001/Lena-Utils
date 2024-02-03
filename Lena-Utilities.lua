@@ -452,25 +452,6 @@ end)
     end)
 
     -------------------------------------
-    -- Cannon Manager
-    -------------------------------------
-
-    local cannon_type = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? B8")
-    menu.list_action(plane_wep_manager, "Explosion Type", {}, "", explosionTypes, function(index, value)
-       memory.write_int(cannon_type + 0x10, index - 1)
-    end)
-    local alternate_wait_time = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 50")
-    menu.click_slider_float(plane_wep_manager, "Alternate Wait Time", {}, "", 0, 100, 0, 1, function(value)
-       local ptr_value = memory.read_int(alternate_wait_time + 0x15);
-       memory.write_float(alternate_wait_time + ptr_value + 0x19, value / 100)
-    end)
-    local time_between_shots = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 3C")
-    menu.click_slider_float(plane_wep_manager, "Time Between Shots", {}, "", 0, 100, 0, 1, function(value)
-       local ptr_value = memory.read_int(time_between_shots + 0x15);
-       memory.write_float(alternate_wait_time + ptr_value + 0x19, value / 10000)
-    end)
-
-    -------------------------------------
     -- Unfair Triggerbot
     -------------------------------------  
 
@@ -642,26 +623,6 @@ end)
             PHYSICS.SET_IN_ARENA_MODE(toggled)
         end)
 
-        -------------------------------------
-        -- Better Explosive Weapons
-        -------------------------------------  
-
-        menu.toggle_loop(better_vehicles, "Better Explosive Weapons", {""}, "Higher Damage Output.", function()
-            if not in_session() then return end
-            if entities.get_user_vehicle_as_pointer(false) != 0 then
-                local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade")
-                local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
-                local veh = 239897677 or 1692272545 or -1281684762 -- raiju, strikeforce, lazer
-                local hash = players.get_vehicle_model(players.user())
-                if hash == veh and toggle_ammo.value == false then
-                    ammo:trigger()
-                    toggle_ammo.value = true
-                elseif hash != veh and toggle_ammo.value == true then
-                    toggle_ammo.value = false
-                end
-            end
-        end)
-
     -------------------------------------
     -- Door Control
     -------------------------------------
@@ -806,6 +767,50 @@ end)
                 wait()
             end
         end)
+
+    -------------------------------------
+    -- Cannon Manager / Credits to err_net_array
+    -------------------------------------
+
+    local cannon_type = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? B8")
+    menu.list_action(plane_wep_manager, "Explosion Type", {}, "", explosionTypes, function(index, value)
+       memory.write_int(cannon_type + 0x10, index - 1)
+    end)
+    local alternate_wait_time = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 50")
+    menu.click_slider_float(plane_wep_manager, "Alternate Wait Time", {}, "", 0, 100, 0, 1, function(value)
+       local ptr_value = memory.read_int(alternate_wait_time + 0x15);
+       memory.write_float(alternate_wait_time + ptr_value + 0x19, value / 100)
+    end)
+    local time_between_shots = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 3C")
+    menu.click_slider_float(plane_wep_manager, "Time Between Shots", {}, "", 0, 100, 0, 1, function(value)
+       local ptr_value = memory.read_int(time_between_shots + 0x15);
+       memory.write_float(alternate_wait_time + ptr_value + 0x19, value / 10000)
+    end)
+
+    -------------------------------------
+    -- Better Explosive Weapons
+    -------------------------------------  
+
+    menu.toggle_loop(veh_weapons, "Better Explosive Weapons", {""}, "Higher Damage Output for certain Vehicle Cannons.", function()
+        if not in_session() then return end
+
+        local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade")
+        local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
+        local veh_hashes = {"raiju", "strikeforce", "lazer"}
+        local user_vehicle_ptr = entities.get_user_vehicle_as_pointer(false)
+
+        if user_vehicle_ptr ~= 0 then
+            local hash = util.reverse_joaat(entities.get_model_hash(user_vehicle_ptr))
+            if table.contains(veh_hashes, hash) and not toggle_ammo.value then
+                ammo:trigger()
+                toggle_ammo.value = true
+            elseif not table.contains(veh_hashes, hash) and toggle_ammo.value then
+                toggle_ammo.value = false
+            end
+        end
+    end, function()
+        menu.ref_by_path("Self>Weapons>Explosive Hits").value = false
+    end)
 
     -------------------------------------
     -- Enter Nearest Vehicle
