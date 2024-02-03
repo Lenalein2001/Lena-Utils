@@ -268,7 +268,7 @@ function get_stand_model(model)
         a_c_crow = "Crow",
         a_c_pigeon = "Pigeon",
         a_c_seagull = "Seagull"
-    } 
+    }
     return translations[model]
 end
 
@@ -276,14 +276,15 @@ function BitTest(bits, place)
     return (bits & (1 << place)) != 0
 end
 
+-- Jinx
 function IS_PLAYER_USING_ORBITAL_CANNON(pid)
     return BitTest(memory.read_int(memory.script_global((2657921 + (pid * 463 + 1) + 424))), 0) -- Global_2657921[PLAYER::PLAYER_ID() /*463*/].f_424
 end
-
+-- Jinx
 function GET_SPAWN_STATE(pid)
     return memory.read_int(memory.script_global(((2657921 + 1) + (pid * 463)) + 232)) -- Global_2657921[PLAYER::PLAYER_ID() /*463*/].f_232
 end
-
+-- Jinx
 function GET_INTERIOR_FROM_PLAYER(pid)
     return memory.read_int(memory.script_global(((2657921 + 1) + (pid * 463)) + 245)) -- Global_2657921[bVar0 /*463*/].f_245)
 end
@@ -294,7 +295,7 @@ function IS_PLAYER_ACTIVE(pid)
 	return true
 end
 
-handle_ptr = memory.alloc(13*8)
+local handle_ptr = memory.alloc(13*8)
 local function pid_to_handle(pid)
     NETWORK.NETWORK_HANDLE_FROM_PLAYER(pid, handle_ptr, 13)
     return handle_ptr
@@ -305,14 +306,14 @@ function IS_PLAYER_FRIEND(pid)
 end
 
 function IsDetectionPresent(pid, detection)
-    if players.exists(pid) then
-        for menu.player_root(pid):getChildren() as cmd do
-            if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath(detection):isValid() then
-                return true
-            end
-        end
-    end
-    return false
+	if players.exists(pid) and menu.player_root(pid):isValid() then
+		for menu.player_root(pid):getChildren() as cmd do
+			if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath(detection):isValid() and players.exists(pid) then
+				return true
+			end
+		end
+	end
+	return false
 end
 
 function getDetections(pid)
@@ -734,6 +735,7 @@ function save_player_info(pid)
     local clan_motto = players.clan_get_motto(pid)
     local crew_info = get_player_crew(pid)
     local detections = getDetections(pid)
+    local stand_user = is_stand_user(pid)
     local filename = name .. ".txt"
     local filepath = lenaDir .. "Players/" .. filename
 
@@ -789,10 +791,13 @@ function save_player_info(pid)
         player_info[#player_info + 1] = "\nCannot save Crew Info. Most likely isn't in a crew."
     end
 
-    if detections then
+    if detections or players.is_marked_as_modder(pid) then
         player_info[#player_info + 1] = "\n\n**Detections**"
         for detections as detection do
             player_info[#player_info + 1] = "\n" .. detection
+        end
+        if stand_user then
+            player_info[#player_info + 1] = "\nStand User"
         end
         player_info[#player_info + 1] = "\n\n" .. getClassification(pid)
         player_info[#player_info + 1] = "\nIs Attacker: " .. tostring(is_attacker and "Yes" or "No")
@@ -1210,6 +1215,7 @@ function handleAdvertisement(p, name)
 end
 
 function isNetPlayerOk(pid, assert_playing = false, assert_done_transition = true) -- Won't change func much. It's from Jinx.
+    local GlobalplayerBD = 2657921
 	if not NETWORK.NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
 	if assert_playing and not PLAYER.IS_PLAYER_PLAYING(pid) then return false end
 
