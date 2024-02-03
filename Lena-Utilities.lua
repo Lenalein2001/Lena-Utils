@@ -1202,22 +1202,22 @@ end)
                     local kdratio = players.get_kd(pid)
                     if kdratio < 0 or kdratio > 100 or kills < 0 or kills > 100000 or deaths < 0 or deaths > 70000 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (K/D)") then
-                            players.add_detection(pid, "Unlegit Stats (K/D)", 7, 50)
+                            players.add_detection(pid, "Unlegit Stats (K/D)", 7, 25)
                         end
                     end
                     if rank >= 1500 or rank <= 0 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Rank)") then
-                            players.add_detection(pid, "Unlegit Stats (Rank)", 7, 75)
+                            players.add_detection(pid, "Unlegit Stats (Rank)", 7, 25)
                         end
                     end
                     if money >= 1600000000 then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Money)") then
-                            players.add_detection(pid, "Unlegit Stats (Money)", 7, 50)
+                            players.add_detection(pid, "Unlegit Stats (Money)", 7, 25)
                         end
                     end
                     if (rank > 1000 and money <= 150000000) or (rank <= 100 and money > 150000000) then
                         if not IsDetectionPresent(pid, "Unlegit Stats (Rank/Money Mismatch)") then
-                            players.add_detection(pid, "Unlegit Stats (Rank/Money Mismatch)", 7, 50)
+                            players.add_detection(pid, "Unlegit Stats (Rank/Money Mismatch)", 7, 25)
                         end
                     end
                 end
@@ -1267,7 +1267,7 @@ end)
 
                         if bitset == 8 or plate_text == "46EEK572" then
                             if not IsDetectionPresent(pid, "Spawned Vehicle") then
-                                players.add_detection(pid, "Spawned Vehicle", 7, 50)
+                                players.add_detection(pid, "Spawned Vehicle", 7, 33)
                             end
                         end
                     end
