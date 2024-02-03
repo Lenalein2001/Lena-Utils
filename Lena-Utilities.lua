@@ -70,33 +70,39 @@ anim_misc = menu.list(anims, "Misc", {""}, "")
 local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Animations. Lock Outfit breaks it.")
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
 local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "A macro for Rocket Spam.")
-local plane_wep_manager = menu.list(weap, "Cannon Manager", {""}, "Modify a Plane's on-board Cannons.")
 local vehicle_gun_list = menu.list(weap, "Vehicle Gun", {"lenavehgun"}, "Spawn a Vehicle at Impact Coords.")
 -- Vehicle
 local better_vehicles = menu.list(vehicle_root, "Better Vehicles", {""}, "")
 local doorcontrol = menu.list(vehicle_root, "Doors", {""}, "")
 local engine_control = menu.list(vehicle_root, "Engine Control", {""}, "")
-local vehicle_flares = menu.list(vehicle_root, "Countermeasures", {"lenacountermeasures"}, "War Thunder-like Countermeasues.")
+local vehicle_flares = menu.list(vehicle_root, "Countermeasures", {"lenacountermeasures"}, "War Thunder-like Countermeasues.") -- Yes yes, I know, War Thunder ebic
+
+local veh_weapons = menu.list(vehicle_root, "Vehicle Weapons", {""}, "")
+local plane_wep_manager = menu.list(veh_weapons, "Cannon Manager", {""}, "Modify a Plane's on-board Cannons.")
 -- Online
 local mpsession = menu.list(online, "Session", {""}, "Features for the current Session.")
 local hosttools = menu.list(mpsession, "Host Tools", {""}, "Tools that can only be used as the Session Host or to force Session Host.")
-local detects_protex = menu.list(online, "Detections&Protections", {""}, "")
-local detections = menu.list(detects_protex, "Detections", {""}, "")
-local protex = menu.list(detects_protex, "Protections", {""}, "")
+local session_veh = menu.list(mpsession, "Session Vehicles", {"sessionvehicles"}, "Will spawn some Vehicles on Set spots for everyone to use them regardless of Level.")
+
+local detects_protex = menu.list(online, "Protections", {""}, "")
+local protex = menu.list(detects_protex, "Events", {""}, "")
 local anti_orb = menu.list(protex, "Anti Orb", {""}, "Protections against the Orbital Cannon.")
+local detections = menu.list(detects_protex, "Detections", {""}, "")
+
 local reactions = menu.list(online, "Reactions", {""}, "")
 local join_reactions = menu.list(reactions, "Join Reactions", {""}, "")
 local leave_reactions = menu.list(reactions, "Leave Reactions", {""}, "")
 local weapon_reactions = menu.list(reactions, "Weapon Reactions", {""}, "")
+
 local spoofing_opt = menu.list(online, "Spoofing", {""}, "")
-local enhanced_chat = menu.list(online, "Enhanced Chat", {""}, "")
-local session_veh = menu.list(online, "Session Vehicles", {"sessionvehicles"}, "")
+local host_kick = menu.list(spoofing_opt, "Host Token Options", {""}, "")
 -- Tunables
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 local tune_screens = menu.list(tunables, "Open Screens", {""}, "")
 local bm_list = menu.list(tunables, "Safe Monitor", {""}, "")
 local stat_editing =  menu.list(tunables, "Stat Editing", {""}, "")
 -- Misc
+local enhanced_chat = menu.list(misc, "Enhanced Chat", {""}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
 local clear_area = menu.list(misc, "Clear Area", {""}, "")
 local teleport = menu.list(misc, "Teleport", {"lenatp"}, "")
