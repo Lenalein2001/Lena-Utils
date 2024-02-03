@@ -210,8 +210,8 @@ lenaDir = filesystem.scripts_dir().."Lena\\"
 libDir = filesystem.scripts_dir().."lib\\lena\\"
 lenaModules = filesystem.scripts_dir().."lib\\lena\\modules\\"
 local scaleForm = require("ScaleformLib")
-local funcs = require("lena.funcs")
-local tables = require("lena.tables")
+local funcs = util.require_no_lag("lena.funcs")
+local tables = util.require_no_lag("lena.tables")
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
@@ -555,7 +555,7 @@ end)
         end
     end)
 
-    --local moneyimpactCords = v3()
+    --local moneyimpactCords = v3() -- hehe
     --menu.toggle_loop(menu.my_root(), "Spawn Money at Bullet Impact", {""}, "", function()
     --    if WEAPON.GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(moneyimpactCords)) then
     --        local cash = joaat("prop_cash_pile_01")
@@ -688,14 +688,8 @@ end)
 
         menu.toggle(doorcontrol, "Unbreakable Doors", {""}, "", function(toggled)
             local vehicleDoorCount = VEHICLE.GET_NUMBER_OF_VEHICLE_DOORS(user_vehicle)
-            if toggled then
-                for i = -1, vehicleDoorCount do
-                    VEHICLE.SET_DOOR_ALLOWED_TO_BE_BROKEN_OFF(user_vehicle, i, false)
-                end
-            else
-                for i = -1, vehicleDoorCount do
-                    VEHICLE.SET_DOOR_ALLOWED_TO_BE_BROKEN_OFF(user_vehicle, i, true)
-                end
+            for i = -1, vehicleDoorCount do
+                VEHICLE.SET_DOOR_ALLOWED_TO_BE_BROKEN_OFF(user_vehicle, i, not toggled)
             end
         end)
 
@@ -815,8 +809,8 @@ end)
 
     -------------------------------------
     -- Enter Nearest Vehicle
-    -------------------------------------        
-    
+    -------------------------------------
+
     menu.action(vehicle_root, "Enter Nearest Vehicle", {""}, "Enters the nearest Vehicle that can be found.", function()
         if not PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             local player_pos = players.get_position(players.user())
@@ -876,13 +870,13 @@ end)
     -- Control Passenger Weapons
     -------------------------------------
 
-    menu.action(vehicle_root, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current vehicle.", function()
+    menu.action(vehicle_root, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current Vehicle.", function()
         local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
         local CVehicleWeaponHandlingDataAddress = entities.handling_get_subhandling(CHandlingData, 9)
         local WeaponSeats = CVehicleWeaponHandlingDataAddress + 0x0020
         local success, seat = get_seat_ped_is_in(PLAYER.PLAYER_PED_ID())
-        if CVehicleWeaponHandlingDataAddress == 0 then 
-            notify("This Vehicle does not have any Weapons.") 
+        if CVehicleWeaponHandlingDataAddress == 0 then
+            notify("This Vehicle does not have any Weapons.")
         return end
         if success then
             for i = 0, 4, 1 do
@@ -905,7 +899,7 @@ end)
                 continue
             end
             if memory.read_byte(entities.handle_to_pointer(vehicle) + 0x0A9E) == 0 then
-                memory.write_byte((entities.handle_to_pointer(vehicle) + 0x0A9E), 1) 
+                memory.write_byte((entities.handle_to_pointer(vehicle) + 0x0A9E), 1)
             end
         end
     end)
@@ -976,7 +970,7 @@ end)
                         if sh != new_sh and new_sh != -1 and new_sh != nil then
                             if players.exists(new_sh) then
                                 notify($"Session Host migrated from {sh_name} to {players.get_name(new_sh)}.")
-                                log($"[Lena | Host Migration] Session Host migrated from {sh_name} to {players.get_name(new_sh)}.")
+                                log($"Session Host migrated from {sh_name} to {players.get_name(new_sh)}.")
                             end
                         end
                     end
@@ -1001,7 +995,7 @@ end)
                         if sh != new_sh and new_sh != -1 and new_sh != nil then
                             if players.exists(new_sh) then
                                 notify($"Script Host migrated from {sh_name} to {players.get_name(new_sh)}.")
-                                log($"[Lena | Script Host Migration] Script Host migrated from {sh_name} to {players.get_name(new_sh)}.")
+                                log($"Script Host migrated from {sh_name} to {players.get_name(new_sh)}.")
                             end
                         end
                     end
@@ -1296,7 +1290,7 @@ end)
                             break
                         end
                         if memory.read_int(data) == SCRIPT.GET_ID_OF_THIS_THREAD() and memory.read_int(data + 8) != players.user() then
-                            if not isDetectionPresent(memory.read_int(data + 8), "Modded Script Host Migration") then
+                            if not IsDetectionPresent(memory.read_int(data + 8), "Modded Script Host Migration") then
                                 local modded_sh = memory.read_int(data + 8)
                                 wait(500)
                                 local current_sh = players.get_script_host()
@@ -1427,7 +1421,7 @@ end)
         -------------------------------------
 
         menu.toggle_loop(detections, "Vehicle Switch", {""}, "", function()
-            for players.list(false) as pid do
+            for players.list() as pid do
                 if not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)) then return end
                 util.create_thread(function()
                     local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -1474,11 +1468,9 @@ end)
         local speed_ctr = 0
         menu.toggle_loop(detections, "Modified Vehicle Speed", {}, "Detects people who have modified their engine power or top speed.", function()
             if NETWORK.NETWORK_IS_ACTIVITY_SESSION(true) or not in_session() then return end
-            for pid in players.list_except() do
+            for players.list_except() as pid do
                 local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                if not PED.IS_PED_IN_ANY_VEHICLE(ped) then
-                    goto continue
-                end
+                if not PED.IS_PED_IN_ANY_VEHICLE(ped) then return end
 
                 local vehicle = PED.GET_VEHICLE_PED_IS_IN(ped)
                 local veh_model = players.get_vehicle_model(pid)
@@ -1514,7 +1506,7 @@ end)
                     repeat
                         wait(100)
                     until speed_ctr >= 15
-                    players.add_detection(pid, "Modified Vehicle Speed", TOAST_ALL, 75)
+                    players.add_detection(pid, "Modified Vehicle Speed", 7, 75)
                     ignored_vehs[vehicle] = true
                     speed_ctr = 0
                 end
@@ -1523,7 +1515,6 @@ end)
 
             wait(250)
         end)
-
 
     -------------------------------------
     -- Protections
@@ -1911,27 +1902,19 @@ end)
         end)
 
         menu.action(enhanced_chat, "Send a Global Message", {"globalmessag", "gmsg"}, "", function(click_type)
-            menu.show_command_box($"gmsg "); end, function(on_command)
-            if #on_command > 254 then
-                notify("The message is to long.")
-            else
-                chat.send_message(on_command, false, true, true)
-            end
+            menu.show_command_box($"gmsg "); end, function(input)
+            chat.send_message(input, false, true, true)
         end)
 
         menu.action(enhanced_chat, "Send a Team Message", {"teammessag", "tmsg"}, "", function(click_type)
-            menu.show_command_box($"tmsg "); end, function(on_command)
-            if #on_command > 254 then
-                notify("The message is to long.")
-            else
-                chat.send_message(on_command, true, true, true)
-            end
+            menu.show_command_box($"tmsg "); end, function(input)
+            chat.send_message(input, true, true, true)
         end)
 
         menu.action(enhanced_chat, "Start Typing", {"starttyping"}, "", function()
             for players.list(false) as pid do
                 if players.exists(pid) then
-                    send_script_event(-1760661233, pid, {players.user(), pid, 9412})
+                    send_script_event(-1760661233, pid, {players.user(), pid, 9412}) -- Not Updated
                 end
             end
         end)
@@ -1939,7 +1922,7 @@ end)
         menu.action(enhanced_chat, "Stop Typing", {"stoptyping"}, "", function()
             for players.list(false) as pid do
                 if players.exists(pid) then
-                    send_script_event(476054205, pid, {players.user(), pid, 4491})
+                    send_script_event(476054205, pid, {players.user(), pid, 4491}) -- Not Updated
                 end
             end
         end)
@@ -2491,9 +2474,9 @@ end)
     -- Disable Scripted Music
     -------------------------------------
 
-    menu.toggle_loop(misc, "Disable Scripted Music", {""}, "", function() -- Credits to err_net_array for the Audio Name <3
+    menu.toggle_loop(misc, "Disable Scripted Music", {""}, "", function()
         if AUDIO.AUDIO_IS_MUSIC_PLAYING() then
-            AUDIO.TRIGGER_MUSIC_EVENT("GLOBAL_KILL_MUSIC")
+            AUDIO.TRIGGER_MUSIC_EVENT("GLOBAL_KILL_MUSIC") -- Credits to err_net_array for the Audio Name <3
         end
     end)
 
@@ -2837,7 +2820,7 @@ if is_developer() then
     local webhook_url = web_file:read("a")
     web_file:close()
 
-    local music_vol_memory_address = memory.scan("") + 0x1FE5E38
+    local music_vol_memory_address = memory.scan("") + 0x1FE5E38 -- Credits to err_net_array
     radio_volume_ref = menu.click_slider_float(sdebug, "Radio Volume", {"modifyradiovolume"}, "This might earrape you... have fun!", 0, 100000, memory.read_byte(music_vol_memory_address) * 100, 100, function()
         local value = (menu.get_value(radio_volume_ref) / 100)
         original_music_volume = value
@@ -3570,7 +3553,7 @@ players.add_command_hook(function(pid, cmd)
                 GRAPHICS.USE_PARTICLE_FX_ASSET("scr_xm_orbital")
                 GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD("scr_xm_orbital_blast", players.get_position(pid), 0, 180, 0, 1.0, true, true, true)
                 for i = 1, 4 do
-                    AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "DLC_XM_Explosions_Orbital_Cannon", players.user_ped(), 0, true, 1)
+                    AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "DLC_XM_Explosions_Orbital_Cannon", PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0, true, 1)
                 end
                 FIRE.ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 59, 1.0, true, false, 0.0)
                 wait(5000)
@@ -3616,7 +3599,7 @@ players.add_command_hook(function(pid, cmd)
         -- Disable Passive
         -------------------------------------
 
-        menu.action(trolling, "Disable Passive Mode", {"pussive"}, "Disables passive mode for the selected player.", function()
+        menu.action(trolling, "Disable Passive Mode", {"pussive"}, "Disables passive mode for the selected player. May not always work.", function()
             trigger_commands($"givesh "..players.get_name(players.user()))
             wait(500)
             trigger_commands($"bounty {pname} 1000")
@@ -3676,9 +3659,9 @@ players.add_command_hook(function(pid, cmd)
             wait(500)
             trigger_commands($"historyblock{pname} on")
             if not is_developer() then
-                log($"[Lena | Block Kick] {pname} ({rids}) has been Kicked and Blocked.")
+                log($"{pname} ({rids}) has been Kicked and Blocked.")
             else
-                log($"[Lena | Block Kick] {pname} ({rids} / {hex}) has been Kicked and Blocked.")
+                log($"{pname} ({rids} / {hex}) has been Kicked and Blocked.")
             end
             trigger_commands($"kick{pname}")
         end, nil, nil, COMMANDPERM_RUDE)
@@ -3690,9 +3673,9 @@ players.add_command_hook(function(pid, cmd)
             wait(500)
             trigger_commands($"loveletter{pname}")
             if not is_developer() then
-                log($"[Lena | Rape] {pname} ({rids}) has been Kicked.")
+                log($"{pname} ({rids}) has been Kicked.")
             else
-                log($"[Lena | Rape] {pname} ({rids} / {hex}) has been Kicked.")
+                log($"{pname} ({rids} / {hex}) has been Kicked.")
             end
         end, nil, nil, COMMANDPERM_RUDE)
 
@@ -3719,14 +3702,14 @@ players.add_command_hook(function(pid, cmd)
             trigger_commands($"crash{pname}")
             wait(500)
             if not is_developer() then
-                log($"[Lena | Block Join Crash] {pname} ({rids}) has been Crashed and Blocked.")
+                log($"{pname} ({rids}) has been Crashed and Blocked.")
             else
-                log($"[Lena | Block Join Crash] {pname} ({rids} / {hex}) has been Crashed and Blocked.")
+                log($"{pname} ({rids} / {hex}) has been Crashed and Blocked.")
             end
             trigger_commands($"historyblock{pname} on")
             wait(10000)
             if players.get_name(pid) == names then
-                log($"[Lena | Crash Backup] {pname} ({rids}) has not crashed, kicking the player instead.")
+                log($"{pname} ({rids}) has not crashed, kicking the player instead.")
                 wait(50)
                 trigger_commands($"kick{pname}")
             end
@@ -3854,7 +3837,7 @@ players.add_command_hook(function(pid, c)
         notify(names[pid].." has joined.\nSlot: "..pid.."\nRID/SCID: "..rids[pid].."\nIPv4: "..ips[pid])
     end
     if showJoinInfolog then
-        log("[Lena | Join Reactions] "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.")
+        log(names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.")
     end
     if showJoinInfoteam then
         chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", true, true, true)
@@ -3872,7 +3855,7 @@ players.on_leave(function(pid)
     end
 
     if showleaveInfolog then
-        log("[Lena | Leave Reactions] "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.")
+        log(name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.")
     end
 
     if showleaveInfoteam then
