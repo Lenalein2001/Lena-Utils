@@ -37,7 +37,7 @@ object_uses = 0
 handle_ptr = memory.alloc(13*8)
 previous_car = nil
 copy_from = nil
-natives_version = "2944b"
+natives_version = "3095a"
 native_invoker.accept_bools_as_ints(true)
 thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
 thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
