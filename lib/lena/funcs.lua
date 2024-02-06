@@ -50,7 +50,7 @@ function write_data_to_file(file_path, data)
     local file = io.open(file_path, "w")
     file:write(data)
     file:close()
-    notify("Webhook URL successfully written to file.\nRestart script to apply webhook URL.")
+    notify("Webhook URL successfully written to file.\nRestart script to apply webhook ")
 end
 
 function send_to_hook(host, url, content_type, payload)
@@ -60,46 +60,46 @@ function send_to_hook(host, url, content_type, payload)
 end
 
 function IA_MENU_OPEN_OR_CLOSE()
-    PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 244, 1.0)
+    SET_CONTROL_VALUE_NEXT_FRAME(2, 244, 1.0)
     wait(150)
 end
 function IA_MENU_UP(Num)
     for i = 1, Num do
-        PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 172, 1.0)
+        SET_CONTROL_VALUE_NEXT_FRAME(2, 172, 1.0)
         wait(100)
     end
 end
 function IA_MENU_DOWN(Num)
     for i = 1, Num do
-        PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 173, 1.0)
+        SET_CONTROL_VALUE_NEXT_FRAME(2, 173, 1.0)
         wait(100)
     end
 end
 function IA_MENU_LEFT(Num)
     for i = 1, Num do
-        PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 174, 1.0)
+        SET_CONTROL_VALUE_NEXT_FRAME(2, 174, 1.0)
         wait(100)
     end
 end
 function IA_MENU_ENTER(Num)
     for i = 1, Num do
-        PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1.0)
+        SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1.0)
         wait(100)
     end
 end
 
 function play_anim(dict, name, duration = -1)
-    local ped = PLAYER.PLAYER_PED_ID()
-    while not STREAMING.HAS_ANIM_DICT_LOADED(dict) do
-        STREAMING.REQUEST_ANIM_DICT(dict)
+    local ped = PLAYER_PED_ID()
+    while not HAS_ANIM_DICT_LOADED(dict) do
+        REQUEST_ANIM_DICT(dict)
         wait()
     end
-    TASK.TASK_PLAY_ANIM(ped, dict, name, 1.0, 1.0, duration, 3, 0.0, false, false, false)
+    TASK_PLAY_ANIM(ped, dict, name, 1.0, 1.0, duration, 3, 0.0, false, false, false)
 end
 
 function IS_HELP_MSG_DISPLAYED(label)
-    HUD.BEGIN_TEXT_COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED(label)
-    return HUD.END_TEXT_COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED(0)
+    BEGIN_TEXT_COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED(label)
+    return END_TEXT_COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED(0)
 end
 
 function start_fm_script(script, stack)
@@ -107,13 +107,13 @@ function start_fm_script(script, stack)
 
     if not players.get_boss(players.user()) == players.user() then
         repeat trigger_commands("ceo") until players.get_boss(players.user()) == players.user()
-        notify("Starting CEO...")
+        notify("Starting ..")
     end
 
-    SCRIPT.REQUEST_SCRIPT(script)
-    repeat wait() until SCRIPT.HAS_SCRIPT_LOADED(script)
-    SYSTEM.START_NEW_SCRIPT(script, stack)
-    SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(script)
+    REQUEST_SCRIPT(script)
+    repeat wait() until HAS_SCRIPT_LOADED(script)
+    START_NEW_SCRIPT(script, stack)
+    SET_SCRIPT_AS_NO_LONGER_NEEDED(script)
 end
 
 function closestveh(myPos)
@@ -135,25 +135,25 @@ end
 function request_control(entity, migrate = true)
     local ctr = 0
     if entity then
-        while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entity) do
+        while not NETWORK_HAS_CONTROL_OF_ENTITY(entity) do
             if ctr >= 250 then
                 ctr = 0
                 return
             end
-            NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
+            NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
             wait()
             ctr += 1
         end
-        if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entity) then
+        if NETWORK_HAS_CONTROL_OF_ENTITY(entity) then
             return true
         end
     end
 end
 
 function get_vehicle_ped_is_in(player)
-    local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(player)
-    local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
-    if PED.IS_PED_IN_ANY_VEHICLE(ped, false) then
+    local ped = GET_PLAYER_PED_SCRIPT_INDEX(player)
+    local veh = GET_VEHICLE_PED_IS_IN(ped, false)
+    if IS_PED_IN_ANY_VEHICLE(ped, false) then
         return veh
     else
         return nil, notify("Player isn't in a vehicle. :/")
@@ -162,13 +162,13 @@ end
 
 function spawn_ped(model_name, pos, gm = false)
     local hash = util.joaat(model_name)
-    if STREAMING.IS_MODEL_A_PED(hash) then
+    if IS_MODEL_A_PED(hash) then
         util.request_model(hash)
-        local ped = entities.create_ped(2, hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
-        ENTITY.SET_ENTITY_INVINCIBLE(ped, gm)
+        local ped = entities.create_ped(2, hash, pos, GET_FINAL_RENDERED_CAM_ROT(2).z)
+        SET_ENTITY_INVINCIBLE(ped, gm)
         local ptr = entities.handle_to_pointer(ped)
         entities.set_can_migrate(ptr, false)
-        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+        SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return ped
     else
         return nil, notify($"{model_name} is not a valid ped. :/")
@@ -176,7 +176,7 @@ function spawn_ped(model_name, pos, gm = false)
 end
 function spawn_obj(model_name, pos)
     local hash = joaat(model_name)
-    if STREAMING.IS_MODEL_VALID(hash) then
+    if IS_MODEL_VALID(hash) then
         util.request_model(hash)
         local obj = entities.create_object(hash, pos)
         local ptr = entities.handle_to_pointer(obj)
@@ -190,15 +190,15 @@ function spawn_vehicle(model_name, pos, gm = false)
 
     local hash = util.joaat(model_name)
 
-    if STREAMING.IS_MODEL_A_VEHICLE(hash) then
+    if IS_MODEL_A_VEHICLE(hash) then
         util.request_model(hash)
-        local veh = entities.create_vehicle(hash, pos, CAM.GET_FINAL_RENDERED_CAM_ROT(2).z)
+        local veh = entities.create_vehicle(hash, pos, GET_FINAL_RENDERED_CAM_ROT(2).z)
         local ptr = entities.handle_to_pointer(veh)
-        ENTITY.SET_ENTITY_INVINCIBLE(veh, gm)
+        SET_ENTITY_INVINCIBLE(veh, gm)
         entities.set_can_migrate(ptr, false)
-        ENTITY.SET_ENTITY_SHOULD_FREEZE_WAITING_ON_COLLISION(veh, true)
+        SET_ENTITY_SHOULD_FREEZE_WAITING_ON_COLLISION(veh, true)
 
-        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+        SET_MODEL_AS_NO_LONGER_NEEDED(hash)
         return veh
     else
         return nil, notify($"{model_name} is not a valid vehicle. :/")
@@ -212,9 +212,9 @@ function trapcage(pid, object, visible = true)
     local obj = entities.create_object(hash, pos)
     entities.set_can_migrate(entities.handle_to_pointer(obj), false)
     spawned_cages[#spawned_cages + 1] = obj
-    ENTITY.SET_ENTITY_VISIBLE(obj, visible)
-    ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+    SET_ENTITY_VISIBLE(obj, visible)
+    FREEZE_ENTITY_POSITION(obj, true)
+    SET_MODEL_AS_NO_LONGER_NEEDED(hash)
 end
 
 function get_stand_model(model)
@@ -290,19 +290,19 @@ function GET_INTERIOR_FROM_PLAYER(pid)
 end
 
 function IS_PLAYER_ACTIVE(pid)
-	if pid or not NETWORK.NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
-	if not PLAYER.IS_PLAYER_PLAYING(pid) then return false end
+	if pid or not NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
+	if not IS_PLAYER_PLAYING(pid) then return false end
 	return true
 end
 
 local handle_ptr = memory.alloc(13*8)
 local function pid_to_handle(pid)
-    NETWORK.NETWORK_HANDLE_FROM_PLAYER(pid, handle_ptr, 13)
+    NETWORK_HANDLE_FROM_PLAYER(pid, handle_ptr, 13)
     return handle_ptr
 end
 
 function IS_PLAYER_FRIEND(pid)
-    if NETWORK.NETWORK_IS_FRIEND(pid_to_handle(pid)) then return true else return false end
+    if NETWORK_IS_FRIEND(pid_to_handle(pid)) then return true else return false end
 end
 
 function IsDetectionPresent(pid, detection)
@@ -391,7 +391,7 @@ function GET_INT_LOCAL(Script, Local)
 end
 function STAT_GET_INT(Stat)
     local Int_PTR = memory.alloc_int()
-    STATS.STAT_GET_INT(joaat("MP"..util.get_char_slot().."_".. Stat), Int_PTR, -1)
+    STAT_GET_INT(joaat("MP"..util.get_char_slot().."_".. Stat), Int_PTR, -1)
     return memory.read_int(Int_PTR)
 end
 function IS_MPPLY(Stat)
@@ -421,7 +421,7 @@ function SET_INT_LOCAL(Script, Local, Value)
     end
 end
 function STAT_SET_INT(Stat, Value)
-    STATS.STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
+    STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
 end
 function GET_INT_GLOBAL(global)
     return memory.read_int(memory.script_global(global))
@@ -435,34 +435,34 @@ function STAT_SET_DATE(stat, year, month, day, hour, min)
     memory.write_int(DatePTR+32, min)
     memory.write_int(DatePTR+40, 0)
     memory.write_int(DatePTR+48, 0)
-    STATS.STAT_SET_DATE(util.joaat(ADD_MP_INDEX(stat)), DatePTR, 7, true)
+    STAT_SET_DATE(util.joaat(ADD_MP_INDEX(stat)), DatePTR, 7, true)
 end
 -- Stats End
 
 function get_seat_ped_is_in(ped)
-    local veh = PED.GET_VEHICLE_PED_IS_IN(ped, false)
-    local hash = ENTITY.GET_ENTITY_MODEL(veh)
-    local seats = VEHICLE.GET_VEHICLE_MODEL_NUMBER_OF_SEATS(hash)
+    local veh = GET_VEHICLE_PED_IS_IN(ped, false)
+    local hash = GET_ENTITY_MODEL(veh)
+    local seats = GET_VEHICLE_MODEL_NUMBER_OF_SEATS(hash)
     if veh == 0 then return false end
     for i = -1, seats - 2, 1 do
-        if VEHICLE.GET_PED_IN_VEHICLE_SEAT(veh, i, false) == ped then return true, i end
+        if GET_PED_IN_VEHICLE_SEAT(veh, i, false) == ped then return true, i end
     end
     return false
 end
 
 function request_animation(hash)
-    STREAMING.REQUEST_ANIM_DICT(hash)
-    while not STREAMING.HAS_ANIM_DICT_LOADED(hash) do
+    REQUEST_ANIM_DICT(hash)
+    while not HAS_ANIM_DICT_LOADED(hash) do
         wait()
     end
 end
 
 function getWeaponHash(ped)
     local wpn_ptr = memory.alloc_int()
-    if WEAPON.GET_CURRENT_PED_VEHICLE_WEAPON(ped, wpn_ptr) then -- only returns true if the weapon is a vehicle weapon
+    if GET_CURRENT_PED_VEHICLE_WEAPON(ped, wpn_ptr) then -- only returns true if the weapon is a vehicle weapon
         return memory.read_int(wpn_ptr), true
     end
-    return WEAPON.GET_SELECTED_PED_WEAPON(ped), false
+    return GET_SELECTED_PED_WEAPON(ped), false
 end
 
 function BlockSyncs(pid, callback)
@@ -570,10 +570,10 @@ function is_entity_a_projectile(hash)
 end
 
 function format_friends_list()
-    local friend_count = NETWORK.NETWORK_GET_FRIEND_COUNT()
+    local friend_count = NETWORK_GET_FRIEND_COUNT()
     local friend_list = {}
     for i = 0, friend_count - 1 do
-        local friend_name = tostring(NETWORK.NETWORK_GET_FRIEND_DISPLAY_NAME(i))
+        local friend_name = tostring(NETWORK_GET_FRIEND_DISPLAY_NAME(i))
         local friend_url = "https://socialclub.rockstargames.com/member/" .. friend_name
         table.insert(friend_list, "[" .. friend_name .. "](" .. friend_url .. "), ")
 
@@ -641,7 +641,7 @@ function get_vehicles_in_player_range(player, radius)
 	local vehicles = {}
 	local pos = players.get_position(player)
 	for entities.get_all_vehicles_as_handles() as vehicle do
-		local vehPos = ENTITY.GET_ENTITY_COORDS(vehicle, true)
+		local vehPos = GET_ENTITY_COORDS(vehicle, true)
 		if pos:distance(vehPos) <= radius then table.insert(vehicles, vehicle) end
 	end
 	return vehicles
@@ -657,7 +657,7 @@ function mode_manu_edition(edition)
 end
 
 function log_failsafe()
-    local player_name = SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()
+    local player_name = SC_ACCOUNT_INFO_GET_NICKNAME()
     local player_id = players.get_rockstar_id(players.user())
     local using_vpn = players.is_using_vpn(players.user())
     local edition = mode_manu_edition(menu.get_edition())
@@ -694,9 +694,9 @@ end
 function get_player_crew(pid)
     local networkHandle = memory.alloc(104)
     local clan_desc = memory.alloc(280)
-    NETWORK.NETWORK_HANDLE_FROM_PLAYER(pid, networkHandle, 13)
+    NETWORK_HANDLE_FROM_PLAYER(pid, networkHandle, 13)
 
-    if NETWORK.NETWORK_IS_HANDLE_VALID(networkHandle, 13) and NETWORK.NETWORK_CLAN_PLAYER_GET_DESC(clan_desc, 35, networkHandle) then
+    if NETWORK_IS_HANDLE_VALID(networkHandle, 13) and NETWORK_CLAN_PLAYER_GET_DESC(clan_desc, 35, networkHandle) then
         return {
             icon = memory.read_int(clan_desc),
             name = memory.read_string(clan_desc+0x8),
@@ -856,13 +856,13 @@ end
 function hud_notification(format, colour, ...)
 	assert(type(format) == "string", "msg must be a string, got " .. type(format))
 	local msg = string.format(format, ...)
-	HUD.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or 2)
+	THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or 2)
 	util.BEGIN_TEXT_COMMAND_THEFEED_POST(msg)
-	HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)
+	END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)
 end
 
 function get_current_money()
-    return MONEY.NETWORK_GET_VC_BALANCE()
+    return NETWORK_GET_VC_BALANCE()
 end
 function calculate_difference(old_value, new_value)
     return new_value - old_value
@@ -882,7 +882,7 @@ function check_and_write_money_change()
     local current_money = get_current_money()
     if current_money != initial_money then
         local difference = calculate_difference(initial_money, current_money)
-        local file = io.open($"{lenaDir}Transactions for {SOCIALCLUB.SC_ACCOUNT_INFO_GET_NICKNAME()}.txt", "a")
+        local file = io.open($"{lenaDir}Transactions for {SC_ACCOUNT_INFO_GET_NICKNAME()}.txt", "a")
         if file then
             local formatted_initial_money = "$"..format_money_value(initial_money)
             local formatted_current_money = "$"..format_money_value(current_money)
@@ -900,11 +900,11 @@ function tune_vehicle(v, p, tell = false)
     local auto_perf_ind = {11,12,13,16,18,22}
     if p then
         for auto_perf_ind as index do
-            local veh_mods = VEHICLE.GET_VEHICLE_TYRES_CAN_BURST(v)
+            local veh_mods = GET_VEHICLE_TYRES_CAN_BURST(v)
             local upgrade = entities.get_upgrade_value(v, index) != entities.get_upgrade_max_value(v, index)
             if veh_mods or upgrade then
                 entities.set_upgrade_value(v, index, entities.get_upgrade_max_value(v, index))
-                VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(v, false)
+                SET_VEHICLE_TYRES_CAN_BURST(v, false)
                 if tell then notify("Upgraded your Car. :D") end
             end
         end
@@ -913,7 +913,7 @@ end
 
 function DELETE_OBJECT_BY_HASH(hash)
     for entities.get_all_objects_as_handles() as ent do
-        if ENTITY.GET_ENTITY_MODEL(ent) == hash then
+        if GET_ENTITY_MODEL(ent) == hash then
             entities.delete_by_handle(ent)
         end
     end
@@ -1000,21 +1000,21 @@ function save_player_outfit(pid, name)
         Outfitdir = filesystem.stand_dir().."Outfits/"..generateOutfitName()..".txt"
     end
 
-    local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
     local final_components = {}
     local final_props = {}
-    local model = ENTITY.GET_ENTITY_MODEL(ped)
-    while ENTITY.GET_ENTITY_MODEL(ped) == 0 do
+    local model = GET_ENTITY_MODEL(ped)
+    while GET_ENTITY_MODEL(ped) == 0 do
         util.yield()
     end
     model = util.reverse_joaat(model)
     local stand_outfit = get_outfit_components(model)
     for index, stand_name in stand_outfit do
-        final_components[stand_name] = PED.GET_PED_DRAWABLE_VARIATION(ped, index)
-        final_components[stand_name .. " Variation"] = PED.GET_PED_TEXTURE_VARIATION(ped, index)
+        final_components[stand_name] = GET_PED_DRAWABLE_VARIATION(ped, index)
+        final_components[stand_name .. " Variation"] = GET_PED_TEXTURE_VARIATION(ped, index)
         if table.contains(final_props, props[index]) then
-            final_props[props[index]] = PED.GET_PED_PROP_INDEX(ped, index)
-            local variation = PED.GET_PED_PROP_TEXTURE_INDEX(ped, index)
+            final_props[props[index]] = GET_PED_PROP_INDEX(ped, index)
+            local variation = GET_PED_PROP_TEXTURE_INDEX(ped, index)
             if variation == -1 then
                 variation = 0
             end
@@ -1070,7 +1070,7 @@ function StartCEO()
             return true
         end
     else
-        return false, notify("Cannot start CEO.")
+        return false, notify("Cannot start ")
     end
 end
 
@@ -1114,7 +1114,7 @@ function enhanceDownforce()
         if entities.get_user_vehicle_as_pointer(false) ~= 0 and players.is_visible(players.user()) then
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer(false))
             local vmodel = players.get_vehicle_model(players.user())
-            local isCarModel = VEHICLE.IS_THIS_MODEL_A_CAR(vmodel)
+            local isCarModel = IS_THIS_MODEL_A_CAR(vmodel)
             if isCarModel then
                 local jsonData = loadJsonData()
                 local downforce, id = getDownforceAndId()
@@ -1180,7 +1180,7 @@ function deleteEntities(entityType, total, typeName)
     local count = 0
     for entitiesList as entity do
 
-        if entities.get_owner(entity) == players.user() and (not NETWORK.NETWORK_IS_ACTIVITY_SESSION()) then
+        if entities.get_owner(entity) == players.user() and (not NETWORK_IS_ACTIVITY_SESSION()) then
             if not entity then return end
 
             entities.delete(entity)
@@ -1216,8 +1216,8 @@ end
 
 function isNetPlayerOk(pid, assert_playing = false, assert_done_transition = true) -- Won't change func much. It's from Jinx.
     local GlobalplayerBD = 2657921
-	if not NETWORK.NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
-	if assert_playing and not PLAYER.IS_PLAYER_PLAYING(pid) then return false end
+	if not NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
+	if assert_playing and not IS_PLAYER_PLAYING(pid) then return false end
 
 	if assert_done_transition then
 		if pid == memory.read_int(memory.script_global(2672741 + 3)) then
