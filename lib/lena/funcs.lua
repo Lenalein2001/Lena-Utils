@@ -315,7 +315,6 @@ function IsDetectionPresent(pid, detection)
 	end
 	return false
 end
-
 function getDetections(pid)
     if players.exists(pid) then
         local detections = {}
@@ -340,7 +339,6 @@ function getDetections(pid)
         end
     end
 end
-
 function getClassification(pid)
     if players.exists(pid) then
         for menu.player_root(pid):getChildren() as cmd do
@@ -350,7 +348,6 @@ function getClassification(pid)
         end
     end
 end
-
 function is_stand_user(pid)
     if players.exists(pid) then
         if pid == players.user() then return true end
@@ -532,7 +529,7 @@ function hexToDecimal(hex)
 end
 
 function is_developer()
-    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92, 0x03DAF57D}
+    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92, 0x03DAF57D, 0x0E02C0EA}
     local user = players.get_rockstar_id(players.user())
     for developer as id do
         if user == id then
@@ -1066,7 +1063,7 @@ function StartCEO()
             else
                 return false, notify("CEO couldn't be started.")
             end
-        else 
+        else
             return true
         end
     else
