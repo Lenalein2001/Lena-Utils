@@ -3869,9 +3869,7 @@ players.on_leave(function(pid)
     allplayers[pid] = nil
 end)
 
-if not is_developer() and async_http.have_access() then
-    log_failsafe()
-
+if async_http.have_access() then
     menu.action(menu.my_root(), "Check for Updates", {""}, "", function()
         auto_update_config.check_interval = 0
 
