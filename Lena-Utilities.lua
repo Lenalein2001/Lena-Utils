@@ -806,7 +806,7 @@ end)
 
     -------------------------------------
     -- Better Explosive Weapons
-    -------------------------------------  
+    -------------------------------------
 
     menu.toggle_loop(veh_weapons, "Better Explosive Weapons", {""}, "Higher Damage Output for certain Vehicle Cannons.", function()
         if not in_session() then return end
@@ -831,7 +831,7 @@ end)
 
     local wpn_ptrw = memory.alloc()
     local explo_mass_slider = menu.slider(veh_weapons, "Explosive Mass", {"Explosivermass"}, "", 1, 100, 10, 5, function(); end)
-    menu.toggle_loop(veh_weapons, "Better Explosive AOE", {""}, "Higher Damage Output for certain Vehicle Cannons.", function()
+    menu.toggle_loop(veh_weapons, "Better Explosive AOE", {""}, "Higher Damage Output for certain Vehicle Explosives", function()
         if not in_session() then return end
         local user_vehicle_ptr = entities.get_user_vehicle_as_pointer(false)
 
@@ -886,7 +886,7 @@ end)
     menu.toggle(vehicle_root, "Disable Visible Damage", {""}, "Vehicle will not take any visible damage.", function(toggled)
         SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(toggled)
     end)
-        
+
     -------------------------------------
     -- Unbreakable Lights
     -------------------------------------   
@@ -1068,41 +1068,6 @@ end)
         end)
 
         -------------------------------------
-        -- Force Host
-        -------------------------------------
-
-        menu.action(hosttools, "Force Host", {"forcehost"}, "Forces you to become the Session Host.", function()
-            local curPos = players.get_host_queue_position(players.user())
-            if curPos == 0 then
-                notify("You are Session Host already.")
-                return
-            end
-            local friendsHostQueue = players.get_host_queue(false, true, false)
-            if #friendsHostQueue > 0 then
-                for friendsHostQueue as pid do
-                    if players.get_host_queue_position(pid) < curPos then
-                        notify("Failed, one of the players in the queue is your friend. Forcing Session Host is impossible until your friend re-joins the Session with a higher Host queue index.")
-                        return
-                    end
-                end
-            end
-            local HostQueue = players.get_host_queue(false, false, true)
-            for idx, pid in HostQueue do
-                if idx <= curPos then
-                    trigger_commands($"kick{players.get_name(pid)}")
-                    wait(100)
-                end
-            end
-            util.create_tick_handler(function()
-                if NETWORK_IS_HOST() then
-                    notify("Success, you are now the Session Host.")
-                    return false
-                end
-                wait(500)
-            end)
-        end)
-
-        -------------------------------------
         -- Block SH Migration
         -------------------------------------
 
@@ -1271,7 +1236,7 @@ end)
         -------------------------------------
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made.
-        menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned  Can also detect Menus.", function()
+        menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
             for players.list() as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = GET_VEHICLE_PED_IS_USING(ped)
@@ -3041,7 +3006,7 @@ players.add_command_hook(function(pid, cmd)
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
         0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 0x0AFC4BF9, 0x0D44D097, 0x07FBE4BE, 0x0D44D097, 0x000A196C, 0x0541D9C3, 0x0E7EA79A, 0x096D4D22, 0x04B10C32, 0x0E96E4A3,
-        0x0E72C6BA, 0x0E94EE31, 0x0A8C691A, 0x0E08B8A3, 0x0A022CB2, 0x0D3F4FCD, 0x0C9D09DD, 0x0AC24FF0, 0x0E70C31E, 0x0A4368F1, 0x06DCD94E, 0x0506FEF2, 
+        0x0E72C6BA, 0x0E94EE31, 0x0A8C691A, 0x0E08B8A3, 0x0A022CB2, 0x0D3F4FCD, 0x0C9D09DD, 0x0AC24FF0, 0x0E70C31E, 0x0A4368F1, 0x06DCD94E, 0x0506FEF2, 0x075E7B64, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
