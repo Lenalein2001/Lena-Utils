@@ -718,6 +718,7 @@ function save_player_info(pid)
     local name_with_tags = players.get_name_with_tags(pid)
     local name = players.get_name(pid)
     local rockstar_id = players.get_rockstar_id(pid)
+    local hex = decimalToHex2s(rockstar_id)
     local rank = players.get_rank(pid)
     local money = "$" .. format_money_value(players.get_money(pid))
     local kd = players.get_kd(pid)
@@ -747,6 +748,7 @@ function save_player_info(pid)
         os.date("%a, %d. %B %X"),
         "\n\nName with Tags: ", name_with_tags,
         "\nRID/SCID: ", rockstar_id,
+        "\n Hex: ", hex,
         "\nRank: ", rank,
         "\nMoney: ", money,
         "\nK/D: ", kd,
@@ -760,7 +762,7 @@ function save_player_info(pid)
 
     if player_ip != "Connected via Relay" then
         local as, dns = soup.netIntel.getAsByIp(player_ip), soup.IpAddr(player_ip)
-        player_info[#player_info + 1] = "\nIPv4: " .. player_ip
+        player_info[#player_info + 1] = "\n||IPv4: " .. player_ip
         player_info[#player_info + 1] = "\nNetIntel addr: " .. tostring(dns) .. ", " .. dns:getReverseDns()
         player_info[#player_info + 1] = "\nNetIntel Number: AS" .. as.number
         player_info[#player_info + 1] = "\nNetIntel Handle: " .. as.handle
@@ -770,7 +772,7 @@ function save_player_info(pid)
         local loc = soup.netIntel.getLocationByIp(player_ip)
         player_info[#player_info + 1] = "\n\nNetIntel City: " .. loc.city
         player_info[#player_info + 1] = "\nNetIntel State: " .. loc.state
-        player_info[#player_info + 1] = "\nNetIntel County Code: " .. loc.country_code
+        player_info[#player_info + 1] = "\nNetIntel County Code: " .. loc.country_code .. "||"
     else
         player_info[#player_info + 1] = "\nConnected to Rockstar's Server. Intel will not be shown."
     end
@@ -859,7 +861,7 @@ function hud_notification(format, colour, ...)
 end
 
 function get_current_money()
-    return NETWORK_GET_VC_BALANCE()
+    return util.stat_get_int64(util.joaat("BANK_BALANCE"))
 end
 function calculate_difference(old_value, new_value)
     return new_value - old_value
