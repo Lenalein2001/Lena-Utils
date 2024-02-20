@@ -3006,7 +3006,8 @@ players.add_command_hook(function(pid, cmd)
         0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
         0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 0x0AFC4BF9, 0x0D44D097, 0x07FBE4BE, 0x0D44D097, 0x000A196C, 0x0541D9C3, 0x0E7EA79A, 0x096D4D22, 0x04B10C32, 0x0E96E4A3,
-        0x0E72C6BA, 0x0E94EE31, 0x0A8C691A, 0x0E08B8A3, 0x0A022CB2, 0x0D3F4FCD, 0x0C9D09DD, 0x0AC24FF0, 0x0E70C31E, 0x0A4368F1, 0x06DCD94E, 0x0506FEF2, 0x075E7B64, 
+        0x0E72C6BA, 0x0E94EE31, 0x0A8C691A, 0x0E08B8A3, 0x0A022CB2, 0x0D3F4FCD, 0x0C9D09DD, 0x0AC24FF0, 0x0E70C31E, 0x0A4368F1, 0x06DCD94E, 0x0506FEF2, 0x075E7B64, 0x0A23C745,
+        0x09D0BD82, 0x04412EEA, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3117,7 +3118,7 @@ players.add_command_hook(function(pid, cmd)
             end
         end)
 
-        menu.toggle_loop(friendly, "Stealth Messages", {""}, "", function()
+        menu.toggle_loop(friendly, "Stealth Messages", {""}, "Works the same as 'Stealth msg' but you won't need to press it everytime. It uses the normal Chat.", function()
             if IS_CONTROL_JUST_PRESSED(1, 245) then
                 repeat chat.close() until not chat.is_open()
                 menu.show_command_box($"pm{pname:lower()} ")
@@ -3693,8 +3694,6 @@ players.add_command_hook(function(pid, cmd)
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
             if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
 
-            trigger_commands($"ngcrash{pname}")
-            wait(500)
             trigger_commands($"crash{pname}")
             wait(500)
             if not is_developer() then
