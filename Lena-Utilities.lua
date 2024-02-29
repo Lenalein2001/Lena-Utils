@@ -49,7 +49,7 @@ util.require_natives("3095a", "g")
 -------------------------------------
 
 local self = menu.list(menu.my_root(), "Self", {"lenaself"}, "Self Options")
-local vehicle_root = menu.list(menu.my_root(), "Vehicle", {"lenavehicle"}, "Vehicle Options")
+vehicle_root = menu.list(menu.my_root(), "Vehicle", {"lenavehicle"}, "Vehicle Options")
 local online = menu.list(menu.my_root(), "Online", {"lenaonline"}, "Online Options")
 local tunables = menu.list(menu.my_root(), "Tunables", {"lenatunables"}, "Tunables")
 local misc = menu.list(menu.my_root(), "Misc", {"lenamisc"}, "")
@@ -214,6 +214,9 @@ local tables = util.require_no_lag("lena.tables")
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
+end
+if not filesystem.exists(lenaModules) then
+	filesystem.mkdir(lenaModules)
 end
 if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
@@ -867,7 +870,7 @@ end)
     -- Clean vehicle
     -------------------------------------
 
-    menu.action(vehicle_root, "Clean Vehicle", {"clv"}, "Cleans the current ", function()
+    menu.action(vehicle_root, "Clean Vehicle", {"clv"}, "Cleans the current Vehicle.", function()
         SET_VEHICLE_DIRT_LEVEL(user_vehicle, 0.0)
     end)
 
@@ -889,7 +892,7 @@ end)
 
     -------------------------------------
     -- Unbreakable Lights
-    -------------------------------------   
+    -------------------------------------
 
     menu.toggle(vehicle_root, "Unbreakable Lights", {""}, "Makes the Lights unbreakable on your current ", function(toggled)
         SET_VEHICLE_HAS_UNBREAKABLE_LIGHTS(user_vehicle, toggled)
@@ -907,7 +910,7 @@ end)
             SET_VEHICLE_REDUCE_GRIP(user_vehicle, false)
         end
     end)
-    
+
     -------------------------------------
     -- Control Passenger Weapons
     -------------------------------------
@@ -3007,7 +3010,7 @@ players.add_command_hook(function(pid, cmd)
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
         0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 0x0AFC4BF9, 0x0D44D097, 0x07FBE4BE, 0x0D44D097, 0x000A196C, 0x0541D9C3, 0x0E7EA79A, 0x096D4D22, 0x04B10C32, 0x0E96E4A3,
         0x0E72C6BA, 0x0E94EE31, 0x0A8C691A, 0x0E08B8A3, 0x0A022CB2, 0x0D3F4FCD, 0x0C9D09DD, 0x0AC24FF0, 0x0E70C31E, 0x0A4368F1, 0x06DCD94E, 0x0506FEF2, 0x075E7B64, 0x0A23C745,
-        0x09D0BD82, 0x04412EEA, 0x09F98CF8, 
+        0x09D0BD82, 0x04412EEA, 0x09F98CF8, 0x02628018, 0x0E71FD5F, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3877,6 +3880,8 @@ if async_http.have_access() then
         end
     end)
 end
+
+
 
 util.create_tick_handler(function()
     local carCheck = entities.get_user_vehicle_as_handle(true)
