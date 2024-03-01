@@ -2230,7 +2230,7 @@ end)
         local name, stat, max = data[1], data[2], data[3]
         menu.toggle_loop(bm_list, $"Monitor {name}", {$"monitor{name}"}, "", function()
             if in_session() then
-                local value = STAT_GET_INT(stat)
+                local value = SSTAT_GET_INT(stat)
                 util.draw_debug_text($"{name} $: {value} | {max}")
             end
         end)
@@ -2424,14 +2424,14 @@ end)
         -------------------------------------
 
         if is_developer() then
-            menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a ", function()
+            menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO", function()
                 if StartCEO() then
                     wait(500)
                     trigger_commands("ceoname ¦ Rockstar")
                 end
             end)
         else
-            menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a ", function()
+            menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO", function()
                 StartCEO()
             end)
         end
@@ -2568,7 +2568,7 @@ end)
     -- Rockstar Verified All
     -------------------------------------
 
-    menu.toggle_loop(misc, "Rockstar Verified All", {""}, "You will always be Rockstar Verified with this.", function()
+    menu.toggle_loop(misc, "Rockstar Verified All", {""}, "You will always be Rockstar Verified with this. :troll240p:", function()
         if IS_CONTROL_JUST_PRESSED(1, 245) then
             chat.ensure_open_with_empty_draft(false)
             chat.add_to_draft("¦ ")
@@ -2585,7 +2585,7 @@ end)
     }
     local pop_multiplier_id
 
-    menu.toggle(misc, "No Traffic", {""}, "Deletes all Traffic from the Map. Works Session-Wide.", function(toggled)
+    menu.toggle(misc, "No Traffic", {""}, "Deletes all Traffic from the Map. Works Session-Wide.", function(toggled) -- Hexarobi
         if toggled then
             local ped_sphere, traffic_sphere
             if config.disable_peds then ped_sphere = 0.0 else ped_sphere = 1.0 end
@@ -2610,7 +2610,7 @@ end)
     -- Disable Phone
     -------------------------------------
 
-    menu.toggle_loop(misc, "Disable Phone", {""}, "Disables the Phone when certain conditions are met.", function()
+    menu.toggle_loop(misc, "Disable Phone calls", {""}, "Disables Phone calls when certain conditions are met.", function()
         local phone = menu.ref_by_path("Game>Disables>Straight To Voicemail")
         if chat.is_open() or IS_PLAYER_FREE_AIMING(players.user()) or util.is_interaction_menu_open() or menu.is_open() then
             if not phone.value then

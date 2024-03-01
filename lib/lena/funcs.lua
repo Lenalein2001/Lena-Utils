@@ -386,7 +386,7 @@ function GET_INT_LOCAL(Script, Local)
         end
     end
 end
-function STAT_GET_INT(Stat)
+function SSTAT_GET_INT(Stat)
     local Int_PTR = memory.alloc_int()
     STAT_GET_INT(joaat("MP"..util.get_char_slot().."_".. Stat), Int_PTR, -1)
     return memory.read_int(Int_PTR)
