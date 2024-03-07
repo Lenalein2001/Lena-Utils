@@ -198,6 +198,12 @@ auto_update_config = {
             script_relpath="/lib/lena/downforce_data.json",
             check_interval=default_check_interval,
         },
+        {
+            name="Blacklist",
+            source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/Export_Blacklist.json",
+            script_relpath="/lib/lena/Export_Blacklist.json",
+            check_interval=default_check_interval,
+        }
     }
 }
 
