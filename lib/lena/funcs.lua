@@ -417,13 +417,13 @@ function SET_INT_LOCAL(Script, Local, Value)
         memory.write_int(memory.script_local(Script, Local), Value)
     end
 end
-function STAT_SET_INT(Stat, Value)
+function SSTAT_SET_INT(Stat, Value)
     STAT_SET_INT(joaat(ADD_MP_INDEX(Stat)), Value, true)
 end
 function GET_INT_GLOBAL(global)
     return memory.read_int(memory.script_global(global))
 end
-function STAT_SET_DATE(stat, year, month, day, hour, min)
+function SSTAT_SET_DATE(stat, year, month, day, hour, min)
     local DatePTR = memory.alloc(8*7)
     memory.write_int(DatePTR, year)
     memory.write_int(DatePTR+8, month)
@@ -792,8 +792,10 @@ function save_player_info(pid)
 
     if detections or players.is_marked_as_modder(pid) then
         player_info[#player_info + 1] = "\n\n**Detections**"
-        for detections as detection do
-            player_info[#player_info + 1] = "\n" .. detection
+        if detections then
+            for detections as detection do
+                player_info[#player_info + 1] = "\n" .. detection
+            end
         end
         if stand_user then
             player_info[#player_info + 1] = "\nStand User"

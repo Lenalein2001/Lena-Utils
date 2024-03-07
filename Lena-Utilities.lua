@@ -582,13 +582,15 @@ end)
 
         menu.divider(better_vehicles, "Better Heli")
         menu.slider_float(better_vehicles, "Thrust", {"helithrust"}, "Set the Heli thrust.", 0, 1000, 220, 10, function(value)
-            if IS_PED_IN_ANY_HELI(players.user_ped()) then
-                local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
-                local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
-                if CflyingHandling then
-                    memory.write_float(CflyingHandling + 0x8, value * 0.01)
+            util.create_tick_handler(function()
+                if IS_PED_IN_ANY_HELI(players.user_ped()) then
+                    local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+                    local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
+                    if CflyingHandling then
+                        memory.write_float(CflyingHandling + 0x8, value * 0.01)
+                    end
                 end
-            end
+            end)
         end)
 
         -------------------------------------
@@ -2067,7 +2069,7 @@ end)
                 Blip = GET_NEXT_BLIP_INFO_ID(432)
                 wait(2000)
             end
-        end, nil, nil, COMMANDPERM_FRIENDLY)
+        end)
 
         -------------------------------------
         -- Finish Headhunter
@@ -2208,7 +2210,7 @@ end)
         else
             notify("You need Ultimate to Start a Business Battle. Request denied.")
         end
-    end, nil, nil, COMMANDPERM_FRIENDLY)
+    end)
 
     -------------------------------------
     -- Screen Opener
@@ -2251,7 +2253,7 @@ end)
         local helpText = this[3] or ""
         menu.action(stat_editing, $"Edit {name}", {$"edit{name}"}, helpText, function()
             if not menu.get_value(add_playtime) then
-                STAT_SET_INT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
+                SSTAT_SET_INT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
             else
                 STAT_INCREMENT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
             end
@@ -2268,7 +2270,7 @@ end)
         local stat = that[2]
         local helpText = that[3] or ""
         menu.action(stat_editing, $"Edit {name}", {$"edit{name}"}, helpText, function()
-            STAT_SET_DATE(stat, menu.get_value(Stat_year), menu.get_value(Stat_month), menu.get_value(Stat_day), 0, 59)
+            SSTAT_SET_DATE(stat, menu.get_value(Stat_year), menu.get_value(Stat_month), menu.get_value(Stat_day), 0, 59)
             trigger_commands("forcecloudsave")
         end)
     end
@@ -2657,7 +2659,7 @@ end)
             wait(1, "s")
         end
         chat.send_message("GO!!!", true, true, true)
-    end, nil, nil, COMMANDPERM_FRIENDLY)
+    end)
 
     -------------------------------------
     -- Remove Bounty
@@ -2760,8 +2762,9 @@ if is_developer() then
             local vname = util.get_label_text(vmodel)
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
             local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
-            if menu.get_value(modified_vehicle, vname) != vname and IS_PLAYER_PLAYING(players.user()) and GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
-                if IS_THIS_MODEL_A_PLANE(vmodel) then
+            if IS_PLAYER_PLAYING(players.user()) and GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
+
+                if IS_THIS_MODEL_A_PLANE(vmodel) and menu.get_value(modified_vehicle, vname) != vname then
                     if vmodel == -1700874274 then
                         trigger_commands("vhengineoffglidemulti 10; vhgeardownliftmult 1")
                     else
@@ -2769,20 +2772,23 @@ if is_developer() then
                             local handling = offsets[1]
                             local value = offsets[2]
                             memory.write_float(CflyingHandling + handling, value)
+
                         end
                     end
-                    notify($"Better Planes have been enabled for: {vname}")
                     trigger_commands("fovfpinveh 90; gravitymult 2; fovtpinveh 100")
-                elseif IS_THIS_MODEL_A_HELI(vmodel) then
+                    notify($"Better Planes have been enabled for {vname}.")
+                elseif IS_THIS_MODEL_A_HELI(vmodel) and not util.is_this_model_a_blimp(vmodel) then
                     for better_heli_offsets as offset do
-                        memory.write_float(CflyingHandling + offset, 0)
+                        if math.floor(memory.read_float(CflyingHandling + offset)) != 0 then
+                            memory.write_float(CflyingHandling + offset, 0)
+                        end
                     end
-                    trigger_commands("gravitymult 1; helithrust 2.3")
-                    notify($"Better Helis have been enabled for: {vname}")
-                elseif util.is_this_model_a_blimp(vmodel) then
-                    notify($"Better Blimps have been enabled for: {vname}")
-                    trigger_commands("gravitymult 1; helithrust 2.3; betterheli")
-                else
+
+                    if memory.read_float(CflyingHandling + 0x8) != menu.ref_by_command_name("helithrust").value then
+                        trigger_commands("gravitymult 1; helithrust 2.3")
+                        notify($"Better Helis have been enabled for {vname}.")
+                    end
+                elseif menu.get_value(modified_vehicle, vname) != vname then
                     trigger_commands("gravitymult 1; fovfpinveh -5; fovtpinveh -5")
                 end
                 menu.set_value(modified_vehicle, vname)
@@ -3010,7 +3016,7 @@ players.add_command_hook(function(pid, cmd)
         0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
         0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 0x0AFC4BF9, 0x0D44D097, 0x07FBE4BE, 0x0D44D097, 0x000A196C, 0x0541D9C3, 0x0E7EA79A, 0x096D4D22, 0x04B10C32, 0x0E96E4A3,
         0x0E72C6BA, 0x0E94EE31, 0x0A8C691A, 0x0E08B8A3, 0x0A022CB2, 0x0D3F4FCD, 0x0C9D09DD, 0x0AC24FF0, 0x0E70C31E, 0x0A4368F1, 0x06DCD94E, 0x0506FEF2, 0x075E7B64, 0x0A23C745,
-        0x09D0BD82, 0x04412EEA, 0x09F98CF8, 0x02628018, 0x0E71FD5F, 
+        0x09D0BD82, 0x04412EEA, 0x09F98CF8, 0x02628018, 0x0E71FD5F, 0x0E4DB6E1, 0x0D3D2FCD, 0x0DD12BC5, 0x02676D18, 0x06B6DB5B, 0x01B69040, 
         -- Retard/Sexual Abuser
         0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
     }
@@ -3072,7 +3078,7 @@ players.add_command_hook(function(pid, cmd)
             trigger_commands($"givesh{pname}")
             wait(100)
             trigger_commands($"summon{pname}")
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
 
         -------------------------------------
         -- Invite to CEO/MC
@@ -3088,7 +3094,7 @@ players.add_command_hook(function(pid, cmd)
                 memory.read_int(memory.script_global(1916087 + 9)), -- *uParam0 = Global_1916087.f_9;
                 memory.read_int(memory.script_global(1916087 + 10)), -- *uParam1 = Global_1916087.f_10;
             })
-        end, nil, nil, COMMANDPERM_FRIENDLY)
+        end)
 
         -------------------------------------
         -- Fix Blackscreen
@@ -3096,7 +3102,7 @@ players.add_command_hook(function(pid, cmd)
 
         menu.action(friendly, "Fix Blackscreen", {"fixblackscreen"}, $"Tries to fix a stuck Blackscreen for {pname}", function()
             trigger_commands($"givesh {pname}; aptme {pname}")
-        end, nil, nil, COMMANDPERM_FRIENDLY)
+        end)
 
         -------------------------------------
         -- Set Waypoint
@@ -3147,24 +3153,6 @@ players.add_command_hook(function(pid, cmd)
                 save_player_outfit(pid, n)
         end)
 
-        -------------------------------------
-        -- Spectate
-        -------------------------------------
-
-        local spec = menu.ref_by_rel_path(menu.player_root(pid), "Spectate")
-        brv_six = menu.toggle(spec, "Bravo Six", {"bravo"}, $"Bravo six, going dark. Blocks Outgoing Syncs with {pname}.", function(toggled)
-            local outgoingSyncs = menu.ref_by_rel_path(menu.player_root(pid), "Outgoing Syncs>Block")
-            local nuts = menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Nuts Method")
-            if pid == players.user() then
-                notify(lang.get_localised(-1974706693))
-                brv_six.value = false
-                util.stop_thread()
-            end
-            trigger_command(outgoingSyncs, toggled)
-            wait(100)
-            trigger_command(nuts, toggled)
-        end)
-
     -------------------------------------
     -------------------------------------
     -- Vehicle
@@ -3199,7 +3187,7 @@ players.add_command_hook(function(pid, cmd)
                 SET_VEHICLE_TYRES_CAN_BURST(veh, not on)
                 SET_VEHICLE_WHEELS_CAN_BREAK(veh, not on)
             end
-        end, nil, nil, COMMANDPERM_FRIENDLY)
+        end)
 
         -------------------------------------
         -- Repair Vehicle
@@ -3212,7 +3200,7 @@ players.add_command_hook(function(pid, cmd)
                 SET_VEHICLE_DEFORMATION_FIXED(veh)
                 SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
             end
-        end, nil, nil, COMMANDPERM_FRIENDLY)
+        end)
 
         -------------------------------------
         -- Clean Vehicle
@@ -3223,7 +3211,7 @@ players.add_command_hook(function(pid, cmd)
             if veh and request_control(veh, true) then
                 SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
             end
-        end, nil, nil, COMMANDPERM_FRIENDLY)
+        end)
 
         -------------------------------------
         -- Launch Player Vehicle
@@ -3250,7 +3238,7 @@ players.add_command_hook(function(pid, cmd)
                     APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 100000.0, 0.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
                     break
                 end
-        end, nil, nil, COMMANDPERM_FRIENDLY)
+        end)
 
         -------------------------------------
         -- Hurricane
@@ -3266,7 +3254,7 @@ players.add_command_hook(function(pid, cmd)
                 trigger_command(ram)
                 wait(100)
             end
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
 
     -------------------------------------
     -------------------------------------
@@ -3434,7 +3422,7 @@ players.add_command_hook(function(pid, cmd)
             local int = memory.read_int(memory.script_global(1895156 + 1 + (pid * 609) + 511)) --Global_1895156[PLAYER::PLAYER_ID() /*609*/].f_511;
             sendse(1 << pid, {-366707054, players.user(), 20, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
             sendse(1 << pid, {1757622014, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
 
         -------------------------------------
         -- Force 1v1
@@ -3508,7 +3496,7 @@ players.add_command_hook(function(pid, cmd)
                     end
                 end
             end
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
             
         -------------------------------------
         -- Kill Player Inside Interior
@@ -3535,7 +3523,7 @@ players.add_command_hook(function(pid, cmd)
                 entities.delete(obj); entities.delete(veh)
                 wait(250)
             end
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
 
         -------------------------------------
         -- Bounty Loop
@@ -3549,7 +3537,7 @@ players.add_command_hook(function(pid, cmd)
                 notify($"Bounty set on: {pname}.")
                 wait(10000)
             end
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
 
         -------------------------------------
         -- EXPLOSIONS
@@ -3557,7 +3545,7 @@ players.add_command_hook(function(pid, cmd)
 
         menu.action(customExplosion, "Explode", {""}, "", function()
             ADD_EXPLOSION(players.get_position(pid), 1, 1.0, false, true, 0.0, false)
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
         menu.action(customExplosion, "Owned Explode", {""}, "", function()
             ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 1, 1.0, false, true, 0.0)
         end)
@@ -3619,7 +3607,7 @@ players.add_command_hook(function(pid, cmd)
             trigger_commands($"mission {pname}")
             wait(3000)
             notify("Passive mode should be dissabled now.")
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
 
         -------------------------------------
         -- Ghost to User
@@ -3664,7 +3652,7 @@ players.add_command_hook(function(pid, cmd)
                 log($"{pname} ({rids} / {hex}) has been Kicked and Blocked.")
             end
             trigger_commands($"kick{pname}")
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
 
         menu.action(kicks, "Rape", {"rape"}, "A Unblockable kick that won't tell the target or non-hosts who did it.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
@@ -3677,7 +3665,7 @@ players.add_command_hook(function(pid, cmd)
             else
                 log($"{pname} ({rids} / {hex}) has been Kicked.")
             end
-        end, nil, nil, COMMANDPERM_RUDE)
+        end)
 
         menu.action(kicks, "Host Kick", {"hostkick", "hokick"}, "Only works as Host.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
