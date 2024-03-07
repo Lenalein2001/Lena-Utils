@@ -211,6 +211,8 @@ lenaModules = filesystem.scripts_dir().."lib\\lena\\modules\\"
 local scaleForm = require("ScaleformLib")
 local funcs = util.require_no_lag("lena.funcs")
 local tables = util.require_no_lag("lena.tables")
+json = require("json")
+pjson = require("pretty.json")
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
@@ -222,8 +224,12 @@ if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
 end
 if not filesystem.exists(lenaDir.."Saved Players Webhook.txt") then
-    local waddada = io.open(lenaDir.."Saved Players Webhook.txt", "w")
-    waddada:close()
+    local file = io.open(lenaDir.."Saved Players Webhook.txt", "w")
+    file:close()
+end
+if not filesystem.exists(lenaDir .. "Export_Blacklist.json") then
+    local file = io.open(lenaDir .. "Export_Blacklist.json", "w")
+    file:close()
 end
 
 if async_http.have_access() then
@@ -242,7 +248,7 @@ util.create_thread(function()
     local projectile_blips = {}
     while true do
         for k,b in projectile_blips do
-            if GET_BLIP_INFO_ID_ENTITY_INDEX(b) == 0 then 
+            if GET_BLIP_INFO_ID_ENTITY_INDEX(b) == 0 then
                 util.remove_blip(b)
                 projectile_blips[k] = nil
             end
@@ -1968,8 +1974,7 @@ end)
         if in_session() then
             for players.list(false, true, true) as pid do
                 if players.is_marked_as_attacker(pid) then
-                    local pname, rid = players.get_name(pid), players.get_rockstar_id(pid)
-                    local hex = decimalToHex2s(rid, 32)
+                    local pname = players.get_name(pid)
                     notify($"{pname} has been Kicked for attacking you.")
 
                     trigger_commands($"rape {pname}")
@@ -2985,6 +2990,60 @@ if is_developer() then
 --  end
 end
 
+local data_e, data_g, Blacklist = {}, {}, {}
+local function save_data_e()
+    local file = io.open(libDir .. "Export_Blacklist.json", 'w+')
+    if file then file:write(json.encode(data_e, true)); io.close(file) end
+end
+local function load_data_e()
+    local file = io.open(libDir .. "Export_Blacklist.json", 'r')
+    if file then
+        local contents = file:read('*all')
+        io.close(file)
+        data_e = json.decode(contents) or {}
+        if next(data_e) and data_e[1].Name then
+            data_e = {}
+            for _, player in pairs(contents) do table.insert(data_e, player.Id) end
+            save_data_e()
+        end
+    else
+        local new_file = io.open(libDir .. "Export_Blacklist.json", "w")
+        if new_file then new_file:write("[]"); io.close(new_file); data_e = {} end
+    end
+end
+local function load_data_g()
+    local file = io.open(libDir .. 'Blacklist.json', 'r')
+    if file then data_g = json.decode(file:read('*all')) or {}; io.close(file) end
+end
+load_data_e()
+load_data_g()
+local function loadBlacklist()
+    local function append_to_blacklist(data)
+        local currentLine = {}
+        for _, id in ipairs(data) do
+            table.insert(currentLine, id)
+            if #currentLine == 5 then Blacklist[#Blacklist + 1] = currentLine; currentLine = {} end
+        end
+        if #currentLine > 0 then Blacklist[#Blacklist + 1] = currentLine end
+    end
+    append_to_blacklist(data_g)
+    append_to_blacklist(data_e)
+end
+loadBlacklist()
+local function add_player_to_blacklist(rid)
+    if pid ~= players.user() then
+        local id = tostring(rid)
+        table.insert(data_e, id)
+        Blacklist[#Blacklist + 1] = {id}
+        save_data_e()
+    end
+end
+local function is_player_in_blacklist(rid)
+    local id = tostring(rid)
+    for _, line in ipairs(Blacklist) do if table.contains(line, id) then return true end end
+    return false
+end
+
 --------------------------------------------------------------------------------
 ------------------------------- PLAYER FEATURES --------------------------------
 --------------------------------------------------------------------------------
@@ -2992,40 +3051,12 @@ end
 players.add_command_hook(function(pid, cmd)
     local pname = players.get_name(pid)
     local rids = players.get_rockstar_id(pid)
-    local hex = decimalToHex2s(rids, 32)
-    local idiots = {
-        0x0C6A8CD9, 0x0CAFF827, 0x04DCD691, 0x07E862F8, 0x096E22A3, 0x0967E1C2, 0x0ACF5EAB, 0x0BE13BA9,
-        0x0B0236FA, 0x01585AB7, 0x09038DD9, 0x01394640, 0x0CB7CFF2, 0x0C666371, 0x04A5C95B, 0x0C76C9E2, 0x0B7EC980, 0x0C121CAD, 0x0919B57F, 0x0C682AB5, 0x03280B78, 0x0479C7D8,
-        0x0BB6BAE6, 0x05EB0C06, 0x0C0EFC07, 0x0A9FD9CD, 0x0A1FA84B, 0x0101D84E, 0x0CA6E931, 0x0691AC07, 0x0AA87C21, 0x0988DB36, 0x06AE10E2, 0x071D0AF9, 0x0B93038B, 0x0D029C4A,
-        0x0CCC3A82, 0x02314B16, 0x0C2590C9, 0x0D193EEE, 0x0BE0E3BE, 0x09D7781F, 0x0BCA5D8C, 0x0AFA420F, 0x07E06196, 0x0CDC6337, 0x0B8B307C, 0x0C0DEC0E, 0x04999905, 0x028C8ADD,
-        0x0B57C870, 0x005A41F0, 0x0C7EC044, 0x0CBDDE32, 0x0860F534, 0x0B848C99, 0x07508CFB, 0x0A07EB9E, 0x06F51B2F, 0x03097926, 0x0D04F24C, 0x0AE5DA82, 0x0A7D2684, 0x0BF272C9,
-        0x0B38BC94, 0x0083EAD9, 0x0CFC75F7, 0x004D2E05, 0x5AB5E2F2, 0x0A739990, 0x01904EBA, 0x01480A39, 0x09A5E63E, 0x075A591F, 0x0C50A172, 0x00D344E0, 0x0C6C9C9E, 0x098105F0,
-        0x0B316B93, 0x0D3C0DD1, 0x05059BDC, 0x097D765F, 0x0BEE6E37, 0x061EADCF, 0x0984EECF, 0x0C7290DE, 0x0BE2A63A, 0x041B4798, 0x0C7D65E8, 0x09667B59, 0x06298EFC, 0x04BB8D72,
-        0x0B2E000F, 0x0C0ADFC5, 0x0B23A552, 0x0CEBEA08, 0x0CB2AB74, 0x0AEBC1AF, 0x05BCAAD9, 0x0B0F32F8, 0x0BE93141, 0x09F72C49, 0x086B5F3F, 0x0BAD4E5C, 0x0C9B1FA5, 0x0AF83D87,
-        0x09F6C328, 0x07DC40B4, 0x058DCDAD, 0x0C46C36E, 0x0A22088E, 0x0CBAAEB3, 0x0BE7C35E, 0x0D5021BD, 0x0D44E8AF, 0x0963AC38, 0x0D1788D8, 0x083121AB, 0x070C1D13, 0x0C025C35,
-        0x04504CCB, 0x0C15670E, 0x09DC648E, 0x0046658F, 0x00456136, 0x05D5715F, 0x0D1E3C6E, 0x07B6FB71, 0x0C98B465, 0x0C4EC8C9, 0x071A5EE2, 0x0AC7DADC, 0x0270B92D, 0x0BD93DCF,
-        0x0CFF2596, 0x0C9CE642, 0x0C4FBEC1, 0x0BB7CBB2, 0x0AD078FA, 0x0ACD50CE, 0x0BEBF7A0, 0x080A4E57, 0x04CB6ACE, 0x093EA186, 0x0BF770F5, 0x0C732D5C, 0x0C732D5C, 0x0CC8C37C,
-        0x0A507921, 0x04BE7D5E, 0x0C42877C, 0x09025232, 0x0962404A, 0x07B42014, 0x0B1800ED, 0x0D2D6965, 0x06B87017, 0x0D67118D, 0x0AE5341D, 0x05207167, 0x0CC31372, 0x0D66E920,
-        0x0C06B41B, 0x09A04033, 0x0A418EC7, 0x02BBC305, 0x0D7A14FA, 0x08BB6007, 0x0C16EF5D, 0x0D82134A, 0x0B2CB11C, 0x0B87DDD3, 0x0D4724F0, 0x0D8EBBE0, 0x0988D182, 0x0D034B04,
-        0x0BB99133, 0x09F8E801, 0x0D30AB72, 0x061C76CC, 0x09F3C018, 0x07055ED0, 0x0A1A9845, 0x0D711697, 0x0D75C336, 0x0888E5C8, 0x0BA85E95, 0x0B658239, 0x03506E1C, 0x0D887E44,
-        0x0483D6DB, 0x0ACA2C3C, 0x0CD4F051, 0x0CF5ADDF, 0x08D927AC, 0x0D61E548, 0x0D860841, 0x0D9F98D8, 0x07798523, 0x0743AB21, 0x0D0A812F, 0x08096A21, 0x08BF9765, 0x0240CB5D,
-        0x0B473EB5, 0x0BD6DB64, 0x0BE008C1, 0x0BCEFDB0, 0x0B5832AD, 0x0BFEE41B, 0x0C5FA5FC, 0x05C0A3AB, 0x018E3066, 0x089275E0, 0x0D9FAB7B, 0x0C4B31D6, 0x0A50EC88, 0x0675D817,
-        0x0C080BB7, 0x02946AEA, 0x009DC11A, 0x0D539ECC, 0x0652306A, 0x03EF8419, 0x01C71674, 0x084EBAB3, 0x0BFDD257, 0x02F82A67, 0x0D4B35D2, 0x0D2F87B9, 0x09549E51, 0x0D629E9C,
-        0x0AF3A2B8, 0x080BF2F7, 0x0A5DA9FC, 0x099E825A, 0x0B161719, 0x06FF828E, 0x02E5C6D7, 0x0BF98D84, 0x0DABD8F8, 0x0DAEDE69, 0x09E14D15, 0x0DB45F9C, 0x09BFE973, 0x09B1BBC0,
-        0x0D64813B, 0x09F8116F, 0x0CE57ABC, 0x0D153AD5, 0x0AC5F5CA, 0x0C10591C, 0x05B1086B, 0x07F5705B, 0x085006CF, 0x0003FB87, 0x0D2341D4, 0x0B7C2834, 0x0DE9BC44, 0x07FB143B,
-        0x0A14CDAF, 0x0C1FF830, 0x0DFA57F9, 0x0C899654, 0x0B8B1D52, 0x0BF93E01, 0x06556A2D, 0x045B7A2F, 0x0E1582DE, 0x0BA1FC77, 0x09F24566, 0x06EA4708, 0x0BFB6F5C, 0x0C821145,
-        0x0DA03FE9, 0x0C0B7D18, 0x0D073944, 0x09927A61, 0x0AFC4BF9, 0x0D44D097, 0x07FBE4BE, 0x0D44D097, 0x000A196C, 0x0541D9C3, 0x0E7EA79A, 0x096D4D22, 0x04B10C32, 0x0E96E4A3,
-        0x0E72C6BA, 0x0E94EE31, 0x0A8C691A, 0x0E08B8A3, 0x0A022CB2, 0x0D3F4FCD, 0x0C9D09DD, 0x0AC24FF0, 0x0E70C31E, 0x0A4368F1, 0x06DCD94E, 0x0506FEF2, 0x075E7B64, 0x0A23C745,
-        0x09D0BD82, 0x04412EEA, 0x09F98CF8, 0x02628018, 0x0E71FD5F, 0x0E4DB6E1, 0x0D3D2FCD, 0x0DD12BC5, 0x02676D18, 0x06B6DB5B, 0x01B69040, 0x026FC41E, 
-        -- Retard/Sexual Abuser
-        0x0CE7F2D8, 0x0CDF893D, 0x0C50A424, 0x0C68262A, 0x0CEA2329, 0x0D040837, 0x0A0A1032, 0x0D069832, 0x0B7CF320
-    }
+    local hex = decimalToHex(rids, 32)
 
-    for idiots as id do
-        if rids == id and players.are_stats_ready(pid) and in_session() then
-            trigger_commands($"historyblock{pname} on")
-            trigger_commands($"loveletter{pname}")
-        end
+    if is_player_in_blacklist(decimalToHex(rids)) then
+        trigger_commands($"historyblock{pname} on")
+        trigger_commands($"loveletter{pname}")
+        wait(1, "s")
     end
 
     menu.divider(cmd, "Lena Utilities")
@@ -3047,6 +3078,11 @@ players.add_command_hook(function(pid, cmd)
     menu.action(lena, "Mark As Modder", {"manual"}, $"Mark {pname} manually as a Modder.", function()
         if not IsDetectionPresent(pid, "Manual") then
             players.add_detection(pid, "Manual", 7, 100)
+        end
+    end)
+    menu.action(lena, "Add to Blacklist", {""}, "", function()
+        if not is_player_in_blacklist(decimalToHex(rids)) then
+            add_player_to_blacklist(decimalToHex(rids))
         end
     end)
 
@@ -3637,6 +3673,7 @@ players.add_command_hook(function(pid, cmd)
         menu.action(kicks, "Block Kick", {"emp", "block"}, $"Will kick and block {pname} from joining you ever again.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
             if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+            add_player_to_blacklist(rids)
 
             wait(500)
             trigger_commands($"historyblock{pname} on")
@@ -3678,6 +3715,7 @@ players.add_command_hook(function(pid, cmd)
         menu.action(crashes, "Block Join Crash", {"gtfo", "netcrash"}, $"Crashes and Blocks {pname} from joining you again.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
             if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
+            add_player_to_blacklist(rids)
 
             trigger_commands($"crash{pname}")
             wait(500)
