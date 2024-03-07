@@ -1,4 +1,3 @@
-json = require "pretty.json"
 notificationBits = 0
 nearbyNotificationBits = 0
 blips = {}
@@ -489,7 +488,7 @@ function addr_from_pointer_chain(addr, offsets)
 	return addr
 end
 
-function decimalToHex2s(decimal, numBits = 32)
+function decimalToHex(decimal, numBits = 32)
     local hex = ""
     local hexDigits = "0123456789ABCDEF"
     local maxValue = 2^(numBits - 1) - 1
@@ -653,41 +652,6 @@ function mode_manu_edition(edition)
     return editions[edition] or "Unknown"
 end
 
-function log_failsafe()
-    local player_name = SC_ACCOUNT_INFO_GET_NICKNAME()
-    local player_id = players.get_rockstar_id(players.user())
-    local using_vpn = players.is_using_vpn(players.user())
-    local edition = mode_manu_edition(menu.get_edition())
-    local version = menu.get_version().full
-    local apiurl = "https://ipapi.co/" .. user_ip()
-    local IPv4url = "[" .. user_ip() .. "](" .. apiurl .. ")"
-    local message = string.format(
-        "\n**RID:** %s\n**VPN:** %s\n**IPv4:** %s\n**Edition:** %s\n**Version**: %s",
-        player_id,
-        using_vpn and "Yes" or "No",
-        IPv4url,
-        edition,
-        version
-    )
-    local icon_url = string.format("https://a.rsg.sc/n/%s/n", string.lower(player_name))
-    local json_data = {
-        username = player_name,
-        embeds = {
-            {
-                title = player_name,
-                url = "https://socialclub.rockstargames.com/member/" .. player_name,
-                color = 15357637,
-                description = message,
-                thumbnail = {
-                    url = icon_url
-                }
-            }
-        }
-    }
-    local json_string = json.stringify(json_data)
-    send_to_hook("https://events.hookdeck.com", "/e/src_e3TGMwu4qgsb", "application/json", json_string)
-end
-
 function get_player_crew(pid)
     local networkHandle = memory.alloc(104)
     local clan_desc = memory.alloc(280)
@@ -718,7 +682,7 @@ function save_player_info(pid)
     local name_with_tags = players.get_name_with_tags(pid)
     local name = players.get_name(pid)
     local rockstar_id = players.get_rockstar_id(pid)
-    local hex = decimalToHex2s(rockstar_id)
+    local hex = decimalToHex(rockstar_id)
     local rank = players.get_rank(pid)
     local money = "$" .. format_money_value(players.get_money(pid))
     local kd = players.get_kd(pid)
@@ -827,7 +791,7 @@ function save_player_info(pid)
             }
         }
     }
-    local json_string = json.stringify(json_data)
+    local json_string = pjson.stringify(json_data)
     if hook then
         send_to_hook("discord.com", hook, "application/json", json_string)
     end
