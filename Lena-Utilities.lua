@@ -249,7 +249,7 @@ if not filesystem.exists(lenaDir .. "Export_Blacklist.json") then
 end
 
 if async_http.have_access() then
-    if is_developer() then
+    if not is_developer() then
         auto_updater.run_auto_update(auto_update_config)
     end
 else
