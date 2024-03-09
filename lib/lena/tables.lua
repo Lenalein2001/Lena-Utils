@@ -339,7 +339,7 @@ Modulepath = {
     },
     vehicle_resupply = {
         name = "Vehicle Resupply",
-        github = "",
+        github = "/Lenalein2001/Lena-Utils-Modules/main/vehicle_resupply.pluto",
         absolute_path = lenaModules.."vehicle_resupply.pluto",
         path = "lena.modules.vehicle_resupply"
     }
