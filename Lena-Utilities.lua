@@ -149,60 +149,70 @@ auto_update_config = {
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/funcs.lua",
             script_relpath="/lib/lena/funcs.lua",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="Natives",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/natives-2944b/init.lua",
             script_relpath="/lib/natives-2944b/init.lua",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="Json",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json.lua",
             script_relpath="/lib/pretty/json.lua",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="Constant",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/constant.lua",
             script_relpath="/lib/pretty/json/constant.lua",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="Parser",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/parser.lua",
             script_relpath="/lib/pretty/json/parser.lua",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="Serializer",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/pretty/json/serializer.lua",
             script_relpath="/lib/pretty/json/serializer.lua",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="ScaleformLib",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/ScaleformLib.lua",
             script_relpath="/lib/ScaleformLib.lua",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="Tables",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/tables.lua",
             script_relpath="/lib/lena/tables.lua",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="Handling",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/downforce_data.json",
             script_relpath="/lib/lena/downforce_data.json",
             check_interval=default_check_interval,
+            silent_updates=true,
         },
         {
             name="Blacklist",
             source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/lib/lena/Export_Blacklist.json",
             script_relpath="/lib/lena/Export_Blacklist.json",
             check_interval=default_check_interval,
+            silent_updates=true,
         }
     }
 }
@@ -239,7 +249,7 @@ if not filesystem.exists(lenaDir .. "Export_Blacklist.json") then
 end
 
 if async_http.have_access() then
-    if not is_developer() then
+    if is_developer() then
         auto_updater.run_auto_update(auto_update_config)
     end
 else
