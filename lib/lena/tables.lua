@@ -336,6 +336,12 @@ Modulepath = {
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/maze_bank.pluto",
         absolute_path = lenaModules.."maze_bank.pluto",
         path = "lena.modules.maze_bank"
+    },
+    vehicle_resupply = {
+        name = "Vehicle Resupply",
+        github = "",
+        absolute_path = lenaModules.."vehicle_resupply.pluto",
+        path = "lena.modules.vehicle_resupply"
     }
 }
 
