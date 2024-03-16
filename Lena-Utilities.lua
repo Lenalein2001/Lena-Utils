@@ -2645,6 +2645,17 @@ end)
     end)
 
     -------------------------------------
+    -- Disable Phone
+    -------------------------------------
+
+    menu.toggle(misc, "User Radio Everywhere", {""}, "", function()
+        for emitterList as i do
+            SET_EMITTER_RADIO_STATION(i, "RADIO_19_USER", true)
+            SET_STATIC_EMITTER_ENABLED(i, true)
+        end
+    end)
+
+    -------------------------------------
     -- Russian Roulette
     -------------------------------------
 
