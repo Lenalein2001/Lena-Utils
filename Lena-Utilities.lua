@@ -16,6 +16,7 @@
     ⠄⠄⠄⠄⠄⠄⠙⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣵⠄⠄⠄⠄⠄⠄⠄⠄⠄
     ⠄⠄⠄⠄⠄⠄⠄⢀⣿⣯⣟⣿⣿⣿⡿⣟⣯⣷⣿⣿⡏⣤⠄⠄⠄⠄⠄⠄⠄⠄
     ⠄⠄⠄⠄⠄⠄⠄⣞⢸⣿⣿⣿⣾⣷⣿⣿⣿⣿⣿⣿⣇⣿⡆⠄⠄⠄⠄⠄⠄⠄
+
 ]]
 
 -------------------------------------
@@ -37,10 +38,11 @@ object_uses = 0
 handle_ptr = memory.alloc(13*8)
 previous_car = nil
 copy_from = nil
+data_e, data_g, Blacklist = {}, {}, {} -- Blacklist
 native_invoker.accept_bools_as_ints(true)
 thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
 thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
-local clearRopes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
+clearRopes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
 
 util.require_natives("3095a", "g")
 
@@ -1593,39 +1595,6 @@ end)
         end)
 
         -------------------------------------
-        -- Group-Based Copy Session Info
-        -------------------------------------
-
-        group_name = menu.text_input(protex, "Group Name", {"groupname"}, "", function(); end, "Admins")
-        group_copy_ref = menu.toggle_loop(protex, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
-            local players = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
-
-            if not players:isValid() then
-                group_copy_ref.value = false
-                return print("Group not Valid!")
-            end
-
-            if copy_from != nil then
-                if copy_from.menu_name:sub(-8) != "[Public]" then
-                    util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling Copy Session Info.")
-                    clearCopySession()
-                end
-            else
-                for players:getChildren() as link do
-                    local ref = link:getPhysical()
-                    --print(ref.menu_name)
-                    if ref.menu_name:sub(-8) == "[Public]" then
-                        util.toast($"{ref.name_for_config} is in a Public Session, copying their Session Info.")
-                        ref:refByRelPath("Copy Session Info").value = true
-                        copy_from = ref
-                    end
-
-                end
-            end
-            wait(500)
-        end, clearCopySession)
-
-        -------------------------------------
         -- Disable Halloween Weather
         -------------------------------------
 
@@ -1859,22 +1828,22 @@ end)
                     if HAS_PED_GOT_WEAPON(ped, 177293209) and HAS_PED_GOT_WEAPON_COMPONENT(ped, 177293209, -1981031769) then
                         if explo_reactions == 1 then
                             REMOVE_WEAPON_FROM_PED(ped, 177293209)
-                            notify("Removed Weapon From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
+                            notify("Removed Weapon From Explo Sniper User\n"..players.get_name(pid))
                             wait(5000)
                         elseif explo_reactions == 2 then
                             REMOVE_WEAPON_COMPONENT_FROM_PED(ped, 177293209, -1981031769)
-                            notify("Removed Attachment From Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
+                            notify("Removed Attachment From Explo Sniper User\n"..players.get_name(pid))
                             wait(5000)
-                        elseif explo_reactions == 3 then
-                            util.draw_debug_text(players.get_name(pid).." is using the Explo Sniper.")
+                        elseif explo_reactions == 2 then
+                            SET_PED_AMMO(ped, 177293209, 0, 0)
+                            notify("Removed Ammo From Explo Sniper User\n"..players.get_name(pid))
+                            wait(5000)
                         elseif explo_reactions == 4 then
                             trigger_commands("explode"..players.get_name(pid))
-                            notify("Killed Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
+                            notify("Killed Explo Sniper User\n"..players.get_name(pid))
                             wait(5000)
                         elseif explo_reactions == 5 then
-                            notify("Kicked Explo Sniper User\n"..players.get_name(pid).." / "..players.get_rockstar_id(pid))
-                            trigger_commands("kick"..players.get_name(pid))
-                            wait(5000)
+                            util.draw_debug_text(players.get_name(pid).." is using the Explo Sniper.")
                         end
                     end
                 end
@@ -1894,9 +1863,37 @@ end)
         end)
 
         -------------------------------------
-        -- Spoof Session
+        -- Group-Based Copy Session Info
         -------------------------------------
 
+        local group_name = menu.text_input(spoofing_opt, "Group Name", {"groupname"}, "", function(); end, "Admins")
+        local group_copy_ref = menu.toggle_loop(spoofing_opt, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
+            local players = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
+
+            if not players:isValid() then
+                group_copy_ref.value = false
+                return print("Group not Valid!")
+            end
+
+            if copy_from != nil then
+                if copy_from.menu_name:sub(-8) != "[Public]" then
+                    util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling Copy Session Info.")
+                    clearCopySession()
+                end
+            else
+                for players:getChildren() as link do
+                    local ref = link:getPhysical()
+                    --print(ref.menu_name)
+                    if ref.menu_name:sub(-8) == "[Public]" then
+                        util.toast($"{ref.name_for_config} is in a Public Session, copying their Session Info.")
+                        ref:refByRelPath("Copy Session Info").value = true
+                        copy_from = ref
+                    end
+
+                end
+            end
+            wait(500)
+        end, clearCopySession)
 
     -------------------------------------
     -- Enhanced Chat
@@ -1957,13 +1954,13 @@ end)
     -- Save Players Information on Kick
     -------------------------------------
 
-    savekicked = menu.toggle(online, "Save Players Information on Kick", {""}, "", function(); end)
+    local savekicked = menu.toggle(online, "Save Players Information on Kick", {""}, "", function(); end)
 
     -------------------------------------
     -- Preview Players
     -------------------------------------
 
-    draw_players = menu.toggle(online, "Preview Players", {""}, "Draw their Ped onto the Screen if focused.", function(); end)
+    local draw_players = menu.toggle(online, "Preview Players", {""}, "Draw their Ped onto the Screen if focused.", function(); end)
 
     -------------------------------------
     -- Whitelist Session
@@ -1991,16 +1988,33 @@ end)
             for players.list(false, true, true) as pid do
                 if players.is_marked_as_attacker(pid) then
                     local pname = players.get_name(pid)
-                    notify($"{pname} has been Kicked for attacking you.")
+                    local rid = players.get_rockstar_id(pid)
 
-                    trigger_commands($"rape {pname}")
-                    wait(30000)
+                    local start_time = os.time()
+                    local confirmed = false
+
+                    while os.time() - start_time < 10 do
+                        util.draw_centered_text("Add " .. pname .. " to blacklist? (y/n)")
+                        if util.is_key_down("Y") then
+                            confirmed = true
+                            break
+                        elseif util.is_key_down("N") then
+                            break
+                        end
+                        wait()
+                    end
+
+                    -- If confirmed, add the player to the blacklist
+                    if confirmed and not is_player_in_blacklist(decimalToHex(rid)) then
+                        notify(pname .. " has been added to the blacklist for attacking you.")
+                        add_player_to_blacklist(decimalToHex(rid))
+                    end
+                    trigger_commands("rape " .. pname)
+                    wait(30, "s")
                 end
             end
         end
     end)
-
-
 
     -------------------------------------
     -- Ghost Session
@@ -2014,25 +2028,9 @@ end)
         end
     end)
 
-    local isPlayerFriendToggle = menu.toggle(host_kick, "Exclude Friends", {"host_kick"}, "Toggle exception for Player Friend", function(); end)
-    local isStandUserToggle = menu.toggle(host_kick, "Exclude Stand Users", {"host_kick"}, "Toggle exception for Stand User", function(); end)
-    local isMarkedAsModderToggle = menu.toggle(host_kick, "Exclude Modders ", {"host_kick"}, "Toggle exception for Marked as Modder", function(); end)
-
-    function isPlayerFriend(pid)
-        if isPlayerFriendToggle.value then
-            return IS_PLAYER_FRIEND(pid)
-        else
-            return false
-        end
-    end
-
-    function isStandUser(pid)
-        return isStandUserToggle.value and is_stand_user(pid)
-    end
-
-    function isMarkedAsModder(pid)
-        return isMarkedAsModderToggle.value and players.is_marked_as_modder(pid)
-    end
+    isPlayerFriendToggle = menu.toggle(host_kick, "Exclude Friends", {"host_kick"}, "Toggle exception for Player Friend", function(); end)
+    isStandUserToggle = menu.toggle(host_kick, "Exclude Stand Users", {"host_kick"}, "Toggle exception for Stand User", function(); end)
+    isMarkedAsModderToggle = menu.toggle(host_kick, "Exclude Modders ", {"host_kick"}, "Toggle exception for Marked as Modder", function(); end)
 
     menu.toggle_loop(host_kick, "Kick Host", {""}, "", function()
         if not in_session() then return end
@@ -2040,7 +2038,7 @@ end)
         local index = players.get_host_queue_position(players.user())
 
         if hostId and index == 1 then
-            if not (isPlayerFriend(hostId) or isStandUser(hostId) or isMarkedAsModder(hostId)) then
+            if not (IS_PLAYER_FRIEND(hostId) or isStandUser(hostId) or isMarkedAsModder(hostId)) then
                 trigger_commands($"kick {players.get_name(hostId)}")
                 wait(1, "m")
             end
@@ -2790,6 +2788,7 @@ if is_developer() then
     local modified_vehicle = menu.readonly(sdebug, "Current Vehicle: ", "N/A")
     menu.toggle_loop(sdebug, "Better Vehicles", {"bv"}, "", function()
         if entities.get_user_vehicle_as_pointer(false) != 0 then
+            wait(20)
             local vmodel = players.get_vehicle_model(players.user())
             local vname = util.get_label_text(vmodel)
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
@@ -2810,13 +2809,10 @@ if is_developer() then
                     trigger_commands("fovfpinveh 90; gravitymult 2; fovtpinveh 100")
                     notify($"Better Planes have been enabled for {vname}.")
                 elseif IS_THIS_MODEL_A_HELI(vmodel) and not util.is_this_model_a_blimp(vmodel) then
-                    for better_heli_offsets as offset do
-                        if math.floor(memory.read_float(CflyingHandling + offset)) != 0 then
+                    if math.ceil(memory.read_float(CflyingHandling + 0x8) * 100) != menu.ref_by_command_name("helithrust").value then
+                        for better_heli_offsets as offset do
                             memory.write_float(CflyingHandling + offset, 0)
                         end
-                    end
-
-                    if memory.read_float(CflyingHandling + 0x8) != menu.ref_by_command_name("helithrust").value then
                         trigger_commands("gravitymult 1; helithrust 2.3")
                         notify($"Better Helis have been enabled for {vname}.")
                     end
@@ -3015,60 +3011,6 @@ if is_developer() then
             end
         end)
 --  end
-end
-
-local data_e, data_g, Blacklist = {}, {}, {}
-local function save_data_e()
-    local file = io.open(libDir .. "Export_Blacklist.json", 'w+')
-    if file then file:write(json.encode(data_e, true)); io.close(file) end
-end
-local function load_data_e()
-    local file = io.open(libDir .. "Export_Blacklist.json", 'r')
-    if file then
-        local contents = file:read('*all')
-        io.close(file)
-        data_e = json.decode(contents) or {}
-        if next(data_e) and data_e[1].Name then
-            data_e = {}
-            for _, player in pairs(contents) do table.insert(data_e, player.Id) end
-            save_data_e()
-        end
-    else
-        local new_file = io.open(libDir .. "Export_Blacklist.json", "w")
-        if new_file then new_file:write("[]"); io.close(new_file); data_e = {} end
-    end
-end
-local function load_data_g()
-    local file = io.open(libDir .. 'Blacklist.json', 'r')
-    if file then data_g = json.decode(file:read('*all')) or {}; io.close(file) end
-end
-load_data_e()
-load_data_g()
-local function loadBlacklist()
-    local function append_to_blacklist(data)
-        local currentLine = {}
-        for _, id in ipairs(data) do
-            table.insert(currentLine, id)
-            if #currentLine == 5 then Blacklist[#Blacklist + 1] = currentLine; currentLine = {} end
-        end
-        if #currentLine > 0 then Blacklist[#Blacklist + 1] = currentLine end
-    end
-    append_to_blacklist(data_g)
-    append_to_blacklist(data_e)
-end
-loadBlacklist()
-local function add_player_to_blacklist(rid)
-    if pid ~= players.user() then
-        local id = tostring(rid)
-        table.insert(data_e, id)
-        Blacklist[#Blacklist + 1] = {id}
-        save_data_e()
-    end
-end
-local function is_player_in_blacklist(rid)
-    local id = tostring(rid)
-    for _, line in ipairs(Blacklist) do if table.contains(line, id) then return true end end
-    return false
 end
 
 --------------------------------------------------------------------------------

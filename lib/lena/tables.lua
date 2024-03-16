@@ -3,9 +3,9 @@ flare_veh = {788747387, -82626025, 1181327175, -1281684762}
 anti_explo_sniper = {
     {1, "Remove Weapon"},
     {2, "Remove Component"},
-    {3, "Notify"},
+    {3, "Remove Ammo"},
     {4, "Kill"},
-    {5, "Kick"}
+    {5, "Notify"}
 }
 interior_stuff = {0, 233985, 169473, 169729, 169985, 170241, 177665, 177409, 185089, 184833, 184577, 163585, 167425, 167169}
 launch_vehicle = {"Launch Up", "Launch Forward", "Launch Backwards", "Launch Down", "Slingshot"}

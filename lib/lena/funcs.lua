@@ -304,6 +304,23 @@ function IS_PLAYER_FRIEND(pid)
     if NETWORK_IS_FRIEND(pid_to_handle(pid)) then return true else return false end
 end
 
+
+function isPlayerFriend(pid)
+    if isPlayerFriendToggle.value then
+        return IS_PLAYER_FRIEND(pid)
+    else
+        return false
+    end
+end
+
+function isStandUser(pid)
+    return isStandUserToggle.value and is_stand_user(pid)
+end
+
+function isMarkedAsModder(pid)
+    return isMarkedAsModderToggle.value and players.is_marked_as_modder(pid)
+end
+
 function IsDetectionPresent(pid, detection)
 	if players.exists(pid) and menu.player_root(pid):isValid() then
 		for menu.player_root(pid):getChildren() as cmd do
@@ -1193,4 +1210,57 @@ function isNetPlayerOk(pid, assert_playing = false, assert_done_transition = tru
 	end
 
 	return true
+end
+
+function save_data_e()
+    local file = io.open(libDir .. "Export_Blacklist.json", 'w+')
+    if file then file:write(json.encode(data_e, true)); io.close(file) end
+end
+function load_data_e()
+    local file = io.open(libDir .. "Export_Blacklist.json", 'r')
+    if file then
+        local contents = file:read('*all')
+        io.close(file)
+        data_e = json.decode(contents) or {}
+        if next(data_e) and data_e[1].Name then
+            data_e = {}
+            for _, player in pairs(contents) do table.insert(data_e, player.Id) end
+            save_data_e()
+        end
+    else
+        local new_file = io.open(libDir .. "Export_Blacklist.json", "w")
+        if new_file then new_file:write("[]"); io.close(new_file); data_e = {} end
+    end
+end
+local function load_data_g()
+    local file = io.open(libDir .. 'Blacklist.json', 'r')
+    if file then data_g = json.decode(file:read('*all')) or {}; io.close(file) end
+end
+load_data_e()
+load_data_g()
+function loadBlacklist()
+    local function append_to_blacklist(data)
+        local currentLine = {}
+        for _, id in ipairs(data) do
+            table.insert(currentLine, id)
+            if #currentLine == 5 then Blacklist[#Blacklist + 1] = currentLine; currentLine = {} end
+        end
+        if #currentLine > 0 then Blacklist[#Blacklist + 1] = currentLine end
+    end
+    append_to_blacklist(data_g)
+    append_to_blacklist(data_e)
+end
+loadBlacklist()
+function add_player_to_blacklist(rid)
+    if pid ~= players.user() then
+        local id = tostring(rid)
+        table.insert(data_e, id)
+        Blacklist[#Blacklist + 1] = {id}
+        save_data_e()
+    end
+end
+function is_player_in_blacklist(rid)
+    local id = tostring(rid)
+    for _, line in ipairs(Blacklist) do if table.contains(line, id) then return true end end
+    return false
 end
