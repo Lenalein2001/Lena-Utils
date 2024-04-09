@@ -262,36 +262,6 @@ if not SCRIPT_SILENT_START then
     notify($"Hi, {SC_ACCOUNT_INFO_GET_NICKNAME()}. <3")
 end
 
-util.create_thread(function()
-    local projectile_blips = {}
-    while true do
-        for k,b in projectile_blips do
-            if GET_BLIP_INFO_ID_ENTITY_INDEX(b) == 0 then
-                util.remove_blip(b)
-                projectile_blips[k] = nil
-            end
-        end
-        if object_uses > 0 then
-            all_objects = entities.get_all_objects_as_pointers()
-            for k, obj_ptr in all_objects do
-                local obj_model = entities.get_model_hash(obj_ptr)
-                if is_entity_a_projectile(obj_model) then
-                    if blip_projectiles then
-                        local obj_hdl = entities.pointer_to_handle(obj_ptr)
-                        if GET_BLIP_FROM_ENTITY(obj_hdl) == 0 then
-                            local proj_blip = ADD_BLIP_FOR_ENTITY(obj_hdl)
-                            SET_BLIP_SPRITE(proj_blip, 443)
-                            SET_BLIP_COLOUR(proj_blip, 75)
-                            projectile_blips[#projectile_blips + 1] = proj_blip 
-                        end
-                    end
-                end
-            end
-        end
-        wait()
-    end
-end)
-
 -------------------------------------
 -------------------------------------
 -- Self
@@ -1130,7 +1100,7 @@ end)
                 end
             end
         end)
-        
+
     -------------------------------------
     -- Detections
     -------------------------------------
@@ -1138,11 +1108,27 @@ end)
         -------------------------------------
         -- Detect Rockets
         -------------------------------------
-
-        blip_projectiles = false
-        menu.toggle(detections, "Detect Rockets", {""}, "Detects incoming Rockets and Mines.", function(on)
-            blip_projectiles = on
-            mod_uses("object", if on then 1 else -1)
+        local projectile_blips = {}
+        menu.toggle_loop(detections, "Detect Rockets", {""}, "Detects incoming Rockets and Mines.", function(on)
+            for k, b in projectile_blips do
+                if GET_BLIP_INFO_ID_ENTITY_INDEX(b) == 0 then
+                    util.remove_blip(b)
+                    projectile_blips[k] = nil
+                end
+            end
+            for k, obj_ptr in entities.get_all_objects_as_pointers() do
+                local obj_model = entities.get_model_hash(obj_ptr)
+                if is_entity_a_projectile(obj_model) then
+                    local obj_hdl = entities.pointer_to_handle(obj_ptr)
+                    if GET_BLIP_FROM_ENTITY(obj_hdl) == 0 then
+                        local proj_blip = ADD_BLIP_FOR_ENTITY(obj_hdl)
+                        SET_BLIP_SPRITE(proj_blip, 443)
+                        SET_BLIP_COLOUR(proj_blip, 75)
+                        projectile_blips[#projectile_blips + 1] = proj_blip
+                    end
+                end
+            end
+            wait()
         end)
 
         -------------------------------------
@@ -1993,7 +1979,7 @@ end)
                     local start_time = os.time()
                     local confirmed = false
 
-                    while os.time() - start_time < 10 do
+                    while os.time() - start_time < 15 do
                         util.draw_centered_text("Add " .. pname .. " to blacklist? (y/n)")
                         if util.is_key_down("Y") then
                             confirmed = true
@@ -2005,9 +1991,9 @@ end)
                     end
 
                     -- If confirmed, add the player to the blacklist
-                    if confirmed and not is_player_in_blacklist(decimalToHex(rid)) then
+                    if confirmed and not is_player_in_blacklist(rid) then
                         notify(pname .. " has been added to the blacklist for attacking you.")
-                        add_player_to_blacklist(decimalToHex(rid))
+                        add_player_to_blacklist(rid)
                     end
                     trigger_commands("rape " .. pname)
                     wait(30, "s")
@@ -2809,12 +2795,15 @@ if is_developer() then
                     trigger_commands("fovfpinveh 90; gravitymult 2; fovtpinveh 100")
                     notify($"Better Planes have been enabled for {vname}.")
                 elseif IS_THIS_MODEL_A_HELI(vmodel) and not util.is_this_model_a_blimp(vmodel) then
-                    if math.ceil(memory.read_float(CflyingHandling + 0x8) * 100) != menu.ref_by_command_name("helithrust").value then
+                    if modified_vehicle.value != vname then
                         for better_heli_offsets as offset do
                             memory.write_float(CflyingHandling + offset, 0)
+                            wait()
                         end
-                        trigger_commands("gravitymult 1; helithrust 2.3")
                         notify($"Better Helis have been enabled for {vname}.")
+                    end
+                    if (math.ceil(memory.read_float(CflyingHandling + 0x8) * 100) != menu.ref_by_command_name("helithrust").value) then
+                        trigger_commands("gravitymult 1; helithrust 2.3")
                     end
                 elseif menu.get_value(modified_vehicle, vname) != vname then
                     trigger_commands("gravitymult 1; fovfpinveh -5; fovtpinveh -5")
@@ -3022,7 +3011,7 @@ players.add_command_hook(function(pid, cmd)
     local rids = players.get_rockstar_id(pid)
     local hex = decimalToHex(rids, 32)
 
-    if is_player_in_blacklist(decimalToHex(rids)) then
+    if is_player_in_blacklist(rids) then
         trigger_commands($"historyblock{pname} on")
         trigger_commands($"loveletter{pname}")
         wait(1, "s")
@@ -3050,8 +3039,8 @@ players.add_command_hook(function(pid, cmd)
         end
     end)
     menu.action(lena, "Add to Blacklist", {""}, "", function()
-        if not is_player_in_blacklist(decimalToHex(rids)) then
-            add_player_to_blacklist(decimalToHex(rids))
+        if not is_player_in_blacklist(rids) then
+            add_player_to_blacklist(rids, pname)
         end
     end)
 
