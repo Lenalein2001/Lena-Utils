@@ -381,18 +381,6 @@ function is_stand_user(pid)
     end
 end
 
-function mod_uses(type, incr)
-    if incr < 0 and is_loading then
-        return
-    end
-    if type == "object" then
-        if object_uses <= 0 and incr < 0 then
-            return
-        end
-        object_uses = object_uses + incr
-    end
-end
-
 -- Stats
 function GET_INT_LOCAL(Script, Local)
     if memory.script_local(Script, Local) != 0 then
@@ -1212,55 +1200,71 @@ function isNetPlayerOk(pid, assert_playing = false, assert_done_transition = tru
 	return true
 end
 
-function save_data_e()
-    local file = io.open(libDir .. "Export_Blacklist.json", 'w+')
-    if file then file:write(json.encode(data_e, true)); io.close(file) end
+local EXPORT_BLACKLIST_FILE = libDir .. "Export_Blacklist.json"
+local BLACKLIST_FILE = libDir .. "Blacklist.json"
+
+-- Function to save data to a file
+function save_data(data, filename)
+  local file = io.open(filename, "w+")
+  if file then
+    local encodedData = json.encode(data, true)
+    file:write(encodedData)
+    io.close(file)
+  end
 end
-function load_data_e()
-    local file = io.open(libDir .. "Export_Blacklist.json", 'r')
-    if file then
-        local contents = file:read('*all')
-        io.close(file)
-        data_e = json.decode(contents) or {}
-        if next(data_e) and data_e[1].Name then
-            data_e = {}
-            for _, player in pairs(contents) do table.insert(data_e, player.Id) end
-            save_data_e()
-        end
-    else
-        local new_file = io.open(libDir .. "Export_Blacklist.json", "w")
-        if new_file then new_file:write("[]"); io.close(new_file); data_e = {} end
+
+-- Function to load data from a file
+function load_data(filename)
+  local data = {}
+  local file = io.open(filename, "r")
+  if file then
+    local contents = file:read("*all")
+    io.close(file)
+    data = json.decode(contents) or {}
+  end
+  return data
+end
+
+-- Load data from both blacklist files
+local data_e = load_data(EXPORT_BLACKLIST_FILE)
+local data_g = load_data(BLACKLIST_FILE)
+
+-- Single function for player data management (combined functionality)
+local function manage_player_data(rid, playerName, action)
+  local id = tostring(rid)
+  if action == "add" then
+    -- Add to both data tables
+    table.insert(data_e, {id = id, name = playerName})
+    table.sort(data_e, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
+    save_data(data_e, EXPORT_BLACKLIST_FILE)
+
+    table.insert(data_g, {id = id, name = playerName})
+    table.sort(data_g, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
+    save_data(data_g, BLACKLIST_FILE)
+  elseif action == "check" then
+    -- Check both data tables
+    for _, player in ipairs(data_e) do
+      if player.id == id then
+        return player
+      end
     end
-end
-local function load_data_g()
-    local file = io.open(libDir .. 'Blacklist.json', 'r')
-    if file then data_g = json.decode(file:read('*all')) or {}; io.close(file) end
-end
-load_data_e()
-load_data_g()
-function loadBlacklist()
-    local function append_to_blacklist(data)
-        local currentLine = {}
-        for _, id in ipairs(data) do
-            table.insert(currentLine, id)
-            if #currentLine == 5 then Blacklist[#Blacklist + 1] = currentLine; currentLine = {} end
-        end
-        if #currentLine > 0 then Blacklist[#Blacklist + 1] = currentLine end
+    for _, player in ipairs(data_g) do
+      if player.id == id then
+        return player
+      end
     end
-    append_to_blacklist(data_g)
-    append_to_blacklist(data_e)
+    return nil
+  end
 end
-loadBlacklist()
-function add_player_to_blacklist(rid)
-    if pid ~= players.user() then
-        local id = tostring(rid)
-        table.insert(data_e, id)
-        Blacklist[#Blacklist + 1] = {id}
-        save_data_e()
-    end
+
+-- Blacklist table is no longer needed, use manage_player_data directly
+
+-- Add player to blacklist with name
+function add_player_to_blacklist(rid, playerName)
+  manage_player_data(rid, playerName, "add")
 end
+
+-- Check if player is in blacklist and return their data (if found)
 function is_player_in_blacklist(rid)
-    local id = tostring(rid)
-    for _, line in ipairs(Blacklist) do if table.contains(line, id) then return true end end
-    return false
+  return manage_player_data(rid, nil, "check")
 end
