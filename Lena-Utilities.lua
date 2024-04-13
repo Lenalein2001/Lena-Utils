@@ -26,7 +26,6 @@
 scriptname = "Lena-Utilities"
 log = util.log
 notify = util.toast
---wait = util.yield
 trigger_commands = menu.trigger_commands
 trigger_command = menu.trigger_command
 sendse = util.trigger_script_event
@@ -38,7 +37,7 @@ object_uses = 0
 handle_ptr = memory.alloc(13*8)
 previous_car = nil
 copy_from = nil
-data_e, data_g, Blacklist = {}, {}, {} -- Blacklist
+data_e, data_l, Blacklist = {}, {}, {} -- Blacklist
 native_invoker.accept_bools_as_ints(true)
 thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
 thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
@@ -89,6 +88,7 @@ local session_veh = menu.list(mpsession, "Session Vehicles", {"sessionvehicles"}
 
 local detects_protex = menu.list(online, "Protections", {""}, "")
 local protex = menu.list(detects_protex, "Events", {""}, "")
+retards = menu.list(protex, "Blacklist", {""}, "Contains all blacklisted Players. ")
 local anti_orb = menu.list(protex, "Anti Orb", {""}, "Protections against the Orbital Cannon.")
 local detections = menu.list(detects_protex, "Detections", {""}, "")
 
@@ -231,6 +231,7 @@ local funcs = util.require_no_lag("lena.funcs")
 local tables = util.require_no_lag("lena.tables")
 json = require("json")
 pjson = require("pretty.json")
+plutoURL = require("pluto:url")
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
@@ -549,16 +550,6 @@ end
             if menu.get_value(vehicle_gun_perf) then tune_vehicle(v, true, false) end
         end
     end)
-
-    --local moneyimpactCords = v3() -- hehe
-    --menu.toggle_loop(menu.my_root(), "Spawn Money at Bullet Impact", {""}, "", function()
-    --    if GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(moneyimpactCords)) then
-    --        local cash = joaat("prop_cash_pile_01")
-    --        REQUEST_MODEL(cash)
-    --        util.request_model(cash, 50)
-    --        CREATE_AMBIENT_PICKUP(1704231442, moneyimpactCords.x, moneyimpactCords.y, moneyimpactCords.z+ 1, 0, 1000, cash, false, true)
-    --    end
-    --end)
 
 -------------------------------------
 -------------------------------------
@@ -1979,7 +1970,7 @@ end
                     local start_time = os.time()
                     local confirmed = false
 
-                    while os.time() - start_time < 15 do
+                    while os.time() - start_time < 30 do
                         util.draw_centered_text("Add " .. pname .. " to blacklist? (y/n)")
                         if util.is_key_down("Y") then
                             confirmed = true
@@ -1993,7 +1984,7 @@ end
                     -- If confirmed, add the player to the blacklist
                     if confirmed and not is_player_in_blacklist(rid) then
                         notify(pname .. " has been added to the blacklist for attacking you.")
-                        add_player_to_blacklist(rid)
+                        add_player_to_blacklist(rid, pname, "Attacker")
                     end
                     trigger_commands("rape " .. pname)
                     wait(30, "s")
@@ -3012,9 +3003,11 @@ players.add_command_hook(function(pid, cmd)
     local hex = decimalToHex(rids, 32)
 
     if is_player_in_blacklist(rids) then
+        local player = get_blacklist_reason(rids) or "No Reason given"
+        notify($"{pname} will be kicked due to being on the Blacklist. Reason: {player}.")
+        wait(1, "s")
         trigger_commands($"historyblock{pname} on")
         trigger_commands($"loveletter{pname}")
-        wait(1, "s")
     end
 
     menu.divider(cmd, "Lena Utilities")
@@ -3040,7 +3033,12 @@ players.add_command_hook(function(pid, cmd)
     end)
     menu.action(lena, "Add to Blacklist", {""}, "", function()
         if not is_player_in_blacklist(rids) then
-            add_player_to_blacklist(rids, pname)
+            local i = ""
+            for getDetections(pid) as detection do
+                i ..= detection .. ", "
+            end
+            add_player_to_blacklist(rids, pname, i)
+            notify($"Added {pname} to the Blacklist.")
         end
     end)
 
@@ -3631,7 +3629,7 @@ players.add_command_hook(function(pid, cmd)
         menu.action(kicks, "Block Kick", {"emp", "block"}, $"Will kick and block {pname} from joining you ever again.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
             if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-            add_player_to_blacklist(rids)
+            add_player_to_blacklist(rids, pname)
 
             wait(500)
             trigger_commands($"historyblock{pname} on")
@@ -3673,7 +3671,7 @@ players.add_command_hook(function(pid, cmd)
         menu.action(crashes, "Block Join Crash", {"gtfo", "netcrash"}, $"Crashes and Blocks {pname} from joining you again.", function()
             if pid == players.user() then notify(lang.get_localised(-1974706693)) return end
             if menu.get_value(savekicked) then trigger_commands($"savep {pname}") end
-            add_player_to_blacklist(rids)
+            add_player_to_blacklist(rids, pname)
 
             trigger_commands($"crash{pname}")
             wait(500)

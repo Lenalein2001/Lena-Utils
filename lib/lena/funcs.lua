@@ -19,7 +19,6 @@ function wait(duration, unit)
     util.yield(milliseconds)
 end
 
-
 function gen_fren_funcs(name)
     local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)
     menu.divider(friend_player_function, name)
@@ -1175,7 +1174,6 @@ function handleAdvertisement(p, name)
 
         if (table.contains(advertisedPlayers, rid) == nil) then
             trigger_commands($"loveletterkick {n}")
-            trigger_commands($"historyblock {n} true")
             trigger_commands($"historynote {n} Advertiser")
             table.insert(advertisedPlayers, rid)
             print($"{n} ({rid}) has been detected Advertising. Blocking Player now.")
@@ -1205,66 +1203,116 @@ local BLACKLIST_FILE = libDir .. "Blacklist.json"
 
 -- Function to save data to a file
 function save_data(data, filename)
-  local file = io.open(filename, "w+")
-  if file then
-    local encodedData = json.encode(data, true)
-    file:write(encodedData)
-    io.close(file)
-  end
+    local file = io.open(filename, "w+")
+    if file then
+        local encodedData = json.encode(data, true)
+        file:write(encodedData)
+        io.close(file)
+    end
 end
 
 -- Function to load data from a file
 function load_data(filename)
-  local data = {}
-  local file = io.open(filename, "r")
-  if file then
-    local contents = file:read("*all")
-    io.close(file)
-    data = json.decode(contents) or {}
-  end
-  return data
+    local data = {}
+    local file = io.open(filename, "r")
+    if file then
+        local contents = file:read("*all")
+        io.close(file)
+        data = json.decode(contents) or {}
+    end
+    return data
 end
 
 -- Load data from both blacklist files
 local data_e = load_data(EXPORT_BLACKLIST_FILE)
-local data_g = load_data(BLACKLIST_FILE)
+local data_l = load_data(BLACKLIST_FILE)
 
 -- Single function for player data management (combined functionality)
-local function manage_player_data(rid, playerName, action)
-  local id = tostring(rid)
-  if action == "add" then
-    -- Add to both data tables
-    table.insert(data_e, {id = id, name = playerName})
-    table.sort(data_e, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
-    save_data(data_e, EXPORT_BLACKLIST_FILE)
+local function manage_player_data(rid, playerName, action, reason = "")
+    local id = tostring(rid)
+    if action == "add" then
+        -- Check for existing player by RID in both data sets
+        local foundPlayer = nil
+        for _, player in ipairs(data_e) do
+            if player.id == id then
+                foundPlayer = player
+                break
+            end
+        end
+        if not foundPlayer then
+            for _, player in ipairs(data_l) do
+                if player.id == id then
+                    foundPlayer = player
+                    break
+                end
+            end
+        end
 
-    table.insert(data_g, {id = id, name = playerName})
-    table.sort(data_g, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
-    save_data(data_g, BLACKLIST_FILE)
-  elseif action == "check" then
-    -- Check both data tables
-    for _, player in ipairs(data_e) do
-      if player.id == id then
-        return player
-      end
+        if not foundPlayer then
+            -- Player not found, add it
+            table.insert(data_e, {id = id, name = playerName, reason = reason, added_on = os.time()})
+            table.sort(data_e, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
+            save_data(data_e, EXPORT_BLACKLIST_FILE)
+
+            table.insert(data_l, {id = id, name = playerName, reason = reason, added_on = os.time()})
+            table.sort(data_l, function(a, b) return a.name < b.name end) -- Sort by player name (LOCAL)
+            save_data(data_l, BLACKLIST_FILE)
+        else
+            -- Player already exists, print message (optional)
+            print("Player with RID", id, "already exists in blacklist!")
+        end
+    elseif action == "check" then
+        for _, player in ipairs(data_e) do
+            if player.id == id then
+                return player
+            end
+        end
+        for _, player in ipairs(data_l) do
+            if player.id == id then
+                return player
+            end
+        end
+        return nil
     end
-    for _, player in ipairs(data_g) do
-      if player.id == id then
-        return player
-      end
-    end
-    return nil
-  end
 end
 
--- Blacklist table is no longer needed, use manage_player_data directly
-
 -- Add player to blacklist with name
-function add_player_to_blacklist(rid, playerName)
-  manage_player_data(rid, playerName, "add")
+function add_player_to_blacklist(rid, playerName, reason)
+    manage_player_data(rid, playerName, "add", reason)
 end
 
 -- Check if player is in blacklist and return their data (if found)
 function is_player_in_blacklist(rid)
-  return manage_player_data(rid, nil, "check")
+    return manage_player_data(rid, nil, "check")
+end
+function get_blacklist_reason(rid)
+    local id = tostring(rid)
+    for _, player in ipairs(data_e) do
+        if player.id == id then
+            return player.reason
+        end
+    end
+    for _, player in ipairs(data_l) do
+        if player.id == id then
+            return player.reason
+        end
+    end
+    return "No reason given."
+end
+
+local retards_div = menu.divider(retards, "Blacklist")
+local bl_counter = 0
+for _, players in ipairs(data_e) do
+    bl_counter = bl_counter + 1
+    local c = menu.list(retards, players.name, {""}, "")
+    local reason = players.reason
+    if reason == nil or reason == "" then
+        reason = "No Reason provided."
+    end
+    menu.readonly(c, "Name", players.name)
+    menu.readonly(c, "RID", players.id)
+    menu.readonly(c, "Reason", reason)
+    local added_on_formatted = os.date("%c", players.added_on)
+    menu.readonly(c, "Added On", added_on_formatted) 
+    menu.set_menu_name(retards_div, $"Blacklist ({bl_counter})")
 end

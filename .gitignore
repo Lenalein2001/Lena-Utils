@@ -4,3 +4,4 @@
 *.log
 *.gsl
 *\modules
+lib/lena/Export_Blacklist1.json
