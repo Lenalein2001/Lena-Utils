@@ -224,15 +224,15 @@ auto_update_config = {
 -- Required Files
 -------------------------------------
 
+json = require("json")
+pjson = require("pretty.json")
+plutoURL = require("pluto:url")
 lenaDir = filesystem.scripts_dir().."Lena\\"
 libDir = filesystem.scripts_dir().."lib\\lena\\"
 lenaModules = filesystem.scripts_dir().."lib\\lena\\modules\\"
 local scaleForm = require("ScaleformLib")
 local funcs = util.require_no_lag("lena.funcs")
 local tables = util.require_no_lag("lena.tables")
-json = require("json")
-pjson = require("pretty.json")
-plutoURL = require("pluto:url")
 
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
@@ -1276,6 +1276,12 @@ end
                         elseif plate_text == "  FATE  " then
                             if not IsDetectionPresent(pid, "Fate User") then
                                 players.add_detection(pid, "Fate User", 7)
+                            end
+                        end
+
+                        if tonumber(players.get_host_token(pid)) == 41 then
+                            if not IsDetectionPresent(pid, "YimMenu User") then
+                                players.add_detection(pid, "YimMenu User", 7)
                             end
                         end
 
@@ -2808,14 +2814,6 @@ if is_developer() then
     end)
 
     -------------------------------------
-    -- Enhanced Downforce
-    -------------------------------------
-
-    menu.toggle_loop(sdebug, "Enhanced Downforce", {""}, "", function()
-        enhanceDownforce()
-    end)
-
-    -------------------------------------
     -- Increase Weapon Range
     -------------------------------------
 
@@ -2971,26 +2969,6 @@ if is_developer() then
             local plate_texts = {"VEROSA", "LOVE", "LOVE YOU", "TOCUTE4U", "TOFAST4U", "LENA", "LENALEIN", "HENTAI", "FNIX", "SEXY", "CUWUTE", " ", "2TAKE1", "WHORE"}
             SET_VEHICLE_NUMBER_PLATE_TEXT(user_vehicle, plate_texts[math.random(#plate_texts)])
         end)
-
-        -------------------------------------
-        -- ENTITY
-        -------------------------------------
-
-        menu.action(nativeentity, "Clone Player", {""}, "Clones the Player ", function()
-            local whore = CLONE_PED(players.user_ped(), true, true, true)
-            local cords = GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), -5.0, 0.0, 0.0)
-            SET_ENTITY_COORDS(whore, cords)
-            -- FREEZE_ENTITY_POSITION(whore, true)
-            -- TASK_START_SCENARIO_IN_PLACE(whore, "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", 0, false) -- Shrugs
-        end)
-        menu.toggle_loop(nativeentity, "Get Entity", {""}, "", function()
-            if IS_PLAYER_FREE_AIMING(players.user()) then
-                local e = _GET_LAST_ENTITY_HIT_BY_ENTITY(players.user_ped())
-                if e != (0 or nil or "") then
-                    print(e)
-                end
-            end
-        end)
 --  end
 end
 
@@ -3002,14 +2980,6 @@ players.add_command_hook(function(pid, cmd)
     local pname = players.get_name(pid)
     local rids = players.get_rockstar_id(pid)
     local hex = decimalToHex(rids, 32)
-
-    if is_player_in_blacklist(rids) then
-        local player = get_blacklist_reason(rids) or "No Reason given"
-        notify($"{pname} will be kicked due to being on the Blacklist. Reason: {player}.")
-        wait(1, "s")
-        trigger_commands($"historyblock{pname} on")
-        trigger_commands($"loveletter{pname}")
-    end
 
     menu.divider(cmd, "Lena Utilities")
     local lena = menu.list(cmd, "Lena Utilities", {"lenau"}, "")
@@ -3058,20 +3028,10 @@ players.add_command_hook(function(pid, cmd)
         end)
 
         -------------------------------------
-        -- Summon
-        -------------------------------------        
-
-        menu.action(friendly, "TP to Me", {"tptome"}, "Improved \"summon\" Command", function()
-            trigger_commands($"givesh{pname}")
-            wait(100)
-            trigger_commands($"summon{pname}")
-        end)
-
-        -------------------------------------
         -- Invite to CEO/MC
         -------------------------------------
 
-        menu.action(friendly, "Invite to CEO/MC", {"ceoinv"}, "Invites the Player to your CEO/", function()
+        menu.action(friendly, "Invite to CEO/MC", {"ceoinv"}, "Invites the Player to your CEO/MC.", function()
             sendse(1 << pid, {
                 -245642440, -- am_pi_menu.c
                 players.user(),
@@ -3087,7 +3047,7 @@ players.add_command_hook(function(pid, cmd)
         -- Fix Blackscreen
         -------------------------------------         
 
-        menu.action(friendly, "Fix Blackscreen", {"fixblackscreen"}, $"Tries to fix a stuck Blackscreen for {pname}", function()
+        menu.action(friendly, "Fix Blackscreen", {"fixblackscreen"}, $"Tries to fix a stuck Blackscreen for {pname}.", function()
             trigger_commands($"givesh {pname}; aptme {pname}")
         end)
 
@@ -3209,7 +3169,7 @@ players.add_command_hook(function(pid, cmd)
         -- Repair Vehicle
         -------------------------------------
 
-        menu.action(mpvehicle, "Repair Vehicle", {"rpv"}, "Repais the current ", function()
+        menu.action(mpvehicle, "Repair Vehicle", {"rpv"}, "Repais the current Vehicle.", function()
             local veh = get_vehicle_ped_is_in(pid)
             if veh and request_control(veh, true) then
                 SET_VEHICLE_FIXED(veh)
@@ -3222,7 +3182,7 @@ players.add_command_hook(function(pid, cmd)
         -- Clean Vehicle
         -------------------------------------
 
-        menu.action(mpvehicle, "Clean Vehicle", {"cleanv"}, "Cleans the current ", function()
+        menu.action(mpvehicle, "Clean Vehicle", {"cleanv"}, "Cleans the current Vehicle.", function()
             local veh = get_vehicle_ped_is_in(pid)
             if veh and request_control(veh, true) then
                 SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
@@ -3265,8 +3225,8 @@ players.add_command_hook(function(pid, cmd)
             local speed = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Speed")
             local veh = menu.ref_by_rel_path(menu.player_root(pid), "Trolling>Ram>Vehicle>Military>TM-02 Khanjali")
             trigger_command(veh); speed.value = 200
-            usinghurricane = toggled
-            while usinghurricane and not IS_PLAYER_DEAD(pid) do
+            local usinghurricane = toggled
+            while usinghurricane and IS_PLAYER_PLAYING(pid) do
                 trigger_command(ram)
                 wait(100)
             end
@@ -3281,30 +3241,6 @@ players.add_command_hook(function(pid, cmd)
         -------------------------------------
         -- Cage
         -------------------------------------
-
-            -------------------------------------
-            -- AUTOMATIC
-            -------------------------------------
-
-            local cagePos
-            auto_cage = menu.toggle_loop(mpcage, "Automatic Cage", {"autocage"}, "Automatically Cages the ", function()
-                if not players.exists(pid) then
-                    util.stop_thread()
-                    auto_cage.value = false
-                    return
-                end
-                local targetPed = GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                local playerPos = GET_ENTITY_COORDS(targetPed, false)
-                if not cagePos or cagePos:distance(playerPos) >= 4.0 then
-                    CLEAR_PED_TASKS_IMMEDIATELY(targetPed)
-                    if IS_PED_IN_ANY_VEHICLE(targetPed, false) then return end
-                    cagePos = playerPos
-                    if pname != "**Invalid**" then
-                        notify($"{pname} was out of the cage!")
-                        trapcage(pid, "prop_gold_cont_01", true)
-                    end
-                end
-            end)
 
             -------------------------------------
             -- Small Cage
@@ -3331,7 +3267,7 @@ players.add_command_hook(function(pid, cmd)
             -------------------------------------
 
             local elevatorPOS
-            elevator_cage = menu.toggle_loop(mpcage, "Invisible Cage", {""}, "", function()
+            local elevator_cage = menu.toggle_loop(mpcage, "Invisible Cage", {""}, "", function()
                 if not players.exists(pid) then
                     util.stop_thread()
                     elevator_cage.value = false
@@ -3387,10 +3323,6 @@ players.add_command_hook(function(pid, cmd)
 
         attack_ent_gm = menu.toggle(vehattack, "Enable Godmode", {""}, "", function(); end)
 
-        -------------------------------------
-        -- Tank
-        -------------------------------------
-
         menu.action(vehattack, "Send Tank", {""}, "", function()
             local gm = menu.get_value(attack_ent_gm)
             local player_ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3431,31 +3363,11 @@ players.add_command_hook(function(pid, cmd)
         end)
 
         -------------------------------------
-        -- Send To Online Intro
-        -------------------------------------        
-
-        menu.action(trolling, "Send To Online Intro", {"intro"}, "Sends player to the GTA Online intro.", function()
-            local int = memory.read_int(memory.script_global(1895156 + 1 + (pid * 609) + 511)) --Global_1895156[PLAYER::PLAYER_ID() /*609*/].f_511;
-            sendse(1 << pid, {-366707054, players.user(), 20, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
-            sendse(1 << pid, {1757622014, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-        end)
-
-        -------------------------------------
-        -- Force 1v1
-        -------------------------------------   
-        
-        menu.action(trolling, "Force 1v1", {"1v1"}, "Forces them into a 1v1.", function()
-            local int = memory.read_int(memory.script_global(1895156 + 1 + (pid * 609) + 511))
-            sendse(1 << pid, {-366707054, players.user(), 197, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, int})
-            sendse(1 << pid, {1757622014, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-        end)
-
-        -------------------------------------
         -- Unfair Triggerbot
         -------------------------------------
 
-        paimbor = menu.toggle_loop(trolling, "Unfair Triggerbot", {"triggerbot"}, "It tries to Aim for the head, but chances are low if they are moving.", function()
-            if not players.exists(pid) then paimbor.value = false; util.stop_thread() end
+        local paimbor = menu.toggle_loop(trolling, "Unfair Triggerbot", {"triggerbot"}, "It tries to Aim for the head, but chances are low if they are moving.", function()
+            if not players.exists(pid) then paimbor.value = false return end
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
                 paimbor.value = false
@@ -3483,7 +3395,7 @@ players.add_command_hook(function(pid, cmd)
         -------------------------------------
 
         menu.toggle_loop(trolling, "Rocket Aimbot", {"rocketaimbot"}, "Distance is limited to 500 Meters.", function()
-            if not players.exists(pid) then util.stop_thread() end
+            if not players.exists(pid) then return end
             local ped, user = GET_PLAYER_PED_SCRIPT_INDEX(pid), players.user_ped()
             local pos = players.get_position(pid)
             local ped_dist = v3.distance(players.get_position(user), players.get_position(pid))
@@ -3513,39 +3425,12 @@ players.add_command_hook(function(pid, cmd)
                 end
             end
         end)
-            
-        -------------------------------------
-        -- Kill Player Inside Interior
-        -------------------------------------
-
-        menu.action(trolling, "Force Player Outside of Interior", {""}, "", function()
-            local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
-            local pos = players.get_position(pid)
-            local glitch_hash, mdl = util.request_model("prop_windmill_01"), util.request_model("brickade2")
-            for interior_stuff as id do
-                if GET_INTERIOR_FROM_PLAYER(pid) == id then
-                    notify($"{pname} isn't in an Interior. :/")
-                return end
-            end
-            for i = 0, 3 do
-                local obj = entities.create_object(glitch_hash, pos)
-                local veh = entities.create_vehicle(mdl, pos, 0)
-                SET_ENTITY_VISIBLE(obj, false)
-                SET_ENTITY_VISIBLE(veh, false)
-                SET_ENTITY_INVINCIBLE(veh, true)
-                SET_ENTITY_COLLISION(obj, true, true)
-                APPLY_FORCE_TO_ENTITY(veh, 1, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0, 1, 1, 1, 0, 1)
-                wait(250)
-                entities.delete(obj); entities.delete(veh)
-                wait(250)
-            end
-        end)
 
         -------------------------------------
         -- Bounty Loop
         -------------------------------------
 
-        bounty_loop = menu.toggle_loop(trolling, "Bounty Loop", {"bountyloop", "bloop"}, "Will set the Players bounty always to 9000.", function(on)
+        local bounty_loop = menu.toggle_loop(trolling, "Bounty Loop", {"bountyloop", "bloop"}, "Will set the Players bounty always to 9000.", function(on)
             if not players.exists(pid) then bounty_loop.value = false; util.stop_thread() end
             local bounty, interior = players.get_bounty(pid), players.is_in_interior(pid)
             if not (bounty and interior) then
@@ -3553,17 +3438,6 @@ players.add_command_hook(function(pid, cmd)
                 notify($"Bounty set on: {pname}.")
                 wait(10000)
             end
-        end)
-
-        -------------------------------------
-        -- EXPLOSIONS
-        -------------------------------------
-
-        menu.action(customExplosion, "Explode", {""}, "", function()
-            ADD_EXPLOSION(players.get_position(pid), 1, 1.0, false, true, 0.0, false)
-        end)
-        menu.action(customExplosion, "Owned Explode", {""}, "", function()
-            ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 1, 1.0, false, true, 0.0)
         end)
 
         -------------------------------------
@@ -3587,7 +3461,6 @@ players.add_command_hook(function(pid, cmd)
                 wait(5000)
             becomeorb.value = false
         end)
-  
         -------------------------------------
         -- Explosion Loop
         -------------------------------------
@@ -3827,7 +3700,7 @@ players.add_command_hook(function(pid, cmd)
 --  end
 end)
 
-Jointimes, names, rids, hostq, allplayers, ips = {}, {}, {}, {}, {}, {}
+local Jointimes, names, rids, hostq, allplayers, ips = {}, {}, {}, {}, {}, {}
 players.add_command_hook(function(pid, c)
     names[pid] = players.get_name(pid)
     rids[pid] = players.get_rockstar_id(pid)
@@ -3838,16 +3711,16 @@ players.add_command_hook(function(pid, c)
 
     if showJoinInfomsg then
         if not in_session() then return end
-        notify(names[pid].." has joined.\nSlot: "..pid.."\nRID/SCID: "..rids[pid].."\nIPv4: "..ips[pid])
+        notify(names[pid].." has joined.\nSlot: "..pid.."\nRID: "..rids[pid].."\nIPv4: "..ips[pid])
     end
     if showJoinInfolog then
-        log(names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.")
+        log(names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.")
     end
     if showJoinInfoteam then
-        chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", true, true, true)
+        chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", true, true, true)
     end
     if showJoinInfoall then
-        chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID/SCID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", false, true, true)
+        chat.send_message("> "..names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.", false, true, true)
     end
 end)
 
@@ -3919,12 +3792,24 @@ util.create_tick_handler(function()
         end
 
     end
-end)
 
-util.on_stop(function()
-    for pid, blip in orbital_blips do
-        util.remove_blip(blip)
+    for players.list() as pid do
+        local rid, name = players.get_rockstar_id(pid), players.get_name(pid)
+        if is_player_in_blacklist(rid) then
+            local player = tostring(get_blacklist_reason(rid)) or "No Reason given"
+            notify($"{name} will be kicked due to being on the Blacklist. Reason: {player}.")
+            wait(1, "s")
+            trigger_commands($"historyblock{name} on")
+            trigger_commands($"loveletter{name}")
+        end
     end
 end)
 
-util.keep_running()
+util.on_pre_stop(function()
+    for pid, blip in orbital_blips do
+        util.remove_blip(blip)
+    end
+    for spawnedPickups as p do
+        entities.delete(p)
+    end
+end)
