@@ -902,7 +902,11 @@ end
 
 function update_value(commandref, text, player = false)
     if text then
-        if player then menu.set_value(commandref, tostring(players.get_name(text))) else menu.set_value(commandref, tostring(text)) end
+        if player then
+            menu.set_value(commandref, tostring(players.get_name(text)))
+        else
+            menu.set_value(commandref, tostring(text))
+        end
     else
         menu.set_value(commandref, "N/A")
     end
