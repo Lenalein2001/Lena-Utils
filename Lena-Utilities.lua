@@ -42,6 +42,7 @@ native_invoker.accept_bools_as_ints(true)
 thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
 thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
 clearRopes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
+local spawnedPickups = {}
 
 util.require_natives("3095a", "g")
 
@@ -3137,6 +3138,35 @@ players.add_command_hook(function(pid, cmd)
             menu.show_command_box($"saveplayeroutfit{pname} "); end, function(name)
                 local n = string.lstrip(name, $"saveplayeroutfit{pname} ")
                 save_player_outfit(pid, n)
+        end)
+
+        local pickups = {
+            { Hash = 2406513688, Model = "prop_ld_health_pack",     amount = 1 },
+            { Hash = 1426343849, Model = "w_ar_assaultrifle_mag1",  amount = 60 },
+            { Hash = 4187887056, Model = "W_LR_RPG_Rocket",         amount = 1 },
+            { Hash = 2753668402, Model = "W_LR_40mm",               amount = 5 },
+            { Hash = 1274757841, Model = "Prop_Armour_Pickup",      amount = 1 },
+            { Hash = 1548844439, Model = "prop_ld_ammo_pack_02",    amount = 30 },
+            --{ Hash = 1651898027, Model = "Prop_Drug_package_02", amount = 1 },
+        }
+
+        menu.action(friendly, "Drop Pickups", {}, $"Drop various Pickups for {pname}.", function()
+            local pos = players.get_position(pid)
+            local radius = 2.0
+            local numPickups = 6
+            local angleIncrement = 2 * math.pi / numPickups -- angle increment for even distribution
+
+            for i = 0, numPickups - 1 do
+                local randomIndex = math.random(#pickups) -- Choose a random pickup type
+                local pickupData = pickups[randomIndex]
+
+                -- Calculate offset coordinates
+                local angle = i * angleIncrement
+                local offsetX = radius * math.cos(angle)
+                local offsetY = radius * math.sin(angle)
+
+                spawnedPickups[i] = spawn_pickup(pickupData, pos.x + offsetX, pos.y + offsetY, pos.z, 0, 0, 0)
+            end
         end)
 
     -------------------------------------

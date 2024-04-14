@@ -1316,3 +1316,11 @@ for _, players in ipairs(data_e) do
     menu.readonly(c, "Added On", added_on_formatted) 
     menu.set_menu_name(retards_div, $"Blacklist ({bl_counter})")
 end
+
+function spawn_pickup(pickupData, posX, posY, posZ, rotX, rotY, rotZ)
+    util.request_model(pickupData.Model)
+
+    -- Spawn the pickup with rotation and flags (on ground, spinning)
+    local pickup = CREATE_PICKUP_ROTATE(pickupData.Hash, posX, posY, posZ, rotX, rotY, rotZ, 512, pickupData.amount, false, false, pickupData.Hash)
+    return pickup
+end
