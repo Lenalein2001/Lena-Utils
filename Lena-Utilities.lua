@@ -643,43 +643,6 @@ end
             end
         end)
 
-        -------------------------------------
-        -- Taze Players
-        -------------------------------------
-
-        menu.toggle_loop(doorcontrol, "Taze Players trying to Enter", {""}, "", function()
-            if not in_session() then return end
-            if user_vehicle != -1 then
-                SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(user_vehicle, true)
-            else
-                SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(user_vehicle, false)
-            end
-            local ped_point = entities.get_all_peds_as_pointers()
-            local ped_point_tab = {}
-            for ped_point as point do
-                local entpos = entities.get_position(point)
-                local distance = v3.distance(players.get_position(players.user_ped()), entpos)
-                if distance <= 500 then
-                    table.insert(ped_point_tab, entities.pointer_to_handle(point))
-                end
-            end
-            for ped_point_tab as handle do
-                if IS_PED_TRYING_TO_ENTER_A_LOCKED_VEHICLE(handle) then
-                    local bone1 = GET_PED_BONE_COORDS(handle, 36029, 0.0, 0.0, 0.0) 
-                    START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('ent_sht_electrical_box', bone1.x, bone1.y, bone1.z, 90, 0, 0, 1, true, true, true)
-                    ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
-                elseif IS_PED_BEING_JACKED(players.user_ped()) then
-                    SET_VEHICLE_DOOR_SHUT(user_vehicle, 0, true)
-                    local jacker = GET_PEDS_JACKER(players.user_ped())
-                    CLEAR_PED_TASKS_IMMEDIATELY(jacker)
-                    local bone1 = GET_PED_BONE_COORDS(jacker, 36029, 0.0, 0.0, 0.0) 
-                    ADD_EXPLOSION(bone1.x, bone1.y, bone1.z, 8, 0.5, false, true, 0.0, true)
-                    START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('ent_sht_electrical_box', bone1.x, bone1.y, bone1.z, 90, 0, 0, 1, true, true, true)
-                    SET_PED_INTO_VEHICLE(players.user_ped(), user_vehicle, -1)
-                end
-            end
-        end)
-
     -------------------------------------
     -- Engine Control
     -------------------------------------
@@ -1081,23 +1044,30 @@ end
         -------------------------------------
         -- Detect Rockets
         -------------------------------------
+
         local projectile_blips = {}
         menu.toggle_loop(detections, "Detect Rockets", {""}, "Detects incoming Rockets and Mines.", function(on)
-            for k, b in projectile_blips do
+            for k, b in pairs(projectile_blips) do
                 if GET_BLIP_INFO_ID_ENTITY_INDEX(b) == 0 then
                     util.remove_blip(b)
                     projectile_blips[k] = nil
                 end
             end
-            for k, obj_ptr in entities.get_all_objects_as_pointers() do
+
+            for k, obj_ptr in pairs(entities.get_all_objects_as_pointers()) do
                 local obj_model = entities.get_model_hash(obj_ptr)
                 if is_entity_a_projectile(obj_model) then
                     local obj_hdl = entities.pointer_to_handle(obj_ptr)
-                    if GET_BLIP_FROM_ENTITY(obj_hdl) == 0 then
-                        local proj_blip = ADD_BLIP_FOR_ENTITY(obj_hdl)
-                        SET_BLIP_SPRITE(proj_blip, 443)
+                    local proj_blip = GET_BLIP_FROM_ENTITY(obj_hdl)
+                    if proj_blip == 0 then
+                        proj_blip = ADD_BLIP_FOR_ENTITY(obj_hdl)
+                        SET_BLIP_SPRITE(proj_blip, 368)
                         SET_BLIP_COLOUR(proj_blip, 75)
                         projectile_blips[#projectile_blips + 1] = proj_blip
+                    end
+
+                    if proj_blip ~= 0 then
+                        SET_BLIP_ROTATION_WITH_FLOAT(proj_blip, GET_ENTITY_HEADING_FROM_EULERS(obj_hdl))
                     end
                 end
             end
