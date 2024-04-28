@@ -367,19 +367,22 @@ end
     end)
 
     menu.toggle_loop(self, "Regenerative Killing", {""}, "Will regenerate health of your Ped and Vehicle if you get a kill.", function()
-        local temp = memory.alloc()
+        local wep = memory.alloc(4)
         local heal_factor = 1.10 -- aka 10%
 
         for pid in players.list_except(true) do
-            if NETWORK_IS_PLAYER_ACTIVE(pid) and players.user() == NETWORK_GET_KILLER_OF_PLAYER(pid, temp) then
-                user_vehicle = user_vehicle or entities.get_user_vehicle_as_pointer(false)
+            if players.user() == NETWORK_GET_KILLER_OF_PLAYER(pid, wep) then
+                user_vehicle = user_vehicle or entities.get_user_vehicle_as_handle(false)
 
                 if user_vehicle then
                     local current_vehicle_health = GET_ENTITY_HEALTH(user_vehicle)
                     local new_vehicle_health = math.floor(current_vehicle_health * heal_factor)
                     if new_vehicle_health > 1000 then new_vehicle_health = 1000 end
                     SET_ENTITY_HEALTH(user_vehicle, new_vehicle_health, 0, 0)
+                    SET_VEHICLE_BODY_HEALTH(user_vehicle, new_vehicle_health)
                     SET_VEHICLE_ENGINE_HEALTH(user_vehicle, new_vehicle_health)
+                    SET_HELI_MAIN_ROTOR_HEALTH(user_vehicle, new_vehicle_health)
+                    SET_HELI_TAIL_ROTOR_HEALTH(user_vehicle, new_vehicle_health)
                 end
 
                 local user_ped = players.user_ped()
@@ -463,7 +466,6 @@ end
             local pos = GET_PED_BONE_COORDS(ped, 31086, 0.0, 0.0, 0.0)
             if IS_PLAYER_FREE_AIMING_AT_ENTITY(players.user(), ped) and not IS_PED_RELOADING(players.user_ped()) then
                 SHOOT_SINGLE_BULLET_BETWEEN_COORDS(wpnCoords, pos, dmg, true, wpn, players.user_ped(), true, false, 10000)
-                print(wpn)
                 --SET_CONTROL_VALUE_NEXT_FRAME(0, 24, 1.0)
                 wait(delay * 1000)
             end
@@ -549,15 +551,13 @@ end
 
         menu.divider(better_vehicles, "Better Heli")
         menu.slider_float(better_vehicles, "Thrust", {"helithrust"}, "Set the Heli thrust.", 0, 1000, 220, 10, function(value)
-            util.create_tick_handler(function()
-                if IS_PED_IN_ANY_HELI(players.user_ped()) then
-                    local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
-                    local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
-                    if CflyingHandling then
-                        memory.write_float(CflyingHandling + 0x8, value * 0.01)
-                    end
+            if IS_PED_IN_ANY_HELI(players.user_ped()) then
+                local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
+                local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
+                if CflyingHandling then
+                    memory.write_float(CflyingHandling + 0x8, value * 0.01)
                 end
-            end)
+            end
         end)
 
         -------------------------------------
@@ -773,11 +773,8 @@ end
         if user_vehicle_ptr ~= 0 then
             local success = GET_CURRENT_PED_VEHICLE_WEAPON(players.user_ped(), wpn_ptrw)
             if success then
-                local selected_weapon_hash = util.reverse_joaat(memory.read_int(wpn_ptrw))
-                if selected_weapon_hash == "vehicle_weapon_akula_barrage" then
-                    SET_WEAPON_AOE_MODIFIER(memory.read_int(wpn_ptrw), explo_mass_slider.value / 10)
-                    wait(10)
-                end
+                SET_WEAPON_AOE_MODIFIER(memory.read_int(wpn_ptrw), explo_mass_slider.value / 10)
+                wait(10)
             end
         end
     end, function()
@@ -787,6 +784,24 @@ end
     -------------------------------------
     -- Enter Nearest Vehicle
     -------------------------------------
+
+    menu.toggle_loop(vehicle_root, "Homing Missile Locked Alert", {""}, "Tells you when a player is locking onto you, as the game doesn't always play the sound.", function()
+        local veh =  entities.get_user_vehicle_as_pointer(false)
+        if veh != 0 then
+            local v1 = memory.read_long(veh + 0xAE8)
+            local v2 = memory.read_long(veh + 0xA48)
+
+            if BitTest(v1, 1 << 48) and BitTest(v2, 1 << 32) then
+                util.draw_debug_text('Amber lock on detected')
+            elseif BitTest(v1, 1 << 48) and BitTest(v2, 1 << 33) then
+                util.draw_debug_text('Red lock on detected')
+            elseif not BitTest(v1, 1 << 48) and BitTest(v2, 1 << 32) then
+                util.draw_debug_text('Modded lock on detected')
+            elseif not BitTest(v1, 1 << 48) and BitTest(v2, 1 << 33) then
+                util.draw_debug_text('Modded lock on detected')
+            end
+        end
+    end)
 
     menu.action(vehicle_root, "Enter Nearest Vehicle", {""}, "Enters the nearest Vehicle that can be found.", function()
         if not IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
@@ -2342,7 +2357,7 @@ end
         -- Delete Vehicle
         -------------------------------------
 
-        menu.action(shortcuts, "Delete Vehicle", {"dv"}, "Deletes your current ", function()
+        menu.action(shortcuts, "Delete Vehicle", {"dv"}, "Deletes your current Vehicle.", function()
             trigger_commands("deletevehicle")
         end)
 
@@ -2352,6 +2367,10 @@ end
 
         menu.action(shortcuts, "Grab Script Host", {"sh"}, "Grabs Script Host less destructively.", function()
             util.request_script_host("freemode")
+            wait(100)
+            if players.get_script_host() != players.user() then
+                NETWORK_REQUEST_TO_BE_HOST_OF_THIS_SCRIPT()
+            end
         end)
 
         -------------------------------------
@@ -2558,7 +2577,7 @@ end
     -------------------------------------
 
     menu.toggle_loop(misc, "Show OS Date", {""}, "Shows the current Day, Month and Time.", function()
-        trigger_commands("infotime off")
+        menu.ref_by_path("Game>Info Overlay>Real-World Time", 50).value = false
         util.draw_debug_text(os.date("%a, %d. %B %X"))
     end)
 
@@ -2723,7 +2742,6 @@ if is_developer() then
     local modified_vehicle = menu.readonly(sdebug, "Current Vehicle: ", "N/A")
     menu.toggle_loop(sdebug, "Better Vehicles", {"bv"}, "", function()
         if entities.get_user_vehicle_as_pointer(false) != 0 then
-            wait(20)
             local vmodel = players.get_vehicle_model(players.user())
             local vname = util.get_label_text(vmodel)
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
@@ -2751,8 +2769,9 @@ if is_developer() then
                         end
                         notify($"Better Helis have been enabled for {vname}.")
                     end
-                    if (math.ceil(memory.read_float(CflyingHandling + 0x8) * 100) != menu.ref_by_command_name("helithrust").value) then
+                    if (math.round(memory.read_float(CflyingHandling + 0x8) * 1000) != menu.ref_by_command_name("helithrust").value * 10) then
                         trigger_commands("gravitymult 1; helithrust 2.3")
+                        notify("done")
                     end
                 elseif menu.get_value(modified_vehicle, vname) != vname then
                     trigger_commands("gravitymult 1; fovfpinveh -5; fovtpinveh -5")
@@ -2795,15 +2814,6 @@ if is_developer() then
         if not NETWORK_IS_HOST() then
             trigger_commands($"kick{players.get_name(players.get_host())}")
         end
-    end)
-
-    initial_money = get_current_money()
-    menu.toggle_loop(sdebug, "Transaction Log", {}, "", function(toggled)
-        if not util.is_session_started() and util.is_session_transition_active() or util.is_interaction_menu_open() then return end
-        if get_current_money() != initial_money then
-            check_and_write_money_change()
-        end
-        wait(1, "s")
     end)
 
     menu.action(sdebug, "Set Webhook Url", {"setwebhookurl"}, "", function()
@@ -2930,7 +2940,7 @@ end
 players.add_command_hook(function(pid, cmd)
     local pname = players.get_name(pid)
     local rids = players.get_rockstar_id(pid)
-    local hex = decimalToHex(rids, 32)
+    local hex = decimalToHex(rids)
 
     menu.divider(cmd, "Lena Utilities")
     local lena = menu.list(cmd, "Lena Utilities", {"lenau"}, "")
@@ -2955,11 +2965,14 @@ players.add_command_hook(function(pid, cmd)
     end)
     menu.action(lena, "Add to Blacklist", {""}, "", function()
         if not is_player_in_blacklist(rids) then
-            local i = ""
-            for getDetections(pid) as detection do
-                i ..= detection .. ", "
+            local i, isClassified = "", getDetections(pid)
+            if isClassified then
+                for getDetections(pid) as detection do
+                    i ..= detection .. ", "
+                end
             end
-            add_player_to_blacklist(rids, pname, i)
+            i:gsub(",  ", "")
+            add_player_to_blacklist(rids, pname, i or "")
             notify($"Added {pname} to the Blacklist.")
         end
     end)
@@ -3395,7 +3408,7 @@ players.add_command_hook(function(pid, cmd)
         -- Orbital Cannon
         -------------------------------------
 
-        menu.action(customExplosion, "Orbital Cannon", {"nuke"}, "Spawns the explosion on the selected ", function()
+        menu.action(customExplosion, "Orbital Cannon", {"nuke"}, $"Nukes {pname} without the need for the Orbital Cannon UI.", function()
             local becomeorb = menu.ref_by_path("Online>Become The Orbital Cannon")
             becomeorb.value = true
                 wait(200)
@@ -3418,7 +3431,7 @@ players.add_command_hook(function(pid, cmd)
 
         local usingExplosionLoop = false
         menu.slider(customExplosion, "Loop Speed", {"expspeed"}, "", 50, 10000, 1000, 10, function(value)
-            local delay = value 
+            local delay = value
         end)
         menu.toggle(customExplosion, "Owned Explosion Loop", {""}, "", function(on)
             usingExplosionLoop = on
@@ -3725,6 +3738,10 @@ util.create_tick_handler(function()
         update_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
     end
 
+    if menu.ref_by_path("Self>Appearance>Outfit>Hat", 50).value == 37 then
+        menu.ref_by_path("Self>Appearance>Outfit>Hat", 50).value = -1 -- The fucking flight helmet
+    end
+
     update_value(host_name, players.get_host(), true)
     update_value(next_host_name, players.get_host_queue()[2], true)
     update_value(script_host_name, players.get_script_host(), true)
@@ -3747,8 +3764,9 @@ util.create_tick_handler(function()
     for players.list() as pid do
         local rid, name = players.get_rockstar_id(pid), players.get_name(pid)
         if is_player_in_blacklist(rid) then
-            local player = tostring(get_blacklist_reason(rid)) or "No Reason given"
-            notify($"{name} will be kicked due to being on the Blacklist. Reason: {player}.")
+            local player = tostring(get_blacklist_reason(rid)).."." or "No Reason given"
+            player:gsub(", .", ".")
+            notify($"{name} will be kicked due to being on the Blacklist. Reason: {player}")
             wait(1, "s")
             trigger_commands($"historyblock{name} on")
             trigger_commands($"loveletter{name}")
