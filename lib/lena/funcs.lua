@@ -511,26 +511,6 @@ function decimalToHex(decimal, numBits = 32)
     return "0x0"..hex
 end
 
-function hexToDecimal(hex)
-    -- Remove leading and trailing whitespace, remove 0x if present, make hex Uppercase
-    hex = hex:match("^%s*(.-)%s*$")
-    hex = hex:gsub("0x", "")
-    hex = hex:upper()
-
-    local hexDigits = "0123456789ABCDEF"
-    local decimal = 0
-    local hexLength = #hex
-    for i = 1, hexLength do
-        local char = hex:sub(i, i)
-        local digitValue = hexDigits:find(char, 1, true) - 1
-        if digitValue < 0 then
-            return nil, "Invalid character in the hex string."
-        end
-        decimal = decimal * 16 + digitValue
-    end
-    return decimal
-end
-
 function is_developer()
     local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92, 0x03DAF57D, 0x0E02C0EA}
     local user = players.get_rockstar_id(players.user())
@@ -601,7 +581,7 @@ function player_ip(pid)
     math.floor(connectIP / 2^16) % 256,
     math.floor(connectIP / 2^8) % 256,
     connectIP % 256)
-    if ipStringplayer == "255.255.255.255" then
+    if connectIP == 4294967295 then
         return "Connected via Relay", false
     else
         return tostring(ipStringplayer), true
@@ -688,7 +668,7 @@ function save_player_info(pid)
     local rockstar_id = players.get_rockstar_id(pid)
     local hex = decimalToHex(rockstar_id)
     local rank = players.get_rank(pid)
-    local money = "$" .. format_money_value(players.get_money(pid))
+    local money = "$" .. math.formatint(players.get_money(pid))
     local kd = players.get_kd(pid)
     local kills = players.get_kills(pid)
     local deaths = players.get_deaths(pid)
@@ -823,7 +803,7 @@ function DOES_VEHICLE_HAVE_IMANI_TECH(vehicle_model)
 end
 
 function hud_notification(format, colour, ...)
-	assert(type(format) == "string", "msg must be a string, got " .. type(format))
+	assert(type(format) == "string", "Message must be a string, got " .. type(format))
 	local msg = string.format(format, ...)
 	THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST(colour or 2)
 	util.BEGIN_TEXT_COMMAND_THEFEED_POST(msg)
@@ -832,37 +812,6 @@ end
 
 function get_current_money()
     return util.stat_get_int64(util.joaat("BANK_BALANCE"))
-end
-function calculate_difference(old_value, new_value)
-    return new_value - old_value
-end
-function format_money_value(value)
-    local formatted = string.format("%d", value)
-    local k
-    while true do
-        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
-        if k == 0 then
-            break
-        end
-    end
-    return formatted
-end
-function check_and_write_money_change()
-    local current_money = get_current_money()
-    if current_money != initial_money then
-        local difference = calculate_difference(initial_money, current_money)
-        local file = io.open($"{lenaDir}Transactions for {SC_ACCOUNT_INFO_GET_NICKNAME()}.txt", "a")
-        if file then
-            local formatted_initial_money = "$"..format_money_value(initial_money)
-            local formatted_current_money = "$"..format_money_value(current_money)
-            local formatted_difference = "$"..format_money_value(math.abs(difference))
-            local sign = difference >= 0 and "Added ~g~" or "Removed ~r~"
-            file:write(string.format("[%s] Old amount: %s. New amount: %s. Difference: %s%s \n", os.date("%d.%m.%Y %X"), formatted_initial_money, formatted_current_money, sign, formatted_difference))
-            file:close()
-            hud_notification(sign..formatted_difference)
-        end
-        initial_money = current_money
-    end
 end
 
 function tune_vehicle(v, p, tell = false)
@@ -1011,40 +960,44 @@ function save_player_outfit(pid, name)
     end
 end
 
-function CanStartCEO()
-    if not in_session() then return false end
-    if players.get_boss(players.user()) != -1 then return false end
-    local bossCount = 0
-
-    for pid in players.list(false, true, true) do
-        if players.get_boss(pid) == pid then
-            if players.get_org_type(pid) != 1 then
-                bossCount = bossCount + 1
-            end
-        end
-        if bossCount >= 10 then
-            return false, notify($"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}")
-        end
-    end
-    return true
-end
 function StartCEO()
-    if CanStartCEO() then
-        local user = players.user()
-        if players.get_boss(user) != user then
+    local user = players.user()
+    local reason = nil
+
+    switch players.get_boss(user) do
+        case -1:  -- User is unemployed
             trigger_commands("ceostart")
             wait(250)
             if players.get_boss(user) == user then
                 return true
             else
-                return false, notify("CEO couldn't be started.")
+                reason = "CEO couldn't be started."
             end
-        else
-            return true
-        end
-    else
-        return false, notify("Cannot start ")
+            break
+        case user: -- User already CEO
+            return true, notify("Already in your own CEO.")
+            break
+        default:  -- User employed by another company
+            reason = "You can't start a CEO while employed by another Organisation."
+            break
     end
+
+    -- Check for additional cases (e.g., MAX Boss count)
+    local bossCount = 0
+    for pid in players.list(false, true, true) do
+        if players.get_boss(pid) == pid and players.get_org_type(pid) != 1 then
+            bossCount = bossCount + 1
+            if bossCount >= 10 then
+                reason = $"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}"
+            end
+        end
+    end
+
+    if reason then
+        return false, notify(reason)
+    end
+
+    return true
 end
 
 function replaceInDraft(search, replacement)
