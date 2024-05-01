@@ -453,7 +453,7 @@ end
 
     -------------------------------------
     -- Unfair Triggerbot
-    -------------------------------------  
+    -------------------------------------
 
     menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "Slightly worse than Stand's triggerbot. Not including the Magic Bullets.", function()
         local wpn = GET_SELECTED_PED_WEAPON(players.user_ped())
@@ -474,7 +474,7 @@ end
 
     -------------------------------------
     -- Rocket Aimbot
-    ------------------------------------- 
+    -------------------------------------
 
     menu.toggle_loop(weap, "Rocket Aimbot", {""}, "Distance is limited to 500 Meters.", function()
         for players.list(false, false, true) as pid do
@@ -490,7 +490,7 @@ end
 
     -------------------------------------
     -- Thermal Scope
-    -------------------------------------  
+    -------------------------------------
 
     local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
     menu.toggle_loop(weap, "Thermal Scope", {""}, "Press E while aiming to activate.", function()
@@ -520,7 +520,7 @@ end
 
     -------------------------------------
     -- Spawn vehicle at Bullet Impact
-    -------------------------------------  
+    -------------------------------------
 
     local vehicle_gun_ent  = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be ", function(on_change); end, "zentorno")
     local vehicle_gun_gm   = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
@@ -682,6 +682,8 @@ end
 
         local periodicforceflares
         forceflares = menu.toggle_loop(vehicle_flares, "Force Flares", {"forceflares"}, "Forces Flares on Airborn Vehicles.", function()
+            if not in_session() then return end
+
             if periodicforceflares.value then forceflares.value = false end
             local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
             local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
@@ -704,6 +706,8 @@ end
         flareamount = menu.slider(vehicle_flares, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
 
         periodicforceflares = menu.toggle_loop(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function()
+            if not in_session() then return end
+
             if forceflares.value then periodicforceflares.value = false end
             local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
             local how = menu.ref_by_path("Vehicle>Countermeasures>Pattern>Horizontal")
@@ -751,7 +755,7 @@ end
         local veh_hashes = {"raiju", "strikeforce", "lazer"}
         local user_vehicle_ptr = entities.get_user_vehicle_as_pointer(false)
 
-        if user_vehicle_ptr ~= 0 then
+        if user_vehicle_ptr != 0 then
             local hash = util.reverse_joaat(entities.get_model_hash(user_vehicle_ptr))
             if table.contains(veh_hashes, hash) and not toggle_ammo.value then
                 ammo:trigger()
@@ -759,6 +763,8 @@ end
             elseif not table.contains(veh_hashes, hash) and toggle_ammo.value then
                 toggle_ammo.value = false
             end
+        else
+            toggle_ammo.value = false
         end
     end, function()
         menu.ref_by_path("Self>Weapons>Explosive Hits").value = false
@@ -768,6 +774,7 @@ end
     local explo_mass_slider = menu.slider(veh_weapons, "Explosive Mass", {"Explosivermass"}, "", 1, 100, 10, 5, function(); end)
     menu.toggle_loop(veh_weapons, "Better Explosive AOE", {""}, "Higher Damage Output for certain Vehicle Explosives", function()
         if not in_session() then return end
+
         local user_vehicle_ptr = entities.get_user_vehicle_as_pointer(false)
 
         if user_vehicle_ptr ~= 0 then
