@@ -117,6 +117,7 @@ end
 function closestveh(myPos)
     local closestDist = 999999999999
     local closestVeh = nil
+
     for entities.get_all_vehicles_as_pointers() as veh do
         local vehpos = entities.get_position(veh)
         local dist = myPos:distance(vehpos)
@@ -132,6 +133,7 @@ end
 
 function request_control(entity, migrate = true)
     local ctr = 0
+
     if entity then
         while not NETWORK_HAS_CONTROL_OF_ENTITY(entity) do
             if ctr >= 250 then
@@ -142,6 +144,7 @@ function request_control(entity, migrate = true)
             wait()
             ctr += 1
         end
+
         if NETWORK_HAS_CONTROL_OF_ENTITY(entity) then
             return true
         end
@@ -151,6 +154,7 @@ end
 function get_vehicle_ped_is_in(player)
     local ped = GET_PLAYER_PED_SCRIPT_INDEX(player)
     local veh = GET_VEHICLE_PED_IS_IN(ped, false)
+
     if IS_PED_IN_ANY_VEHICLE(ped, false) then
         return veh
     else
@@ -160,6 +164,7 @@ end
 
 function spawn_ped(model_name, pos, gm = false)
     local hash = util.joaat(model_name)
+
     if IS_MODEL_A_PED(hash) then
         util.request_model(hash)
         local ped = entities.create_ped(2, hash, pos, GET_FINAL_RENDERED_CAM_ROT(2).z)
@@ -185,7 +190,6 @@ function spawn_obj(model_name, pos)
     end
 end
 function spawn_vehicle(model_name, pos, gm = false)
-
     local hash = util.joaat(model_name)
 
     if IS_MODEL_A_VEHICLE(hash) then
@@ -270,8 +274,8 @@ function get_stand_model(model)
     return translations[model]
 end
 
-function BitTest(bits, place)
-    return (bits & (1 << place)) != 0
+function BitTest(value, bit)
+    return (value & (1 << bit)) != 0
 end
 
 -- Jinx
@@ -460,9 +464,9 @@ end
 function getWeaponHash(ped)
     local wpn_ptr = memory.alloc_int()
     if GET_CURRENT_PED_VEHICLE_WEAPON(ped, wpn_ptr) then -- only returns true if the weapon is a vehicle weapon
-        return memory.read_int(wpn_ptr), true
+        return memory.read_int(wpn_ptr)
     end
-    return GET_SELECTED_PED_WEAPON(ped), false
+    return GET_SELECTED_PED_WEAPON(ped)
 end
 
 function BlockSyncs(pid, callback)

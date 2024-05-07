@@ -370,8 +370,8 @@ end
         local wep = memory.alloc(4)
         local heal_factor = 1.10 -- aka 10%
 
-        for pid in players.list_except(true) do
-            if players.user() == NETWORK_GET_KILLER_OF_PLAYER(pid, wep) then
+        for players.list_except(true) as pid do
+            if players.user() or user_vehicle == NETWORK_GET_KILLER_OF_PLAYER(pid, wep) then
                 user_vehicle = user_vehicle or entities.get_user_vehicle_as_handle(false)
 
                 if user_vehicle then
@@ -522,7 +522,7 @@ end
     -- Spawn vehicle at Bullet Impact
     -------------------------------------
 
-    local vehicle_gun_ent  = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be ", function(on_change); end, "zentorno")
+    local vehicle_gun_ent  = menu.text_input(vehicle_gun_list, "Vehicle", {"shoveh"}, "Vehicle to Spawn. Needs to be JOAAT.", function(on_change); end, "zentorno")
     local vehicle_gun_gm   = menu.toggle(vehicle_gun_list, "Godmode", {""}, "", function(); end)
     local vehicle_gun_perf = menu.toggle(vehicle_gun_list, "Tune Performance", {""}, "", function(); end)
 
@@ -598,7 +598,7 @@ end
 
         -------------------------------------
         -- Reset better Vehicles
-        -------------------------------------  
+        -------------------------------------
 
         menu.action(better_vehicles, "Reset Better Vehicles", {"rbv"}, "", function()
             trigger_commands("gravitymult 2; fovfpinveh -5")
@@ -606,7 +606,7 @@ end
 
         -------------------------------------
         -- Reduce Burnout
-        -------------------------------------  
+        -------------------------------------
 
         menu.toggle(better_vehicles, "Reduce Burnout", {""}, "Makes it to where the vehicle does not burnout as easily.", function(toggled)
             SET_IN_ARENA_MODE(toggled)
@@ -729,18 +729,14 @@ end
     -------------------------------------
 
     local cannon_type = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? B8")
-    menu.list_action(plane_wep_manager, "Explosion Type", {}, "", explosionTypes, function(index, value)
+    menu.list_action(plane_wep_manager, "Explosion Type", {""}, "", explosionTypes, function(index, value)
        memory.write_int(cannon_type + 0x10, index - 1)
     end)
+
     local alternate_wait_time = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 50")
-    menu.click_slider_float(plane_wep_manager, "Alternate Wait Time", {}, "", 0, 100, 0, 1, function(value)
-       local ptr_value = memory.read_int(alternate_wait_time + 0x15);
+    menu.click_slider_float(plane_wep_manager, "Alternate Wait Time", {""}, "", 0, 100, 0, 1, function(value)
+       local ptr_value = memory.read_int(alternate_wait_time + 0x15)
        memory.write_float(alternate_wait_time + ptr_value + 0x19, value / 100)
-    end)
-    local time_between_shots = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 3C")
-    menu.click_slider_float(plane_wep_manager, "Time Between Shots", {}, "", 0, 100, 0, 1, function(value)
-       local ptr_value = memory.read_int(time_between_shots + 0x15);
-       memory.write_float(alternate_wait_time + ptr_value + 0x19, value / 10000)
     end)
 
     -------------------------------------
@@ -793,7 +789,7 @@ end
     -------------------------------------
 
     menu.toggle_loop(vehicle_root, "Homing Missile Locked Alert", {""}, "Tells you when a player is locking onto you, as the game doesn't always play the sound.", function()
-        local veh =  entities.get_user_vehicle_as_pointer(false)
+        local veh = entities.get_user_vehicle_as_pointer(false)
         if veh != 0 then
             local v1 = memory.read_long(veh + 0xAE8)
             local v2 = memory.read_long(veh + 0xA48)
@@ -3774,7 +3770,7 @@ util.create_tick_handler(function()
             local player = tostring(get_blacklist_reason(rid)).."." or "No Reason given"
             player:gsub(", .", ".")
             notify($"{name} will be kicked due to being on the Blacklist. Reason: {player}")
-            wait(1, "s")
+            wait(30, "s")
             trigger_commands($"historyblock{name} on")
             trigger_commands($"loveletter{name}")
         end
