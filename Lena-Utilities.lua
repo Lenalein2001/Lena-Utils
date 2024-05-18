@@ -39,10 +39,9 @@ previous_car = nil
 copy_from = nil
 data_e, data_l, Blacklist = {}, {}, {} -- Blacklist
 native_invoker.accept_bools_as_ints(true)
-thunder_on = menu.ref_by_path("Online>Session>Thunder Weather>Enable Request")
-thunder_off = menu.ref_by_path("Online>Session>Thunder Weather>Disable Request")
 clearRopes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
 local spawnedPickups = {}
+local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
 
 util.require_natives("3095a", "g")
 
@@ -67,7 +66,6 @@ local anims = menu.list(self, "Animations", {""}, "Some Animations.")
 anim_idle = menu.list(anims, "Idle", {""}, "")
 anim_sit = menu.list(anims, "Sitting", {""}, "")
 anim_romantic = menu.list(anims, "Romantic", {""}, "")
-anim_sexy = menu.list(anims, "Sexy", {""}, "")
 anim_misc = menu.list(anims, "Misc", {""}, "")
 
 local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Animations. Lock Outfit breaks it.")
@@ -294,6 +292,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(fast_stuff, "Fast Vehicle Enter/Exit", {""}, "Enter vehicles faster.", function()
+            if not inSession() then return end
+
             if (GET_IS_TASK_ACTIVE(players.user_ped(), 160) or GET_IS_TASK_ACTIVE(players.user_ped(), 167) or GET_IS_TASK_ACTIVE(players.user_ped(), 165)) and not GET_IS_TASK_ACTIVE(players.user_ped(), 195) then
                 FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -304,6 +304,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(fast_stuff, "Fast Weapon Switch", {""}, "Swaps your weapons faster.", function()
+            if not inSession() then return end
+
             if GET_IS_TASK_ACTIVE(players.user_ped(), 56) then
                 FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -314,6 +316,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(fast_stuff, "Fast Reload", {""}, "Reloads your Weapon Faster.", function()
+            if not inSession() then return end
+
             if GET_IS_TASK_ACTIVE(players.user_ped(), 298) then
                 FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -324,6 +328,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(fast_stuff, "Fast Mount", {""}, "Mount over stuff faster.", function()
+            if not inSession() then return end
+
             if GET_IS_TASK_ACTIVE(players.user_ped(), 50) or GET_IS_TASK_ACTIVE(players.user_ped(), 51) then
                 FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
             end
@@ -334,6 +340,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(self, "Friendly NPCs", {""}, "The NPCs will ignore you.", function(toggled)
+        if not inSession() then return end
+
         SET_PED_RESET_FLAG(players.user_ped(), 124, true)
         SET_EVERYONE_IGNORE_PLAYER(players.user(), toggled)
     end)
@@ -351,6 +359,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(self, "Auto Heal", {""}, "Heals you if the Ped has low health.", function()
+        if not inSession() then return end
+
         local ped = players.user_ped()
         local health = GET_ENTITY_HEALTH(ped)
         if health <= 140 and not IS_PED_DEAD_OR_DYING(ped) then
@@ -367,6 +377,8 @@ end
     end)
 
     menu.toggle_loop(self, "Regenerative Killing", {""}, "Will regenerate health of your Ped and Vehicle if you get a kill.", function()
+        if not inSession() then return end
+
         local wep = memory.alloc(4)
         local heal_factor = 1.10 -- aka 10%
 
@@ -399,7 +411,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(self, "Automatically Become a CEO/MC", {""}, "Will start a CEO/MC if you need to be in one.", function()
-        if not util.is_session_started() then return end
+        if not inSession() then return end
+
         for CEOLabels as label do
             if IS_HELP_MSG_DISPLAYED(label) then
                 if players.get_boss(players.user()) == -1 then trigger_commands("ceostart") end
@@ -427,27 +440,18 @@ end
     -------------------------------------
 
     local LegitRapidMS = menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to the grenade and back to the ", 1, 1000, 100, 50, function (value); end)
-    local LegitRapidFire = false
-    menu.toggle(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main ", function(toggled)
+    menu.toggle_loop(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main ", function(toggled)
+        if not inSession() then return end
+
         local ped = players.user_ped()
-        if toggled then
-            LegitRapidFire = true
-            util.create_thread(function()
-                while LegitRapidFire do
-                    if IS_PED_SHOOTING(ped) then
-                        local currentWpMem = memory.alloc()
-                        local junk = GET_CURRENT_PED_WEAPON(ped, currentWpMem, 1)
-                        local currentWP = memory.read_int(currentWpMem)
-                        SET_CURRENT_PED_WEAPON(ped, 2481070269, true)
-                        wait(menu.get_value(LegitRapidMS))
-                        SET_CURRENT_PED_WEAPON(ped, currentWP, true)
-                    end
-                    wait()
-                end
-                util.stop_thread()
-            end)
-        else
-            LegitRapidFire = false
+
+        if IS_PED_SHOOTING(ped) then
+            local currentWpMem = memory.alloc()
+            local junk = GET_CURRENT_PED_WEAPON(ped, currentWpMem, 1)
+            local currentWP = memory.read_int(currentWpMem)
+            SET_CURRENT_PED_WEAPON(ped, 2481070269, true)
+            wait(menu.get_value(LegitRapidMS))
+            SET_CURRENT_PED_WEAPON(ped, currentWP, true)
         end
     end)
 
@@ -456,6 +460,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "Slightly worse than Stand's triggerbot. Not including the Magic Bullets.", function()
+        if not inSession() then return end
+
         local wpn = GET_SELECTED_PED_WEAPON(players.user_ped())
         local dmg = ROUND(GET_WEAPON_DAMAGE(wpn, 0))
         local delay = GET_WEAPON_TIME_BETWEEN_SHOTS(wpn)
@@ -477,6 +483,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(weap, "Rocket Aimbot", {""}, "Distance is limited to 500 Meters.", function()
+        if not inSession() then return end
+
         for players.list(false, false, true) as pid do
             local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local user = players.user_ped()
@@ -492,8 +500,9 @@ end
     -- Thermal Scope
     -------------------------------------
 
-    local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
     menu.toggle_loop(weap, "Thermal Scope", {""}, "Press E while aiming to activate.", function()
+        if not inSession() then return end
+
         local aiming = IS_PLAYER_FREE_AIMING(players.user())
         if IS_PLAYER_FREE_AIMING(players.user()) then
             if util.is_key_down(0x45) then
@@ -528,6 +537,8 @@ end
 
     local impactCords = v3()
     menu.toggle_loop(vehicle_gun_list, "Spawn Vehicle at Bullet Impact", {""}, "", function()
+        if not inSession() then return end
+
         if GET_PED_LAST_WEAPON_IMPACT_COORD(players.user_ped(), memory.addrof(impactCords)) then
             local model, gm = menu.get_value(vehicle_gun_ent), menu.get_value(vehicle_gun_gm)
             v = spawn_vehicle(model, impactCords, gm)
@@ -666,6 +677,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(engine_control, "Disable Engine Fires", {""}, "", function()
+            if not inSession() then return end
+
             if user_vehicle != previous_car then
                 SET_DISABLE_VEHICLE_ENGINE_FIRES(user_vehicle, true)
                 previous_car = player_car
@@ -681,8 +694,8 @@ end
         -------------------------------------
 
         local periodicforceflares
-        forceflares = menu.toggle_loop(vehicle_flares, "Force Flares", {"forceflares"}, "Forces Flares on Airborn Vehicles.", function()
-            if not in_session() then return end
+        local forceflares = menu.toggle_loop(vehicle_flares, "Force Flares", {"forceflares"}, "Forces Flares on Airborn Vehicles.", function()
+            if not inSession() then return end
 
             if periodicforceflares.value then forceflares.value = false end
             local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
@@ -702,11 +715,11 @@ end
         -- Periodic flares release
         -------------------------------------
 
-        flaredelay = menu.slider_float(vehicle_flares, "Flare Delay", {""}, "Delay is in Seconds. 0.5 would be half a Second.", 10, 1000, 100, 10, function(); end)
-        flareamount = menu.slider(vehicle_flares, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
+        local flaredelay = menu.slider_float(vehicle_flares, "Flare Delay", {""}, "Delay is in Seconds. 0.5 would be half a Second.", 10, 1000, 100, 10, function(); end)
+        local flareamount = menu.slider(vehicle_flares, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
 
-        periodicforceflares = menu.toggle_loop(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function()
-            if not in_session() then return end
+        local periodicforceflares = menu.toggle_loop(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function()
+            if not inSession() then return end
 
             if forceflares.value then periodicforceflares.value = false end
             local count = menu.ref_by_path("Vehicle>Countermeasures>Count")
@@ -744,7 +757,7 @@ end
     -------------------------------------
 
     menu.toggle_loop(veh_weapons, "Better Explosive Weapons", {""}, "Higher Damage Output for certain Vehicle Cannons.", function()
-        if not in_session() then return end
+        if not inSession() then return end
 
         local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade")
         local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
@@ -769,7 +782,7 @@ end
     local wpn_ptrw = memory.alloc()
     local explo_mass_slider = menu.slider(veh_weapons, "Explosive Mass", {"Explosivermass"}, "", 1, 100, 10, 5, function(); end)
     menu.toggle_loop(veh_weapons, "Better Explosive AOE", {""}, "Higher Damage Output for certain Vehicle Explosives", function()
-        if not in_session() then return end
+        if not inSession() then return end
 
         local user_vehicle_ptr = entities.get_user_vehicle_as_pointer(false)
 
@@ -788,30 +801,12 @@ end
     -- Enter Nearest Vehicle
     -------------------------------------
 
-    menu.toggle_loop(vehicle_root, "Homing Missile Locked Alert", {""}, "Tells you when a player is locking onto you, as the game doesn't always play the sound.", function()
-        local veh = entities.get_user_vehicle_as_pointer(false)
-        if veh != 0 then
-            local v1 = memory.read_long(veh + 0xAE8)
-            local v2 = memory.read_long(veh + 0xA48)
-
-            if BitTest(v1, 1 << 48) and BitTest(v2, 1 << 32) then
-                util.draw_debug_text('Amber lock on detected')
-            elseif BitTest(v1, 1 << 48) and BitTest(v2, 1 << 33) then
-                util.draw_debug_text('Red lock on detected')
-            elseif not BitTest(v1, 1 << 48) and BitTest(v2, 1 << 32) then
-                util.draw_debug_text('Modded lock on detected')
-            elseif not BitTest(v1, 1 << 48) and BitTest(v2, 1 << 33) then
-                util.draw_debug_text('Modded lock on detected')
-            end
-        end
-    end)
-
     menu.action(vehicle_root, "Enter Nearest Vehicle", {""}, "Enters the nearest Vehicle that can be found.", function()
         if not IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             local player_pos = players.get_position(players.user())
             SET_PED_INTO_VEHICLE(players.user_ped(), closestveh(player_pos), -1)
             wait(100)
-            local vehname = util.get_label_text(players.get_vehicle_model(players.user()))
+            local vehname = util.get_label_text(GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(players.get_vehicle_model(players.user())))
             notify($"Set Ped into the nearest \nVehicle: {vehname}.")
         end
     end)
@@ -853,7 +848,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(vehicle_root, "Drift Mode", {"driftmode"}, "Hold shift to drift.", function()
-        if not in_session() then return end
+        if not inSession() then return end
+
         if IS_CONTROL_PRESSED(0, 21) then
             SET_VEHICLE_REDUCE_GRIP(user_vehicle, true)
         else
@@ -886,7 +882,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(vehicle_root, "Bypass Anti-Lockon", {""}, "Bypass No Lock-on features. Works great on Kiddions Users.", function()
-        if not in_session() then return end
+        if not inSession() then return end
+
         for players.list(false, true, true) as pid do
             local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local veh = GET_VEHICLE_PED_IS_USING(ped)
@@ -903,8 +900,9 @@ end
     -- Auto-Performance Tuning
     -------------------------------------
 
-    menu.toggle_loop(vehicle_root, "Auto-Perf", {""}, "Will Check every 5 seconds if your vehicle could use a upgrade.", function()
-        if not in_session() then return end
+    menu.toggle_loop(vehicle_root, "Auto-Perf", {""}, "", function()
+        if not inSession() then return end
+
         if IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
             local veh = players.get_vehicle_model(players.user())
             if IS_THIS_MODEL_A_CAR(veh) or IS_THIS_MODEL_A_BIKE(veh) then
@@ -914,23 +912,12 @@ end
     end)
 
     -------------------------------------
-    -- Shot Flames
-    -------------------------------------
-
-    menu.toggle_loop(vehicle_root, "Limit RPM", {""}, "", function()
-        if not in_session() then return end
-        if players.get_vehicle_model(players.user()) != 0 then
-            entities.set_rpm(entities.get_user_vehicle_as_pointer(), 1.2)
-            wait(100)
-        end
-    end)
-
-    -------------------------------------
     -- Keep Vehicle Clean
     -------------------------------------
 
     menu.toggle_loop(vehicle_root, "Keep Vehicle Clean", {""}, "", function()
-        if not in_session() then return end
+        if not inSession() then return end
+
         if IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
             if GET_VEHICLE_DIRT_LEVEL(user_vehicle) >= 1.0 and entities.get_owner(user_vehicle) == players.user() then
                 SET_VEHICLE_DIRT_LEVEL(user_vehicle, 0.0)
@@ -1046,11 +1033,11 @@ end
         -------------------------------------
 
         menu.toggle_loop(mpsession, "Show Talking Players", {""}, "Draws a debug text of players current talking.", function()
-            if util.is_session_started() and not util.is_session_transition_active() then
-                for players.list(true, true, true) as pid do
-                    if NETWORK_IS_PLAYER_TALKING(pid) then
-                        util.draw_debug_text(players.get_name(pid).." is talking", ALIGN_TOP_CENTRE)
-                    end
+            if not inSession() then return end
+
+            for players.list(true, true, true) as pid do
+                if NETWORK_IS_PLAYER_TALKING(pid) then
+                    util.draw_debug_text(players.get_name(pid).." is talking", ALIGN_TOP_CENTRE)
                 end
             end
         end)
@@ -1065,6 +1052,8 @@ end
 
         local projectile_blips = {}
         menu.toggle_loop(detections, "Detect Rockets", {""}, "Detects incoming Rockets and Mines.", function(on)
+            if not inSession() then return end
+
             for k, b in pairs(projectile_blips) do
                 if GET_BLIP_INFO_ID_ENTITY_INDEX(b) == 0 then
                     util.remove_blip(b)
@@ -1089,7 +1078,6 @@ end
                     end
                 end
             end
-            wait()
         end)
 
         -------------------------------------
@@ -1106,6 +1094,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(detections, "Super Drive", {""}, "Detects Players using Super Drive.", function()
+            if not inSession() then return end
+
             for players.list() as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = GET_VEHICLE_PED_IS_USING(ped)
@@ -1126,6 +1116,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(detections, "Spectate", {""}, "Detects if someone is spectating you.", function()
+            if not inSession() then return end
+
             for players.list(false) as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local cam_dist = v3.distance(players.get_position(players.user()), players.get_cam_pos(pid))
@@ -1145,6 +1137,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(detections, "Teleport", {""}, "Detects if the player has teleported.", function()
+            if not inSession() then return end
+
             for players.list() as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if not NETWORK_IS_PLAYER_FADING(pid) and IS_ENTITY_VISIBLE(ped) and not IS_PED_DEAD_OR_DYING(ped) then
@@ -1173,11 +1167,10 @@ end
         -------------------------------------
 
         menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
+            if not inSession() then return end
+
             for players.list() as pid do
-                if players.are_stats_ready(pid) and players.exists(pid) then
-                    while not players.are_stats_ready(pid) do return end
-                    wait(5, "s")
-                    if not in_session() then return end
+                if players.are_stats_ready(pid) and players.exists(pid) and inSession() then
                     local rank = players.get_rank(pid)
                     local money = players.get_money(pid)
                     local kills = players.get_kills(pid)
@@ -1314,6 +1307,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(detections, "Vehicle Godmode", {""}, "Detects if someone is using a vehicle that is in godmode.", function()
+            if not inSession() then return end
+
             for players.list(false) as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = GET_VEHICLE_PED_IS_USING(ped)
@@ -1337,6 +1332,8 @@ end
 
         local lockon = 0
         menu.toggle_loop(detections, "Anti-Lockon", {}, "Detects players using anti-lockon.", function()
+            if not inSession() then return end
+
             for players.list(false) as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = GET_VEHICLE_PED_IS_IN(ped)
@@ -1370,6 +1367,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(detections, "Modded Vehicle Upgrade", {""}, "Detects players who have modded their own or someone else's vehicles outside of a shop.", function()
+            if not inSession() then return end
+
             for players.list() as pid do
                 if not IS_PED_IN_ANY_VEHICLE(GET_PLAYER_PED_SCRIPT_INDEX(pid)) then return end
                 util.create_thread(function()
@@ -1410,6 +1409,8 @@ end
         -------------------------------------
 
         menu.toggle_loop(detections, "Vehicle Switch", {""}, "", function()
+            if not inSession() then return end
+
             for players.list() as pid do
                 if not IS_PED_IN_ANY_VEHICLE(GET_PLAYER_PED_SCRIPT_INDEX(pid)) then return end
                 util.create_thread(function()
@@ -1426,7 +1427,6 @@ end
                     end
                 end)
             end
-            wait(100)
         end)
 
         -------------------------------------
@@ -1434,6 +1434,8 @@ end
         -------------------------------------
 
         menu.toggle(detections, "Anti Cheat", {""}, "", function(on, click_type)
+            if not inSession() then return end
+
             if on then
                 players.on_flow_event_done(function(p, name, extra)
                     name = lang.get_localised(name)
@@ -1456,7 +1458,8 @@ end
         local ignored_vehs = {}
         local speed_ctr = 0
         menu.toggle_loop(detections, "Modified Vehicle Speed", {}, "Detects people who have modified their engine power or top speed.", function()
-            if NETWORK_IS_ACTIVITY_SESSION(true) or not in_session() then return end
+            if NETWORK_IS_ACTIVITY_SESSION(true) or not inSession() then return end
+
             for players.list_except() as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if not IS_PED_IN_ANY_VEHICLE(ped) then return end
@@ -1575,23 +1578,23 @@ end
         -------------------------------------
 
         menu.toggle_loop(anti_orb, "Ghost", {"ghostorb"}, "Automatically ghost Players that are using the Orbital Cannon.", function()
-            if not util.is_session_transition_active() then
-                for players.list(false) as pid do
-                    local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                    local cam_pos = players.get_cam_pos(pid)
-                    if IS_PLAYER_USING_ORBITAL_CANNON(pid) and GET_IS_TASK_ACTIVE(ped, 135)
-                    and v3.distance(GET_ENTITY_COORDS(players.user_ped(), false), cam_pos) < 400
-                    and v3.distance(GET_ENTITY_COORDS(players.user_ped(), false), cam_pos) > 340 then
-                        notify(players.get_name(pid).." Is targeting you with the Orbital Cannon.")
-                    end
-                    if players.is_in_interior(pid) then
-                        if IS_PLAYER_USING_ORBITAL_CANNON(pid) then
-                            SET_REMOTE_PLAYER_AS_GHOST(pid, true)
-                        else
-                            SET_REMOTE_PLAYER_AS_GHOST(pid, false)
-                        end
+            if not inSession() then return end
+
+            for players.list(false) as pid do
+                local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local cam_pos = players.get_cam_pos(pid)
+                if IS_PLAYER_USING_ORBITAL_CANNON(pid) and GET_IS_TASK_ACTIVE(ped, 135)
+                and v3.distance(GET_ENTITY_COORDS(players.user_ped(), false), cam_pos) < 400
+                and v3.distance(GET_ENTITY_COORDS(players.user_ped(), false), cam_pos) > 340 then
+                    notify(players.get_name(pid).." Is targeting you with the Orbital Cannon.")
+                end
+                if players.is_in_interior(pid) then
+                    if IS_PLAYER_USING_ORBITAL_CANNON(pid) then
+                        SET_REMOTE_PLAYER_AS_GHOST(pid, true)
                     else
+                        SET_REMOTE_PLAYER_AS_GHOST(pid, false)
                     end
+                else
                 end
             end
         end)
@@ -1684,41 +1687,41 @@ end
         local orbital_blips = {}
         local draw_orbital_blips = false
         menu.toggle(anti_orb, "Show Orbital Cannon", {"showorb"}, "Shows you where the Player is aiming at.", function(on)
-            if in_session() then
-                draw_orbital_blips = on
-                while true do
-                    if not draw_orbital_blips then
-                        for pid, blip in orbital_blips do
-                            util.remove_blip(blip)
-                            orbital_blips[pid] = nil
-                        end
-                        break 
+            if not inSession() then return end
+
+            draw_orbital_blips = on
+            while true do
+                if not draw_orbital_blips then
+                    for pid, blip in orbital_blips do
+                        util.remove_blip(blip)
+                        orbital_blips[pid] = nil
                     end
-                    for players.list(false, true, true) as pid do
-                        local cam_rot = players.get_cam_rot(pid)
-                        local cam_pos = players.get_cam_pos(pid)
-                        if players.is_in_interior(pid) then
-                            if IS_PLAYER_USING_ORBITAL_CANNON(pid) then
-                                util.draw_debug_text(players.get_name(pid).." is Using the Orbital Cannon!")
-                                if orbital_blips[pid] == nil then 
-                                    local blip = ADD_BLIP_FOR_COORD(cam_pos.x, cam_pos.y, cam_pos.z)
-                                    SET_BLIP_SPRITE(blip, 588)
-                                    SET_BLIP_COLOUR(blip, 59)
-                                    SET_BLIP_NAME_TO_PLAYER_NAME(blip, pid)
-                                    orbital_blips[pid] = blip
-                                else
-                                    SET_BLIP_COORDS(orbital_blips[pid], cam_pos.x, cam_pos.y, cam_pos.z)
-                                end
+                    break 
+                end
+                for players.list(false, true, true) as pid do
+                    local cam_rot = players.get_cam_rot(pid)
+                    local cam_pos = players.get_cam_pos(pid)
+                    if players.is_in_interior(pid) then
+                        if IS_PLAYER_USING_ORBITAL_CANNON(pid) then
+                            util.draw_debug_text(players.get_name(pid).." is Using the Orbital Cannon!")
+                            if orbital_blips[pid] == nil then 
+                                local blip = ADD_BLIP_FOR_COORD(cam_pos.x, cam_pos.y, cam_pos.z)
+                                SET_BLIP_SPRITE(blip, 588)
+                                SET_BLIP_COLOUR(blip, 59)
+                                SET_BLIP_NAME_TO_PLAYER_NAME(blip, pid)
+                                orbital_blips[pid] = blip
                             else
-                                if orbital_blips[pid] != nil then
-                                    util.remove_blip(orbital_blips[pid])
-                                    orbital_blips[pid] = nil
-                                end
+                                SET_BLIP_COORDS(orbital_blips[pid], cam_pos.x, cam_pos.y, cam_pos.z)
+                            end
+                        else
+                            if orbital_blips[pid] != nil then
+                                util.remove_blip(orbital_blips[pid])
+                                orbital_blips[pid] = nil
                             end
                         end
                     end
-                    wait()
                 end
+                wait()
             end
         end)
 
@@ -1774,7 +1777,7 @@ end
             explo_reactions = index
         end)
         menu.toggle_loop(weapon_reactions, "Anti Explo Sniper", {""}, "", function()
-            if not in_session() then return end
+            if not inSession() then return end
             for players.list(false) as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 if IS_PED_ARMED(ped, 4 | 2) then
@@ -1845,7 +1848,6 @@ end
 
                 end
             end
-            wait(500)
         end, clearCopySession)
 
     -------------------------------------
@@ -1937,34 +1939,32 @@ end
     -------------------------------------
 
     menu.toggle_loop(online, "Kick Attackers", {""}, "", function()
-        if in_session() then
-            for players.list(false, true, true) as pid do
-                if players.is_marked_as_attacker(pid) then
-                    local pname = players.get_name(pid)
-                    local rid = players.get_rockstar_id(pid)
+        for players.list(false, true, true) as pid do
+            if players.is_marked_as_attacker(pid) then
+                local pname = players.get_name(pid)
+                local rid = players.get_rockstar_id(pid)
 
-                    local start_time = os.time()
-                    local confirmed = false
+                local start_time = os.time()
+                local confirmed = false
 
-                    while os.time() - start_time < 30 do
-                        util.draw_centered_text("Add " .. pname .. " to blacklist? (y/n)")
-                        if util.is_key_down("Y") then
-                            confirmed = true
-                            break
-                        elseif util.is_key_down("N") then
-                            break
-                        end
-                        wait()
+                while os.time() - start_time < 30 do
+                    util.draw_centered_text("Add " .. pname .. " to blacklist? (y/n)")
+                    if util.is_key_down("Y") then
+                        confirmed = true
+                        break
+                    elseif util.is_key_down("N") then
+                        break
                     end
-
-                    -- If confirmed, add the player to the blacklist
-                    if confirmed and not is_player_in_blacklist(rid) then
-                        notify(pname .. " has been added to the blacklist for attacking you.")
-                        add_player_to_blacklist(rid, pname, "Attacker")
-                    end
-                    trigger_commands("rape " .. pname)
-                    wait(30, "s")
+                    wait()
                 end
+
+                -- If confirmed, add the player to the blacklist
+                if confirmed and not is_player_in_blacklist(rid) then
+                    notify(pname .. " has been added to the blacklist for attacking you.")
+                    add_player_to_blacklist(rid, pname, "Attacker")
+                end
+                trigger_commands("rape " .. pname)
+                wait(30, "s")
             end
         end
     end)
@@ -1985,8 +1985,9 @@ end
     isStandUserToggle = menu.toggle(host_kick, "Exclude Stand Users", {"host_kick"}, "Toggle exception for Stand User", function(); end)
     isMarkedAsModderToggle = menu.toggle(host_kick, "Exclude Modders ", {"host_kick"}, "Toggle exception for Marked as Modder", function(); end)
 
-    menu.toggle_loop(host_kick, "Kick Host", {""}, "", function()
-        if not in_session() then return end
+    menu.toggle_loop(host_kick, "Kick Host", {""}, "Automatically kicks the Host if you're next in queue.", function()
+        if not inSession() then return end
+
         local hostId = players.get_host()
         local index = players.get_host_queue_position(players.user())
 
@@ -2023,7 +2024,7 @@ end
         -------------------------------------
 
         menu.action(missions_tunables, "Start Headhunter", {"hh", "headhunter"}, "Starts the CEO mission \"Headhunter\".", function()
-            if not StartCEO() or not in_session() then return end
+            if not StartCEO() or not inSession() then return end
             wait(1000)
             IA_MENU_OPEN_OR_CLOSE()
             IA_MENU_ENTER(1)
@@ -2203,64 +2204,21 @@ end
     for index, data in bm_safe_table do
         local name, stat, max = data[1], data[2], data[3]
         menu.toggle_loop(bm_list, $"Monitor {name}", {$"monitor{name}"}, "", function()
-            if in_session() then
-                local value = SSTAT_GET_INT(stat)
-                util.draw_debug_text($"{name} $: {value} | {max}")
-            end
+            if not inSession() then return end
+
+            local value = SSTAT_GET_INT(stat)
+            util.draw_debug_text($"{name} $: {value} | {max}")
         end)
     end
-
-    -------------------------------------
-    -- Stat Editor
-    -------------------------------------
-
-    menu.divider(stat_editing, "Set Time")
-    add_playtime = menu.toggle(stat_editing, "Add Additional Playtime", {""}, "", function(); end)
-    local PLAYTIME_DAYS = menu.slider(stat_editing, "Days", {""}, "", 0, 50000, 0, 1, function(); end)
-    local PLAYTIME_HOURS = menu.slider(stat_editing,"Hours", {""}, "", 0, 50000, 0, 1, function(); end)
-    local PLAYTIME_MINS = menu.slider(stat_editing, "Minutes", {""}, "", 0, 50000, 0, 1, function(); end)
-    for index, this in PlaytimeStats do
-        local name = this[1]
-        local stat = this[2]
-        local helpText = this[3] or ""
-        menu.action(stat_editing, $"Edit {name}", {$"edit{name}"}, helpText, function()
-            if not menu.get_value(add_playtime) then
-                SSTAT_SET_INT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
-            else
-                STAT_INCREMENT(stat, menu.get_value(PLAYTIME_DAYS) * 86400000 + menu.get_value(PLAYTIME_HOURS) * 3600000 + menu.get_value(PLAYTIME_MINS) * 60000)
-            end
-            trigger_commands("forcecloudsave")
-        end)
-    end
-
-    menu.divider(stat_editing, "Set Dates")
-    local Stat_day = menu.slider(stat_editing, "Day", {""}, "", 0, 31, os.date("%d"), 1, function(); end)
-    local Stat_month = menu.slider(stat_editing,"Month", {""}, "", 0, 12, os.date("%m"), 1, function(); end)
-    local Stat_year = menu.slider(stat_editing, "Year", {""}, "", 2013, os.date("%Y"), os.date("%Y"), 1, function(); end)
-    for index, that in playtimeDates do
-        local name = that[1]
-        local stat = that[2]
-        local helpText = that[3] or ""
-        menu.action(stat_editing, $"Edit {name}", {$"edit{name}"}, helpText, function()
-            SSTAT_SET_DATE(stat, menu.get_value(Stat_year), menu.get_value(Stat_month), menu.get_value(Stat_day), 0, 59)
-            trigger_commands("forcecloudsave")
-        end)
-    end
-
-    -------------------------------------
-    -- Remove The Drainage Pipe
-    ------------------------------------- 
-
-    menu.action(tunables, "Remove The Drainage Pipe", {""}, "", function()
-        DELETE_OBJECT_BY_HASH(joaat("prop_chem_grill_bit"))
-    end)
 
     -------------------------------------
     -- Toggle Godmode for Vehicle Cargo
     -------------------------------------
 
     menu.toggle_loop(tunables, "Godmode for Vehicle Cargo", {""}, "Source Only. Relies on the Vehicle's blip.", function()
-        if in_session() and players.get_boss(players.user()) == players.user() then
+        if not inSession() then return end
+
+        if players.get_boss(players.user()) == players.user() then
             for entities.get_all_vehicles_as_handles() as veh do
                 if GET_BLIP_SPRITE(GET_BLIP_FROM_ENTITY(veh)) == 523 and GET_ENTITY_CAN_BE_DAMAGED(veh) and NETWORK_HAS_CONTROL_OF_ENTITY(veh) then
                     SET_ENTITY_CAN_BE_DAMAGED(veh, false)
@@ -2274,7 +2232,7 @@ end
     -------------------------------------
 
     menu.action(tunables, "TP Inside Vehicle Cargo", {"vc"}, "Source Only. Relies on the Vehicle's blip.", function()
-        if in_session() and players.get_boss(players.user()) == players.user() then
+        if inSession() and players.get_boss(players.user()) == players.user() then
             for entities.get_all_vehicles_as_handles() as veh do
                 local bitset, owner = DECOR_GET_INT(veh, "MPBitset"), DECOR_GET_INT(veh, "ContrabandDeliveryType")
                 if bitset == 11264 and owner == -81613951 then
@@ -2477,7 +2435,9 @@ end
     -------------------------------------
 
     menu.toggle_loop(misc, "Disable Control Keys", {"disablecontrolkeys", "dn"}, "Disables certain Keys while Stand is open.", function()
+        if not inSession() then return end
         if not menu.is_open() then return end
+
         for numpadControls as control do
             DISABLE_CONTROL_ACTION(2, control, true)
         end
@@ -2488,27 +2448,10 @@ end
     -------------------------------------
 
     menu.toggle_loop(misc, "Disable Scripted Music", {""}, "", function()
+        if not inSession() then return end
+
         if AUDIO_IS_MUSIC_PLAYING() then
             TRIGGER_MUSIC_EVENT("GLOBAL_KILL_MUSIC") -- Credits to err_net_array for the Audio Name <3
-        end
-    end)
-
-    -------------------------------------
-    -- Toggle Thunder Weather
-    -------------------------------------
-
-    menu.toggle(misc, "Toggle Thunder Weather", {"thunder"}, "Requests Thunder Weather Session-wide.", function(toggled)
-        if toggled then
-            trigger_commands("weather normal")
-            wait(1000)
-            trigger_command(thunder_on)
-            wait(10000)
-            notify("Weather Set to Thunder.")
-        else
-            trigger_command(thunder_off)
-            wait(10000)
-            trigger_commands("weather extrasunny")
-            notify("Weather set back to Normal.")
         end
     end)
 
@@ -2547,6 +2490,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(misc, "Rockstar Verified All", {""}, "You will always be Rockstar Verified with this. :troll240p:", function()
+        if not inSession() then return end
+
         if IS_CONTROL_JUST_PRESSED(1, 245) then
             chat.ensure_open_with_empty_draft(false)
             chat.add_to_draft("¦ ")
@@ -2589,6 +2534,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(misc, "Disable Phone calls", {""}, "Disables Phone calls when certain conditions are met.", function()
+        if not inSession() then return end
+
         local phone = menu.ref_by_path("Game>Disables>Straight To Voicemail")
         if chat.is_open() or IS_PLAYER_FREE_AIMING(players.user()) or util.is_interaction_menu_open() or menu.is_open() then
             if not phone.value then
@@ -2653,10 +2600,12 @@ end
     -------------------------------------
 
     menu.toggle_loop(ai_made, "Remove Bounty", {"remove_bounty"}, "Automatically remove bounties.", function()
+        if not inSession() then return end
+
         local user = players.user()
         local has_bounty = players.get_bounty(user)
 
-        if has_bounty and in_session() and not players.is_in_interior(user) then
+        if has_bounty and not players.is_in_interior(user) then
             repeat
                 trigger_commands("removebounty")
                 wait(5, "s")
@@ -2664,7 +2613,6 @@ end
             until bounty == nil
             notify("Bounty has been Claimed.")
         end
-        wait(20, "s")
     end)
 
     -------------------------------------
@@ -2672,6 +2620,8 @@ end
     -------------------------------------      
 
     menu.toggle_loop(ai_made, "Auto Skip Cutscenes", {"auto_skip_cutscenes"}, "Automatically skips cutscenes.", function()
+        if not inSession() then return end
+
         if IS_CUTSCENE_PLAYING() then
             repeat
                 STOP_CUTSCENE_IMMEDIATELY()
@@ -2686,6 +2636,8 @@ end
     -------------------------------------
 
     menu.toggle_loop(ai_made, "Auto Skip Conversations", {"auto_skip_conversations"}, "Automatically skips conversations.", function()
+        if not inSession() then return end
+
         if IS_SCRIPTED_CONVERSATION_ONGOING() then
             repeat
                 STOP_SCRIPTED_CONVERSATION(false)
@@ -2702,8 +2654,9 @@ end
 -------------------------------------
 
 for key, value in pairs(Modulepath) do
+    local modlist = menu.list(modules, value.name)
     if not io.isfile(value.absolute_path) then
-        menu.action(modules, $"Download {value.name}", {""}, "", function()
+        menu.action(modlist, $"Download {value.name}", {""}, "", function()
             async_http.init("raw.githubusercontent.com", value.giturl, function(body, headers, status_code)
                 if status_code != 404 then
                     local file = io.open(value.absolute_path, "w+")
@@ -2720,8 +2673,19 @@ for key, value in pairs(Modulepath) do
             async_http.dispatch()
         end)
     else
+        menu.action(modlist, $"Update {value.name}", {""}, "Updates are not Automatic. Please Restart the script after Updating.", function()
+            async_http.init("raw.githubusercontent.com", value.giturl, function(body, headers, status_code)
+                if status_code != 404 then
+                    local file = io.open(value.absolute_path, "w+")
+                    file:write(body)
+                    file:close()
+                end
+            end)
+            async_http.dispatch()
+        end)
+
         require(value.path)
-        menu.action(modules, $"Remove {value.name}", {""}, "", function()
+        menu.action(modlist, $"Remove {value.name}", {""}, "", function()
             os.remove(value.absolute_path)
             notify($"Removed {value.name}. Please restart the Script now.")
         end)
@@ -2744,9 +2708,11 @@ if is_developer() then
 
     local modified_vehicle = menu.readonly(sdebug, "Current Vehicle: ", "N/A")
     menu.toggle_loop(sdebug, "Better Vehicles", {"bv"}, "", function()
+        if not inSession() then return end
+
         if entities.get_user_vehicle_as_pointer(false) != 0 then
             local vmodel = players.get_vehicle_model(players.user())
-            local vname = util.get_label_text(vmodel)
+            local vname = util.get_label_text(GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(players.get_vehicle_model(players.user())))
             local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
             local CflyingHandling = entities.handling_get_subhandling(CHandlingData, 1)
             if IS_PLAYER_PLAYING(players.user()) and GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
@@ -2790,26 +2756,22 @@ if is_developer() then
     -- Increase Weapon Range
     -------------------------------------
 
-    local modifiedRange = {}
     menu.toggle_loop(sdebug, "Increase Weapon Range", {""}, "", function()
-        if util.is_session_transition_active() then return end
-        if players.is_in_interior(players.user()) then return end
-        local user = players.user_ped()
-        local weaponHash, vehicleWeapon = getWeaponHash(user)
-        if modifiedRange[weaponHash] then return end
-        local pointer = (vehicleWeapon and 0x70 or 0x20)
-        local PedPointer = entities.handle_to_pointer(user)
-        modifiedRange[weaponHash] = {
-            minAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x178}),
-            maxAddress   = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x28C}), -- m_weapon_range
-            rangeAddress = addr_from_pointer_chain(PedPointer, {0x10B8, pointer, 0x288}), -- m_lock_on_range
+        if not inSession() or players.is_in_interior(players.user()) then
+            return
+        end
+
+        local userPed = players.user_ped()
+        local weaponHash, vehicleWeapon = getWeaponHash(userPed)
+        local pointerOffset = (vehicleWeapon and 0x70 or 0x20) -- m_vehicle_weapon_info or m_weapon_info
+        local modifiedRange = {
+            maxAddress = addr_from_pointer_chain(userPed, {0x10B8, pointerOffset, 0x28C}), -- m_weapon_range
+            rangeAddress = addr_from_pointer_chain(userPed, {0x10B8, pointerOffset, 0x288}), -- m_lock_on_range
         }
 
-        if modifiedRange[weaponHash].rangeAddress != 0 then
-            modifiedRange[weaponHash].originalMax   = memory.read_float(modifiedRange[weaponHash].maxAddress)
-            modifiedRange[weaponHash].originalRange = memory.read_float(modifiedRange[weaponHash].rangeAddress)
-            memory.write_float(modifiedRange[weaponHash].maxAddress,   10000)
-            memory.write_float(modifiedRange[weaponHash].rangeAddress, 10000)
+        if modifiedRange.rangeAddress != 0 then
+            memory.write_float(modifiedRange.maxAddress, 10000)
+            memory.write_float(modifiedRange.rangeAddress, 10000)
         end
     end)
 
@@ -2883,7 +2845,7 @@ if is_developer() then
 
         menu.action(nativevehicle, "Get Vehicle", {""}, "Gets The current Model and Name.", function()
             local user = players.user()
-            local vname = lang.get_localised(util.get_label_text(players.get_vehicle_model(user)))
+            local vname = util.get_label_text(GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(players.get_vehicle_model(players.user())))
             local vmodel = players.get_vehicle_model(user)
             local modelname = util.reverse_joaat(vmodel)
             local plate_text = GET_VEHICLE_NUMBER_PLATE_TEXT(user_vehicle)
@@ -3074,7 +3036,6 @@ players.add_command_hook(function(pid, cmd)
             { Hash = 2753668402, Model = "W_LR_40mm",               amount = 5 },
             { Hash = 1274757841, Model = "Prop_Armour_Pickup",      amount = 1 },
             { Hash = 1548844439, Model = "prop_ld_ammo_pack_02",    amount = 30 },
-            --{ Hash = 1651898027, Model = "Prop_Drug_package_02", amount = 1 },
         }
 
         menu.action(friendly, "Drop Pickups", {}, $"Drop various Pickups for {pname}.", function()
@@ -3288,7 +3249,7 @@ players.add_command_hook(function(pid, cmd)
         -- Attackers
         -------------------------------------
 
-        attack_ent_gm = menu.toggle(vehattack, "Enable Godmode", {""}, "", function(); end)
+        local attack_ent_gm = menu.toggle(vehattack, "Enable Godmode", {""}, "", function(); end)
 
         menu.action(vehattack, "Send Tank", {""}, "", function()
             local gm = menu.get_value(attack_ent_gm)
@@ -3432,19 +3393,18 @@ players.add_command_hook(function(pid, cmd)
         -- Explosion Loop
         -------------------------------------
 
-        local usingExplosionLoop = false
         menu.slider(customExplosion, "Loop Speed", {"expspeed"}, "", 50, 10000, 1000, 10, function(value)
             local delay = value
         end)
         menu.toggle(customExplosion, "Owned Explosion Loop", {""}, "", function(on)
-            usingExplosionLoop = on
+            local usingExplosionLoop = on
             while usingExplosionLoop and is_player_active(pid, false, true) and not util.is_session_transition_active() do
                 ADD_OWNED_EXPLOSION(players.user_ped(), players.get_position(pid), 1, 1.0, false, true, 0.0)
                 wait(delay)
             end
         end)
         menu.toggle(customExplosion, "Explosion Loop", {""}, "", function(on)
-            usingExplosionLoop = on
+            local usingExplosionLoop = on
             while usingExplosionLoop and is_player_active(pid, false, true) and not util.is_session_transition_active() do
                 ADD_EXPLOSION(players.get_position(pid), 1, 1.0, true, false, 0.0, false)
                 wait(delay)
@@ -3469,7 +3429,7 @@ players.add_command_hook(function(pid, cmd)
         -- Ghost to User
         -------------------------------------
 
-        menu.toggle(trolling, "Ghost Player", {"ghost", "g"}, "Makes you ghosted to that ", function(toggled)
+        menu.toggle(trolling, "Ghost Player", {"ghost"}, "Player will be ghosted for you.", function(toggled)
             if pid == players.user() then notify(lang.get_localised(-1974706693)); trigger_commands($"ghost{pname} off") end
             SET_REMOTE_PLAYER_AS_GHOST(pid, toggled)
         end)
@@ -3677,7 +3637,7 @@ players.add_command_hook(function(pid, c)
     Jointimes[pid] = os.clock()
 
     if showJoinInfomsg then
-        if not in_session() then return end
+        if not inSession() then return end
         notify(names[pid].." has joined.\nSlot: "..pid.."\nRID: "..rids[pid].."\nIPv4: "..ips[pid])
     end
     if showJoinInfolog then
@@ -3727,8 +3687,6 @@ if async_http.have_access() then
     end)
 end
 
-
-
 util.create_tick_handler(function()
     local carCheck = entities.get_user_vehicle_as_handle(true)
     local focused = players.get_focused()[1]
@@ -3770,9 +3728,9 @@ util.create_tick_handler(function()
             local player = tostring(get_blacklist_reason(rid)).."." or "No Reason given"
             player:gsub(", .", ".")
             notify($"{name} will be kicked due to being on the Blacklist. Reason: {player}")
-            wait(30, "s")
             trigger_commands($"historyblock{name} on")
             trigger_commands($"loveletter{name}")
+            wait(30, "s")
         end
     end
 end)

@@ -190,9 +190,6 @@ interiors = {
 }
 
 animation_table = {
-    -- Sexy
-    {anim_sexy, "Car blowjob", "mini@prostitutes@sexlow_veh", "low_car_bj_loop_female"},
-    {anim_sexy, "Twerk", "switch@trevor@mocks_lapdance", "001443_01_trvs_28_idle_stripper"},
     -- Sitting
     {anim_sit, "Sit Ground", "amb@world_human_picnic@female@idle_a", "idle_a"},
     {anim_sit, "Sit Ground 2", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_idle_nowork"},

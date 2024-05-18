@@ -36,7 +36,7 @@ function gen_fren_funcs(name)
     end)
 end
 
-function in_session()
+function inSession()
     if util.is_session_started() and not util.is_session_transition_active() then
         return true
     else
@@ -179,6 +179,7 @@ function spawn_ped(model_name, pos, gm = false)
 end
 function spawn_obj(model_name, pos)
     local hash = joaat(model_name)
+
     if IS_MODEL_VALID(hash) then
         util.request_model(hash)
         local obj = entities.create_object(hash, pos)
@@ -1062,7 +1063,7 @@ end
 
 local advertisedPlayers = {}
 function handleAdvertisement(p, name)
-    if not in_session() then return end
+    if not inSession() then return end
 
     local n = players.get_name(p)
     local rid = players.get_rockstar_id(p)
