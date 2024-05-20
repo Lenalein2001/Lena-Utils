@@ -757,7 +757,7 @@ function save_player_info(pid)
         player_info[#player_info + 1] = "\nIs Attacker: " .. tostring(is_attacker and "Yes" or "No")
     else
         player_info[#player_info + 1] = "\n\nNo detections triggered."
-        player_info[#player_info + 1] = "\n\n" .. getClassification(pid)
+        player_info[#player_info + 1] = "\n\n" .. (getClassification(pid) or "")
     end
 
     file:write(table.concat(player_info))
@@ -1126,7 +1126,7 @@ local data_e = load_data(EXPORT_BLACKLIST_FILE)
 local data_l = load_data(BLACKLIST_FILE)
 
 -- Single function for player data management (combined functionality)
-local function manage_player_data(rid, playerName, action, reason = "")
+local function manage_player_data(rid, playerName, action, reason)
     local id = tostring(rid)
     if action == "add" then
         -- Check for existing player by RID in both data sets
@@ -1171,6 +1171,21 @@ local function manage_player_data(rid, playerName, action, reason = "")
             end
         end
         return nil
+    elseif action == "delete" then
+        for i, player in ipairs(data_e) do
+            if player.id == id then
+                table.remove(data_e, i)
+                save_data(data_e, EXPORT_BLACKLIST_FILE)
+                break
+            end
+        end
+        for i, player in ipairs(data_l) do
+            if player.id == id then
+                table.remove(data_l, i)
+                save_data(data_l, BLACKLIST_FILE)
+                break
+            end
+        end
     end
 end
 
@@ -1183,6 +1198,8 @@ end
 function is_player_in_blacklist(rid)
     return manage_player_data(rid, nil, "check")
 end
+
+-- Get the reason why the player is blacklisted
 function get_blacklist_reason(rid)
     local id = tostring(rid)
     for _, player in ipairs(data_e) do
@@ -1198,21 +1215,33 @@ function get_blacklist_reason(rid)
     return "No reason given."
 end
 
+-- Delete player from blacklist
+function delete_player_from_blacklist(rid)
+    manage_player_data(rid, nil, "delete")
+end
+
+-- Create the blacklist menu
 local retards_div = menu.divider(retards, "Blacklist")
 local bl_counter = 0
-for _, players in ipairs(data_e) do
+for _, player in ipairs(data_e) do
     bl_counter = bl_counter + 1
-    local c = menu.list(retards, players.name, {""}, "")
-    local reason = players.reason
+    local c = menu.list(retards, player.name, {}, "")
+    local reason = player.reason
     if reason == nil or reason == "" then
         reason = "No Reason provided."
     end
-    menu.readonly(c, "Name", players.name)
-    menu.readonly(c, "RID", players.id)
+    menu.readonly(c, "Name", player.name)
+    menu.readonly(c, "RID", player.id)
     menu.readonly(c, "Reason", reason)
-    local added_on_formatted = os.date("%c", players.added_on)
-    menu.readonly(c, "Added On", added_on_formatted) 
-    menu.set_menu_name(retards_div, $"Blacklist ({bl_counter})")
+    local added_on_formatted = os.date("%c", player.added_on)
+    menu.readonly(c, "Added On", added_on_formatted)
+    menu.action(c, "Delete", {}, "Remove this player from the blacklist", function()
+        delete_player_from_blacklist(player.id)
+        menu.delete(c) -- Remove the entry from the menu
+        bl_counter = bl_counter - 1
+        menu.set_menu_name(retards_div, "Blacklist (" .. bl_counter .. ")")
+    end)
+    menu.set_menu_name(retards_div, "Blacklist (" .. bl_counter .. ")")
 end
 
 function spawn_pickup(pickupData, posX, posY, posZ, rotX, rotY, rotZ)

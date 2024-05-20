@@ -383,7 +383,7 @@ end
         local heal_factor = 1.10 -- aka 10%
 
         for players.list_except(true) as pid do
-            if players.user() or user_vehicle == NETWORK_GET_KILLER_OF_PLAYER(pid, wep) then
+            if (players.user() or user_vehicle) == NETWORK_GET_KILLER_OF_PLAYER(pid, wep) then
                 user_vehicle = user_vehicle or entities.get_user_vehicle_as_handle(false)
 
                 if user_vehicle then
@@ -2654,7 +2654,12 @@ end
 -------------------------------------
 
 for key, value in pairs(Modulepath) do
-    local modlist = menu.list(modules, value.name)
+    local modlist = menu.list(modules, value.name, {""}, "Status: ".. (io.isfile(value.absolute_path) and "Installed" or "Not Installed"))
+    if io.isfile(value.absolute_path) then
+        menu.set_indicator_type(modlist, LISTINDICATOR_ON)
+    else
+        menu.set_indicator_type(modlist, LISTINDICATOR_OFF)
+    end
     if not io.isfile(value.absolute_path) then
         menu.action(modlist, $"Download {value.name}", {""}, "", function()
             async_http.init("raw.githubusercontent.com", value.giturl, function(body, headers, status_code)
@@ -2794,8 +2799,8 @@ if is_developer() then
     local webhook_url = web_file:read("a")
     web_file:close()
 
-    local music_vol_memory_address = memory.scan("") + 0x1FE5E38 -- Credits to err_net_array
-    radio_volume_ref = menu.click_slider_float(sdebug, "Radio Volume", {"modifyradiovolume"}, "This might earrape you... have fun!", 0, 100000, memory.read_byte(music_vol_memory_address) * 100, 100, function()
+    local music_vol_memory_address = memory.rip(memory.scan("8B 05 ? ? ? ? 41 3B C7 41 0F 45 C7 89 05 ? ? ? ? 8B 05 ? ? ? ? 89 2D ? ? ? ?") + 2)
+    local radio_volume_ref = menu.click_slider_float(sdebug, "Radio Volume", {"modifyradiovolume"}, "This might earrape you... have fun!", 0, 100000, memory.read_byte(music_vol_memory_address) * 100, 100, function()
         local value = (menu.get_value(radio_volume_ref) / 100)
         original_music_volume = value
         memory.write_byte(music_vol_memory_address, value)
