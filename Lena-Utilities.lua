@@ -459,7 +459,7 @@ end
     -- Unfair Triggerbot
     -------------------------------------
 
-    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "Slightly worse than Stand's triggerbot. Not including the Magic Bullets.", function()
+    menu.toggle_loop(weap, "Triggerbot", {"triggerbotall"}, "Slightly worse than Stand's triggerbot. Not including the Magic Bullets. From Jinx. Modified.", function()
         if not inSession() then return end
 
         local wpn = GET_SELECTED_PED_WEAPON(players.user_ped())
@@ -1093,7 +1093,7 @@ end
         -- Super Drive
         -------------------------------------
 
-        menu.toggle_loop(detections, "Super Drive", {""}, "Detects Players using Super Drive.", function()
+        menu.toggle_loop(detections, "Super Drive", {""}, "Detects Players using Super Drive. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list() as pid do
@@ -1115,7 +1115,7 @@ end
         -- Spectate
         -------------------------------------
 
-        menu.toggle_loop(detections, "Spectate", {""}, "Detects if someone is spectating you.", function()
+        menu.toggle_loop(detections, "Spectate", {""}, "Detects if someone is spectating you. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list(false) as pid do
@@ -1136,7 +1136,7 @@ end
         -- Teleport
         -------------------------------------
 
-        menu.toggle_loop(detections, "Teleport", {""}, "Detects if the player has teleported.", function()
+        menu.toggle_loop(detections, "Teleport", {""}, "Detects if the player has teleported. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list() as pid do
@@ -1205,7 +1205,7 @@ end
         -------------------------------------
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
         -- Small changes will be made.
-        menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus.", function()
+        menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus. From Jinx. Heaviy modified.", function()
             for players.list() as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = GET_VEHICLE_PED_IS_USING(ped)
@@ -1261,7 +1261,7 @@ end
         -- Thunder Join
         -------------------------------------
 
-        menu.toggle_loop(detections, "Modded Script Host Migration", {""}, "Detects people who give script host to another player or took script host while still in a transition.", function()
+        menu.toggle_loop(detections, "Modded Script Host Migration", {""}, "Detects people who give script host to another player or took script host while still in a transition. From Jinx. Modified.", function()
             if not isNetPlayerOk(players.user()) then return end
             local data = memory.alloc(56 * 8)
             for queue = 0, 2 do
@@ -1306,7 +1306,7 @@ end
         -- Vehicle Godmode
         -------------------------------------
 
-        menu.toggle_loop(detections, "Vehicle Godmode", {""}, "Detects if someone is using a vehicle that is in godmode.", function()
+        menu.toggle_loop(detections, "Vehicle Godmode", {""}, "Detects if someone is using a vehicle that is in godmode. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list(false) as pid do
@@ -1331,7 +1331,7 @@ end
         -------------------------------------
 
         local lockon = 0
-        menu.toggle_loop(detections, "Anti-Lockon", {}, "Detects players using anti-lockon.", function()
+        menu.toggle_loop(detections, "Anti-Lockon", {}, "Detects players using anti-lockon. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list(false) as pid do
@@ -1366,7 +1366,7 @@ end
         -- Modded Vehicle Upgrade
         -------------------------------------
 
-        menu.toggle_loop(detections, "Modded Vehicle Upgrade", {""}, "Detects players who have modded their own or someone else's vehicles outside of a shop.", function()
+        menu.toggle_loop(detections, "Modded Vehicle Upgrade", {""}, "Detects players who have modded their own or someone else's vehicles outside of a shop. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list() as pid do
@@ -1457,7 +1457,7 @@ end
 
         local ignored_vehs = {}
         local speed_ctr = 0
-        menu.toggle_loop(detections, "Modified Vehicle Speed", {}, "Detects people who have modified their engine power or top speed.", function()
+        menu.toggle_loop(detections, "Modified Vehicle Speed", {}, "Detects people who have modified their engine power or top speed. From Jinx. Modified.", function()
             if NETWORK_IS_ACTIVITY_SESSION(true) or not inSession() then return end
 
             for players.list_except() as pid do
@@ -2171,14 +2171,6 @@ end
     end)
 
     -------------------------------------
-    -- Enable R* DLC
-    -------------------------------------
-
-    menu.toggle(tunables, "Unlock R* Clothes", {""}, "Unlocks some Rockstar Clothes.", function(toggled)
-        trigger_commands($"admindlc {toggled}")
-    end)
-
-    -------------------------------------
     -- Start a BB
     -------------------------------------
 
@@ -2379,35 +2371,6 @@ end
         end
 
         -------------------------------------
-        -- Buy Ammo
-        -------------------------------------
-
-        menu.action(shortcuts, "Buy Ammo", {"buyammo"}, "Buys ammo the legit way.", function()
-            wait(500)
-            if players.get_boss(players.user()) == -1 then
-                IA_MENU_OPEN_OR_CLOSE()
-                IA_MENU_DOWN(2)
-                IA_MENU_ENTER(1)
-                IA_MENU_DOWN(6)
-                IA_MENU_ENTER(1)
-                IA_MENU_LEFT(1)
-                IA_MENU_DOWN(1)
-                IA_MENU_ENTER(1)
-                IA_MENU_OPEN_OR_CLOSE()
-            else
-                IA_MENU_OPEN_OR_CLOSE()
-                IA_MENU_DOWN(3)
-                IA_MENU_ENTER(1)
-                IA_MENU_DOWN(6)
-                IA_MENU_ENTER(1)
-                IA_MENU_LEFT(1)
-                IA_MENU_DOWN(1)
-                IA_MENU_ENTER(1)
-                IA_MENU_OPEN_OR_CLOSE()
-            end
-        end)
-
-        -------------------------------------
         -- Spawn Buzzard
         -------------------------------------
 
@@ -2514,7 +2477,7 @@ end
     }
     local pop_multiplier_id
 
-    menu.toggle(misc, "No Traffic", {""}, "Deletes all Traffic from the Map. Works Session-Wide.", function(toggled) -- Hexarobi
+    menu.toggle(misc, "No Traffic", {""}, "Deletes all Traffic from the Map. Works Session-Wide. From Hexa.", function(toggled) -- Hexarobi
         if toggled then
             local ped_sphere, traffic_sphere
             if config.disable_peds then ped_sphere = 0.0 else ped_sphere = 1.0 end
@@ -2786,12 +2749,6 @@ if is_developer() then
         end
     end)
 
-    debug_hk = menu.action(sdebug, "Kick Host", {"hk"}, $"Kick {players.get_name(players.get_host())}", function()
-        if not NETWORK_IS_HOST() then
-            trigger_commands($"kick{players.get_name(players.get_host())}")
-        end
-    end)
-
     menu.action(sdebug, "Set Webhook Url", {"setwebhookurl"}, "", function()
         menu.show_command_box("setwebhookurl "); end, function(webhook_url)
         if string.startswith(webhook_url, "https://discord.com/api/webhooks") or string.startswith(webhook_url, "https://canary.discord.com/api/webhooks") then
@@ -2985,7 +2942,7 @@ players.add_command_hook(function(pid, cmd)
 
         -------------------------------------
         -- Fix Blackscreen
-        -------------------------------------         
+        -------------------------------------
 
         menu.action(friendly, "Fix Blackscreen", {"fixblackscreen"}, $"Tries to fix a stuck Blackscreen for {pname}.", function()
             trigger_commands($"givesh {pname}; aptme {pname}")
@@ -3305,7 +3262,7 @@ players.add_command_hook(function(pid, cmd)
         -- Unfair Triggerbot
         -------------------------------------
 
-        local paimbor = menu.toggle_loop(trolling, "Unfair Triggerbot", {"triggerbot"}, "It tries to Aim for the head, but chances are low if they are moving.", function()
+        local paimbor = menu.toggle_loop(trolling, "Unfair Triggerbot", {"triggerbot"}, "It tries to Aim for the head, but chances are low if they are moving. From Jinx. Modified.", function()
             if not players.exists(pid) then paimbor.value = false return end
             if pid == players.user() then
                 notify(lang.get_localised(-1974706693))
@@ -3736,7 +3693,7 @@ util.create_tick_handler(function()
     for players.list() as pid do
         local rid, name = players.get_rockstar_id(pid), players.get_name(pid)
         if is_player_in_blacklist(rid) then
-            local player = tostring(get_blacklist_reason(rid)).."." or "No Reason given"
+            local player = tostring(get_blacklist_reason(rid)).."." or "No Reason given."
             player:gsub(", .", ".")
             notify($"{name} will be kicked due to being on the Blacklist. Reason: {player}")
             trigger_commands($"historyblock{name} on")
