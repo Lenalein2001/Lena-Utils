@@ -1220,7 +1220,54 @@ function delete_player_from_blacklist(rid)
     manage_player_data(rid, nil, "delete")
 end
 
+-- Search for a player in the blacklist by RID or name
+function search_blacklist(query)
+    local results = {}
+    notify("Searching...")
+    for _, player in ipairs(data_e) do
+        if player.id == query or player.name:lower():find(query:lower()) then
+            table.insert(results, player)
+        end
+    end
+    for _, player in ipairs(data_l) do
+        if player.id == query or player.name:lower():find(query:lower()) then
+            table.insert(results, player)
+        end
+    end
+    return results
+end
+
 -- Create the blacklist menu
+menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in the blacklist by RID or Name", function()
+    menu.show_command_box("searchbl "); end, function(input)
+    local query = string.lstrip(input, "searchbl ")
+
+    if query and query ~= "" then
+        local results = search_blacklist(query)
+        if #results == 0 then
+            menu.notify("No results found for: " .. query)
+        else
+            
+            for _, player in ipairs(results) do
+                local result_menu = menu.list(retards, player.name .. " (Search Result)", {}, "")
+                local reason = player.reason
+                if reason == nil or reason == "" then
+                    reason = "No Reason provided."
+                end
+                menu.readonly(result_menu, "Name", player.name)
+                menu.readonly(result_menu, "RID", player.id)
+                menu.readonly(result_menu, "Reason", reason)
+                local added_on_formatted = os.date("%c", player.added_on)
+                menu.readonly(result_menu, "Added On", added_on_formatted)
+                menu.action(result_menu, "Delete", {}, "Remove this player from the blacklist", function()
+                    delete_player_from_blacklist(player.id)
+                    menu.delete(result_menu) -- Remove the entry from the menu
+                end)
+            end
+        end
+    end
+end)
+
 local retards_div = menu.divider(retards, "Blacklist")
 local bl_counter = 0
 for _, player in ipairs(data_e) do
@@ -1243,6 +1290,7 @@ for _, player in ipairs(data_e) do
     end)
     menu.set_menu_name(retards_div, "Blacklist (" .. bl_counter .. ")")
 end
+
 
 function spawn_pickup(pickupData, posX, posY, posZ, rotX, rotY, rotZ)
     util.request_model(pickupData.Model)

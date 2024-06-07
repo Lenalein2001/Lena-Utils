@@ -1938,33 +1938,39 @@ end
     -- Kick Attackers
     -------------------------------------
 
+    local kicked_players = {}
     menu.toggle_loop(online, "Kick Attackers", {""}, "", function()
         for players.list(false, true, true) as pid do
             if players.is_marked_as_attacker(pid) then
                 local pname = players.get_name(pid)
                 local rid = players.get_rockstar_id(pid)
 
-                local start_time = os.time()
-                local confirmed = false
+                if not table.contains(kicked_players, rid) then
+                    local start_time = os.time()
+                    local confirmed = false
 
-                while os.time() - start_time < 30 do
-                    util.draw_centered_text("Add " .. pname .. " to blacklist? (y/n)")
-                    if util.is_key_down("Y") then
-                        confirmed = true
-                        break
-                    elseif util.is_key_down("N") then
-                        break
+                    while os.time() - start_time < 30 do
+                        util.draw_centered_text("Add " .. pname .. " to blacklist? (y/n)")
+                        if util.is_key_down("Y") then
+                            confirmed = true
+                            break
+                        elseif util.is_key_down("N") then
+                            break
+                        end
+                        wait()
                     end
-                    wait()
-                end
 
-                -- If confirmed, add the player to the blacklist
-                if confirmed and not is_player_in_blacklist(rid) then
+                    -- If confirmed, add the player to the blacklist
+                    if confirmed and not is_player_in_blacklist(rid) then
+                        notify(pname .. " has been added to the blacklist for attacking you.")
+                        add_player_to_blacklist(rid, pname, "Attacker")
+                    end
+                    --trigger_commands("rape " .. pname)
                     notify(pname .. " has been added to the blacklist for attacking you.")
-                    add_player_to_blacklist(rid, pname, "Attacker")
+
+                    -- Mark this player as kicked
+                    kicked_players[rid] = rid
                 end
-                trigger_commands("rape " .. pname)
-                wait(30, "s")
             end
         end
     end)
@@ -3643,7 +3649,7 @@ players.add_command_hook(function(pid, c)
 
     if showJoinInfomsg then
         if not inSession() then return end
-        notify(names[pid].." has joined.\nSlot: "..pid.."\nRID: "..rids[pid].."\nIPv4: "..ips[pid])
+        notify(names[pid].." ("..rids[pid]..") with slot "..pid.." has joined.")
     end
     if showJoinInfolog then
         log(names[pid].." (Slot: "..pid.." | Host Queue: #"..hostq[pid].." | Count: "..allplayers[pid].." | RID: "..rids[pid].." | IPv4: "..ips[pid]..") is joining.")
@@ -3664,15 +3670,15 @@ players.on_leave(function(pid)
     end
 
     if showleaveInfolog then
-        log(name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.")
+        log(name.." ("..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.")
     end
 
     if showleaveInfoteam then
-        chat.send_message("> "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", true, true, true)
+        chat.send_message("> "..name.." ( "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", true, true, true)
     end
 
     if showleaveInfoall then
-        chat.send_message("> "..name.." (RID: "..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", false, true, true)
+        chat.send_message("> "..name.." ("..rids[pid].." | Time in Session: "..formatTime(math.floor(os.clock() - Jointimes[pid] + 0.5))..") left.", false, true, true)
     end
 
     wait(100)
