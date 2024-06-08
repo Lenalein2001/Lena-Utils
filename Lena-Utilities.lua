@@ -117,7 +117,7 @@ local teleport = menu.list(misc, "Teleport", {"lenatp"}, "")
 util.ensure_package_is_installed("lua/auto-updater")
 local auto_updater = require("auto-updater")
 
-local default_check_interval = 86400
+local default_check_interval = 3600
 auto_update_config = {
     source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/Lena-Utilities.lua",
     script_relpath=SCRIPT_RELPATH,
@@ -209,7 +209,7 @@ plutoURL = require("pluto:url")
 lenaDir = filesystem.scripts_dir().."Lena\\"
 libDir = filesystem.scripts_dir().."lib\\lena\\"
 lenaModules = filesystem.scripts_dir().."lib\\lena\\modules\\"
-local scaleForm = require("ScaleformLib")
+local scaleForm = util.require_no_lag("ScaleformLib")
 local funcs = util.require_no_lag("lena.funcs")
 local tables = util.require_no_lag("lena.tables")
 
@@ -222,7 +222,6 @@ end
 if not filesystem.exists(libDir) then
 	filesystem.mkdir(libDir)
 end
-
 if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
 end
