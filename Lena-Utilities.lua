@@ -203,16 +203,9 @@ auto_update_config = {
 -- Required Files
 -------------------------------------
 
-json = require("json")
-pjson = require("pretty.json")
-plutoURL = require("pluto:url")
 lenaDir = filesystem.scripts_dir().."Lena\\"
 libDir = filesystem.scripts_dir().."lib\\lena\\"
 lenaModules = filesystem.scripts_dir().."lib\\lena\\modules\\"
-local scaleForm = util.require_no_lag("ScaleformLib")
-local funcs = util.require_no_lag("lena.funcs")
-local tables = util.require_no_lag("lena.tables")
-
 if not filesystem.exists(lenaDir) then
 	filesystem.mkdir(lenaDir)
 end
@@ -241,6 +234,13 @@ if async_http.have_access() then
 else
     notify("This Script needs Internet Access for the Auto Updater to work!")
 end
+
+json = require("json")
+pjson = require("pretty.json")
+plutoURL = require("pluto:url")
+local scaleForm = util.require_no_lag("ScaleformLib")
+local funcs = util.require_no_lag("lena.funcs")
+local tables = util.require_no_lag("lena.tables")
 
 if not SCRIPT_SILENT_START then
     notify($"Hi, {SC_ACCOUNT_INFO_GET_NICKNAME()}. <3")
