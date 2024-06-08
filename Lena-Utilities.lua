@@ -117,13 +117,13 @@ local teleport = menu.list(misc, "Teleport", {"lenatp"}, "")
 util.ensure_package_is_installed("lua/auto-updater")
 local auto_updater = require("auto-updater")
 
-local default_check_interval = 3600
+local default_check_interval = 60
 auto_update_config = {
     source_url="https://raw.githubusercontent.com/Lenalein2001/Lena-Utils/senpai/Lena-Utilities.lua",
     script_relpath=SCRIPT_RELPATH,
     switch_to_branch=selected_branch,
     verify_file_begins_with="--",
-    check_interval=3600,
+    check_interval=60,
     silent_updates=false,
     dependencies={
         {
@@ -228,7 +228,7 @@ if not filesystem.exists(lenaDir .. "Export_Blacklist.json") then
 end
 
 if async_http.have_access() then
-    if not is_developer() then
+    if not io.isfile(libDir.."isDev.txt") then -- I know lol
         auto_updater.run_auto_update(auto_update_config)
     end
 else
