@@ -219,6 +219,10 @@ end
 if not filesystem.exists(lenaModules) then
 	filesystem.mkdir(lenaModules)
 end
+if not filesystem.exists(libDir) then
+	filesystem.mkdir(libDir)
+end
+
 if not filesystem.exists(lenaDir.."Players") then
 	filesystem.mkdir(lenaDir.."Players")
 end
@@ -3661,10 +3665,6 @@ util.create_tick_handler(function()
 
     if user_vehicle != carCheck then
         user_vehicle = carCheck
-    end
-
-    if is_developer() then
-        update_help_text(debug_hk, $"Kick {players.get_name(players.get_host())}")
     end
 
     if menu.ref_by_path("Self>Appearance>Outfit>Hat", 50).value == 37 then
