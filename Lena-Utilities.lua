@@ -102,7 +102,6 @@ local host_kick = menu.list(spoofing_opt, "Host Token Options", {""}, "")
 local missions_tunables = menu.list(tunables, "Missions", {""}, "")
 local tune_screens = menu.list(tunables, "Open Screens", {""}, "")
 local bm_list = menu.list(tunables, "Safe Monitor", {""}, "")
-local stat_editing =  menu.list(tunables, "Stat Editing", {""}, "")
 -- Misc
 local enhanced_chat = menu.list(misc, "Enhanced Chat", {""}, "")
 local shortcuts = menu.list(misc, "Shortcuts", {""}, "")
