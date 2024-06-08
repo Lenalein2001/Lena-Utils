@@ -617,14 +617,6 @@ end
             trigger_commands("gravitymult 2; fovfpinveh -5")
         end)
 
-        -------------------------------------
-        -- Reduce Burnout
-        -------------------------------------
-
-        menu.toggle(better_vehicles, "Reduce Burnout", {""}, "Makes it to where the vehicle does not burnout as easily.", function(toggled)
-            SET_IN_ARENA_MODE(toggled)
-        end)
-
     -------------------------------------
     -- Door Control
     -------------------------------------
@@ -796,7 +788,7 @@ end
             end
         end
     end, function()
-        SET_WEAPON_AOE_MODIFIER(GET_SELECTED_PED_WEAPON(players.user_ped()), 1.0)
+        SET_WEAPON_AOE_MODIFIER(memory.read_int(wpn_ptrw), 1.0)
     end)
 
     -------------------------------------
@@ -863,7 +855,7 @@ end
     -- Control Passenger Weapons
     -------------------------------------
 
-    menu.action(vehicle_root, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current ", function()
+    menu.action(vehicle_root, "Control Passenger Weapons", {"controlweapons", "conwep"}, "You can control all weapons of the current Vehicle.", function()
         local CHandlingData = entities.vehicle_get_handling(entities.get_user_vehicle_as_pointer())
         local CVehicleWeaponHandlingDataAddress = entities.handling_get_subhandling(CHandlingData, 9)
         local WeaponSeats = CVehicleWeaponHandlingDataAddress + 0x0020
@@ -902,7 +894,7 @@ end
     -- Auto-Performance Tuning
     -------------------------------------
 
-    menu.toggle_loop(vehicle_root, "Auto-Perf", {""}, "", function()
+    menu.toggle_loop(vehicle_root, "Auto-Perf", {""}, "Upgrades the Performance of your current Vehicle.", function()
         if not inSession() then return end
 
         if IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
@@ -1206,7 +1198,6 @@ end
         -- Spawned Vehicle
         -------------------------------------
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
-        -- Small changes will be made.
         menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus. From Jinx. Heaviy modified.", function()
             for players.list() as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -1318,7 +1309,6 @@ end
                     local driver = NETWORK_GET_PLAYER_INDEX_FROM_PED(GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if not GET_ENTITY_CAN_BE_DAMAGED(vehicle) and not NETWORK_IS_PLAYER_FADING(pid) and IS_ENTITY_VISIBLE(ped) 
                     and players.are_stats_ready(pid) and not players.is_in_interior(pid) and pid == driver then
-                        util.draw_debug_text(players.get_name(driver) ..  " is in vehicle godmode")
                         if not IsDetectionPresent(pid, "Vehicle Godmode") then
                             players.add_detection(pid, "Vehicle Godmode", 7)
                         end
