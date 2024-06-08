@@ -1526,7 +1526,7 @@ end
         -- Hide IP if not using VPN
         -------------------------------------
 
-        menu.toggle_loop(protex, "VPN Fallback", {""}, "Hide your IP if you're not connected to a ", function()
+        menu.toggle_loop(protex, "VPN Fallback", {""}, "Hide your IP if you're not connected to a VPN.", function()
             local relay = menu.ref_by_path("Online>Protections>Force Relay Connections")
             if not players.is_using_vpn(players.user()) and relay.value == false then
                 relay.value = true
