@@ -487,7 +487,7 @@ end
     menu.toggle_loop(weap, "Rocket Aimbot", {""}, "Distance is limited to 500 Meters.", function()
         if not inSession() then return end
 
-        for players.list(false, false, true) as pid do
+        for players.list(false, true, true) as pid do
             local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local user = players.user_ped()
             local ped_dist = v3.distance(players.get_position(user), players.get_position(pid))
@@ -712,7 +712,7 @@ end
         local flaredelay = menu.slider_float(vehicle_flares, "Flare Delay", {""}, "Delay is in Seconds. 0.5 would be half a Second.", 10, 1000, 100, 10, function(); end)
         local flareamount = menu.slider(vehicle_flares, "Flare Amount", {""}, "", 1, 20, 1, 1, function(); end)
 
-        local periodicforceflares = menu.toggle_loop(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function()
+        periodicforceflares = menu.toggle_loop(vehicle_flares, "Periodic flares release", {""}, "Forces Flares on Airborne Vehicles.", function()
             if not inSession() then return end
 
             if forceflares.value then periodicforceflares.value = false end
@@ -1816,9 +1816,9 @@ end
 
         local group_name = menu.text_input(spoofing_opt, "Group Name", {"groupname"}, "", function(); end, "Admins")
         local group_copy_ref = menu.toggle_loop(spoofing_opt, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
-            local players = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
+        local historyPlayers = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
 
-            if not players:isValid() then
+            if not historyPlayers:isValid() then
                 group_copy_ref.value = false
                 return print("Group not Valid!")
             end
@@ -1829,7 +1829,7 @@ end
                     clearCopySession()
                 end
             else
-                for players:getChildren() as link do
+                for historyPlayers:getChildren() as link do
                     local ref = link:getPhysical()
                     --print(ref.menu_name)
                     if ref.menu_name:sub(-8) == "[Public]" then
@@ -2317,11 +2317,7 @@ end
         -------------------------------------
 
         menu.action(shortcuts, "Grab Script Host", {"sh"}, "Grabs Script Host less destructively.", function()
-            util.request_script_host("freemode")
-            wait(100)
-            if players.get_script_host() != players.user() then
-                NETWORK_REQUEST_TO_BE_HOST_OF_THIS_SCRIPT()
-            end
+            trigger_commands("scripthost")
         end)
 
         -------------------------------------
