@@ -5,7 +5,7 @@ A Lua Script to enhance the User's Gameplay. My first Script for Stand. More or 
 To install, simply click "Download ZIP" and extract the .zip file. Copy and paste everything into the "%AppData%\Roaming\Stand\Lua Scripts" folder.
 
 # Credits
-I am using functions and features from other LUA developers. Since this won't be public, I have not added credits in the Code. I would probably go insane if I would need to give credit to everyone who has helped me or I have taken options & Ideas from. If you are unsure about this, look at the commits. Though, as I am quite late with 'em, some may existed before others had it.
+I am using functions and features from other LUA developers. Since this won't be public, I have not added credits in the code (though there are credits in the help texts). I would probably go insane if I needed to give credit to everyone who has helped me or from whom I have taken options. If you are unsure about this, look at the commits. Though, as I am quite late with them, some may have existed before others had them.
 
 So my thanks go out to everyone, especially:
 - Prisuhm
