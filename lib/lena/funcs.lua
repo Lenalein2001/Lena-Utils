@@ -303,9 +303,8 @@ local function pid_to_handle(pid)
 end
 
 function IS_PLAYER_FRIEND(pid)
-    if NETWORK_IS_FRIEND(pid_to_handle(pid)) then return true else return false end
+    if NETWORK_IS_FRIEND(pid_to_handle(pid)) then return true end
 end
-
 
 function isPlayerFriend(pid)
     if isPlayerFriendToggle.value then
@@ -1236,7 +1235,7 @@ function search_blacklist(query)
 end
 
 -- Create the blacklist menu
-menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in the blacklist by RID or Name", function()
+menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in the blacklist by RID or Name. This is experimental.", function()
     menu.show_command_box("searchbl "); end, function(input)
     local query = string.lstrip(input, "searchbl ")
 
@@ -1245,7 +1244,7 @@ menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in t
         if #results == 0 then
             menu.notify("No results found for: " .. query)
         else
-            
+
             for _, player in ipairs(results) do
                 local result_menu = menu.list(retards, player.name .. " (Search Result)", {}, "")
                 local reason = player.reason
@@ -1267,6 +1266,7 @@ menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in t
 end)
 
 local retards_div = menu.divider(retards, "Blacklist")
+local BlToggle = menu.toggle(retards, "Use Export Blacklist", {""}, "When this is off, only the local Blacklist will be used.", function(); end)
 local bl_counter = 0
 for _, player in ipairs(data_e) do
     bl_counter = bl_counter + 1
