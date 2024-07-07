@@ -2572,6 +2572,7 @@ end
 
 for key, value in pairs(Modulepath) do
     local modlist = menu.list(modules, value.name, {""}, "Status: ".. (io.isfile(value.absolute_path) and "Installed" or "Not Installed"))
+
     if io.isfile(value.absolute_path) then
         menu.set_indicator_type(modlist, LISTINDICATOR_ON)
     else
