@@ -327,6 +327,13 @@ Modulepath = {
         absolute_path = lenaModules.."vehicle_resupply.pluto",
         path = "lena.modules.vehicle_resupply",
         help = "This will create resupply points accross the map, which will resupply and repair your Vehicle when inside."
+    },
+    vehicle_UI = {
+        name = "Vehicle Info UI",
+        github = "/Lenalein2001/Lena-Utils-Modules/main/vehicle_UI.pluto",
+        absolute_path = lenaModules.."vehicle_UI.pluto",
+        path = "lena.modules.vehicle_UI",
+        help = "This Module will show a small UI which will display Speed, Body-/ and Engine health, as well as countermeasures."
     }
 }
 
