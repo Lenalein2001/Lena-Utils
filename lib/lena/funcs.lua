@@ -280,16 +280,14 @@ function BitTest(value, bit)
 end
 
 -- Jinx
+local GlobalplayerBD = 2657971
 function IS_PLAYER_USING_ORBITAL_CANNON(pid)
-    return BitTest(memory.read_int(memory.script_global((2657921 + (pid * 463 + 1) + 424))), 0) -- Global_2657921[PLAYER::PLAYER_ID() /*463*/].f_424
-end
--- Jinx
-function GET_SPAWN_STATE(pid)
-    return memory.read_int(memory.script_global(((2657921 + 1) + (pid * 463)) + 232)) -- Global_2657921[PLAYER::PLAYER_ID() /*463*/].f_232
+	return BitTest(memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 426)), 0) -- Global_2657971[PLAYER::PLAYER_ID() /*465*/].f_426
 end
 -- Jinx
 function GET_INTERIOR_FROM_PLAYER(pid)
-    return memory.read_int(memory.script_global(((2657921 + 1) + (pid * 463)) + 245)) -- Global_2657921[bVar0 /*463*/].f_245)
+	if not isNetPlayerOk(pid) then return end -- to prevent random access violations
+	return memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 246)) -- Global_2657971[bVar0 /*465*/].f_246)
 end
 
 function IS_PLAYER_ACTIVE(pid)
@@ -298,8 +296,8 @@ function IS_PLAYER_ACTIVE(pid)
 	return true
 end
 
-local handle_ptr = memory.alloc(13*8)
 local function pid_to_handle(pid)
+    local handle_ptr = memory.alloc(13*8)
     NETWORK_HANDLE_FROM_PLAYER(pid, handle_ptr, 13)
     return handle_ptr
 end

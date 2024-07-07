@@ -1099,16 +1099,14 @@ end
                     local oldpos = players.get_position(pid)
                     wait(1, "s")
                     local currentpos = players.get_position(pid)
-                    if GET_SPAWN_STATE(pid) != 0 then
-                        for i, interior in interior_stuff do
-                            if v3.distance(oldpos, currentpos) > 500 and oldpos.x != currentpos.x and oldpos.y != currentpos.y and oldpos.z != currentpos.z then
-                                wait(500)
-                                if GET_INTERIOR_FROM_PLAYER(pid) == interior and IS_PLAYER_PLAYING(pid) and players.exists(pid) then
-                                    if not IsDetectionPresent(pid, "Teleport") then
-                                        players.add_detection(pid, "Teleport", 7, 50)
-                                    end
-                                    break
+                    for i, interior in interior_stuff do
+                        if v3.distance(oldpos, currentpos) > 500 and oldpos.x != currentpos.x and oldpos.y != currentpos.y and oldpos.z != currentpos.z then
+                            wait(500)
+                            if GET_INTERIOR_FROM_PLAYER(pid) == interior and IS_PLAYER_PLAYING(pid) and players.exists(pid) then
+                                if not IsDetectionPresent(pid, "Teleport") then
+                                    players.add_detection(pid, "Teleport", 7, 50)
                                 end
+                                break
                             end
                         end
                     end
@@ -1173,7 +1171,7 @@ end
                     end
                 end
 
-                if players.get_vehicle_model(pid) != 0 and not GET_IS_TASK_ACTIVE(ped, 160) and GET_SPAWN_STATE(players.user()) != 0 then
+                if players.get_vehicle_model(pid) != 0 and not GET_IS_TASK_ACTIVE(ped, 160) then
                     local driver = NETWORK_GET_PLAYER_INDEX_FROM_PED(GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if players.get_name(driver) != "InvalidPlayer" and not pegasusveh and pid == driver and not players.is_in_interior(pid) then
                         if bitset == 1024 and players.get_weapon_damage_modifier(pid) == 1 and not players.is_godmode(pid) then
@@ -1844,7 +1842,7 @@ end
         menu.action(enhanced_chat, "Start Typing", {"starttyping"}, "", function()
             for players.list(false) as pid do
                 if players.exists(pid) then
-                    send_script_event(-1760661233, pid, {players.user(), pid, 9412}) -- Not Updated
+                    send_script_event(-1760661233, pid, {players.user(), pid, 1489})
                 end
             end
         end)
@@ -1852,7 +1850,7 @@ end
         menu.action(enhanced_chat, "Stop Typing", {"stoptyping"}, "", function()
             for players.list(false) as pid do
                 if players.exists(pid) then
-                    send_script_event(476054205, pid, {players.user(), pid, 4491}) -- Not Updated
+                    send_script_event(476054205, pid, {players.user(), pid, 1474})
                 end
             end
         end)
@@ -2884,8 +2882,8 @@ players.add_command_hook(function(pid, cmd)
                 4,
                 10000,
                 0, 0, 0, 0,
-                memory.read_int(memory.script_global(1916087 + 9)), -- *uParam0 = Global_1916087.f_9;
-                memory.read_int(memory.script_global(1916087 + 10)), -- *uParam1 = Global_1916087.f_10;
+                memory.read_int(memory.script_global(1916617 + 9)), -- *uParam0 = Global_1916617.f_9;
+                memory.read_int(memory.script_global(1916617 + 10)), -- *uParam1 =  Global_1916617.f_10;
             })
         end)
 
