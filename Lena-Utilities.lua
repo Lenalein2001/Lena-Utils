@@ -2769,9 +2769,9 @@ if is_developer() then
             notify($"Hash: {vmodel}\nName: {vname}\nJoaat: {modelname}\nBitset: {bitset}")
             log($"[Lena | Debug] Hash: {vmodel} | Name: {vname} | Joaat: {modelname} | Bitset: {bitset} | Blip: {blip} | Plate:{plate_text}.")
         end)
-        menu.action(nativevehicle, "Get Decorators", {""}, "Get set decorators from ", function()
+        menu.action(nativevehicle, "Get Decorators", {""}, "Get set decorators from your Vehicle.", function()
             local ints = {
-                "FMDeliverableID", 
+                "FMDeliverableID",
                 "Not_Allow_As_Saved_Veh",
                 "MPBitset",
                 "Player_Vehicle",
@@ -2799,11 +2799,11 @@ if is_developer() then
             local v = user_vehicle
             for ints as i do
                 print($"int {i} = {DECOR_GET_INT(v, i)}")
-                wait(50)
+                wait()
             end
             for bools as i do
                 print($"bool {i} = {DECOR_GET_BOOL(v, i)}")
-                wait(50)
+                wait()
             end
         end)
         menu.action(nativevehicle, "Set Number Plate", {"randomplate"}, "Sets the Current Number Plate to a random Text.", function()

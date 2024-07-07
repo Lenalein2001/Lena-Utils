@@ -1078,23 +1078,22 @@ function handleAdvertisement(p, name)
 end
 
 function isNetPlayerOk(pid, assert_playing = false, assert_done_transition = true) -- Won't change func much. It's from Jinx.
-    local GlobalplayerBD = 2657921
 	if not NETWORK_IS_PLAYER_ACTIVE(pid) then return false end
 	if assert_playing and not IS_PLAYER_PLAYING(pid) then return false end
-
 	if assert_done_transition then
-		if pid == memory.read_int(memory.script_global(2672741 + 3)) then
-			return memory.read_int(memory.script_global(2672741 + 2)) != 0
-		elseif memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 463))) != 4 then -- Global_2657921[iVar0 /*463*/] != 4
+		if pid == memory.read_int(memory.script_global(2672855 + 3)) then -- Global_2672855.f_3
+			return memory.read_int(memory.script_global(2672855 + 2)) != 0 -- -- Global_2672855.f_2
+		elseif memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 465))) != 4 then -- Global_2657971[iVar0 /*465*/] != 4
 			return false
 		end
 	end
-
 	return true
 end
 
 local EXPORT_BLACKLIST_FILE = libDir .. "Export_Blacklist.json"
 local BLACKLIST_FILE = libDir .. "Blacklist.json"
+local BlToggle = menu.toggle(retards, "Use Export Blacklist", {""}, "When this is off, only the local Blacklist will be used. Save it's state in order to be used next time the Script launches.", function(); end)
+local retards_div = menu.divider(retards, "Blacklist")
 
 -- Function to save data to a file
 function save_data(data, filename)
@@ -1128,10 +1127,12 @@ local function manage_player_data(rid, playerName, action, reason)
     if action == "add" then
         -- Check for existing player by RID in both data sets
         local foundPlayer = nil
-        for _, player in ipairs(data_e) do
-            if player.id == id then
-                foundPlayer = player
-                break
+        if BlToggle.value then
+            for _, player in ipairs(data_e) do
+                if player.id == id then
+                    foundPlayer = player
+                    break
+                end
             end
         end
         if not foundPlayer then
@@ -1145,9 +1146,11 @@ local function manage_player_data(rid, playerName, action, reason)
 
         if not foundPlayer then
             -- Player not found, add it
-            table.insert(data_e, {id = id, name = playerName, reason = reason, added_on = os.time()})
-            table.sort(data_e, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
-            save_data(data_e, EXPORT_BLACKLIST_FILE)
+            if BlToggle.value then
+                table.insert(data_e, {id = id, name = playerName, reason = reason, added_on = os.time()})
+                table.sort(data_e, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
+                save_data(data_e, EXPORT_BLACKLIST_FILE)
+            end
 
             table.insert(data_l, {id = id, name = playerName, reason = reason, added_on = os.time()})
             table.sort(data_l, function(a, b) return a.name < b.name end) -- Sort by player name (LOCAL)
@@ -1157,9 +1160,11 @@ local function manage_player_data(rid, playerName, action, reason)
             print("Player with RID", id, "already exists in blacklist!")
         end
     elseif action == "check" then
-        for _, player in ipairs(data_e) do
-            if player.id == id then
-                return player
+        if BlToggle.value then
+            for _, player in ipairs(data_e) do
+                if player.id == id then
+                    return player
+                end
             end
         end
         for _, player in ipairs(data_l) do
@@ -1169,11 +1174,13 @@ local function manage_player_data(rid, playerName, action, reason)
         end
         return nil
     elseif action == "delete" then
-        for i, player in ipairs(data_e) do
-            if player.id == id then
-                table.remove(data_e, i)
-                save_data(data_e, EXPORT_BLACKLIST_FILE)
-                break
+        if BlToggle.value then
+            for i, player in ipairs(data_e) do
+                if player.id == id then
+                    table.remove(data_e, i)
+                    save_data(data_e, EXPORT_BLACKLIST_FILE)
+                    break
+                end
             end
         end
         for i, player in ipairs(data_l) do
@@ -1199,9 +1206,11 @@ end
 -- Get the reason why the player is blacklisted
 function get_blacklist_reason(rid)
     local id = tostring(rid)
-    for _, player in ipairs(data_e) do
-        if player.id == id then
-            return player.reason
+    if BlToggle.value then
+        for _, player in ipairs(data_e) do
+            if player.id == id then
+                return player.reason
+            end
         end
     end
     for _, player in ipairs(data_l) do
@@ -1220,75 +1229,107 @@ end
 -- Search for a player in the blacklist by RID or name
 function search_blacklist(query)
     local results = {}
-    notify("Searching...")
-    for _, player in ipairs(data_e) do
-        if player.id == query or player.name:lower():find(query:lower()) then
+    local seen = {}
+
+    local function add_to_results(player)
+        if not seen[player.id] then
             table.insert(results, player)
+            seen[player.id] = true
         end
     end
+
+    if BlToggle.value then
+        for _, player in ipairs(data_e) do
+            if player.id == query or player.name:lower():find(query:lower()) then
+                add_to_results(player)
+            end
+        end
+    end
+
     for _, player in ipairs(data_l) do
         if player.id == query or player.name:lower():find(query:lower()) then
-            table.insert(results, player)
+            add_to_results(player)
         end
     end
+
     return results
 end
 
 -- Create the blacklist menu
 menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in the blacklist by RID or Name. This is experimental.", function()
     menu.show_command_box("searchbl "); end, function(input)
-    local query = string.lstrip(input, "searchbl ")
+    local query = string.gsub(input, "^searchbl%s*", "")
 
     if query and query ~= "" then
         local results = search_blacklist(query)
         if #results == 0 then
             menu.notify("No results found for: " .. query)
         else
-
+            local searchResult = menu.list(retards, "Search", {""}, "")
+            local result_menu
             for _, player in ipairs(results) do
-                local result_menu = menu.list(retards, player.name .. " (Search Result)", {}, "")
+                result_menu = menu.list(searchResult, player.name .. " (Search Result)", {}, "")
                 local reason = player.reason
+                result_menu:focus()
+
                 if reason == nil or reason == "" then
                     reason = "No Reason provided."
                 end
                 menu.readonly(result_menu, "Name", player.name)
                 menu.readonly(result_menu, "RID", player.id)
                 menu.readonly(result_menu, "Reason", reason)
-                local added_on_formatted = os.date("%c", player.added_on)
-                menu.readonly(result_menu, "Added On", added_on_formatted)
+                menu.readonly(result_menu, "Added On", os.date("%c", player.added_on))
                 menu.action(result_menu, "Delete", {}, "Remove this player from the blacklist", function()
                     delete_player_from_blacklist(player.id)
                     menu.delete(result_menu) -- Remove the entry from the menu
                 end)
             end
+
+            while searchResult:isValid() do
+                if searchResult:isFocused() then
+                    searchResult:delete()
+                end
+                wait()
+            end
         end
     end
 end)
 
-local retards_div = menu.divider(retards, "Blacklist")
-local BlToggle = menu.toggle(retards, "Use Export Blacklist", {""}, "When this is off, only the local Blacklist will be used.", function(); end)
 local bl_counter = 0
-for _, player in ipairs(data_e) do
-    bl_counter = bl_counter + 1
-    local c = menu.list(retards, player.name, {}, "")
-    local reason = player.reason
-    if reason == nil or reason == "" then
-        reason = "No Reason provided."
-    end
-    menu.readonly(c, "Name", player.name)
-    menu.readonly(c, "RID", player.id)
-    menu.readonly(c, "Reason", reason)
-    local added_on_formatted = os.date("%c", player.added_on)
-    menu.readonly(c, "Added On", added_on_formatted)
-    menu.action(c, "Delete", {}, "Remove this player from the blacklist", function()
-        delete_player_from_blacklist(player.id)
-        menu.delete(c) -- Remove the entry from the menu
-        bl_counter = bl_counter - 1
+local seen = {}
+local function add_player_to_menu(player)
+    if not seen[player.id] then
+        seen[player.id] = true
+        bl_counter = bl_counter + 1
+        local playerList = menu.list(retards, player.name, {}, "")
+        local reason = player.reason
+        if reason == nil or reason == "" then
+            reason = "No Reason provided."
+        end
+
+        menu.readonly(playerList, "Name", player.name)
+        menu.readonly(playerList, "RID", player.id)
+        menu.readonly(playerList, "Reason", reason)
+        menu.readonly(playerList, "Added On", os.date("%c", player.added_on))
+        menu.action(playerList, "Delete", {}, "Remove this player from the blacklist", function()
+            delete_player_from_blacklist(player.id)
+            menu.delete(playerList) -- Remove the entry from the menu
+            bl_counter = bl_counter - 1
+            menu.set_menu_name(retards_div, "Blacklist (" .. bl_counter .. ")")
+        end)
         menu.set_menu_name(retards_div, "Blacklist (" .. bl_counter .. ")")
-    end)
-    menu.set_menu_name(retards_div, "Blacklist (" .. bl_counter .. ")")
+    end
 end
 
+if BlToggle.value then
+    for _, player in ipairs(data_e) do
+        add_player_to_menu(player)
+    end
+end
+
+for _, player in ipairs(data_l) do
+    add_player_to_menu(player)
+end
 
 function spawn_pickup(pickupData, posX, posY, posZ, rotX, rotY, rotZ)
     util.request_model(pickupData.Model)
