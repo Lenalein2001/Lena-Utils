@@ -62,12 +62,6 @@ local modules = menu.list(menu.my_root(), "Modules", {"lenamodules"}, "Here you'
 -------------------------------------
 
 -- Self
-local anims = menu.list(self, "Animations", {""}, "Some Animations.")
-anim_idle = menu.list(anims, "Idle", {""}, "")
-anim_sit = menu.list(anims, "Sitting", {""}, "")
-anim_romantic = menu.list(anims, "Romantic", {""}, "")
-anim_misc = menu.list(anims, "Misc", {""}, "")
-
 local fast_stuff = menu.list(self, "Skip Animations", {""}, "Skips certain Animations. Lock Outfit breaks it.")
 local weap = menu.list(self, "Weapons", {""}, "Weapon Options.")
 local lrf = menu.list(weap, "Legit Rapid Fire", {""}, "A macro for Rocket Spam.")
@@ -250,40 +244,6 @@ end
 -- Self
 -------------------------------------
 -------------------------------------
-
-        -------------------------------------
-        -- Animations
-        -------------------------------------
-
-        local stopallanim = menu.action(menu.shadow_root(), "Stop all Animations", {""}, "", function()
-            CLEAR_PED_TASKS(players.user_ped())
-        end)
-        menu.attach_before(anim_idle, stopallanim)
-        for index, data in animation_table do
-            local ref, label, dict, name, duration = data[1], data[2], data[3], data[4], data[5]
-            menu.action(ref, label, {$"anim{label}"}, "", function()
-                play_anim(dict, name, duration)
-            end)
-        end
-
-        menu.action(anims, "Faint", {""}, "", function()
-            trigger_commands("animfaint")
-        end)
-        menu.action(anims, "Flirt", {""}, "", function()
-            trigger_commands("animflirtylean")
-        end)
-        menu.action(anims, "Prone", {""}, "", function()
-            trigger_commands("animprone")
-        end)
-        menu.action(anims, "Look at the clouds", {""}, "", function()
-            trigger_commands("animcloudgazer")
-        end)
-        menu.action(anims, "Chill", {""}, "", function()
-            trigger_commands("animchill")
-        end)
-        menu.action(anims, "Dance", {""}, "", function()
-            play_anim("anim@amb@casino@mini@dance@dance_solo@female@var_b@", "high_center", -1)
-        end)
 
     -------------------------------------
     -- Fast Stuff
@@ -1079,7 +1039,7 @@ end
         -------------------------------------
 
         menu.toggle(detections, "Stand User ID", {"suid"}, "Detects Stand Users.", function(toggled)
-            local stand_UID = menu.ref_by_path("Online>Protections>Detections>Stand User Identification")
+            local stand_UID = menu.ref_by_path("Online>Protections>Detections>Stand User Identification", 50)
             trigger_command(stand_UID, toggled)
         end, true)
 
@@ -2618,7 +2578,7 @@ for key, value in pairs(Modulepath) do
         menu.set_indicator_type(modlist, LISTINDICATOR_OFF)
     end
     if not io.isfile(value.absolute_path) then
-        menu.action(modlist, $"Download {value.name}", {""}, "", function()
+        menu.action(modlist, $"Download {value.name}", {""}, value.help, function()
             async_http.init("raw.githubusercontent.com", value.giturl, function(body, headers, status_code)
                 if status_code != 404 then
                     local file = io.open(value.absolute_path, "w+")
