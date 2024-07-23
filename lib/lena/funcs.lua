@@ -1092,8 +1092,6 @@ end
 
 local EXPORT_BLACKLIST_FILE = libDir .. "Export_Blacklist.json"
 local BLACKLIST_FILE = libDir .. "Blacklist.json"
-local BlToggle = menu.toggle(retards, "Use Export Blacklist", {""}, "When this is off, only the local Blacklist will be used. Save it's state in order to be used next time the Script launches.", function(); end)
-local retards_div = menu.divider(retards, "Blacklist")
 
 -- Function to save data to a file
 function save_data(data, filename)
@@ -1127,12 +1125,10 @@ local function manage_player_data(rid, playerName, action, reason)
     if action == "add" then
         -- Check for existing player by RID in both data sets
         local foundPlayer = nil
-        if BlToggle.value then
-            for _, player in ipairs(data_e) do
-                if player.id == id then
-                    foundPlayer = player
-                    break
-                end
+        for _, player in ipairs(data_e) do
+            if player.id == id then
+                foundPlayer = player
+                break
             end
         end
         if not foundPlayer then
@@ -1146,13 +1142,12 @@ local function manage_player_data(rid, playerName, action, reason)
 
         if not foundPlayer then
             -- Player not found, add it
-            if BlToggle.value then
-                table.insert(data_e, {id = id, name = playerName, reason = reason, added_on = os.time()})
-                table.sort(data_e, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
-                save_data(data_e, EXPORT_BLACKLIST_FILE)
-            end
+            local newPlayer = {id = id, name = playerName, reason = reason, added_on = os.time()}
+            table.insert(data_e, newPlayer)
+            table.sort(data_e, function(a, b) return a.name < b.name end) -- Sort by player name (EXPORT)
+            save_data(data_e, EXPORT_BLACKLIST_FILE)
 
-            table.insert(data_l, {id = id, name = playerName, reason = reason, added_on = os.time()})
+            table.insert(data_l, newPlayer)
             table.sort(data_l, function(a, b) return a.name < b.name end) -- Sort by player name (LOCAL)
             save_data(data_l, BLACKLIST_FILE)
         else
@@ -1160,11 +1155,9 @@ local function manage_player_data(rid, playerName, action, reason)
             print("Player with RID", id, "already exists in blacklist!")
         end
     elseif action == "check" then
-        if BlToggle.value then
-            for _, player in ipairs(data_e) do
-                if player.id == id then
-                    return player
-                end
+        for _, player in ipairs(data_e) do
+            if player.id == id then
+                return player
             end
         end
         for _, player in ipairs(data_l) do
@@ -1174,13 +1167,11 @@ local function manage_player_data(rid, playerName, action, reason)
         end
         return nil
     elseif action == "delete" then
-        if BlToggle.value then
-            for i, player in ipairs(data_e) do
-                if player.id == id then
-                    table.remove(data_e, i)
-                    save_data(data_e, EXPORT_BLACKLIST_FILE)
-                    break
-                end
+        for i, player in ipairs(data_e) do
+            if player.id == id then
+                table.remove(data_e, i)
+                save_data(data_e, EXPORT_BLACKLIST_FILE)
+                break
             end
         end
         for i, player in ipairs(data_l) do
@@ -1206,11 +1197,9 @@ end
 -- Get the reason why the player is blacklisted
 function get_blacklist_reason(rid)
     local id = tostring(rid)
-    if BlToggle.value then
-        for _, player in ipairs(data_e) do
-            if player.id == id then
-                return player.reason
-            end
+    for _, player in ipairs(data_e) do
+        if player.id == id then
+            return player.reason
         end
     end
     for _, player in ipairs(data_l) do
@@ -1218,7 +1207,7 @@ function get_blacklist_reason(rid)
             return player.reason
         end
     end
-    return "No reason given."
+    return {"No reason given."}
 end
 
 -- Delete player from blacklist
@@ -1238,11 +1227,9 @@ function search_blacklist(query)
         end
     end
 
-    if BlToggle.value then
-        for _, player in ipairs(data_e) do
-            if player.id == query or player.name:lower():find(query:lower()) then
-                add_to_results(player)
-            end
+    for _, player in ipairs(data_e) do
+        if player.id == query or player.name:lower():find(query:lower()) then
+            add_to_results(player)
         end
     end
 
@@ -1272,14 +1259,20 @@ menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in t
                 local reason = player.reason
                 result_menu:focus()
 
-                if reason == nil or reason == "" then
-                    reason = "No Reason provided."
+                if reason == nil or #reason == 0 then
+                    flag = "None"
+                else
+                    flag = "Modder"
                 end
+
                 menu.readonly(result_menu, "Name", player.name)
                 menu.readonly(result_menu, "RID", player.id)
-                menu.readonly(result_menu, "Reason", reason)
+                local classification = menu.list(result_menu, "Classification: "..flag, {}, "")
+                for _, detection in ipairs(reason) do
+                    menu.readonly(classification, detection)
+                end
                 menu.readonly(result_menu, "Added On", os.date("%c", player.added_on))
-                menu.action(result_menu, "Delete", {}, "Remove this player from the blacklist", function()
+                menu.action(result_menu, "Delete", {}, "Remove this player from the blacklist.", function()
                     delete_player_from_blacklist(player.id)
                     menu.delete(result_menu) -- Remove the entry from the menu
                 end)
@@ -1295,7 +1288,9 @@ menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in t
     end
 end)
 
+local retards_div = menu.divider(retards, "Blacklist")
 local bl_counter = 0
+
 local seen = {}
 local function add_player_to_menu(player)
     if not seen[player.id] then
@@ -1303,15 +1298,21 @@ local function add_player_to_menu(player)
         bl_counter = bl_counter + 1
         local playerList = menu.list(retards, player.name, {}, "")
         local reason = player.reason
-        if reason == nil or reason == "" then
-            reason = "No Reason provided."
+        local flag
+        if reason == nil or #reason == 0 then
+            flag = "None"
+        else
+            flag = "Modder"
         end
 
         menu.readonly(playerList, "Name", player.name)
         menu.readonly(playerList, "RID", player.id)
-        menu.readonly(playerList, "Reason", reason)
+        local classification = menu.list(playerList, "Classification: "..flag, {}, "")
+        for _, detection in ipairs(reason) do
+            menu.readonly(classification, detection)
+        end
         menu.readonly(playerList, "Added On", os.date("%c", player.added_on))
-        menu.action(playerList, "Delete", {}, "Remove this player from the blacklist", function()
+        menu.action(playerList, "Delete", {}, "Remove this player from the blacklist.", function()
             delete_player_from_blacklist(player.id)
             menu.delete(playerList) -- Remove the entry from the menu
             bl_counter = bl_counter - 1
@@ -1321,10 +1322,8 @@ local function add_player_to_menu(player)
     end
 end
 
-if BlToggle.value then
-    for _, player in ipairs(data_e) do
-        add_player_to_menu(player)
-    end
+for _, player in ipairs(data_e) do
+    add_player_to_menu(player)
 end
 
 for _, player in ipairs(data_l) do

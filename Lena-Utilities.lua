@@ -83,7 +83,7 @@ local detects_protex = menu.list(online, "Protections", {""}, "")
 local protex = menu.list(detects_protex, "Events", {""}, "")
 retards = menu.list(protex, "Blacklist", {""}, "Contains all blacklisted Players. ")
 local anti_orb = menu.list(protex, "Anti Orb", {""}, "Protections against the Orbital Cannon.")
-local detections = menu.list(detects_protex, "Detections", {""}, "")
+local detectionsRef = menu.list(detects_protex, "Detections", {""}, "")
 
 local reactions = menu.list(online, "Reactions", {""}, "")
 local join_reactions = menu.list(reactions, "Join Reactions", {""}, "")
@@ -338,6 +338,10 @@ end
         trigger_commands("refillhealth; refillarmour")
     end)
 
+    -------------------------------------
+    -- Regenerative Killing
+    -------------------------------------
+
     menu.toggle_loop(self, "Regenerative Killing", {""}, "Will regenerate health of your Ped and Vehicle if you get a kill.", function()
         if not inSession() then return end
 
@@ -372,7 +376,7 @@ end
     -- Auto Become CEO/MC
     -------------------------------------
 
-    menu.toggle_loop(self, "Automatically Become a CEO/MC", {""}, "Will start a CEO/MC if you need to be in one.", function()
+    menu.toggle_loop(self, "Automatically Become a CEO/MC", {""}, "Will start a CEO/MC if you need to be in one. Heist Control. Edited.", function()
         if not inSession() then return end
 
         for CEOLabels as label do
@@ -401,8 +405,8 @@ end
     -- Legit rapid Fire
     -------------------------------------
 
-    local LegitRapidMS = menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to the grenade and back to the ", 1, 1000, 100, 50, function (value); end)
-    menu.toggle_loop(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main ", function(toggled)
+    local LegitRapidMS = menu.slider(lrf, "Delay", {"lrfdelay"}, "The delay that it takes to switch to the grenade and back to the Weapon.", 1, 1000, 100, 50, function (value); end)
+    menu.toggle_loop(lrf, "Legit Rapid Fire", {""}, "Switches to a grenade and back to your Main Weapon.", function(toggled)
         if not inSession() then return end
 
         local ped = players.user_ped()
@@ -1005,7 +1009,7 @@ end
         -------------------------------------
 
         local projectile_blips = {}
-        menu.toggle_loop(detections, "Detect Rockets", {""}, "Detects incoming Rockets and Mines.", function(on)
+        menu.toggle_loop(detectionsRef, "Detect Rockets", {""}, "Detects incoming Rockets and Mines.", function(on)
             if not inSession() then return end
 
             for k, b in pairs(projectile_blips) do
@@ -1038,7 +1042,7 @@ end
         -- Stand User ID
         -------------------------------------
 
-        menu.toggle(detections, "Stand User ID", {"suid"}, "Detects Stand Users.", function(toggled)
+        menu.toggle(detectionsRef, "Stand User ID", {"suid"}, "Detects Stand Users.", function(toggled)
             local stand_UID = menu.ref_by_path("Online>Protections>Detections>Stand User Identification", 50)
             trigger_command(stand_UID, toggled)
         end, true)
@@ -1047,7 +1051,7 @@ end
         -- Super Drive
         -------------------------------------
 
-        menu.toggle_loop(detections, "Super Drive", {""}, "Detects Players using Super Drive. From Jinx. Modified.", function()
+        menu.toggle_loop(detectionsRef, "Super Drive", {""}, "Detects Players using Super Drive. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list() as pid do
@@ -1069,7 +1073,7 @@ end
         -- Spectate
         -------------------------------------
 
-        menu.toggle_loop(detections, "Spectate", {""}, "Detects if someone is spectating you. From Jinx. Modified.", function()
+        menu.toggle_loop(detectionsRef, "Spectate", {""}, "Detects if someone is spectating you. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list(false) as pid do
@@ -1090,7 +1094,7 @@ end
         -- Teleport
         -------------------------------------
 
-        menu.toggle_loop(detections, "Teleport", {""}, "Detects if the player has teleported. From Jinx. Modified.", function()
+        menu.toggle_loop(detectionsRef, "Teleport", {""}, "Detects if the player has teleported. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list() as pid do
@@ -1118,7 +1122,7 @@ end
         -- Stat Detection
         -------------------------------------
 
-        menu.toggle_loop(detections, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
+        menu.toggle_loop(detectionsRef, "Detect Unlegit Stats", {""}, "Detects Modded Stats.", function()
             if not inSession() then return end
 
             for players.list() as pid do
@@ -1156,7 +1160,7 @@ end
         -- Spawned Vehicle
         -------------------------------------
         -- Full credits go to Prism, I just wanted this feature without having to load more luas.
-        menu.toggle_loop(detections, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus. From Jinx. Heaviy modified.", function()
+        menu.toggle_loop(detectionsRef, "Spawned Vehicle", {""}, "Detects if someone is using a spawned Vehicle. Can also detect Menus. From Jinx. Heaviy modified.", function()
             for players.list() as pid do
                 local ped = GET_PLAYER_PED_SCRIPT_INDEX(pid)
                 local vehicle = GET_VEHICLE_PED_IS_USING(ped)
@@ -1212,7 +1216,7 @@ end
         -- Thunder Join
         -------------------------------------
 
-        menu.toggle_loop(detections, "Modded Script Host Migration", {""}, "Detects people who give script host to another player or took script host while still in a transition. From Jinx. Modified.", function()
+        menu.toggle_loop(detectionsRef, "Modded Script Host Migration", {""}, "Detects people who give script host to another player or took script host while still in a transition. From Jinx. Modified.", function()
             if not isNetPlayerOk(players.user()) then return end
             local data = memory.alloc(56 * 8)
             for queue = 0, 2 do
@@ -1257,7 +1261,7 @@ end
         -- Vehicle Godmode
         -------------------------------------
 
-        menu.toggle_loop(detections, "Vehicle Godmode", {""}, "Detects if someone is using a vehicle that is in godmode. From Jinx. Modified.", function()
+        menu.toggle_loop(detectionsRef, "Vehicle Godmode", {""}, "Detects if someone is using a vehicle that is in godmode. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list(false) as pid do
@@ -1281,7 +1285,7 @@ end
         -------------------------------------
 
         local lockon = 0
-        menu.toggle_loop(detections, "Anti-Lockon", {}, "Detects players using anti-lockon. From Jinx. Modified.", function()
+        menu.toggle_loop(detectionsRef, "Anti-Lockon", {}, "Detects players using anti-lockon. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list(false) as pid do
@@ -1316,7 +1320,7 @@ end
         -- Modded Vehicle Upgrade
         -------------------------------------
 
-        menu.toggle_loop(detections, "Modded Vehicle Upgrade", {""}, "Detects players who have modded their own or someone else's vehicles outside of a shop. From Jinx. Modified.", function()
+        menu.toggle_loop(detectionsRef, "Modded Vehicle Upgrade", {""}, "Detects players who have modded their own or someone else's vehicles outside of a shop. From Jinx. Modified.", function()
             if not inSession() then return end
 
             for players.list() as pid do
@@ -1358,7 +1362,7 @@ end
         -- Vehicle Switch
         -------------------------------------
 
-        menu.toggle_loop(detections, "Vehicle Switch", {""}, "", function()
+        menu.toggle_loop(detectionsRef, "Vehicle Switch", {""}, "", function()
             if not inSession() then return end
 
             for players.list() as pid do
@@ -1383,7 +1387,7 @@ end
         -- Anti Cheat
         -------------------------------------
 
-        menu.toggle(detections, "Anti Cheat", {""}, "", function(on, click_type)
+        menu.toggle(detectionsRef, "Anti Cheat", {""}, "", function(on, click_type)
             if not inSession() then return end
 
             if on then
@@ -1407,7 +1411,7 @@ end
 
         local ignored_vehs = {}
         local speed_ctr = 0
-        menu.toggle_loop(detections, "Modified Vehicle Speed", {}, "Detects people who have modified their engine power or top speed. From Jinx. Modified.", function()
+        menu.toggle_loop(detectionsRef, "Modified Vehicle Speed", {}, "Detects people who have modified their engine power or top speed. From Jinx. Modified.", function()
             if NETWORK_IS_ACTIVITY_SESSION(true) or not inSession() then return end
 
             for players.list_except() as pid do
@@ -2844,15 +2848,13 @@ players.add_command_hook(function(pid, cmd)
         end
     end)
     menu.action(lena, "Add to Blacklist", {""}, "", function()
+        local detections
         if not is_player_in_blacklist(rids) then
-            local i, isClassified = "", getDetections(pid)
+            local isClassified = getDetections(pid)
             if isClassified then
-                for getDetections(pid) as detection do
-                    i ..= detection .. ", "
-                end
+                detections = isClassified
             end
-            i:gsub(",  ", "")
-            add_player_to_blacklist(rids, pname, i or "")
+            add_player_to_blacklist(rids, pname, getDetections(pid))
             notify($"Added {pname} to the Blacklist.")
         end
     end)
