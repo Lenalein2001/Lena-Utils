@@ -1916,11 +1916,11 @@ end
 
                     -- If confirmed, add the player to the blacklist
                     if confirmed and not is_player_in_blacklist(rid) then
-                        notify(pname .. " has been added to the blacklist for attacking you.")
-                        add_player_to_blacklist(rid, pname, "Attacker")
+                        add_player_to_blacklist(rids, pname, getDetections(pid))
+                        notify($"Added {pname} to the Blacklist.")
                     end
-                    --trigger_commands("rape " .. pname)
-                    notify(pname .. " has been added to the blacklist for attacking you.")
+
+                    trigger_commands("rape " .. pname)
 
                     -- Mark this player as kicked
                     kicked_players[rid] = rid
@@ -2848,12 +2848,7 @@ players.add_command_hook(function(pid, cmd)
         end
     end)
     menu.action(lena, "Add to Blacklist", {""}, "", function()
-        local detections
         if not is_player_in_blacklist(rids) then
-            local isClassified = getDetections(pid)
-            if isClassified then
-                detections = isClassified
-            end
             add_player_to_blacklist(rids, pname, getDetections(pid))
             notify($"Added {pname} to the Blacklist.")
         end
@@ -3638,9 +3633,7 @@ util.create_tick_handler(function()
     for players.list() as pid do
         local rid, name = players.get_rockstar_id(pid), players.get_name(pid)
         if is_player_in_blacklist(rid) then
-            local player = tostring(get_blacklist_reason(rid)).."." or "No Reason given."
-            player:gsub(", .", ".")
-            notify($"{name} will be kicked due to being on the Blacklist. Reason: {player}")
+            notify($"{name} will be kicked due to being on the Blacklist.")
             trigger_commands($"historyblock{name} on")
             trigger_commands($"loveletter{name}")
             wait(30, "s")

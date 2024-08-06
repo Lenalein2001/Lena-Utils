@@ -1257,22 +1257,24 @@ menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in t
             for _, player in ipairs(results) do
                 result_menu = menu.list(searchResult, player.name .. " (Search Result)", {}, "")
                 local reason = player.reason
+                local classification
                 result_menu:focus()
 
                 if reason == nil or #reason == 0 then
-                    flag = "None"
+                    classification = "No Reason provided."
                 else
-                    flag = "Modder"
+                    classification = "Modder"
                 end
 
                 menu.readonly(result_menu, "Name", player.name)
                 menu.readonly(result_menu, "RID", player.id)
-                local classification = menu.list(result_menu, "Classification: "..flag, {}, "")
+                local classificationRef = menu.list(result_menu, "Classification" .. classification, {}, "")
+
                 for _, detection in ipairs(reason) do
-                    menu.readonly(classification, detection)
+                    menu.action(classificationRef, detection, {}, "", function(); end)
                 end
                 menu.readonly(result_menu, "Added On", os.date("%c", player.added_on))
-                menu.action(result_menu, "Delete", {}, "Remove this player from the blacklist.", function()
+                menu.action(result_menu, "Delete", {}, "Remove this player from the blacklist", function()
                     delete_player_from_blacklist(player.id)
                     menu.delete(result_menu) -- Remove the entry from the menu
                 end)
@@ -1298,21 +1300,25 @@ local function add_player_to_menu(player)
         bl_counter = bl_counter + 1
         local playerList = menu.list(retards, player.name, {}, "")
         local reason = player.reason
-        local flag
+        local classification
+
         if reason == nil or #reason == 0 then
-            flag = "None"
+            classification = "No Reason provided."
         else
-            flag = "Modder"
+            classification = "Modder"
         end
 
         menu.readonly(playerList, "Name", player.name)
         menu.readonly(playerList, "RID", player.id)
-        local classification = menu.list(playerList, "Classification: "..flag, {}, "")
+
+        local classificationRef = menu.list(playerList, "Classification" .. classification, {}, "")
+
         for _, detection in ipairs(reason) do
-            menu.readonly(classification, detection)
+            menu.action(classificationRef, detection, {}, "", function(); end)
         end
+
         menu.readonly(playerList, "Added On", os.date("%c", player.added_on))
-        menu.action(playerList, "Delete", {}, "Remove this player from the blacklist.", function()
+        menu.action(playerList, "Delete", {}, "Remove this player from the blacklist", function()
             delete_player_from_blacklist(player.id)
             menu.delete(playerList) -- Remove the entry from the menu
             bl_counter = bl_counter - 1
@@ -1329,6 +1335,7 @@ end
 for _, player in ipairs(data_l) do
     add_player_to_menu(player)
 end
+
 
 function spawn_pickup(pickupData, posX, posY, posZ, rotX, rotY, rotZ)
     util.request_model(pickupData.Model)
