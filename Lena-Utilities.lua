@@ -1920,6 +1920,8 @@ end
                         notify($"Added {pname} to the Blacklist.")
                     end
 
+                    wait(1, "s")
+
                     trigger_commands("rape " .. pname)
 
                     -- Mark this player as kicked
@@ -2307,7 +2309,7 @@ end
         -- Start a CEO
         -------------------------------------
 
-        if is_developer() then
+        if io.isfile(libDir.."isDev.txt") then
             menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO", function()
                 if StartCEO() then
                     wait(500)
@@ -2623,7 +2625,7 @@ end
 -------------------------------------
 -------------------------------------
 
-if is_developer() then
+if io.isfile(libDir.."isDev.txt") then
     local sdebug = menu.list(menu.my_root(), "[Debug]", {"lenadebug"}, "")
     local nativec = menu.list(sdebug, "Native Feedback", {""}, "")
 
@@ -2954,10 +2956,10 @@ players.add_command_hook(function(pid, cmd)
             local pos = players.get_position(pid)
             local radius = 2.0
             local numPickups = 6
-            local angleIncrement = 2 * math.pi / numPickups -- angle increment for even distribution
+            local angleIncrement = 2 * math.pi / numPickups
 
             for i = 0, numPickups - 1 do
-                local randomIndex = math.random(#pickups) -- Choose a random pickup type
+                local randomIndex = math.random(#pickups)
                 local pickupData = pickups[randomIndex]
 
                 -- Calculate offset coordinates
@@ -3375,7 +3377,7 @@ players.add_command_hook(function(pid, cmd)
 
             wait(500)
             trigger_commands($"historyblock{pname} on")
-            if not is_developer() then
+            if not io.isfile(libDir.."isDev.txt") then
                 log($"{pname} ({rids}) has been Kicked and Blocked.")
             else
                 log($"{pname} ({rids} / {hex}) has been Kicked and Blocked.")
@@ -3389,7 +3391,7 @@ players.add_command_hook(function(pid, cmd)
 
             wait(500)
             trigger_commands($"loveletter{pname}")
-            if not is_developer() then
+            if not io.isfile(libDir.."isDev.txt") then
                 log($"{pname} ({rids}) has been Kicked.")
             else
                 log($"{pname} ({rids} / {hex}) has been Kicked.")
@@ -3417,7 +3419,7 @@ players.add_command_hook(function(pid, cmd)
 
             trigger_commands($"crash{pname}")
             wait(500)
-            if not is_developer() then
+            if not io.isfile(libDir.."isDev.txt") then
                 log($"{pname} ({rids}) has been Crashed and Blocked.")
             else
                 log($"{pname} ({rids} / {hex}) has been Crashed and Blocked.")
