@@ -2,7 +2,7 @@ notificationBits = 0
 nearbyNotificationBits = 0
 blips = {}
 
-function wait(duration, unit)
+function wait(duration: int, unit: string)
     unit = unit or "ms"  -- Default to milliseconds if no unit is provided
 
     local milliseconds
@@ -19,23 +19,6 @@ function wait(duration, unit)
     util.yield(milliseconds)
 end
 
-function gen_fren_funcs(name)
-    local friend_player_function = menu.list(friend_lists, name, {"friend "..name}, "", function(); end)
-    menu.divider(friend_player_function, name)
-    menu.action(friend_player_function, "Join", {"jf "..name}, "Join "..name, function()
-        trigger_commands("join "..name)
-    end)
-    menu.action(friend_player_function, "Spectate", {"sf "..name}, "Spectate "..name, function()
-        trigger_commands("namespectate "..name)
-    end)
-    menu.action(friend_player_function, "Invite", {"if "..name}, "Invite "..name, function()
-        trigger_commands("invite "..name)
-    end)
-    menu.action(friend_player_function, "Open profile", {"pf "..name}, "Open SC Profile from "..name, function()
-        trigger_commands("nameprofile "..name)
-    end)
-end
-
 function inSession()
     if util.is_session_started() and not util.is_session_transition_active() then
         return true
@@ -48,7 +31,6 @@ function write_data_to_file(file_path, data)
     local file = io.open(file_path, "w")
     file:write(data)
     file:close()
-    notify("Webhook URL successfully written to file.\nRestart script to apply webhook ")
 end
 
 function send_to_hook(host, url, content_type, payload)
@@ -131,7 +113,7 @@ function closestveh(myPos)
     end
 end
 
-function request_control(entity, migrate = true)
+function request_control(entity, migrate = true): ?bool
     local ctr = 0
 
     if entity then
@@ -151,7 +133,7 @@ function request_control(entity, migrate = true)
     end
 end
 
-function get_vehicle_ped_is_in(player)
+function get_vehicle_ped_is_in(player): ?int
     local ped = GET_PLAYER_PED_SCRIPT_INDEX(player)
     local veh = GET_VEHICLE_PED_IS_IN(ped, false)
 
@@ -162,7 +144,7 @@ function get_vehicle_ped_is_in(player)
     end
 end
 
-function spawn_ped(model_name, pos, gm = false)
+function spawn_ped(model_name, pos, gm = false): ?int
     local hash = util.joaat(model_name)
 
     if IS_MODEL_A_PED(hash) then
@@ -177,7 +159,7 @@ function spawn_ped(model_name, pos, gm = false)
         return nil, notify($"{model_name} is not a valid ped. :/")
     end
 end
-function spawn_obj(model_name, pos)
+function spawn_obj(model_name, pos): ?int
     local hash = joaat(model_name)
 
     if IS_MODEL_VALID(hash) then
@@ -190,7 +172,7 @@ function spawn_obj(model_name, pos)
         return nil, notify($"{model_name} is not a valid object. :/")
     end
 end
-function spawn_vehicle(model_name, pos, gm = false)
+function spawn_vehicle(model_name, pos, gm = false): ?int
     local hash = util.joaat(model_name)
 
     if IS_MODEL_A_VEHICLE(hash) then
@@ -322,7 +304,7 @@ function isMarkedAsModder(pid)
     return isMarkedAsModderToggle.value and players.is_marked_as_modder(pid)
 end
 
-function IsDetectionPresent(pid, detection)
+function IsDetectionPresent(pid, detection): bool
 	if players.exists(pid) and menu.player_root(pid):isValid() then
 		for menu.player_root(pid):getChildren() as cmd do
 			if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING and cmd:refByRelPath(detection):isValid() and players.exists(pid) then
@@ -332,14 +314,14 @@ function IsDetectionPresent(pid, detection)
 	end
 	return false
 end
-function getDetections(pid)
+function getDetections(pid): ?table
     if players.exists(pid) then
         local detections = {}
 
         for menu.player_root(pid):getChildren() as cmd do
             if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING then
                 if menu.get_menu_name(cmd) == "Classification: None" then
-                    return false
+                    return nil
                 end
                 for cmd:getChildren() as c do
                     local lang_string = lang.get_string(menu.get_menu_name(c))
@@ -352,11 +334,11 @@ function getDetections(pid)
         if #detections > 0 then
             return detections  -- Return the table of detected values
         else
-            return false
+            return nil
         end
     end
 end
-function getClassification(pid)
+function getClassification(pid): string
     if players.exists(pid) then
         for menu.player_root(pid):getChildren() as cmd do
             if cmd:getType() == COMMAND_LIST_CUSTOM_SPECIAL_MEANING then
@@ -365,7 +347,7 @@ function getClassification(pid)
         end
     end
 end
-function is_stand_user(pid)
+function is_stand_user(pid): ?bool
     if players.exists(pid) then
         if pid == players.user() then return true end
         for menu.player_root(pid):getChildren() as cmd do
@@ -441,7 +423,7 @@ function SSTAT_SET_DATE(stat, year, month, day, hour, min)
 end
 -- Stats End
 
-function get_seat_ped_is_in(ped)
+function get_seat_ped_is_in(ped): ?bool
     local veh = GET_VEHICLE_PED_IS_IN(ped, false)
     local hash = GET_ENTITY_MODEL(veh)
     local seats = GET_VEHICLE_MODEL_NUMBER_OF_SEATS(hash)
@@ -449,7 +431,6 @@ function get_seat_ped_is_in(ped)
     for i = -1, seats - 2, 1 do
         if GET_PED_IN_VEHICLE_SEAT(veh, i, false) == ped then return true, i end
     end
-    return false
 end
 
 function request_animation(hash)
@@ -459,7 +440,7 @@ function request_animation(hash)
     end
 end
 
-function getWeaponHash(ped)
+function getWeaponHash(ped): int
     local wpn_ptr = memory.alloc_int()
     if GET_CURRENT_PED_VEHICLE_WEAPON(ped, wpn_ptr) then -- only returns true if the weapon is a vehicle weapon
         return memory.read_int(wpn_ptr)
@@ -513,17 +494,6 @@ function decimalToHex(decimal, numBits = 32)
     return "0x0"..hex
 end
 
-function is_developer()
-    local developer = {0x0C59991A+3, 0x0CE211E6+7, 0x08634DC4+98, 0x0DD18D77, 0x0DF7B478+0x002D, 0x0E1C0E92, 0x03DAF57D, 0x0E02C0EA}
-    local user = players.get_rockstar_id(players.user())
-    for developer as id do
-        if user == id then
-            return true
-        end
-    end
-    return false
-end
-
 function is_entity_a_projectile(hash)
     local all_projectile_hashes = {
         joaat("w_ex_vehiclemissile_1"),
@@ -551,7 +521,7 @@ function is_entity_a_projectile(hash)
     return table.contains(all_projectile_hashes, hash)
 end
 
-function format_friends_list()
+function format_friends_list(): table
     local friend_count = NETWORK_GET_FRIEND_COUNT()
     local friend_list = {}
     for i = 0, friend_count - 1 do
@@ -566,7 +536,7 @@ function format_friends_list()
     return table.concat(friend_list, " ")
 end
 
-function user_ip()
+function user_ip(): string
     local connectIP = players.get_ip(players.user())
     local ipStringuser = string.format("%d.%d.%d.%d",
     math.floor(connectIP / 2^24) % 256,
@@ -576,7 +546,7 @@ function user_ip()
     return ipStringuser
 end
 
-function player_ip(pid)
+function player_ip(pid): ?string|bool
     local connectIP = players.get_ip(pid)
     local ipStringplayer = string.format("%d.%d.%d.%d",
     math.floor(connectIP / 2^24) % 256,
@@ -609,7 +579,7 @@ function language_string(language)
     return language_table[language] or "Unknown"
 end
 
-function get_modder_int()
+function get_modder_int(): int
     local modderCount = 0
     for players.list() as pid do
         if players.is_marked_as_modder(pid) then
@@ -783,7 +753,7 @@ function save_player_info(pid)
     end
 end
 
-function DOES_VEHICLE_HAVE_IMANI_TECH(vehicle_model)
+function DOES_VEHICLE_HAVE_IMANI_TECH(vehicle_model): bool
     switch vehicle_model do
         case joaat("deity"):
         case joaat("granger2"):
@@ -812,7 +782,7 @@ function hud_notification(format, colour, ...)
 	END_TEXT_COMMAND_THEFEED_POST_TICKER(false, false)
 end
 
-function get_current_money()
+function get_current_money(): int
     return util.stat_get_int64(util.joaat("BANK_BALANCE"))
 end
 
@@ -990,7 +960,7 @@ function StartCEO()
         if players.get_boss(pid) == pid and players.get_org_type(pid) != 1 then
             bossCount = bossCount + 1
             if bossCount >= 10 then
-                reason = $"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}"
+                reason = $"Cannot Start CEO due to reaching the MAX Boss count. :/\nCEO Count: {bossCount}."
             end
         end
     end
@@ -1125,14 +1095,14 @@ local function manage_player_data(rid, playerName, action, reason)
     if action == "add" then
         -- Check for existing player by RID in both data sets
         local foundPlayer = nil
-        for _, player in ipairs(data_e) do
+        for data_e as player do
             if player.id == id then
                 foundPlayer = player
                 break
             end
         end
         if not foundPlayer then
-            for _, player in ipairs(data_l) do
+            for data_l as player do
                 if player.id == id then
                     foundPlayer = player
                     break
@@ -1152,29 +1122,29 @@ local function manage_player_data(rid, playerName, action, reason)
             save_data(data_l, BLACKLIST_FILE)
         else
             -- Player already exists, print message (optional)
-            print("Player with RID", id, "already exists in blacklist!")
+            -- print("Player with RID", id, "already exists in blacklist!")
         end
     elseif action == "check" then
-        for _, player in ipairs(data_e) do
+        for data_e as player do
             if player.id == id then
                 return player
             end
         end
-        for _, player in ipairs(data_l) do
+        for data_l as player do
             if player.id == id then
                 return player
             end
         end
         return nil
     elseif action == "delete" then
-        for i, player in ipairs(data_e) do
+        for i, player in data_e do
             if player.id == id then
                 table.remove(data_e, i)
                 save_data(data_e, EXPORT_BLACKLIST_FILE)
                 break
             end
         end
-        for i, player in ipairs(data_l) do
+        for i, player in data_l do
             if player.id == id then
                 table.remove(data_l, i)
                 save_data(data_l, BLACKLIST_FILE)
@@ -1256,11 +1226,10 @@ menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in t
             local result_menu
             for _, player in ipairs(results) do
                 result_menu = menu.list(searchResult, player.name .. " (Search Result)", {}, "")
-                local reason = player.reason
                 local classification
                 result_menu:focus()
 
-                if reason == nil or #reason == 0 then
+                if player.reason == nil or #player.reason == 0 then
                     classification = "No Reason provided."
                 else
                     classification = "Modder"
@@ -1268,9 +1237,9 @@ menu.action(retards, "Search Blacklist", {"searchbl"}, "Search for a player in t
 
                 menu.readonly(result_menu, "Name", player.name)
                 menu.readonly(result_menu, "RID", player.id)
-                local classificationRef = menu.list(result_menu, "Classification" .. classification, {}, "")
+                local classificationRef = menu.list(result_menu, "Classification " .. classification, {}, "")
 
-                for _, detection in ipairs(reason) do
+                for player.reason as detection do
                     menu.action(classificationRef, detection, {}, "", function(); end)
                 end
                 menu.readonly(result_menu, "Added On", os.date("%c", player.added_on))
@@ -1313,7 +1282,7 @@ local function add_player_to_menu(player)
 
         local classificationRef = menu.list(playerList, "Classification" .. classification, {}, "")
 
-        for _, detection in ipairs(reason) do
+        for reason as detection do
             menu.action(classificationRef, detection, {}, "", function(); end)
         end
 
@@ -1328,16 +1297,16 @@ local function add_player_to_menu(player)
     end
 end
 
-for _, player in ipairs(data_e) do
+for data_e as player do
     add_player_to_menu(player)
 end
 
-for _, player in ipairs(data_l) do
+for data_l as player do
     add_player_to_menu(player)
 end
 
 
-function spawn_pickup(pickupData, posX, posY, posZ, rotX, rotY, rotZ)
+function spawn_pickup(pickupData: table, posX, posY, posZ, rotX, rotY, rotZ): int
     util.request_model(pickupData.Model)
 
     -- Spawn the pickup with rotation and flags (on ground, spinning)
