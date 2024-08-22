@@ -1173,6 +1173,7 @@ end
                 local plate_text = GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle)
                 local bitset = DECOR_GET_INT(vehicle, "MPBitset")
                 local pegasusveh = DECOR_GET_BOOL(vehicle, "CreatedByPegasus")
+                local hostToken = tonumber(players.get_host_token(pid))
 
                 for veh_things as veh do
                     if hash == joaat(veh) and DECOR_GET_INT(vehicle, "MPBitset") == 8 then
@@ -1183,10 +1184,8 @@ end
                 if players.get_vehicle_model(pid) != 0 and not GET_IS_TASK_ACTIVE(ped, 160) then
                     local driver = NETWORK_GET_PLAYER_INDEX_FROM_PED(GET_PED_IN_VEHICLE_SEAT(vehicle, -1))
                     if players.get_name(driver) != "InvalidPlayer" and not pegasusveh and pid == driver and not players.is_in_interior(pid) then
-                        if bitset == 1024 and players.get_weapon_damage_modifier(pid) == 1 and not players.is_godmode(pid) then
-                            if not IsDetectionPresent(pid, "2Take1 User") then
+                        if bitset == 1024 and players.get_weapon_damage_modifier(pid) == 1 and not entities.is_invulnerable(ped) and not pegasusveh and not IsDetectionPresent(pid, "2Take1 User") then
                                 players.add_detection(pid, "2Take1 User", 7)
-                            end
                         elseif plate_text == " TERROR " then
                             if not IsDetectionPresent(pid, "Terror User") then
                                 players.add_detection(pid, "Terror User", 7)
@@ -1201,7 +1200,7 @@ end
                             end
                         end
 
-                        if tonumber(players.get_host_token(pid)) == 41 then
+                        if (hostToken == 41 or (hostToken > 255 and hostToken <= 10000)) and players.get_weapon_damage_modifier(playerID) != 1 then
                             if not IsDetectionPresent(pid, "YimMenu User") then
                                 players.add_detection(pid, "YimMenu User", 7)
                             end
