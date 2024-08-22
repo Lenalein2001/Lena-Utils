@@ -40,6 +40,7 @@ copy_from = nil
 data_e, data_l, Blacklist = {}, {}, {} -- Blacklist
 native_invoker.accept_bools_as_ints(true)
 clearRopes = menu.ref_by_path("World>Inhabitants>Delete All Ropes")
+isDev =
 local spawnedPickups = {}
 local thermal_command = menu.ref_by_path("Game>Rendering>Thermal Vision")
 
@@ -219,9 +220,14 @@ if not filesystem.exists(lenaDir .. "Export_Blacklist.json") then
     local file = io.open(lenaDir .. "Export_Blacklist.json", "w")
     file:close()
 end
+if io.isfile(libDir.."isDev.txt") then
+    isDev = true
+else
+    isDev = false
+end
 
 if async_http.have_access() then
-    if not io.isfile(libDir.."isDev.txt") then -- I know lol
+    if not isDev then -- I know lol
         auto_updater.run_auto_update(auto_update_config)
     end
 else
@@ -714,11 +720,11 @@ end
     -- Better Explosive Weapons
     -------------------------------------
 
-    menu.toggle_loop(veh_weapons, "Better Explosive Weapons", {""}, "Higher Damage Output for certain Vehicle Cannons.", function()
+    menu.toggle_loop(plane_wep_manager, "Better Explosive Weapons", {""}, "Higher Damage Output for certain Vehicle Cannons.", function()
         if not inSession() then return end
 
-        local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade")
-        local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits")
+        local ammo = menu.ref_by_path("Self>Weapons>Explosion Type>Grenade", 52)
+        local toggle_ammo = menu.ref_by_path("Self>Weapons>Explosive Hits", 52)
         local veh_hashes = {"raiju", "strikeforce", "lazer"}
         local user_vehicle_ptr = entities.get_user_vehicle_as_pointer(false)
 
@@ -734,12 +740,16 @@ end
             toggle_ammo.value = false
         end
     end, function()
-        menu.ref_by_path("Self>Weapons>Explosive Hits").value = false
+        menu.ref_by_path("Self>Weapons>Explosive Hits", 52).value = false
     end)
 
+    -------------------------------------
+    -- Better Explosive Weapons
+    -------------------------------------
+
     local wpn_ptrw = memory.alloc()
-    local explo_mass_slider = menu.slider(veh_weapons, "Explosive Mass", {"Explosivermass"}, "", 1, 100, 10, 5, function(); end)
-    menu.toggle_loop(veh_weapons, "Better Explosive AOE", {""}, "Higher Damage Output for certain Vehicle Explosives", function()
+    local explo_mass_slider = menu.slider(plane_wep_manager, "Explosive Mass", {"Explosivermass"}, "", 1, 100, 10, 5, function(); end)
+    menu.toggle_loop(plane_wep_manager, "Better Explosive AOE", {""}, "Higher Damage Output for certain Vehicle Explosives", function()
         if not inSession() then return end
 
         local user_vehicle_ptr = entities.get_user_vehicle_as_pointer(false)
@@ -864,7 +874,7 @@ end
         if IS_PED_SITTING_IN_ANY_VEHICLE(players.user_ped()) and GET_PED_IN_VEHICLE_SEAT(user_vehicle, -1, true) == players.user_ped() then
             local veh = players.get_vehicle_model(players.user())
             if IS_THIS_MODEL_A_CAR(veh) or IS_THIS_MODEL_A_BIKE(veh) then
-                tune_vehicle(user_vehicle, true, true)
+                tune_vehicle(user_vehicle, true, false)
             end
         end
     end)
@@ -1081,7 +1091,7 @@ end
                 local cam_dist = v3.distance(players.get_position(players.user()), players.get_cam_pos(pid))
                 local ped_dist = v3.distance(players.get_position(players.user()), players.get_position(pid))
                 if cam_dist < 20.0 and ped_dist > 75.0 and not IS_PED_DEAD_OR_DYING(ped) and not NETWORK_IS_PLAYER_FADING(pid) then
-                    notify(players.get_name(pid).." is watching you ")
+                    util.draw_debug_text(players.get_name(pid).." is watching you ")
                     if not IsDetectionPresent(pid, "Spectate") then
                         players.add_detection(pid, "Spectate", 7, 0)
                     end
@@ -2291,18 +2301,9 @@ end
         -- Start a CEO
         -------------------------------------
 
-        if io.isfile(libDir.."isDev.txt") then
-            menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO", function()
-                if StartCEO() then
-                    wait(500)
-                    trigger_commands("ceoname ¦ Rockstar")
-                end
-            end)
-        else
-            menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO", function()
-                StartCEO()
-            end)
-        end
+        menu.action(shortcuts, "Start a CEO", {"ceo"}, "Starts a CEO", function()
+            StartCEO()
+        end)
 
         -------------------------------------
         -- Spawn Buzzard
@@ -2327,9 +2328,6 @@ end
                     IA_MENU_DOWN(2)
                     IA_MENU_ENTER(1)
                 end
-            else
-                wait(3000)
-                trigger_commands("b1")
             end
         end)
 
@@ -2607,7 +2605,7 @@ end
 -------------------------------------
 -------------------------------------
 
-if io.isfile(libDir.."isDev.txt") then
+if isDev then
     local sdebug = menu.list(menu.my_root(), "[Debug]", {"lenadebug"}, "")
     local nativec = menu.list(sdebug, "Native Feedback", {""}, "")
 
@@ -2826,9 +2824,11 @@ players.add_command_hook(function(pid, cmd)
     local kicks = menu.list(player_removals, "Kicks", {""}, "")
     local crashes = menu.list(player_removals, "Crashes", {""}, "")
 
-    menu.action(lena, "Mark As Modder", {"manual"}, $"Mark {pname} manually as a Modder.", function()
-        if not IsDetectionPresent(pid, "Manual") then
-            players.add_detection(pid, "Manual", 7, 100)
+    menu.action(lena, "Mark As Modder", {"manual"}, $"Mark {pname} manually as a Modder.", function(on_click)
+        menu.show_command_box($"manual{pname} "); end, function(reason)
+
+        if not IsDetectionPresent(pid, reason) then
+            players.add_detection(pid, reason, 7, 100)
         end
     end)
     menu.action(lena, "Add to Blacklist", {""}, "", function()
@@ -2924,6 +2924,10 @@ players.add_command_hook(function(pid, cmd)
                 local n = string.lstrip(name, $"saveplayeroutfit{pname} ")
                 save_player_outfit(pid, n)
         end)
+
+        -------------------------------------
+        -- Drop Pickups
+        -------------------------------------
 
         local pickups = {
             { Hash = 2406513688, Model = "prop_ld_health_pack",     amount = 1 },
@@ -3359,7 +3363,7 @@ players.add_command_hook(function(pid, cmd)
 
             wait(500)
             trigger_commands($"historyblock{pname} on")
-            if not io.isfile(libDir.."isDev.txt") then
+            if not isDev then
                 log($"{pname} ({rids}) has been Kicked and Blocked.")
             else
                 log($"{pname} ({rids} / {hex}) has been Kicked and Blocked.")
@@ -3373,7 +3377,7 @@ players.add_command_hook(function(pid, cmd)
 
             wait(500)
             trigger_commands($"loveletter{pname}")
-            if not io.isfile(libDir.."isDev.txt") then
+            if not isDev then
                 log($"{pname} ({rids}) has been Kicked.")
             else
                 log($"{pname} ({rids} / {hex}) has been Kicked.")
@@ -3401,7 +3405,7 @@ players.add_command_hook(function(pid, cmd)
 
             trigger_commands($"crash{pname}")
             wait(500)
-            if not io.isfile(libDir.."isDev.txt") then
+            if not isDev then
                 log($"{pname} ({rids}) has been Crashed and Blocked.")
             else
                 log($"{pname} ({rids} / {hex}) has been Crashed and Blocked.")
