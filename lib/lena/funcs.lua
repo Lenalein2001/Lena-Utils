@@ -288,22 +288,6 @@ function IS_PLAYER_FRIEND(pid)
     if NETWORK_IS_FRIEND(pid_to_handle(pid)) then return true end
 end
 
-function isPlayerFriend(pid)
-    if isPlayerFriendToggle.value then
-        return IS_PLAYER_FRIEND(pid)
-    else
-        return false
-    end
-end
-
-function isStandUser(pid)
-    return isStandUserToggle.value and is_stand_user(pid)
-end
-
-function isMarkedAsModder(pid)
-    return isMarkedAsModderToggle.value and players.is_marked_as_modder(pid)
-end
-
 function IsDetectionPresent(pid, detection): bool
 	if players.exists(pid) and menu.player_root(pid):isValid() then
 		for menu.player_root(pid):getChildren() as cmd do

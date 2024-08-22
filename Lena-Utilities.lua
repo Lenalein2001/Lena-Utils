@@ -1943,24 +1943,6 @@ end
         end
     end)
 
-    isPlayerFriendToggle = menu.toggle(host_kick, "Exclude Friends", {"host_kick"}, "Toggle exception for Player Friend", function(); end)
-    isStandUserToggle = menu.toggle(host_kick, "Exclude Stand Users", {"host_kick"}, "Toggle exception for Stand User", function(); end)
-    isMarkedAsModderToggle = menu.toggle(host_kick, "Exclude Modders ", {"host_kick"}, "Toggle exception for Marked as Modder", function(); end)
-
-    menu.toggle_loop(host_kick, "Kick Host", {""}, "Automatically kicks the Host if you're next in queue.", function()
-        if not inSession() then return end
-
-        local hostId = players.get_host()
-        local index = players.get_host_queue_position(players.user())
-
-        if hostId and index == 1 then
-            if not (IS_PLAYER_FRIEND(hostId) or isStandUser(hostId) or isMarkedAsModder(hostId)) then
-                trigger_commands($"kick {players.get_name(hostId)}")
-                wait(1, "m")
-            end
-        end
-    end)
-
 -------------------------------------
 -------------------------------------
 -- Tuneables
