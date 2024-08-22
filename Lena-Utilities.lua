@@ -705,11 +705,6 @@ end
     -- Cannon Manager / Credits to err_net_array
     -------------------------------------
 
-    local cannon_type = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? B8")
-    menu.list_action(plane_wep_manager, "Explosion Type", {""}, "", explosionTypes, function(index, value)
-       memory.write_int(cannon_type + 0x10, index - 1)
-    end)
-
     local alternate_wait_time = memory.scan("81 7B 10 29 2A 82 E2 ? ? 38 05 ? ? ? ? ? ? F3 0F 10 05 ? ? ? ? ? ? F3 0F 10 83 50")
     menu.click_slider_float(plane_wep_manager, "Alternate Wait Time", {""}, "", 0, 100, 0, 1, function(value)
        local ptr_value = memory.read_int(alternate_wait_time + 0x15)
@@ -1781,38 +1776,6 @@ end
         menu.toggle(spoofing_opt, "Spoof Assets", {"spoofassets", "spoofass"}, "Spoof Session Assets.", function(toggled)
             trigger_commands($"extratoggle {toggled}")
         end)
-
-        -------------------------------------
-        -- Group-Based Copy Session Info
-        -------------------------------------
-
-        local group_name = menu.text_input(spoofing_opt, "Group Name", {"groupname"}, "", function(); end, "Admins")
-        local group_copy_ref = menu.toggle_loop(spoofing_opt, "Group-Based Copy Session Info", {"groupcopy"}, "", function()
-        local historyPlayers = menu.ref_by_path("Online>Player History>Noted Players>"..group_name.value)
-
-            if not historyPlayers:isValid() then
-                group_copy_ref.value = false
-                return print("Group not Valid!")
-            end
-
-            if copy_from != nil then
-                if copy_from.menu_name:sub(-8) != "[Public]" then
-                    util.toast($"{copy_from.name_for_config} is no longer in a public session, disabling Copy Session Info.")
-                    clearCopySession()
-                end
-            else
-                for historyPlayers:getChildren() as link do
-                    local ref = link:getPhysical()
-                    --print(ref.menu_name)
-                    if ref.menu_name:sub(-8) == "[Public]" then
-                        util.toast($"{ref.name_for_config} is in a Public Session, copying their Session Info.")
-                        ref:refByRelPath("Copy Session Info").value = true
-                        copy_from = ref
-                    end
-
-                end
-            end
-        end, clearCopySession)
 
     -------------------------------------
     -- Enhanced Chat
