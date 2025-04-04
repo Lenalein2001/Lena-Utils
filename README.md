@@ -1,3 +1,7 @@
+> [!WARNING]
+> This script is no longer maintained. I have not tested its functionality since BattlEye was added. There should be no safety issues, but I can't say the same for stability.
+
+
 # Lena-Utils
 A Lua Script to enhance the User's Gameplay. My first Script for Stand. More or less a Hobby I partake in every few days.
 
