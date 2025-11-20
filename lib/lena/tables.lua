@@ -189,6 +189,25 @@ interiors = {
     {"Nightclub Safe", {x=-1615.6887, y=-3015.7354, z=-75.205086}}
 }
 
+animation_table = {
+    -- Sitting
+    {anim_sit, "Sit Ground", "amb@world_human_picnic@female@idle_a", "idle_a"},
+    {anim_sit, "Sit Ground 2", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_idle_nowork"},
+    {anim_sit, "Sit Chair", "timetable@reunited@ig_10", "base_amanda"},
+    {anim_sit, "Sit Sad", "anim@amb@business@bgen@bgen_no_work@", "sit_phone_phoneputdown_sleeping-noworkfemale"},
+    -- Romantic
+    {anim_romantic, "Romantic Hug", "misscarsteal2chad_goodbye", "chad_armsaround_girl"},
+    {anim_romantic, "Blow Kiss", "anim@mp_player_intcelebrationfemale@blow_kiss", "blow_kiss", 2000},
+    {anim_romantic, "Blow Kiss 2", "anim@mp_player_intselfieblow_kiss", "exit", 2000},
+    -- Idle
+    {anim_idle, "Idle 1", "amb@world_human_hang_out_street@female_hold_arm@idle_a", "idle_a"},
+    {anim_idle, "Sunbathe Back", "amb@world_human_sunbathe@male@back@base", "base"},
+    {anim_idle, "Sleep", "timetable@tracy@sleep@", "idle_c"},
+    -- Misc
+    {anim_misc, "Sniper", "missfbi3_sniping", "prone_michael"},
+    {anim_misc, "Execute", "guard_reactions", "1hand_aiming_cycle"},
+}
+
 PlaytimeStats = {
     {"Total Playtime", "TOTAL_PLAYING_TIME", "Total Playing time in milliseconds."},
     {"GTA Online Playtime", "MP_PLAYING_TIME"},
@@ -283,57 +302,43 @@ Modulepath = {
         name = "Focus Link",
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/focus_link.pluto",
         absolute_path = lenaModules.."focus_link.pluto",
-        path = "lena.modules.focus_link",
-        help = ""
+        path = "lena.modules.focus_link"
     },
     nitro = {
         name = "Nitro",
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/nitro.pluto",
         absolute_path = lenaModules.."nitro.pluto",
-        path = "lena.modules.nitro",
-        help = ""
+        path = "lena.modules.nitro"
     },
     Remove_weapons = {
         name = "Remove Weapons",
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/Remove_weapons.pluto",
         absolute_path = lenaModules.."Remove_weapons.pluto",
-        path = "lena.modules.Remove_weapons",
-        help = "Will remove selected Weapons from a Players Inventory."
+        path = "lena.modules.Remove_weapons"
     },
     Friend_list = {
         name = "Friend List",
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/friend_list.pluto",
         absolute_path = lenaModules.."friend_list.pluto",
-        path = "lena.modules.friend_list",
-        help = "This is basically Social Clubs friend's list, but inside Stand. Commands may run into issues when Players have special characters."
+        path = "lena.modules.friend_list"
     },
     session_vehicles = {
         name = "Session Vehicles",
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/session_vehicles.pluto",
         absolute_path = lenaModules.."session_vehicles.pluto",
-        path = "lena.modules.session_vehicles",
-        help = "This will spawn Vehicles on set spots around the map. Due to the nature of GTA and collisions, this may break."
+        path = "lena.modules.session_vehicles"
     },
     maze_bank = {
         name = "Maze Bank",
         giturl = "/Lenalein2001/Lena-Utils-Modules/main/maze_bank.pluto",
         absolute_path = lenaModules.."maze_bank.pluto",
-        path = "lena.modules.maze_bank",
-        help = "Will show your current balance, past transactions, and Money in Business Safes."
+        path = "lena.modules.maze_bank"
     },
     vehicle_resupply = {
         name = "Vehicle Resupply",
         github = "/Lenalein2001/Lena-Utils-Modules/main/vehicle_resupply.pluto",
         absolute_path = lenaModules.."vehicle_resupply.pluto",
-        path = "lena.modules.vehicle_resupply",
-        help = "This will create resupply points accross the map, which will resupply and repair your Vehicle when inside."
-    },
-    vehicle_UI = {
-        name = "Vehicle Info UI",
-        github = "/Lenalein2001/Lena-Utils-Modules/main/vehicle_UI.pluto",
-        absolute_path = lenaModules.."vehicle_UI.pluto",
-        path = "lena.modules.vehicle_UI",
-        help = "This Module will show a small UI which will display Speed, Body-/ and Engine health, as well as countermeasures."
+        path = "lena.modules.vehicle_resupply"
     }
 }
 
